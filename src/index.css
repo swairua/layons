@@ -22,10 +22,10 @@
     --primary-hover: 46 65% 45%;
     --primary-light: 46 65% 90%;
 
-    /* Secondary - Medplus Blue (#2DAAE1) */
-    --secondary: 197 74% 53%;
+    /* Secondary - Charcoal */
+    --secondary: 210 10% 15%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-hover: 197 74% 48%;
+    --secondary-hover: 210 10% 20%;
 
     /* Status Colors */
     --success: 140 50% 45%;
