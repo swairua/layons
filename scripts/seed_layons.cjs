@@ -12,8 +12,8 @@ const { Client } = require('pg');
     INSERT INTO companies (
       name, registration_number, tax_number, email, phone, address, city, state, postal_code, country, currency, fiscal_year_start, created_at, updated_at
     )
-    SELECT $1, NULL, NULL, $2, $3, $4, $5, NULL, $6, $7, $8, 1, NOW(), NOW()
-    WHERE NOT EXISTS (SELECT 1 FROM companies WHERE name = $1);
+    SELECT $1::varchar, NULL, NULL, $2::varchar, $3::varchar, $4::text, $5::varchar, NULL, $6::varchar, $7::varchar, $8::varchar, 1, NOW(), NOW()
+    WHERE NOT EXISTS (SELECT 1 FROM companies WHERE name = $1::varchar);
   `;
   const params = [
     'Layons Construction Ltd',
