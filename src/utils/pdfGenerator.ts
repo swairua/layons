@@ -3,7 +3,7 @@
 // In a real app, you'd want to use a proper PDF library like jsPDF or react-pdf
 
 export interface DocumentData {
-  type: 'quotation' | 'invoice' | 'remittance' | 'proforma' | 'delivery' | 'statement' | 'receipt' | 'lpo';
+  type: 'quotation' | 'invoice' | 'remittance' | 'proforma' | 'delivery' | 'statement' | 'receipt' | 'lpo' | 'boq';
   number: string;
   date: string;
   lpo_number?: string;
