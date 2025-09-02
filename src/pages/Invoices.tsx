@@ -226,7 +226,7 @@ export default function Invoices() {
 
     try {
       // Create email content
-      const subject = `Invoice ${invoiceData.invoice_number} from MedPlus Africa`;
+      const subject = `Invoice ${invoiceData.invoice_number} from Layons Construction Limited`;
       const body = `Dear ${invoiceData.customers.name},
 
 Please find attached your invoice ${invoiceData.invoice_number} dated ${new Date(invoiceData.invoice_date).toLocaleDateString()}.
@@ -244,10 +244,10 @@ Payment can be made via:
 If you have any questions about this invoice, please don't hesitate to contact us.
 
 Best regards,
-Biolegend Scientific Ltd Team
-Tel: 0741 207 690/0780 165 490
-Email: biolegend@biolegendscientific.co.ke/info@biolegendscientific.co.ke
-Website: www.biolegendscientific.co.ke`;
+Layons Construction Limited Team
+Tel: 0720717463
+Email: layonscoltd@gmail.com
+Website:`;
 
       // Open email client with pre-filled content
       const emailUrl = `mailto:${invoiceData.customers.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
