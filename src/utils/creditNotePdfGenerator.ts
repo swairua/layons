@@ -47,7 +47,7 @@ const DEFAULT_COMPANY: CompanyData = {
   city: 'Nairobi',
   country: 'Kenya',
   phone: '',
-  email: 'info@medplusafrica.com',
+  email: 'layonscoltd@gmail.com',
   tax_number: '',
   logo_url: 'https://cdn.builder.io/api/v1/image/assets%2Fb048b36350454e4dba55aefd37788f9c%2Fbd04dab542504461a2451b061741034c?format=webp&width=800'
 };
