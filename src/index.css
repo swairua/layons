@@ -16,11 +16,11 @@
     --popover: 0 0% 100%;
     --popover-foreground: 210 10% 15%;
 
-    /* Primary - Medplus Green (#2BB673) */
-    --primary: 152 62% 44%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 152 62% 39%;
-    --primary-light: 152 62% 92%;
+    /* Primary - Layons Gold (#D4AF37 approx) */
+    --primary: 46 65% 53%;
+    --primary-foreground: 0 0% 10%;
+    --primary-hover: 46 65% 45%;
+    --primary-light: 46 65% 90%;
 
     /* Secondary - Medplus Blue (#2DAAE1) */
     --secondary: 197 74% 53%;
