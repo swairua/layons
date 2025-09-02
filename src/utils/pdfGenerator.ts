@@ -70,7 +70,7 @@ interface CompanyDetails {
 
 // Default company details (fallback) - logo will be determined dynamically
 const DEFAULT_COMPANY: CompanyDetails = {
-  name: 'Medplus Africa',
+  name: 'Layons Construction Limited',
   address: '',
   city: 'Nairobi',
   country: 'Kenya',
