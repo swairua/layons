@@ -32,7 +32,7 @@ export default function CompanySettings() {
     name: 'Layons Construction Limited',
     registration_number: '',
     tax_number: 'P051658002D',
-    email: 'info@medplusafrica.com',
+    email: 'layonscoltd@gmail.com',
     phone: 'Tel: 0741 207 690/0780 165 490',
     address: 'P.O Box 85988-00200\nNairobi, Kenya',
     city: 'Nairobi',
