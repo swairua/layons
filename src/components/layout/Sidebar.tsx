@@ -188,7 +188,7 @@ export function Sidebar() {
     <div className="flex h-full w-64 flex-col bg-sidebar border-r border-sidebar-border">
       {/* Company Logo/Header */}
       <div className="flex h-16 items-center border-b border-sidebar-border px-6">
-        <BiolegendLogo size="md" showText={true} className="text-sidebar-foreground" />
+        <BiolegendLogo size="lg" showText={true} className="text-sidebar-foreground" />
       </div>
 
       {/* Navigation */}
