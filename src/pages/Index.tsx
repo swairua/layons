@@ -37,7 +37,7 @@ const Index = () => {
         subtotal: 125000,
         tax_amount: 25000,
         status: 'draft',
-        notes: 'This is a test quotation to demonstrate the MedPlus logo in PDF documents.',
+        notes: 'This is a test quotation to demonstrate the company logo in PDF documents.',
         terms_and_conditions: 'Payment due within 30 days of acceptance.',
         customers: {
           name: 'Sample Customer Ltd',
