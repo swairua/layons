@@ -55,7 +55,7 @@ export function SuperAdminSetup() {
           )}
         </CardTitle>
         <p className="text-sm text-muted-foreground mt-2">
-          Create the first administrator account to manage the MedPlus system. This account will have full access to all features.
+          Create the first administrator account to manage the system. This account will have full access to all features.
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
