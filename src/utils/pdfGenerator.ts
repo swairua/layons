@@ -792,14 +792,19 @@ export const generatePDF = (data: DocumentData) => {
                       '<span style="color: #F59E0B; font-weight: bold;">⚠ Partial</span>'
                     }
                   </td>
+                  ` : data.type === 'boq' ? `
+                  <td>${item.quantity}</td>
+                  <td>${(item as any).unit_of_measure || (item as any).unit || 'Item'}</td>
+                  <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
+                  <td class="amount-cell">${formatCurrency(item.line_total)}</td>
                   ` : `
                   <td>${item.quantity}</td>
                   <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
                   ${visibleColumns.discountPercentage ? `<td>${item.discount_percentage || 0}%</td>` : ''}
                   ${visibleColumns.discountBeforeVat ? `<td>${(item.discount_before_vat || 0)}%</td>` : ''}
-                  ${visibleColumns.discountAmount ? `<td class="amount-cell">${formatCurrency(item.discount_amount || 0)}</td>` : ''}
+                  ${visibleColumns.discountAmount ? `<td class=\"amount-cell\">${formatCurrency(item.discount_amount || 0)}</td>` : ''}
                   ${visibleColumns.taxPercentage ? `<td>${item.tax_percentage || 0}%</td>` : ''}
-                  ${visibleColumns.taxAmount ? `<td class="amount-cell">${formatCurrency(item.tax_amount || 0)}</td>` : ''}
+                  ${visibleColumns.taxAmount ? `<td class=\"amount-cell\">${formatCurrency(item.tax_amount || 0)}</td>` : ''}
                   <td class="amount-cell">${formatCurrency(item.line_total)}</td>
                   `}
                   `}
