@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 interface BiolegendLogoProps {
   className?: string;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   showText?: boolean;
 }
 
@@ -12,13 +12,15 @@ export function BiolegendLogo({ className, size = "md", showText = true }: Biole
   const sizeClasses = {
     sm: "h-10 w-10",
     md: "h-16 w-16",
-    lg: "h-20 w-20"
+    lg: "h-20 w-20",
+    xl: "h-28 w-28",
   };
 
   const textSizeClasses = {
     sm: "text-sm",
     md: "text-lg",
-    lg: "text-2xl"
+    lg: "text-2xl",
+    xl: "text-3xl",
   };
 
   const { currentCompany } = useCurrentCompany();
