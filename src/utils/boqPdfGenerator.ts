@@ -1,7 +1,5 @@
 import { generatePDF } from '@/utils/pdfGenerator';
 
-import { generatePDF } from '@/utils/pdfGenerator';
-
 export interface BoqItem {
   description: string;
   quantity?: number; // defaults to 1 for lump sum items
