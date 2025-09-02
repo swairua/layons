@@ -889,7 +889,7 @@ export const generatePDF = (data: DocumentData) => {
         <!-- Bank Details (only for invoices and quotations) -->
         ${(data.type === 'invoice' || data.type === 'quotation') ? `
         <div class="bank-details">
-          <strong>MAKE ALL PAYMENTS THROUGH MEDPLUS AFRICA, KCB RIVER ROAD BRANCH NUMBER : 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX</strong>
+          <strong>Payments to: Layons Construction Limited. For bank details, contact: layonscoltd@gmail.com / 0720717463</strong>
         </div>
         ` : ''}
 
