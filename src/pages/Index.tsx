@@ -114,6 +114,9 @@ const Index = () => {
         </div>
       </div>
 
+      {/* Database Status */}
+      <DatabaseStatusBanner />
+
       {/* Dashboard Stats */}
       <DashboardStats />
 
