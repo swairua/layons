@@ -148,6 +148,7 @@ export const generatePDF = (data: DocumentData) => {
                        data.type === 'receipt' ? 'Payment Receipt' :
                        data.type === 'remittance' ? 'Remittance Advice' :
                        data.type === 'lpo' ? 'Purchase Order' :
+                       data.type === 'boq' ? 'Bill of Quantities' :
                        data.type.charAt(0).toUpperCase() + data.type.slice(1);
   
   const htmlContent = `
