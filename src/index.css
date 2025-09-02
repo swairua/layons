@@ -63,8 +63,8 @@
     --sidebar-border: 196 30% 18%;
     --sidebar-ring: 152 62% 44%;
 
-    /* Medplus Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(152 62% 44%), hsl(197 74% 53%));
+    /* Layons Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(46 65% 53%), hsl(210 10% 15%));
     --gradient-secondary: linear-gradient(135deg, hsl(210 5% 96%), hsl(210 5% 92%));
     --gradient-success: linear-gradient(135deg, hsl(140 50% 45%), hsl(140 50% 50%));
     
