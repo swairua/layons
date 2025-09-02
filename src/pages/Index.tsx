@@ -4,6 +4,7 @@ import { QuickActions } from '@/components/dashboard/QuickActions';
 import { AuthPerformanceTest } from '@/components/auth/AuthPerformanceTest';
 import { Button } from '@/components/ui/button';
 import { FileText, BarChart3 } from 'lucide-react';
+import { DatabaseStatusBanner } from '@/components/DatabaseStatusBanner';
 import { downloadQuotationPDF } from '@/utils/pdfGenerator';
 import { useQuotations, useCompanies } from '@/hooks/useDatabase';
 import { useState } from 'react';
