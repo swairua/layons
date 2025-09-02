@@ -185,7 +185,7 @@ export function DatabaseInitializer() {
               <CheckCircle className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-700">
                 Excellent! Your database has been initialized and your super admin account is ready.
-                You can now sign in and start using all features of the MedPlus system.
+                You can now sign in and start using all features of the system.
               </AlertDescription>
             </Alert>
           </CardContent>
