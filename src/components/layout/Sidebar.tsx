@@ -69,6 +69,11 @@ const sidebarItems: SidebarItem[] = [
     href: '/customers'
   },
   {
+    title: 'BOQs',
+    icon: FileSpreadsheet,
+    href: '/boqs'
+  },
+  {
     title: 'Purchase Orders',
     icon: ShoppingCart,
     href: '/lpos'
