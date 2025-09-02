@@ -39,13 +39,51 @@ export function DatabaseStatusBanner() {
     let mounted = true;
     (async () => {
       try {
-        const verification = await verifyDatabaseComplete();
+        let isCompleteLocal = false;
+        let missingTables: string[] = [];
+        let missingColumns: Array<{ table: string; column: string }> = [];
+        let summaryLocal = '';
+
+        // First attempt: comprehensive verification via information_schema
+        try {
+          const verification = await verifyDatabaseComplete();
+          isCompleteLocal = verification.isComplete;
+          missingTables = verification.missingTables;
+          missingColumns = verification.missingColumns;
+          summaryLocal = verification.summary;
+        } catch {
+          // ignore; we'll use fallback
+        }
+
+        // Fallback probe: attempt selects against expected tables to infer existence
+        if (!isCompleteLocal && (!summaryLocal || summaryLocal.includes('Verification failed'))) {
+          const expectedTables = [
+            'profiles','companies','customers','products','quotations','quotation_items',
+            'invoices','invoice_items','payments','lpos','lpo_items','delivery_notes',
+            'delivery_note_items','proforma_invoices','proforma_items','remittance_advice','remittance_advice_items'
+          ];
+          const missing: string[] = [];
+          await Promise.all(expectedTables.map(async (t) => {
+            try {
+              const { error } = await supabase.from(t as any).select('id').limit(1);
+              if (error) missing.push(t);
+            } catch {
+              missing.push(t);
+            }
+          }));
+          missingTables = missing;
+          isCompleteLocal = missing.length === 0;
+          summaryLocal = isCompleteLocal
+            ? 'All expected tables responded successfully.'
+            : `Missing or inaccessible tables: ${missing.slice(0, 6).join(', ')}${missing.length > 6 ? '…' : ''}`;
+        }
+
         const coreCounts = await getCoreCounts();
         if (!mounted) return;
-        setIsComplete(verification.isComplete);
-        setMissing({ tables: verification.missingTables, columns: verification.missingColumns });
+        setIsComplete(isCompleteLocal);
+        setMissing({ tables: missingTables, columns: missingColumns });
         setCounts(coreCounts);
-        setSummary(verification.summary);
+        setSummary(summaryLocal);
       } catch (e) {
         setIsComplete(false);
         setSummary('Verification failed.');
