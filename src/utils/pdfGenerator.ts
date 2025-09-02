@@ -741,16 +741,23 @@ export const generatePDF = (data: DocumentData) => {
                 <th style="width: 16%;">Invoice Amount</th>
                 <th style="width: 16%;">Credit Amount</th>
                 <th style="width: 18%;">Payment Amount</th>
+                ` : data.type === 'boq' ? `
+                <th style="width: 5%;">#</th>
+                <th style="width: 45%;">Item Description</th>
+                <th style="width: 10%;">Qty</th>
+                <th style="width: 10%;">Unit</th>
+                <th style="width: 15%;">Rate</th>
+                <th style="width: 15%;">Amount</th>
                 ` : `
                 <th style="width: 5%;">#</th>
                 <th style="width: ${visibleColumns.discountPercentage || visibleColumns.discountBeforeVat || visibleColumns.discountAmount || visibleColumns.taxPercentage || visibleColumns.taxAmount ? '30%' : '40%'};">Description</th>
                 <th style="width: 10%;">Qty</th>
                 <th style="width: 15%;">Unit Price</th>
-                ${visibleColumns.discountPercentage ? '<th style="width: 10%;">Disc %</th>' : ''}
-                ${visibleColumns.discountBeforeVat ? '<th style="width: 12%;">Disc Before VAT</th>' : ''}
-                ${visibleColumns.discountAmount ? '<th style="width: 12%;">Disc Amount</th>' : ''}
-                ${visibleColumns.taxPercentage ? '<th style="width: 10%;">Tax %</th>' : ''}
-                ${visibleColumns.taxAmount ? '<th style="width: 12%;">Tax Amount</th>' : ''}
+                ${visibleColumns.discountPercentage ? '<th style=\"width: 10%;\">Disc %</th>' : ''}
+                ${visibleColumns.discountBeforeVat ? '<th style=\"width: 12%;\">Disc Before VAT</th>' : ''}
+                ${visibleColumns.discountAmount ? '<th style=\"width: 12%;\">Disc Amount</th>' : ''}
+                ${visibleColumns.taxPercentage ? '<th style=\"width: 10%;\">Tax %</th>' : ''}
+                ${visibleColumns.taxAmount ? '<th style=\"width: 12%;\">Tax Amount</th>' : ''}
                 <th style="width: 15%;">Total</th>
                 `}
               </tr>
