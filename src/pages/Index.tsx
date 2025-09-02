@@ -23,7 +23,7 @@ const Index = () => {
 
       if (realQuotation) {
         downloadQuotationPDF(realQuotation);
-        toast.success('PDF generated using real quotation data!');
+        toast.success('PDF generated.');
         return;
       }
 
