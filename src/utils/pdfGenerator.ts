@@ -3,7 +3,7 @@
 // In a real app, you'd want to use a proper PDF library like jsPDF or react-pdf
 
 export interface DocumentData {
-  type: 'quotation' | 'invoice' | 'remittance' | 'proforma' | 'delivery' | 'statement' | 'receipt' | 'lpo';
+  type: 'quotation' | 'invoice' | 'remittance' | 'proforma' | 'delivery' | 'statement' | 'receipt' | 'lpo' | 'boq';
   number: string;
   date: string;
   lpo_number?: string;
@@ -70,14 +70,14 @@ interface CompanyDetails {
 
 // Default company details (fallback) - logo will be determined dynamically
 const DEFAULT_COMPANY: CompanyDetails = {
-  name: 'Medplus Africa',
+  name: 'Layons Construction Limited',
   address: '',
   city: 'Nairobi',
   country: 'Kenya',
   phone: '',
-  email: 'info@medplusafrica.com',
+  email: 'layonscoltd@gmail.com',
   tax_number: '',
-  logo_url: 'https://cdn.builder.io/api/v1/image/assets%2Ffd1c9d5781fc4f20b6ad16683f5b85b3%2F274fc62c033e464584b0f50713695127?format=webp&width=800' // Will use company settings or fallback gracefully
+  logo_url: 'https://cdn.builder.io/api/v1/image/assets%2Fb048b36350454e4dba55aefd37788f9c%2Fbd04dab542504461a2451b061741034c?format=webp&width=800'
 };
 
 // Helper function to determine which columns have values
@@ -148,6 +148,7 @@ export const generatePDF = (data: DocumentData) => {
                        data.type === 'receipt' ? 'Payment Receipt' :
                        data.type === 'remittance' ? 'Remittance Advice' :
                        data.type === 'lpo' ? 'Purchase Order' :
+                       data.type === 'boq' ? 'Bill of Quantities' :
                        data.type.charAt(0).toUpperCase() + data.type.slice(1);
   
   const htmlContent = `
@@ -740,16 +741,23 @@ export const generatePDF = (data: DocumentData) => {
                 <th style="width: 16%;">Invoice Amount</th>
                 <th style="width: 16%;">Credit Amount</th>
                 <th style="width: 18%;">Payment Amount</th>
+                ` : data.type === 'boq' ? `
+                <th style="width: 5%;">#</th>
+                <th style="width: 45%;">Item Description</th>
+                <th style="width: 10%;">Qty</th>
+                <th style="width: 10%;">Unit</th>
+                <th style="width: 15%;">Rate</th>
+                <th style="width: 15%;">Amount</th>
                 ` : `
                 <th style="width: 5%;">#</th>
                 <th style="width: ${visibleColumns.discountPercentage || visibleColumns.discountBeforeVat || visibleColumns.discountAmount || visibleColumns.taxPercentage || visibleColumns.taxAmount ? '30%' : '40%'};">Description</th>
                 <th style="width: 10%;">Qty</th>
                 <th style="width: 15%;">Unit Price</th>
-                ${visibleColumns.discountPercentage ? '<th style="width: 10%;">Disc %</th>' : ''}
-                ${visibleColumns.discountBeforeVat ? '<th style="width: 12%;">Disc Before VAT</th>' : ''}
-                ${visibleColumns.discountAmount ? '<th style="width: 12%;">Disc Amount</th>' : ''}
-                ${visibleColumns.taxPercentage ? '<th style="width: 10%;">Tax %</th>' : ''}
-                ${visibleColumns.taxAmount ? '<th style="width: 12%;">Tax Amount</th>' : ''}
+                ${visibleColumns.discountPercentage ? '<th style=\"width: 10%;\">Disc %</th>' : ''}
+                ${visibleColumns.discountBeforeVat ? '<th style=\"width: 12%;\">Disc Before VAT</th>' : ''}
+                ${visibleColumns.discountAmount ? '<th style=\"width: 12%;\">Disc Amount</th>' : ''}
+                ${visibleColumns.taxPercentage ? '<th style=\"width: 10%;\">Tax %</th>' : ''}
+                ${visibleColumns.taxAmount ? '<th style=\"width: 12%;\">Tax Amount</th>' : ''}
                 <th style="width: 15%;">Total</th>
                 `}
               </tr>
@@ -784,14 +792,19 @@ export const generatePDF = (data: DocumentData) => {
                       '<span style="color: #F59E0B; font-weight: bold;">⚠ Partial</span>'
                     }
                   </td>
+                  ` : data.type === 'boq' ? `
+                  <td>${item.quantity}</td>
+                  <td>${(item as any).unit_of_measure || (item as any).unit || 'Item'}</td>
+                  <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
+                  <td class="amount-cell">${formatCurrency(item.line_total)}</td>
                   ` : `
                   <td>${item.quantity}</td>
                   <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
                   ${visibleColumns.discountPercentage ? `<td>${item.discount_percentage || 0}%</td>` : ''}
                   ${visibleColumns.discountBeforeVat ? `<td>${(item.discount_before_vat || 0)}%</td>` : ''}
-                  ${visibleColumns.discountAmount ? `<td class="amount-cell">${formatCurrency(item.discount_amount || 0)}</td>` : ''}
+                  ${visibleColumns.discountAmount ? `<td class=\"amount-cell\">${formatCurrency(item.discount_amount || 0)}</td>` : ''}
                   ${visibleColumns.taxPercentage ? `<td>${item.tax_percentage || 0}%</td>` : ''}
-                  ${visibleColumns.taxAmount ? `<td class="amount-cell">${formatCurrency(item.tax_amount || 0)}</td>` : ''}
+                  ${visibleColumns.taxAmount ? `<td class=\"amount-cell\">${formatCurrency(item.tax_amount || 0)}</td>` : ''}
                   <td class="amount-cell">${formatCurrency(item.line_total)}</td>
                   `}
                   `}
@@ -876,7 +889,7 @@ export const generatePDF = (data: DocumentData) => {
         <!-- Bank Details (only for invoices and quotations) -->
         ${(data.type === 'invoice' || data.type === 'quotation') ? `
         <div class="bank-details">
-          <strong>MAKE ALL PAYMENTS THROUGH MEDPLUS AFRICA, KCB RIVER ROAD BRANCH NUMBER : 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX</strong>
+          <strong>Payments to: Layons Construction Limited. For bank details, contact: layonscoltd@gmail.com / 0720717463</strong>
         </div>
         ` : ''}
 

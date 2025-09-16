@@ -21,6 +21,7 @@ import CompanySettings from "./pages/settings/CompanySettings";
 import UserManagement from "./pages/settings/UserManagement";
 import RemittanceAdvice from "./pages/RemittanceAdvice";
 import LPOs from "./pages/LPOs";
+import BOQs from "./pages/BOQs";
 import CreditNotes from "./pages/CreditNotes";
 import NotFound from "./pages/NotFound";
 import PaymentSynchronizationPage from "./pages/PaymentSynchronization";
@@ -148,13 +149,21 @@ const App = () => {
           />
 
           {/* Procurement & Inventory */}
-          <Route 
-            path="/lpos" 
+          <Route
+            path="/boqs"
+            element={
+              <ProtectedRoute>
+                <BOQs />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/lpos"
             element={
               <ProtectedRoute>
                 <LPOs />
               </ProtectedRoute>
-            } 
+            }
           />
           <Route 
             path="/lpos/new" 

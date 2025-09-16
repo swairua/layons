@@ -1,12 +1,12 @@
 /**
- * Email templates and signatures for Medplus Africa
+ * Email templates and signatures for Layons Construction Limited
  */
 
 export const BIOLEGEND_CONTACT = {
-  company: 'Medplus Africa',
+  company: 'Layons Construction Limited',
   address: 'P.O. Box 85988-00200, Nairobi\nAlpha Center, Eastern Bypass, Membley',
-  phone: '0741207690/0780165490',
-  email: 'info@medplusafrica.com'
+  phone: '0720717463',
+  email: 'layonscoltd@gmail.com'
 };
 
 export const generateBiolegendEmailSignature = () => {

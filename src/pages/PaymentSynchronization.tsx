@@ -10,7 +10,7 @@ export default function PaymentSynchronizationPage() {
 
   useEffect(() => {
     // Set page title
-    document.title = 'Payment Synchronization - Medplus Africa';
+    document.title = 'Payment Synchronization - Layons Construction Limited';
   }, []);
 
   return (
@@ -18,10 +18,10 @@ export default function PaymentSynchronizationPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <BiolegendLogo size="lg" showText={false} />
+          <BiolegendLogo size="xl" showText={false} />
           <h1 className="text-3xl font-bold mt-4 biolegend-brand flex items-center justify-center gap-2">
             <RefreshCw className="h-8 w-8 text-primary" />
-            Medplus Africa
+            Layons Construction Limited
           </h1>
           <p className="text-muted-foreground mt-2">Payment-Invoice Synchronization</p>
           <p className="text-sm text-muted-foreground mt-1">

@@ -163,16 +163,16 @@ export function ViewRemittanceModal({
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Building2 className="h-5 w-5 text-primary" />
-                <span>From: MedPlus Africa Limited</span>
+                <span>From: Layons Construction Limited</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-sm">
-                <div>P.O Box 85988-00200, Nairobi, Kenya</div>
-                <div>Tel: 0741 207 690/0780 165 490</div>
-                <div>Email: biolegend@biolegendscientific.co.ke/info@biolegendscientific.co.ke</div>
-                <div>Website: www.biolegendscientific.co.ke</div>
-                <div className="text-xs italic text-primary/70">Delivering Discoveries.... and more</div>
+                <div>P.O BOX, Nairobi, Kenya</div>
+                <div>Tel: 0720717463</div>
+                <div>Email: layonscoltd@gmail.com</div>
+                <div>Website: </div>
+                <div className="text-xs italic text-primary/70"></div>
               </div>
             </CardContent>
           </Card>

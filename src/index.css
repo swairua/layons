@@ -2,11 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Medplus Africa Business Management System Design */
+/* Layons Construction Limited Theme */
 
 @layer base {
   :root {
-    /* Medplus Africa Brand Colors (Green & Blue) */
+    /* Layons Brand Colors (Gold & Charcoal) */
     --background: 240 10% 98%;
     --foreground: 210 10% 15%;
 
@@ -16,16 +16,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 210 10% 15%;
 
-    /* Primary - Medplus Green (#2BB673) */
-    --primary: 152 62% 44%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 152 62% 39%;
-    --primary-light: 152 62% 92%;
+    /* Primary - Layons Gold (#D4AF37 approx) */
+    --primary: 46 65% 53%;
+    --primary-foreground: 0 0% 10%;
+    --primary-hover: 46 65% 45%;
+    --primary-light: 46 65% 90%;
 
-    /* Secondary - Medplus Blue (#2DAAE1) */
-    --secondary: 197 74% 53%;
+    /* Secondary - Charcoal */
+    --secondary: 210 10% 15%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-hover: 197 74% 48%;
+    --secondary-hover: 210 10% 20%;
 
     /* Status Colors */
     --success: 140 50% 45%;
@@ -53,18 +53,18 @@
 
     --radius: 0.5rem;
 
-    /* Sidebar - Medplus Professional */
-    --sidebar-background: 196 30% 12%;
+    /* Sidebar - Layons Professional */
+    --sidebar-background: 210 10% 12%;
     --sidebar-foreground: 210 5% 85%;
-    --sidebar-primary: 152 62% 44%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 196 30% 18%;
+    --sidebar-primary: 46 65% 53%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 210 10% 18%;
     --sidebar-accent-foreground: 210 5% 85%;
-    --sidebar-border: 196 30% 18%;
-    --sidebar-ring: 152 62% 44%;
+    --sidebar-border: 210 10% 18%;
+    --sidebar-ring: 46 65% 53%;
 
-    /* Medplus Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(152 62% 44%), hsl(197 74% 53%));
+    /* Layons Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(46 65% 53%), hsl(210 10% 15%));
     --gradient-secondary: linear-gradient(135deg, hsl(210 5% 96%), hsl(210 5% 92%));
     --gradient-success: linear-gradient(135deg, hsl(140 50% 45%), hsl(140 50% 50%));
     
@@ -79,7 +79,7 @@
   }
 
   .dark {
-    /* Dark Mode - Medplus Professional Dark Theme */
+    /* Dark Mode - Layons Professional Dark Theme */
     --background: 196 25% 8%;
     --foreground: 210 5% 92%;
 

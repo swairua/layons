@@ -55,7 +55,7 @@ export function SuperAdminSetup() {
           )}
         </CardTitle>
         <p className="text-sm text-muted-foreground mt-2">
-          Create the first administrator account to manage the MedPlus system. This account will have full access to all features.
+          Create the first administrator account to manage the system. This account will have full access to all features.
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -74,7 +74,7 @@ export function SuperAdminSetup() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex items-center space-x-2">
                   <Mail className="h-4 w-4" />
-                  <span>Email: admin@medplusafrica.com</span>
+                  <span>Email: info@construction.com</span>
                 </li>
                 <li className="flex items-center space-x-2">
                   <Key className="h-4 w-4" />

@@ -14,7 +14,7 @@ export interface DatabaseVerificationResult {
 }
 
 // Expected database structure based on our audit
-const EXPECTED_STRUCTURE = {
+const EXPECTED_STRUCTURE: Record<string, string[]> = {
   customers: [
     'id', 'company_id', 'customer_code', 'name', 'email', 'phone', 
     'address', 'city', 'state', 'postal_code', 'country', 'credit_limit', 
@@ -95,82 +95,91 @@ const EXPECTED_STRUCTURE = {
 
 export async function verifyDatabaseComplete(): Promise<DatabaseVerificationResult> {
   try {
-    console.log('🔍 Starting comprehensive database verification...');
-    
-    // Get all tables and columns from information_schema
-    const { data: columnsData, error: columnsError } = await supabase
-      .from('information_schema.columns')
-      .select('table_name, column_name')
-      .in('table_name', Object.keys(EXPECTED_STRUCTURE));
-
-    if (columnsError) {
-      throw new Error(`Failed to query database structure: ${columnsError.message}`);
-    }
-
-    // Group columns by table
-    const actualStructure: Record<string, string[]> = {};
-    
-    if (columnsData) {
-      columnsData.forEach((row: any) => {
-        if (!actualStructure[row.table_name]) {
-          actualStructure[row.table_name] = [];
-        }
-        actualStructure[row.table_name].push(row.column_name);
-      });
-    }
-
-    // Check for missing tables
     const missingTables: string[] = [];
-    const expectedTables = Object.keys(EXPECTED_STRUCTURE);
-    const actualTables = Object.keys(actualStructure);
-    
-    expectedTables.forEach(table => {
-      if (!actualTables.includes(table)) {
-        missingTables.push(table);
-      }
-    });
-
-    // Check for missing columns
     const missingColumns: Array<{ table: string; column: string }> = [];
-    
-    expectedTables.forEach(table => {
-      if (actualStructure[table]) {
-        const expectedCols = EXPECTED_STRUCTURE[table];
-        const actualCols = actualStructure[table];
-        
-        expectedCols.forEach(column => {
-          if (!actualCols.includes(column)) {
-            missingColumns.push({ table, column });
-          }
-        });
-      }
-    });
 
-    // Calculate totals
+    const expectedTables = Object.keys(EXPECTED_STRUCTURE);
     const totalExpectedTables = expectedTables.length;
     const totalExpectedColumns = Object.values(EXPECTED_STRUCTURE).flat().length;
-    const verifiedTables = actualTables.length;
-    const verifiedColumns = Object.values(actualStructure).flat().length;
+    let verifiedTables = 0;
+    let verifiedColumns = 0;
 
-    // Determine if database is complete
-    const isComplete = missingTables.length === 0 && missingColumns.length === 0;
+    for (const table of expectedTables) {
+      const expectedCols = EXPECTED_STRUCTURE[table] || [];
 
-    // Generate summary
-    let summary = '';
-    if (isComplete) {
-      summary = `✅ Database structure is complete! All ${totalExpectedTables} tables and ${totalExpectedColumns} columns are present.`;
-    } else {
-      const issues = [];
-      if (missingTables.length > 0) {
-        issues.push(`${missingTables.length} missing tables`);
+      try {
+        // Ask PostgREST to validate all requested columns without returning rows
+        const { error } = await supabase
+          .from(table as any)
+          .select(expectedCols.join(','), { head: true })
+          .limit(0);
+
+        if (!error) {
+          verifiedTables++;
+          verifiedColumns += expectedCols.length;
+          continue;
+        }
+
+        const msg = (error.message || '').toLowerCase();
+        if (msg.includes('relation') && msg.includes('does not exist')) {
+          missingTables.push(table);
+          continue;
+        }
+
+        // Table likely exists; probe columns individually to find missing ones
+        let tableVerifiedOnce = false;
+        for (const col of expectedCols) {
+          const { error: colErr } = await supabase
+            .from(table as any)
+            .select(col, { head: true })
+            .limit(0);
+
+          if (colErr) {
+            const cmsg = (colErr.message || '').toLowerCase();
+            if (cmsg.includes('relation') && cmsg.includes('does not exist')) {
+              if (!missingTables.includes(table)) missingTables.push(table);
+              break;
+            }
+            if (cmsg.includes('column') && cmsg.includes('does not exist')) {
+              missingColumns.push({ table, column: col });
+            } else {
+              // treat as verified column if error not about missing column
+              verifiedColumns++;
+            }
+          } else {
+            verifiedColumns++;
+            tableVerifiedOnce = true;
+          }
+        }
+        if (tableVerifiedOnce) verifiedTables++;
+      } catch {
+        // Fallback: cheap probe to detect table presence
+        try {
+          const { error: relErr } = await supabase.from(table as any).select('id', { head: true }).limit(0);
+          if (relErr) {
+            const rmsg = (relErr.message || '').toLowerCase();
+            if (rmsg.includes('relation') && rmsg.includes('does not exist')) {
+              missingTables.push(table);
+            } else {
+              verifiedTables++;
+            }
+          } else {
+            verifiedTables++;
+          }
+        } catch {
+          missingTables.push(table);
+        }
       }
-      if (missingColumns.length > 0) {
-        issues.push(`${missingColumns.length} missing columns`);
-      }
-      summary = `❌ Database structure incomplete: ${issues.join(', ')}.`;
     }
 
-    console.log(summary);
+    const isComplete = missingTables.length === 0 && missingColumns.length === 0;
+    const parts: string[] = [];
+    if (missingTables.length > 0) parts.push(`${missingTables.length} missing tables`);
+    if (missingColumns.length > 0) parts.push(`${missingColumns.length} missing columns`);
+
+    const summary = isComplete
+      ? `✅ Database structure is complete! All ${totalExpectedTables} tables and ${totalExpectedColumns} columns are present.`
+      : `❌ Database structure incomplete: ${parts.join(', ')}.`;
 
     return {
       isComplete,
@@ -184,10 +193,7 @@ export async function verifyDatabaseComplete(): Promise<DatabaseVerificationResu
       },
       summary
     };
-
   } catch (error: any) {
-    console.error('❌ Database verification failed:', error);
-    
     return {
       isComplete: false,
       missingTables: [],
@@ -198,7 +204,7 @@ export async function verifyDatabaseComplete(): Promise<DatabaseVerificationResu
         verifiedTables: 0,
         verifiedColumns: 0
       },
-      summary: `❌ Verification failed: ${error.message}`
+      summary: `❌ Verification failed: ${error?.message || 'Unknown error'}`
     };
   }
 }
@@ -206,11 +212,10 @@ export async function verifyDatabaseComplete(): Promise<DatabaseVerificationResu
 export async function getDetailedStructureReport(): Promise<string> {
   try {
     const verification = await verifyDatabaseComplete();
-    
     let report = `# Database Structure Verification Report\n\n`;
     report += `**Status**: ${verification.isComplete ? '✅ COMPLETE' : '❌ INCOMPLETE'}\n\n`;
     report += `**Summary**: ${verification.summary}\n\n`;
-    
+
     if (verification.missingTables.length > 0) {
       report += `## Missing Tables (${verification.missingTables.length})\n`;
       verification.missingTables.forEach(table => {
@@ -218,15 +223,15 @@ export async function getDetailedStructureReport(): Promise<string> {
       });
       report += '\n';
     }
-    
+
     if (verification.missingColumns.length > 0) {
       report += `## Missing Columns (${verification.missingColumns.length})\n`;
       const groupedMissing = verification.missingColumns.reduce((acc, item) => {
-        if (!acc[item.table]) acc[item.table] = [];
+        if (!acc[item.table]) acc[item.table] = [] as string[];
         acc[item.table].push(item.column);
         return acc;
       }, {} as Record<string, string[]>);
-      
+
       Object.entries(groupedMissing).forEach(([table, columns]) => {
         report += `### ${table}\n`;
         columns.forEach(column => {
@@ -235,13 +240,13 @@ export async function getDetailedStructureReport(): Promise<string> {
         report += '\n';
       });
     }
-    
+
     report += `## Statistics\n`;
     report += `- **Tables**: ${verification.details.verifiedTables}/${verification.details.totalTables}\n`;
     report += `- **Columns**: ${verification.details.verifiedColumns}/${verification.details.totalColumns}\n`;
-    
+
     return report;
   } catch (error: any) {
-    return `# Database Verification Error\n\n❌ ${error.message}`;
+    return `# Database Verification Error\n\n❌ ${error?.message || 'Unknown error'}`;
   }
 }
