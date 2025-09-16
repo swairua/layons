@@ -114,7 +114,7 @@ export function ViewQuotationModal({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Quotation Content - Styled like the MedPlus invoice */}
+        {/* Quotation Content - Styled consistently with brand invoice */}
         <div className="bg-background border rounded-lg p-6 space-y-6">
           {/* Header */}
           <div className="flex justify-between items-start">

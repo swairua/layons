@@ -2,42 +2,48 @@ import { cn } from "@/lib/utils";
 
 interface BiolegendLogoProps {
   className?: string;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   showText?: boolean;
 }
+
+import { useCurrentCompany } from '@/contexts/CompanyContext';
 
 export function BiolegendLogo({ className, size = "md", showText = true }: BiolegendLogoProps) {
   const sizeClasses = {
     sm: "h-10 w-10",
     md: "h-16 w-16",
-    lg: "h-20 w-20"
+    lg: "h-20 w-20",
+    xl: "h-28 w-28",
   };
 
   const textSizeClasses = {
     sm: "text-sm",
     md: "text-lg",
-    lg: "text-2xl"
+    lg: "text-2xl",
+    xl: "text-3xl",
   };
+
+  const { currentCompany } = useCurrentCompany();
+  const logoSrc = currentCompany?.logo_url || 'https://cdn.builder.io/api/v1/image/assets%2Fb048b36350454e4dba55aefd37788f9c%2Fbd04dab542504461a2451b061741034c?format=webp&width=800';
+  const companyName = currentCompany?.name || 'Layons Construction Limited';
 
   return (
     <div className={cn("flex items-center space-x-3", className)}>
-      {/* Biolegend Logo Image */}
       <div className={cn("relative", sizeClasses[size])}>
         <img
-          src="https://cdn.builder.io/api/v1/image/assets%2Ffd1c9d5781fc4f20b6ad16683f5b85b3%2F274fc62c033e464584b0f50713695127?format=webp&width=800"
-          alt="Medplus Africa Logo"
+          src={logoSrc}
+          alt={companyName}
           className="w-full h-full object-contain"
         />
       </div>
 
-      {/* Company Text */}
       {showText && (
         <div className="flex flex-col">
           <span className={cn("font-bold text-primary", textSizeClasses[size])}>
-            MEDPLUS
+            {companyName.split(' ')[0]?.toUpperCase() || 'LAYONS'}
           </span>
           <span className={cn("text-xs text-secondary font-medium -mt-1", size === "sm" && "text-[10px]")}>
-            AFRICA
+            {(companyName.split(' ').slice(1).join(' ') || 'CONSTRUCTION LIMITED').toUpperCase()}
           </span>
         </div>
       )}

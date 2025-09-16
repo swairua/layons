@@ -108,7 +108,7 @@ export function handleAuthError(error: AuthError | Error): AuthErrorInfo {
 }
 
 export const DEFAULT_ADMIN_CREDENTIALS = {
-  email: 'admin@medplusafrica.com',
+  email: 'info@construction.com',
   password: 'Medplus#2025!'
 };
 

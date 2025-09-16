@@ -42,14 +42,14 @@ export interface CompanyData {
 
 // Default company details (fallback) - logo will be determined dynamically
 const DEFAULT_COMPANY: CompanyData = {
-  name: 'Medplus Africa',
+  name: 'Layons Construction Limited',
   address: '',
   city: 'Nairobi',
   country: 'Kenya',
   phone: '',
-  email: 'info@medplusafrica.com',
+  email: 'layonscoltd@gmail.com',
   tax_number: '',
-  logo_url: 'https://cdn.builder.io/api/v1/image/assets%2Ffd1c9d5781fc4f20b6ad16683f5b85b3%2F274fc62c033e464584b0f50713695127?format=webp&width=800' // Will use company settings or fallback gracefully
+  logo_url: 'https://cdn.builder.io/api/v1/image/assets%2Fb048b36350454e4dba55aefd37788f9c%2Fbd04dab542504461a2451b061741034c?format=webp&width=800'
 };
 
 export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: CompanyData) => {

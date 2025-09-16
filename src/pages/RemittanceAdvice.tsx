@@ -323,18 +323,18 @@ const RemittanceAdvice = () => {
               <div className="text-center mb-6">
                 <h2 className="text-xl font-bold text-primary">REMITTANCE ADVICE</h2>
                 <div className="mt-4 space-y-1">
-                  <div className="font-semibold">MedPlus Africa Limited</div>
+                  <div className="font-semibold">Layons Construction Limited</div>
                   <div className="text-sm text-muted-foreground">
                     P.O Box 85988-00200, Nairobi, Kenya
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    Tel: 0741 207 690/0780 165 490
+                    Tel: 0720717463
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    Email: biolegend@biolegendscientific.co.ke/info@biolegendscientific.co.ke
+                    Email: layonscoltd@gmail.com
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    Website: www.biolegendscientific.co.ke
+                    Website:
                   </div>
                 </div>
               </div>

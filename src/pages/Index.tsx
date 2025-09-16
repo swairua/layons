@@ -4,6 +4,7 @@ import { QuickActions } from '@/components/dashboard/QuickActions';
 import { AuthPerformanceTest } from '@/components/auth/AuthPerformanceTest';
 import { Button } from '@/components/ui/button';
 import { FileText, BarChart3 } from 'lucide-react';
+import { DatabaseStatusBanner } from '@/components/DatabaseStatusBanner';
 import { downloadQuotationPDF } from '@/utils/pdfGenerator';
 import { useQuotations, useCompanies } from '@/hooks/useDatabase';
 import { useState } from 'react';
@@ -22,7 +23,7 @@ const Index = () => {
 
       if (realQuotation) {
         downloadQuotationPDF(realQuotation);
-        toast.success('PDF generated using real quotation data!');
+        toast.success('PDF generated.');
         return;
       }
 
@@ -36,7 +37,7 @@ const Index = () => {
         subtotal: 125000,
         tax_amount: 25000,
         status: 'draft',
-        notes: 'This is a test quotation to demonstrate the MedPlus logo in PDF documents.',
+        notes: 'This is a test quotation to demonstrate the company logo in PDF documents.',
         terms_and_conditions: 'Payment due within 30 days of acceptance.',
         customers: {
           name: 'Sample Customer Ltd',
@@ -75,7 +76,7 @@ const Index = () => {
       };
 
       downloadQuotationPDF(testQuotation);
-      toast.success('Test PDF generated using sample data (no real quotations found)');
+      toast.success('Test PDF generated using sample data');
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast.error('Failed to generate PDF');
@@ -112,6 +113,9 @@ const Index = () => {
           </Button>
         </div>
       </div>
+
+      {/* Database Status */}
+      <DatabaseStatusBanner />
 
       {/* Dashboard Stats */}
       <DashboardStats />

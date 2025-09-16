@@ -540,6 +540,118 @@ export const useDeleteTaxSetting = () => {
   });
 };
 
+// BOQs hooks
+export const useBOQs = (companyId?: string) => {
+  return useQuery({
+    queryKey: ['boqs', companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      if (!companyId) return [];
+      const { data, error } = await supabase
+        .from('boqs')
+        .select('*')
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+};
+
+export const useCreateBOQ = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (boq: any) => {
+      const { data, error } = await supabase
+        .from('boqs')
+        .insert([boq])
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['boqs'] });
+    },
+  });
+};
+
+export const useDeleteBOQ = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('boqs').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['boqs'] });
+    },
+  });
+};
+
+// Units hooks
+export const useUnits = (companyId?: string) => {
+  return useQuery({
+    queryKey: ['units', companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      if (!companyId) return [];
+      const { data, error } = await supabase
+        .from('units')
+        .select('*')
+        .eq('company_id', companyId)
+        .order('name', { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+};
+
+export const useCreateUnit = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (unit: any) => {
+      const { data, error } = await supabase
+        .from('units')
+        .insert([unit])
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['units'] });
+    },
+  });
+};
+
+export const useUpdateUnit = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
+      const { data, error } = await supabase.from('units').update(updates).eq('id', id).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['units'] });
+    }
+  });
+};
+
+export const useDeleteUnit = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('units').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['units'] });
+    }
+  });
+};
+
 // Invoices hooks - Fixed to avoid relationship ambiguity
 export const useInvoices = (companyId?: string) => {
   return useQuery({

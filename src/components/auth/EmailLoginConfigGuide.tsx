@@ -31,7 +31,7 @@ export function EmailLoginConfigGuide() {
   };
 
   const adminCredentials = {
-    email: 'admin@medplusafrica.com',
+    email: 'info@construction.com',
     password: 'Medplus#2025!'
   };
 

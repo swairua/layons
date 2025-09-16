@@ -69,6 +69,11 @@ const sidebarItems: SidebarItem[] = [
     href: '/customers'
   },
   {
+    title: 'BOQs',
+    icon: FileSpreadsheet,
+    href: '/boqs'
+  },
+  {
     title: 'Purchase Orders',
     icon: ShoppingCart,
     href: '/lpos'
@@ -188,7 +193,7 @@ export function Sidebar() {
     <div className="flex h-full w-64 flex-col bg-sidebar border-r border-sidebar-border">
       {/* Company Logo/Header */}
       <div className="flex h-16 items-center border-b border-sidebar-border px-6">
-        <BiolegendLogo size="md" showText={true} className="text-sidebar-foreground" />
+        <BiolegendLogo size="lg" showText={true} className="text-sidebar-foreground" />
       </div>
 
       {/* Navigation */}
@@ -202,7 +207,7 @@ export function Sidebar() {
           <div className="flex items-center space-x-3 px-3 py-2 text-sm text-sidebar-foreground">
             <Building2 className="h-4 w-4 text-sidebar-primary" />
             <div>
-              <div className="font-medium">Medplus Africa</div>
+              <div className="font-medium">Layons Construction Limited</div>
               <div className="text-xs text-sidebar-foreground/60">Healthcare & Pharmaceuticals</div>
             </div>
           </div>

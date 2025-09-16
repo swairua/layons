@@ -3,7 +3,7 @@
 // In a real app, you'd want to use a proper PDF library like jsPDF or react-pdf
 
 export interface DocumentData {
-  type: 'quotation' | 'invoice' | 'remittance' | 'proforma' | 'delivery' | 'statement' | 'receipt' | 'lpo';
+  type: 'quotation' | 'invoice' | 'remittance' | 'proforma' | 'delivery' | 'statement' | 'receipt' | 'lpo' | 'boq';
   number: string;
   date: string;
   lpo_number?: string;
@@ -16,6 +16,9 @@ export interface DocumentData {
     country?: string;
   };
   company?: CompanyDetails; // Optional company details override
+  // BOQ-specific structured fields
+  project_title?: string;
+  contractor?: string;
   items?: Array<{
     description: string;
     quantity: number;
@@ -70,14 +73,14 @@ interface CompanyDetails {
 
 // Default company details (fallback) - logo will be determined dynamically
 const DEFAULT_COMPANY: CompanyDetails = {
-  name: 'Medplus Africa',
+  name: 'Layons Construction Limited',
   address: '',
   city: 'Nairobi',
   country: 'Kenya',
   phone: '',
-  email: 'info@medplusafrica.com',
+  email: 'layonscoltd@gmail.com',
   tax_number: '',
-  logo_url: 'https://cdn.builder.io/api/v1/image/assets%2Ffd1c9d5781fc4f20b6ad16683f5b85b3%2F274fc62c033e464584b0f50713695127?format=webp&width=800' // Will use company settings or fallback gracefully
+  logo_url: 'https://cdn.builder.io/api/v1/image/assets%2Fb048b36350454e4dba55aefd37788f9c%2Fbd04dab542504461a2451b061741034c?format=webp&width=800'
 };
 
 // Helper function to determine which columns have values
@@ -114,6 +117,16 @@ const analyzeColumns = (items: DocumentData['items']) => {
 };
 
 export const generatePDF = (data: DocumentData) => {
+  // Extract theme color variables from the main document so PDFs match the app theme
+  const computed = typeof window !== 'undefined' ? getComputedStyle(document.documentElement) : null;
+  const primaryVar = computed ? (computed.getPropertyValue('--primary') || '46 65% 53%').trim() : '46 65% 53%';
+  const primaryForegroundVar = computed ? (computed.getPropertyValue('--primary-foreground') || '0 0% 10%').trim() : '0 0% 10%';
+  const successVar = computed ? (computed.getPropertyValue('--success') || '140 50% 45%').trim() : '140 50% 45%';
+  const warningVar = computed ? (computed.getPropertyValue('--warning') || '45 85% 57%').trim() : '45 85% 57%';
+
+  // Build CSS root variables to inject into the PDF window
+  const pdfRootVars = `:root { --primary: ${primaryVar}; --primary-foreground: ${primaryForegroundVar}; --success: ${successVar}; --warning: ${warningVar}; }`;
+
   // Use company details from data or fall back to defaults
   const company = data.company || DEFAULT_COMPANY;
 
@@ -148,8 +161,173 @@ export const generatePDF = (data: DocumentData) => {
                        data.type === 'receipt' ? 'Payment Receipt' :
                        data.type === 'remittance' ? 'Remittance Advice' :
                        data.type === 'lpo' ? 'Purchase Order' :
+                       data.type === 'boq' ? 'Bill of Quantities' :
                        data.type.charAt(0).toUpperCase() + data.type.slice(1);
   
+  // Prefer structured fields if present, otherwise fall back to parsing notes
+  let boqProject = data.project_title || '';
+  let boqContractor = data.contractor || '';
+  if (data.type === 'boq' && (!boqProject || !boqContractor) && data.notes) {
+    const parts = data.notes.split('\n');
+    parts.forEach(p => {
+      const t = p.trim();
+      if (!boqProject && t.toUpperCase().startsWith('PROJECT:')) boqProject = t.replace(/PROJECT:\s*/i, '').trim();
+      if (!boqContractor && t.toUpperCase().startsWith('CONTRACTOR:')) boqContractor = t.replace(/CONTRACTOR:\s*/i, '').trim();
+    });
+  }
+
+  // If this is a BOQ, render a dedicated BOQ-style layout
+  if (data.type === 'boq') {
+    // Build table rows grouped by section markers (we used '➤ ' prefix for section rows)
+    const rowsHtml = (data.items || []).map((it) => {
+      const isSection = (it.quantity === 0 && it.unit_price === 0);
+      if (isSection) {
+        return `<tr class="section-row"><td colspan="5" class="section-title">${it.description.replace(/^➤\s*/, '')}</td></tr>`;
+      }
+      return `<tr class="item-row">
+        <td class="desc">${it.description}</td>
+        <td class="qty">${it.quantity || ''}</td>
+        <td class="unit">${it.unit_abbreviation || it.unit_of_measure || ''}</td>
+        <td class="rate">${formatCurrency(it.unit_price || 0)}</td>
+        <td class="amount">${formatCurrency(it.line_total || 0)}</td>
+      </tr>`;
+    }).join('');
+
+    const htmlContentBOQ = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>BILLS OF QUANTITIES ${data.number}</title>
+      <meta charset="UTF-8">
+      <style>
+        ${pdfRootVars}
+        @page { size: A4; margin: 12mm; }
+        @media print {
+          @page { counter-increment: page; }
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; margin:0; color:#222; font-size:12px; }
+        body { counter-reset: page; }
+        .pagefoot::after { content: "Page " counter(page) ""; }
+        .container { padding: 12mm; }
+        .top-headers { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+        .company { text-align:right; }
+        .company .name { font-size:18px; font-weight:700; color:hsl(var(--primary)); }
+        .subtitle { font-size:11px; color:#444; }
+        .title { text-align:center; font-size:20px; font-weight:700; margin:12px 0; color:hsl(var(--primary)); }
+        .meta { display:flex; justify-content:space-between; margin-bottom:12px; }
+        .meta .left, .meta .right { width:48%; }
+        .meta .left .field { margin-bottom:6px; }
+        .items { width:100%; border-collapse:collapse; margin-top:8px; }
+        .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
+        .items thead th { background:hsl(var(--primary)); color:#fff; font-weight:700; }
+        .section-row td.section-title { background:#f4f4f4; font-weight:700; padding:8px; }
+        .item-row td.desc { width:60%; }
+        .item-row td.qty, .item-row td.unit, .item-row td.rate, .item-row td.amount { text-align:right; }
+        .totals { margin-top:12px; width:100%; }
+        .totals .label { text-align:right; padding-right:12px; }
+        .footer { margin-top:30px; display:flex; justify-content:space-between; gap:20px; }
+        .sig { width:45%; border-top:1px solid #999; text-align:left; padding-top:6px; }
+        .pagefoot { position:fixed; bottom:12mm; left:12mm; right:12mm; text-align:center; font-size:10px; color:#666; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="company-info">
+            <div class="logo">
+              ${company.logo_url ?
+                `<img src="${company.logo_url}" alt="${company.name} Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                 <div style="display:none; width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">Logo not available</div>` :
+                `<div style="width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">No logo configured</div>`
+              }
+            </div>
+            <div class="company-name">${company.name}</div>
+            <div class="company-details">
+              ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
+              ${company.address ? `${company.address}<br>` : ''}
+              ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
+              ${company.phone ? `Tel: ${company.phone}<br>` : ''}
+              ${company.email ? `Email: ${company.email}` : ''}
+            </div>
+
+            <!-- Client Details Section -->
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e9ecef;">
+              <div class="section-title" style="font-size: 12px; font-weight: bold; color: hsl(var(--primary)); margin-bottom: 8px; text-transform: uppercase;">Client</div>
+              <div class="customer-name" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #212529;">${data.customer.name}</div>
+              <div class="customer-details" style="font-size: 10px; color: #666; line-height: 1.4;">
+                ${data.customer.email ? `${data.customer.email}<br>` : ''}
+                ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
+                ${data.customer.address ? `${data.customer.address}<br>` : ''}
+                ${data.customer.city ? `${data.customer.city}` : ''}
+                ${data.customer.country ? `, ${data.customer.country}` : ''}
+              </div>
+            </div>
+          </div>
+
+          <div class="document-info">
+            <div class="document-title">Bill of Quantities</div>
+            <div class="document-details">
+              <table>
+                <tr>
+                  <td class="label">BOQ #:</td>
+                  <td class="value">${data.number}</td>
+                </tr>
+                <tr>
+                  <td class="label">Date:</td>
+                  <td class="value">${formatDate(data.date)}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="title">BILLS OF QUANTITIES</div>
+
+        <table class="items">
+          <thead>
+            <tr>
+              <th style="width:60%; text-align:left">ITEM DESCRIPTION</th>
+              <th style="width:8%">QTY</th>
+              <th style="width:9%">UNIT</th>
+              <th style="width:11%">RATE</th>
+              <th style="width:12%">AMOUNT (KSHS)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+
+        <div class="totals">
+          <table style="width:100%; margin-top:8px;">
+            <tr>
+              <td class="label" style="text-align:right; font-weight:700;">TOTAL:</td>
+              <td style="width:150px; text-align:right; font-weight:700;">${formatCurrency(data.total_amount || data.subtotal || 0)}</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="footer">
+          <div class="sig">SIGNED: (CONTRACTOR)</div>
+          <div class="sig">SIGNED: (EMPLOYER)</div>
+        </div>
+      </div>
+      <div class="pagefoot">${company.name} • Generated on ${new Date().toLocaleDateString()}</div>
+    </body>
+    </html>
+    `;
+
+    printWindow.document.write(htmlContentBOQ);
+    printWindow.document.close();
+
+    printWindow.onload = () => setTimeout(() => printWindow.print(), 500);
+    setTimeout(() => { if (printWindow && !printWindow.closed) printWindow.print(); }, 1000);
+
+    return printWindow;
+  }
+
+  // Fallback generic document HTML (existing template)
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -157,15 +335,16 @@ export const generatePDF = (data: DocumentData) => {
       <title>${documentTitle} ${data.number}</title>
       <meta charset="UTF-8">
       <style>
+        ${pdfRootVars}
         @page {
           size: A4;
           margin: 15mm;
         }
-        
+
         * {
           box-sizing: border-box;
         }
-        
+
         body {
           font-family: 'Arial', sans-serif;
           margin: 0;
@@ -175,7 +354,7 @@ export const generatePDF = (data: DocumentData) => {
           font-size: 12px;
           background: white;
         }
-        
+
         .page {
           width: 210mm;
           min-height: 297mm;
@@ -185,20 +364,20 @@ export const generatePDF = (data: DocumentData) => {
           padding: 20mm;
           position: relative;
         }
-        
+
         .header {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
           margin-bottom: 30px;
           padding-bottom: 20px;
-          border-bottom: 2px solid #2BB673;
+          border-bottom: 2px solid hsl(var(--primary));
         }
-        
+
         .company-info {
           flex: 1;
         }
-        
+
         .logo {
           width: 320px;
           height: 160px;
@@ -217,7 +396,10 @@ export const generatePDF = (data: DocumentData) => {
           font-size: 24px;
           font-weight: bold;
           margin-bottom: 5px;
-          color: #2BB673;
+          color: hsl(var(--primary));
+          font-weight: bold;
+          margin-bottom: 5px;
+          color: hsl(var(--primary));
         }
         
         .company-details {
@@ -237,7 +419,11 @@ export const generatePDF = (data: DocumentData) => {
           font-size: 28px;
           font-weight: bold;
           margin: 0 0 15px 0;
-          color: #2DAAE1;
+          color: hsl(var(--primary));
+          text-transform: uppercase;
+          font-weight: bold;
+          margin: 0 0 15px 0;
+          color: hsl(var(--primary));
           text-transform: uppercase;
           letter-spacing: 1px;
         }
@@ -274,7 +460,7 @@ export const generatePDF = (data: DocumentData) => {
         .section-title {
           font-size: 14px;
           font-weight: bold;
-          color: #2DAAE1;
+          color: hsl(var(--primary));
           margin: 0 0 15px 0;
           text-transform: uppercase;
           letter-spacing: 0.5px;
@@ -301,13 +487,13 @@ export const generatePDF = (data: DocumentData) => {
           border-collapse: collapse;
           margin: 20px 0;
           font-size: 11px;
-          border: 2px solid #2BB673;
+          border: 2px solid hsl(var(--primary));
           border-radius: 8px;
           overflow: hidden;
         }
         
         .items-table thead {
-          background: #2BB673;
+          background: hsl(var(--primary));
           color: white;
         }
         
@@ -346,7 +532,7 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .items-table tbody tr:hover {
-          background: #e3f2fd;
+          background: hsl(var(--primary-light));
         }
         
         .description-cell {
@@ -398,50 +584,22 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .totals-table .total-row {
-          border-top: 2px solid #2BB673;
+          border-top: 2px solid hsl(var(--primary));
           background: #f8f9fa;
         }
         
         .totals-table .total-row .label {
           font-size: 14px;
           font-weight: bold;
-          color: #2BB673;
+          color: hsl(var(--primary));
         }
         
         .totals-table .total-row .amount {
           font-size: 16px;
           font-weight: bold;
-          color: #2BB673;
+          color: hsl(var(--primary));
         }
         
-        .notes-section {
-          margin-top: 30px;
-          display: flex;
-          gap: 20px;
-        }
-        
-        .notes, .terms {
-          flex: 1;
-          padding: 15px;
-          background: #f8f9fa;
-          border-radius: 8px;
-          border: 1px solid #e9ecef;
-        }
-        
-        .section-subtitle {
-          font-size: 12px;
-          font-weight: bold;
-          color: #2DAAE1;
-          margin: 0 0 10px 0;
-          text-transform: uppercase;
-        }
-        
-        .notes-content, .terms-content {
-          font-size: 10px;
-          line-height: 1.6;
-          color: #666;
-          white-space: pre-wrap;
-        }
         
         .footer {
           position: absolute;
@@ -485,7 +643,7 @@ export const generatePDF = (data: DocumentData) => {
         .field-label {
           font-size: 10px;
           font-weight: bold;
-          color: #2DAAE1;
+          color: hsl(var(--primary));
           margin-bottom: 4px;
           text-transform: uppercase;
         }
@@ -516,7 +674,7 @@ export const generatePDF = (data: DocumentData) => {
         .signature-label {
           font-size: 11px;
           font-weight: bold;
-          color: #2DAAE1;
+          color: hsl(var(--primary));
           margin-bottom: 20px;
           text-transform: uppercase;
         }
@@ -542,7 +700,7 @@ export const generatePDF = (data: DocumentData) => {
           left: 50%;
           transform: translate(-50%, -50%) rotate(-45deg);
           font-size: 72px;
-          color: rgba(45, 170, 225, 0.1);
+          color: hsl(var(--primary) / 0.12);
           font-weight: bold;
           z-index: -1;
           pointer-events: none;
@@ -572,7 +730,7 @@ export const generatePDF = (data: DocumentData) => {
             padding: 20px;
           }
         }
-        \n        .payment-banner {\n          background: #f8f9fa;\n          padding: 8px 15px;\n          margin-bottom: 20px;\n          border-left: 4px solid #2BB673;\n          font-size: 10px;\n          color: #333;\n          text-align: center;\n          border-radius: 4px;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          background: #f8f9fa;\n          padding: 10px;\n          margin: 15px 0;\n          border-left: 4px solid #2BB673;\n          font-size: 10px;\n          color: #333;\n          text-align: center;\n          border-radius: 4px;\n          font-weight: 600;\n        }\n      </style>
+        \n        .payment-banner {\n          background: #f8f9fa;\n          padding: 8px 15px;\n          margin-bottom: 20px;\n          border-left: 4px solid hsl(var(--primary));\n          font-size: 10px;\n          color: #333;\n          text-align: center;\n          border-radius: 4px;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          background: #f8f9fa;\n          padding: 10px;\n          margin: 15px 0;\n          border-left: 4px solid hsl(var(--primary));\n          font-size: 10px;\n          color: #333;\n          text-align: center;\n          border-radius: 4px;\n          font-weight: 600;\n        }\n      </style>
     </head>
     <body>
       <div class="page">
@@ -600,7 +758,7 @@ export const generatePDF = (data: DocumentData) => {
 
             <!-- Client Details Section -->
             <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e9ecef;">
-              <div class="section-title" style="font-size: 12px; font-weight: bold; color: #2DAAE1; margin-bottom: 8px; text-transform: uppercase;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
+              <div class="section-title" style="font-size: 12px; font-weight: bold; color: hsl(var(--primary)); margin-bottom: 8px; text-transform: uppercase;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
               <div class="customer-name" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #212529;">${data.customer.name}</div>
               <div class="customer-details" style="font-size: 10px; color: #666; line-height: 1.4;">
                 ${data.customer.email ? `${data.customer.email}<br>` : ''}
@@ -644,7 +802,7 @@ export const generatePDF = (data: DocumentData) => {
                 ` : ''}
                 <tr>
                   <td class="label">${data.type === 'receipt' ? 'Amount Paid' : data.type === 'remittance' ? 'Total Payment' : data.type === 'lpo' ? 'Order Total' : 'Amount'}:</td>
-                  <td class="value" style="font-weight: bold; color: ${data.type === 'receipt' ? '#2BB673' : '#2BB673'};">${formatCurrency(data.total_amount)}</td>
+                  <td class="value" style="font-weight: bold; color: ${data.type === 'receipt' ? 'hsl(var(--primary))' : 'hsl(var(--primary))'};">${formatCurrency(data.total_amount)}</td>
                 </tr>
               </table>
             </div>
@@ -740,16 +898,23 @@ export const generatePDF = (data: DocumentData) => {
                 <th style="width: 16%;">Invoice Amount</th>
                 <th style="width: 16%;">Credit Amount</th>
                 <th style="width: 18%;">Payment Amount</th>
+                ` : data.type === 'boq' ? `
+                <th style="width: 5%;">#</th>
+                <th style="width: 45%;">Item Description</th>
+                <th style="width: 10%;">Qty</th>
+                <th style="width: 10%;">Unit</th>
+                <th style="width: 15%;">Rate</th>
+                <th style="width: 15%;">Amount</th>
                 ` : `
                 <th style="width: 5%;">#</th>
                 <th style="width: ${visibleColumns.discountPercentage || visibleColumns.discountBeforeVat || visibleColumns.discountAmount || visibleColumns.taxPercentage || visibleColumns.taxAmount ? '30%' : '40%'};">Description</th>
                 <th style="width: 10%;">Qty</th>
                 <th style="width: 15%;">Unit Price</th>
-                ${visibleColumns.discountPercentage ? '<th style="width: 10%;">Disc %</th>' : ''}
-                ${visibleColumns.discountBeforeVat ? '<th style="width: 12%;">Disc Before VAT</th>' : ''}
-                ${visibleColumns.discountAmount ? '<th style="width: 12%;">Disc Amount</th>' : ''}
-                ${visibleColumns.taxPercentage ? '<th style="width: 10%;">Tax %</th>' : ''}
-                ${visibleColumns.taxAmount ? '<th style="width: 12%;">Tax Amount</th>' : ''}
+                ${visibleColumns.discountPercentage ? '<th style=\"width: 10%;\">Disc %</th>' : ''}
+                ${visibleColumns.discountBeforeVat ? '<th style=\"width: 12%;\">Disc Before VAT</th>' : ''}
+                ${visibleColumns.discountAmount ? '<th style=\"width: 12%;\">Disc Amount</th>' : ''}
+                ${visibleColumns.taxPercentage ? '<th style=\"width: 10%;\">Tax %</th>' : ''}
+                ${visibleColumns.taxAmount ? '<th style=\"width: 12%;\">Tax Amount</th>' : ''}
                 <th style="width: 15%;">Total</th>
                 `}
               </tr>
@@ -776,22 +941,27 @@ export const generatePDF = (data: DocumentData) => {
                   <td class="description-cell">${item.description}</td>
                   ${data.type === 'delivery' ? `
                   <td>${(item as any).quantity_ordered || item.quantity}</td>
-                  <td style="font-weight: bold; color: ${(item as any).quantity_delivered >= (item as any).quantity_ordered ? '#2BB673' : '#F59E0B'};">${(item as any).quantity_delivered || item.quantity}</td>
+                  <td style="font-weight: bold; color: ${(item as any).quantity_delivered >= (item as any).quantity_ordered ? 'hsl(var(--primary))' : '#F59E0B'};">${(item as any).quantity_delivered || item.quantity}</td>
                   <td>${(item as any).unit_of_measure || 'pcs'}</td>
                   <td style="font-size: 10px;">
                     ${(item as any).quantity_delivered >= (item as any).quantity_ordered ?
-                      '<span style="color: #2BB673; font-weight: bold;">✓ Complete</span>' :
+                      '<span style="color: hsl(var(--primary)); font-weight: bold;">✓ Complete</span>' :
                       '<span style="color: #F59E0B; font-weight: bold;">⚠ Partial</span>'
                     }
                   </td>
+                  ` : data.type === 'boq' ? `
+                  <td>${item.quantity}</td>
+                  <td>${(item as any).unit_of_measure || (item as any).unit || 'Item'}</td>
+                  <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
+                  <td class="amount-cell">${formatCurrency(item.line_total)}</td>
                   ` : `
                   <td>${item.quantity}</td>
                   <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
                   ${visibleColumns.discountPercentage ? `<td>${item.discount_percentage || 0}%</td>` : ''}
                   ${visibleColumns.discountBeforeVat ? `<td>${(item.discount_before_vat || 0)}%</td>` : ''}
-                  ${visibleColumns.discountAmount ? `<td class="amount-cell">${formatCurrency(item.discount_amount || 0)}</td>` : ''}
+                  ${visibleColumns.discountAmount ? `<td class=\"amount-cell\">${formatCurrency(item.discount_amount || 0)}</td>` : ''}
                   ${visibleColumns.taxPercentage ? `<td>${item.tax_percentage || 0}%</td>` : ''}
-                  ${visibleColumns.taxAmount ? `<td class="amount-cell">${formatCurrency(item.tax_amount || 0)}</td>` : ''}
+                  ${visibleColumns.taxAmount ? `<td class=\"amount-cell\">${formatCurrency(item.tax_amount || 0)}</td>` : ''}
                   <td class="amount-cell">${formatCurrency(item.line_total)}</td>
                   `}
                   `}
@@ -825,11 +995,11 @@ export const generatePDF = (data: DocumentData) => {
             ${(data.type === 'invoice' || data.type === 'proforma') && data.paid_amount !== undefined ? `
             <tr class="payment-info">
               <td class="label">Paid Amount:</td>
-              <td class="amount" style="color: #2BB673;">${formatCurrency(data.paid_amount || 0)}</td>
+              <td class="amount" style="color: hsl(var(--primary));">${formatCurrency(data.paid_amount || 0)}</td>
             </tr>
             <tr class="balance-info">
               <td class="label" style="font-weight: bold;">Balance Due:</td>
-              <td class="amount" style="font-weight: bold; color: ${(data.balance_due || 0) > 0 ? '#DC2626' : '#2BB673'};">${formatCurrency(data.balance_due || 0)}</td>
+              <td class="amount" style="font-weight: bold; color: ${(data.balance_due || 0) > 0 ? '#DC2626' : 'hsl(var(--primary))'};">${formatCurrency(data.balance_due || 0)}</td>
             </tr>
             ` : ''}
           </table>
@@ -854,29 +1024,11 @@ export const generatePDF = (data: DocumentData) => {
         </div>
         ` : ''}
 
-        <!-- Notes Section -->
-        ${data.notes || data.terms_and_conditions ? `
-        <div class="notes-section">
-          ${data.notes ? `
-          <div class="notes">
-            <div class="section-subtitle">Notes</div>
-            <div class="notes-content">${data.notes}</div>
-          </div>
-          ` : ''}
-          
-          ${data.terms_and_conditions ? `
-          <div class="terms">
-            <div class="section-subtitle">Terms & Conditions</div>
-            <div class="terms-content">${data.terms_and_conditions}</div>
-          </div>
-          ` : ''}
-        </div>
-        ` : ''}
         
         <!-- Bank Details (only for invoices and quotations) -->
         ${(data.type === 'invoice' || data.type === 'quotation') ? `
         <div class="bank-details">
-          <strong>MAKE ALL PAYMENTS THROUGH MEDPLUS AFRICA, KCB RIVER ROAD BRANCH NUMBER : 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX</strong>
+          <strong>Payments to: Layons Construction Limited. For bank details, contact: layonscoltd@gmail.com / 0720717463</strong>
         </div>
         ` : ''}
 
