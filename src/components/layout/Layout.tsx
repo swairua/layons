@@ -14,17 +14,6 @@ export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [loadingStartTime] = useState(Date.now());
 
-  // In development, always render content to force preview
-  if (import.meta.env.DEV) {
-    return (
-      <div className="min-h-screen bg-background">
-        <main className="w-full">
-          {children}
-        </main>
-      </div>
-    );
-  }
-
   // Routes that don't require authentication
   const publicRoutes = ['/auth-test', '/manual-setup', '/database-fix-page', '/auto-fix', '/audit', '/auto-payment-sync', '/payment-sync'];
   const isPublicRoute = publicRoutes.includes(location.pathname);
