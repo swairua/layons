@@ -17,6 +17,11 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { isAuthenticated, loading } = useAuth();
 
+  // In development, always show content to ensure preview renders instantly
+  if (import.meta.env.DEV) {
+    return <>{children}</>;
+  }
+
   // Show loading state
   if (loading) {
     return (
