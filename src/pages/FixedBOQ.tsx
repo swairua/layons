@@ -258,6 +258,7 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
           unit_price: r,
           line_total: q * r,
           unit_of_measure: it.unit || 'Item',
+          item_code: it.item_code || undefined,
         });
       });
     });
