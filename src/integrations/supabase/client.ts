@@ -99,4 +99,5 @@ if (SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY) {
   _supabase = createMissingProxy(MISSING_MSG);
 }
 
+export const SUPABASE_READY = Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
 export const supabase = _supabase as ReturnType<typeof createClient>;
