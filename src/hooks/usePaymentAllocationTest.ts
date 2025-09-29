@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useState } from 'react';
 
 interface AllocationTestResult {
   success: boolean;
@@ -29,8 +30,9 @@ export const usePaymentAllocationTest = () => {
       }
 
       // 2. Check if user profile is linked to company
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+    const { data, error: userError } = await supabase.auth.getUser();
+    const user = data?.user;
+    if (!user) {
         return {
           success: false,
           message: 'No authenticated user found',
