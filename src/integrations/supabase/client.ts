@@ -69,19 +69,34 @@ if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
 let _supabase: any;
 const MISSING_MSG = 'Supabase client not initialized: set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (or VITE_SUPABASE_ equivalents).';
 
+function createMissingProxy(msg: string) {
+  const fn = () => Promise.reject(new Error(msg));
+  const handler: ProxyHandler<any> = {
+    get() {
+      // return another proxy so chained property access won't throw
+      return createMissingProxy(msg);
+    },
+    apply() {
+      // when used as a function, return a rejected promise
+      return Promise.reject(new Error(msg));
+    },
+    construct() {
+      throw new Error(msg);
+    }
+  };
+  return new Proxy(fn, handler);
+}
+
 if (SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY) {
   try {
     _supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, supabaseOptions);
   } catch (err) {
     console.warn('Failed to create Supabase client:', err);
-    _supabase = new Proxy({}, { get() { throw new Error(MISSING_MSG); }, apply() { throw new Error(MISSING_MSG); } });
+    _supabase = createMissingProxy(MISSING_MSG);
   }
 } else {
-  // Return a proxy that throws useful error when used
-  _supabase = new Proxy({}, {
-    get() { throw new Error(MISSING_MSG); },
-    apply() { throw new Error(MISSING_MSG); },
-  });
+  // Return a proxy that rejects calls gracefully
+  _supabase = createMissingProxy(MISSING_MSG);
 }
 
 export const supabase = _supabase as ReturnType<typeof createClient>;
