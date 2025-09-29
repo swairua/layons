@@ -6,16 +6,27 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
-import { Download, Database, PlusCircle } from 'lucide-react';
+import { Download, Database, PlusCircle, Upload } from 'lucide-react';
 import { generatePDF } from '@/utils/pdfGenerator';
 
 interface FixedBOQItem {
   id: string;
   company_id: string | null;
+  section: string | null;
+  item_code: string | null; // A, B, C etc
   description: string;
   unit: string | null;
+  default_qty: number | null;
+  default_rate: number | null;
   sort_order: number | null;
 }
+
+// Simple helpers
+const parseNumber = (s: string | null | undefined) => {
+  if (!s) return 0;
+  const n = Number(String(s).replace(/[,\s]/g, ''));
+  return isFinite(n) ? n : 0;
+};
 
 export default function FixedBOQ() {
   const { currentCompany } = useCurrentCompany();
@@ -24,6 +35,8 @@ export default function FixedBOQ() {
   const [items, setItems] = useState<FixedBOQItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [seeding, setSeeding] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importText, setImportText] = useState('');
   const [qty, setQty] = useState<Record<string, number>>({});
   const [rate, setRate] = useState<Record<string, number>>({});
 
@@ -37,7 +50,7 @@ export default function FixedBOQ() {
         .eq('company_id', companyId)
         .order('sort_order', { ascending: true });
       if (error) throw error;
-      setItems(data || []);
+      setItems((data as FixedBOQItem[]) || []);
       if ((data || []).length === 0) {
         toast.message('No Fixed BOQ items found for this company');
       }
@@ -54,19 +67,38 @@ export default function FixedBOQ() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companyId]);
 
+  // Group items by section for UI and PDF
+  const grouped = useMemo(() => {
+    const map = new Map<string, FixedBOQItem[]>();
+    (items || []).forEach((it) => {
+      const key = (it.section || 'General').trim();
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(it);
+    });
+    return Array.from(map.entries());
+  }, [items]);
+
+  const sectionTotals = useMemo(() => {
+    const totals: Record<string, number> = {};
+    grouped.forEach(([section, arr]) => {
+      totals[section] = arr.reduce((sum, it) => {
+        const q = qty[it.id] ?? (it.default_qty ?? 0);
+        const r = rate[it.id] ?? (it.default_rate ?? 0);
+        return sum + q * r;
+      }, 0);
+    });
+    return totals;
+  }, [grouped, qty, rate]);
+
   const totalAmount = useMemo(() => {
-    return items.reduce((sum, it) => {
-      const q = qty[it.id] || 0;
-      const r = rate[it.id] || 0;
-      return sum + q * r;
-    }, 0);
-  }, [items, qty, rate]);
+    return Object.values(sectionTotals).reduce((a, b) => a + b, 0);
+  }, [sectionTotals]);
 
   const totalQuantity = useMemo(() => {
-    return items.reduce((sum, it) => sum + (qty[it.id] || 0), 0);
+    return items.reduce((sum, it) => sum + (qty[it.id] ?? (it.default_qty ?? 0)), 0);
   }, [items, qty]);
 
-  const handleSeed = async () => {
+  const ensureSchemaAndSeed = async () => {
     if (!companyId) { toast.error('No company selected'); return; }
     setSeeding(true);
     try {
@@ -76,59 +108,159 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS fixed_boq_items (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
+  section TEXT,
+  item_code TEXT,
   description TEXT NOT NULL,
   unit TEXT DEFAULT 'Item',
+  default_qty NUMERIC,
+  default_rate NUMERIC,
   sort_order INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Backfill new columns if table already existed
+DO $$ BEGIN
+  ALTER TABLE fixed_boq_items ADD COLUMN IF NOT EXISTS section TEXT;
+  ALTER TABLE fixed_boq_items ADD COLUMN IF NOT EXISTS item_code TEXT;
+  ALTER TABLE fixed_boq_items ADD COLUMN IF NOT EXISTS default_qty NUMERIC;
+  ALTER TABLE fixed_boq_items ADD COLUMN IF NOT EXISTS default_rate NUMERIC;
+  ALTER TABLE fixed_boq_items ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
+EXCEPTION WHEN others THEN NULL; END $$;
+
 CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(company_id);
+`;
 
-INSERT INTO fixed_boq_items (company_id, description, unit, sort_order)
-VALUES
-  ('${companyId}', 'Mobilization and demobilization', 'Item', 1),
-  ('${companyId}', 'Site establishment and preliminaries', 'Item', 2),
-  ('${companyId}', 'Demolitions and cart away debris', 'Item', 3),
-  ('${companyId}', 'Excavation and earthworks', 'm3', 4),
-  ('${companyId}', 'Concrete works (blinding, slab, beams)', 'm3', 5),
-  ('${companyId}', 'Masonry walls and partitions', 'm2', 6),
-  ('${companyId}', 'Plastering and wall finishes', 'm2', 7),
-  ('${companyId}', 'Painting and decorations', 'm2', 8),
-  ('${companyId}', 'Electrical installations (points and fittings)', 'Item', 9),
-  ('${companyId}', 'Plumbing and drainage installations', 'Item', 10),
-  ('${companyId}', 'Roofing and rainwater goods', 'm2', 11),
-  ('${companyId}', 'Windows, doors and ironmongery', 'Item', 12),
-  ('${companyId}', 'Floor finishes (tiles/terrazzo/timber)', 'm2', 13),
-  ('${companyId}', 'Ceilings and cornices', 'm2', 14),
-  ('${companyId}', 'External works (paving, kerbs, drainage)', 'Item', 15),
-  ('${companyId}', 'Contingencies and miscellaneous', 'Item', 16)
-ON CONFLICT DO NOTHING;`;
-
-      // Try to execute via RPC (requires exec_sql function in DB)
       const { error } = await supabase.rpc('exec_sql', { sql });
-      if (error) {
-        throw error;
-      }
-      toast.success('Fixed BOQ table created and seeded');
+      if (error) throw error;
+      toast.success('Fixed BOQ table is ready');
       await fetchItems();
     } catch (err) {
-      console.error('Seeding via RPC failed:', err);
-      toast.error('Automatic SQL execution failed. Please create the table manually in Supabase SQL editor.');
+      console.error('Schema setup via RPC failed:', err);
+      toast.error('Automatic SQL execution failed. Please run the SQL in Supabase SQL editor.');
     } finally {
       setSeeding(false);
+    }
+  };
+
+  const handleImport = async () => {
+    if (!companyId) { toast.error('No company selected'); return; }
+    if (!importText.trim()) { toast.error('Paste the BOQ text to import'); return; }
+
+    try {
+      // Parse the pasted text into structured items
+      const lines = importText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+      let currentSection = '';
+      let order = items.length + 1;
+      const letterLine = /^[A-Z]$/;
+      const sectionLine = /^(SECTION NO\.|BILL NO\.)/i;
+
+      const parsed: Omit<FixedBOQItem, 'id'>[] = [] as any;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (sectionLine.test(line)) {
+          currentSection = line;
+          continue;
+        }
+        if (letterLine.test(line)) {
+          const item_code = line;
+          const descParts: string[] = [];
+          let j = i + 1;
+          let capturedQty = 0;
+          let capturedUnit = '';
+          let capturedRate = 0;
+          let capturedAmount = 0;
+
+          while (j < lines.length && !letterLine.test(lines[j]) && !sectionLine.test(lines[j])) {
+            const l = lines[j];
+            // Try to capture quantity/unit/rate/amount patterns
+            // Pattern 1: "12 Sm 200 2,400.00"
+            const m1 = l.match(/^(\d+[\d,]*(?:\.\d+)?)\s*(No|SM|Sm|sm|CM|Cm|cm|LM|Lm|lm|KG|Kg|kg|Item|ITEM)\b\s+(\d+[\d,]*(?:\.\d+)?)\s+(\d+[\d,]*(?:\.\d+)?)/);
+            // Pattern 2: "Item 58,200.00" or "ITEM 25,000.00"
+            const m2 = !m1 && l.match(/^(Item|ITEM)\b\s+(\d+[\d,]*(?:\.\d+)?)/);
+
+            if (m1) {
+              capturedQty = parseNumber(m1[1]);
+              capturedUnit = m1[2];
+              capturedRate = parseNumber(m1[3]);
+              capturedAmount = parseNumber(m1[4]);
+            } else if (m2) {
+              capturedQty = 1;
+              capturedUnit = 'Item';
+              capturedRate = parseNumber(m2[2]);
+              capturedAmount = capturedRate;
+            } else {
+              descParts.push(l);
+            }
+            j++;
+          }
+
+          const description = descParts.join(' ').replace(/\s+/g, ' ').trim();
+          parsed.push({
+            company_id: companyId,
+            section: currentSection || 'General',
+            item_code,
+            description,
+            unit: capturedUnit || null,
+            default_qty: capturedQty || null,
+            default_rate: capturedRate || null,
+            sort_order: order++,
+          } as any);
+
+          i = j - 1; // advance
+        }
+      }
+
+      if (parsed.length === 0) {
+        toast.error('Could not detect any items. Ensure the text is unformatted plain text.');
+        return;
+      }
+
+      // Insert in chunks to avoid payload limits
+      const chunkSize = 200;
+      for (let k = 0; k < parsed.length; k += chunkSize) {
+        const chunk = parsed.slice(k, k + chunkSize).map(p => ({
+          company_id: p.company_id,
+          section: p.section,
+          item_code: p.item_code,
+          description: p.description,
+          unit: p.unit,
+          default_qty: p.default_qty,
+          default_rate: p.default_rate,
+          sort_order: p.sort_order,
+        }));
+        const { error } = await supabase.from('fixed_boq_items').insert(chunk);
+        if (error) throw error;
+      }
+
+      toast.success(`Imported ${parsed.length} items`);
+      setImporting(false);
+      setImportText('');
+      await fetchItems();
+    } catch (err) {
+      console.error('Import failed:', err);
+      toast.error('Import failed. You can try smaller sections or verify formatting.');
     }
   };
 
   const handleDownloadPDF = async () => {
     if (!currentCompany) { toast.error('Company not loaded'); return; }
 
-    const docItems = items.map((it) => ({
-      description: it.description,
-      quantity: qty[it.id] || 0,
-      unit_price: rate[it.id] || 0,
-      line_total: (qty[it.id] || 0) * (rate[it.id] || 0),
-      unit_of_measure: it.unit || 'Item',
-    }));
+    // Build BOQ-style items including section marker rows for section totals in PDF
+    const pdfItems: Array<{ description: string; quantity: number; unit_price: number; line_total: number; unit_of_measure?: string } & { unit_abbreviation?: string }> = [];
+    grouped.forEach(([section, arr]) => {
+      pdfItems.push({ description: `➤ ${section}`, quantity: 0, unit_price: 0, line_total: 0 });
+      arr.forEach((it) => {
+        const q = qty[it.id] ?? (it.default_qty ?? 0);
+        const r = rate[it.id] ?? (it.default_rate ?? 0);
+        pdfItems.push({
+          description: it.description,
+          quantity: q,
+          unit_price: r,
+          line_total: q * r,
+          unit_of_measure: it.unit || 'Item',
+        });
+      });
+    });
 
     try {
       await generatePDF({
@@ -145,7 +277,7 @@ ON CONFLICT DO NOTHING;`;
           email: currentCompany.email || '',
           logo_url: currentCompany.logo_url || undefined,
         },
-        items: docItems,
+        items: pdfItems,
         subtotal: totalAmount,
         total_amount: totalAmount,
         notes: 'Fixed BOQ generated from predefined item list.'
@@ -159,96 +291,139 @@ ON CONFLICT DO NOTHING;`;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Fixed BOQ</h1>
-          <p className="text-muted-foreground">Enter quantities and unit costs; totals are calculated automatically.</p>
+          <p className="text-muted-foreground">Paste your BOQ text to import, then enter quantities and unit costs; totals are calculated automatically.</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={handleDownloadPDF} variant="default">
             <Download className="h-4 w-4 mr-2" /> Download PDF
           </Button>
-          <Button onClick={handleSeed} variant="outline" disabled={seeding || !companyId} title={!companyId ? 'Select/initialize a company first' : 'Create table and seed items'}>
+          <Button onClick={ensureSchemaAndSeed} variant="outline" disabled={seeding || !companyId} title={!companyId ? 'Select/initialize a company first' : 'Create/upgrade table schema'}>
             {seeding ? (
               <>
-                <Database className="h-4 w-4 mr-2 animate-spin" /> Initializing...
+                <Database className="h-4 w-4 mr-2 animate-spin" /> Preparing...
               </>
             ) : (
               <>
-                <PlusCircle className="h-4 w-4 mr-2" /> Create/Seed Items
+                <PlusCircle className="h-4 w-4 mr-2" /> Prepare Table
               </>
             )}
           </Button>
+          <Button onClick={() => setImporting(true)} variant="secondary" disabled={!companyId}>
+            <Upload className="h-4 w-4 mr-2" /> Import from Text
+          </Button>
         </div>
       </div>
+
+      {importing && (
+        <Card className="border-yellow-300 bg-yellow-50">
+          <CardHeader>
+            <CardTitle>Import BOQ Items (Paste text)</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">Paste the plain text from your PDF (as you provided) and click Import. We detect sections like "BILL NO." or "SECTION NO." and items labeled A, B, C...</p>
+            <textarea
+              value={importText}
+              onChange={(e) => setImportText(e.target.value)}
+              rows={10}
+              className="w-full rounded border p-2 font-mono text-xs"
+              placeholder="Paste BOQ text here"
+            />
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => { setImporting(false); setImportText(''); }}>Cancel</Button>
+              <Button onClick={handleImport}>Import</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
           <CardTitle>Items</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead style={{ width: '56%' }}>Description</TableHead>
-                <TableHead style={{ width: '12%', textAlign: 'right' }}>Qty</TableHead>
-                <TableHead style={{ width: '16%', textAlign: 'right' }}>Unit Cost</TableHead>
-                <TableHead style={{ width: '16%', textAlign: 'right' }}>Line Total</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow><TableCell colSpan={4}>Loading...</TableCell></TableRow>
-              ) : items.length === 0 ? (
-                <TableRow><TableCell colSpan={4}>No items yet. Click "Create/Seed Items" to initialize.</TableCell></TableRow>
-              ) : (
-                items.map((it) => {
-                  const q = qty[it.id] ?? 0;
-                  const r = rate[it.id] ?? 0;
-                  const amount = q * r;
-                  return (
-                    <TableRow key={it.id}>
-                      <TableCell>{it.description}</TableCell>
-                      <TableCell className="text-right">
-                        <Input
-                          type="number"
-                          value={q}
-                          onChange={(e) => setQty((prev) => ({ ...prev, [it.id]: Number(e.target.value) }))}
-                          className="w-28 ml-auto text-right"
-                          min={0}
-                          step={0.01}
-                        />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Input
-                          type="number"
-                          value={r}
-                          onChange={(e) => setRate((prev) => ({ ...prev, [it.id]: Number(e.target.value) }))}
-                          className="w-32 ml-auto text-right"
-                          min={0}
-                          step={0.01}
-                        />
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {new Intl.NumberFormat('en-KE', { style: 'currency', currency: currentCompany?.currency || 'KES' }).format(amount || 0)}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
+        <CardContent className="space-y-6">
+          {loading ? (
+            <div>Loading...</div>
+          ) : grouped.length === 0 ? (
+            <div>No items yet. Click "Prepare Table" then "Import from Text".</div>
+          ) : (
+            grouped.map(([section, arr]) => {
+              const sectionTotal = sectionTotals[section] || 0;
+              return (
+                <div key={section} className="space-y-2">
+                  <div className="font-semibold text-sm bg-muted/40 px-3 py-2 rounded">{section}</div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead style={{ width: '50%' }}>Description</TableHead>
+                        <TableHead style={{ width: '10%' }}>Code</TableHead>
+                        <TableHead style={{ width: '10%', textAlign: 'right' }}>Qty</TableHead>
+                        <TableHead style={{ width: '15%', textAlign: 'right' }}>Unit</TableHead>
+                        <TableHead style={{ width: '15%', textAlign: 'right' }}>Unit Cost</TableHead>
+                        <TableHead style={{ width: '15%', textAlign: 'right' }}>Line Total</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {arr.map((it) => {
+                        const q = qty[it.id] ?? (it.default_qty ?? 0);
+                        const r = rate[it.id] ?? (it.default_rate ?? 0);
+                        const amount = q * r;
+                        return (
+                          <TableRow key={it.id}>
+                            <TableCell>{it.description}</TableCell>
+                            <TableCell>{it.item_code || ''}</TableCell>
+                            <TableCell className="text-right">
+                              <Input
+                                type="number"
+                                value={q}
+                                onChange={(e) => setQty((prev) => ({ ...prev, [it.id]: Number(e.target.value) }))}
+                                className="w-24 ml-auto text-right"
+                                min={0}
+                                step={0.01}
+                              />
+                            </TableCell>
+                            <TableCell className="text-right">{it.unit || 'Item'}</TableCell>
+                            <TableCell className="text-right">
+                              <Input
+                                type="number"
+                                value={r}
+                                onChange={(e) => setRate((prev) => ({ ...prev, [it.id]: Number(e.target.value) }))}
+                                className="w-28 ml-auto text-right"
+                                min={0}
+                                step={0.01}
+                              />
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              {new Intl.NumberFormat('en-KE', { style: 'currency', currency: currentCompany?.currency || 'KES' }).format(amount || 0)}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                      <TableRow>
+                        <TableCell className="text-right font-semibold" colSpan={5}>SECTION TOTAL</TableCell>
+                        <TableCell className="text-right font-semibold">
+                          {new Intl.NumberFormat('en-KE', { style: 'currency', currency: currentCompany?.currency || 'KES' }).format(sectionTotal || 0)}
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              );
+            })
+          )}
 
-              {items.length > 0 && (
-                <TableRow>
-                  <TableCell className="text-right font-semibold">Totals</TableCell>
-                  <TableCell className="text-right font-semibold">{totalQuantity.toLocaleString()}</TableCell>
-                  <TableCell></TableCell>
-                  <TableCell className="text-right font-semibold">
-                    {new Intl.NumberFormat('en-KE', { style: 'currency', currency: currentCompany?.currency || 'KES' }).format(totalAmount || 0)}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          {grouped.length > 0 && (
+            <div className="flex justify-end border-t pt-3 text-sm font-semibold">
+              <div className="space-x-6">
+                <span>Total Qty: {totalQuantity.toLocaleString()}</span>
+                <span>
+                  Total Amount: {new Intl.NumberFormat('en-KE', { style: 'currency', currency: currentCompany?.currency || 'KES' }).format(totalAmount || 0)}
+                </span>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
