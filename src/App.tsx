@@ -33,6 +33,7 @@ import OptimizedCustomers from "./pages/OptimizedCustomers";
 import CustomerPerformanceOptimizerPage from "./pages/CustomerPerformanceOptimizerPage";
 import SetupAndTest from "./components/SetupAndTest";
 import AuthTest from "./components/AuthTest";
+import AdminRecreate from "./pages/AdminRecreate";
 
 const App = () => {
 
@@ -282,6 +283,8 @@ const App = () => {
           {/* Authentication Test - No protection needed */}
           <Route path="/auth-test" element={<AuthTest />} />
 
+          {/* Admin recreate (one-time utility) - No protection needed */}
+          <Route path="/admin-recreate" element={<AdminRecreate />} />
 
           {/* Payment Synchronization - No protection needed for setup */}
           <Route path="/payment-sync" element={<PaymentSynchronizationPage />} />
