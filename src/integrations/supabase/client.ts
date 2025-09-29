@@ -2,21 +2,30 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Read environment variables (no hardcoded fallbacks)
-const SUPABASE_URL = import.meta.env.NEXT_PUBLIC_SUPABASE_URL ?? import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-// Validate that we have valid values
-if (!SUPABASE_URL || SUPABASE_URL === 'undefined') {
-  throw new Error('Supabase URL is required but not found in environment variables.');
+// Read environment variables (support both process.env and import.meta.env)
+const processEnv: any = typeof process !== 'undefined' ? (process.env as any) : undefined;
+let metaEnv: any | undefined = undefined;
+try {
+  // import.meta may not be available in non-Vite environments; guard access
+  // @ts-ignore
+  metaEnv = (import.meta as any)?.env;
+} catch (e) {
+  metaEnv = undefined;
 }
 
-if (!SUPABASE_PUBLISHABLE_KEY || SUPABASE_PUBLISHABLE_KEY === 'undefined') {
-  throw new Error('Supabase publishable key is required but not found in environment variables.');
+const SUPABASE_URL = (processEnv && (processEnv.NEXT_PUBLIC_SUPABASE_URL || processEnv.VITE_SUPABASE_URL)) || (metaEnv && (metaEnv.NEXT_PUBLIC_SUPABASE_URL || metaEnv.VITE_SUPABASE_URL)) || '';
+const SUPABASE_PUBLISHABLE_KEY = (processEnv && (processEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY || processEnv.VITE_SUPABASE_ANON_KEY)) || (metaEnv && (metaEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY || metaEnv.VITE_SUPABASE_ANON_KEY)) || '';
+
+// Warn instead of throwing at import time to avoid breaking SSR or tooling that imports this module
+if (!SUPABASE_URL) {
+  console.warn('Supabase URL is not set. Set NEXT_PUBLIC_SUPABASE_URL or VITE_SUPABASE_URL.');
+}
+if (!SUPABASE_PUBLISHABLE_KEY) {
+  console.warn('Supabase publishable key is not set. Set NEXT_PUBLIC_SUPABASE_ANON_KEY or VITE_SUPABASE_ANON_KEY.');
 }
 
 // If the project changed, clear any cached credentials from localStorage
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && SUPABASE_URL) {
   try {
     const projectRef = new URL(SUPABASE_URL).host.split('.')[0];
     const storedRefKey = 'sb-project-ref';
@@ -32,7 +41,11 @@ if (typeof window !== 'undefined') {
       keysToRemove.forEach(k => localStorage.removeItem(k));
     }
     localStorage.setItem(storedRefKey, projectRef);
-  } catch {}
+  } catch (err) {
+    // don't block app startup
+    // eslint-disable-next-line no-console
+    console.warn('Failed to clear previous Supabase keys:', err);
+  }
 }
 
 // Import the supabase client like this:
