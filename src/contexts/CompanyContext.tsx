@@ -1,5 +1,6 @@
 import React, { createContext, useContext, ReactNode } from 'react';
-import { createContext, type ReactNode, useContext, useMemo } from 'react';
+import { createContext, useContext, useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { useCompanies } from '@/hooks/useDatabase';
 
 interface CompanyContextType {
