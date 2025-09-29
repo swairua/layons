@@ -129,10 +129,11 @@ export const usePopularProducts = (companyId?: string, limit: number = 20) => {
         console.log('Fetching popular products for company:', companyId);
 
         // Check authentication first
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        const { data, error: authError } = await supabase.auth.getUser();
+        const user = data?.user;
         if (authError) {
           console.error('Authentication error:', authError);
-          throw new Error(`Authentication failed: ${authError.message}`);
+          throw new Error(`Authentication failed: ${authError.message || JSON.stringify(authError)}`);
         }
         if (!user) {
           throw new Error('User not authenticated');
