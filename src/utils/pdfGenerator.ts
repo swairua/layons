@@ -23,6 +23,7 @@ export interface DocumentData {
     description: string;
     quantity: number;
     unit_price: number;
+    item_code?: string;
     discount_percentage?: number;
     discount_before_vat?: number;
     discount_amount?: number;
