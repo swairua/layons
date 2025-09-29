@@ -8,7 +8,6 @@ import { Loader2, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { BiolegendLogo } from '@/components/ui/biolegend-logo';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { toast } from 'sonner';
-import { AutoAdminSetup } from './AutoAdminSetup';
 import { handleAuthError } from '@/utils/authErrorHandler';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -58,9 +57,7 @@ export function EnhancedLogin() {
 
 
       if (errorInfo.type === 'invalid_credentials') {
-        setTimeout(() => {
-          toast.info('Tip: Use the "Create Admin User" button above if this is your first time setting up the system.');
-        }, 2000);
+        toast.info('Invalid email or password. If you need access, contact the administrator.');
       }
     } else {
       toast.success(`Welcome to ${brandName}!`);
@@ -172,9 +169,6 @@ export function EnhancedLogin() {
                 </div>
               </form>
 
-              <div className="mt-6">
-                <AutoAdminSetup />
-              </div>
             </TabsContent>
 
           </Tabs>
