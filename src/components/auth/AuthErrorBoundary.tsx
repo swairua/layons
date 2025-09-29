@@ -20,8 +20,23 @@ export class AuthErrorBoundary extends Component<Props, State> {
     this.state = { hasError: false, showDiagnostics: false };
   }
 
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error, showDiagnostics: false };
+  // Normalize any thrown value into an Error instance so UI can reliably read .message/.stack
+  static getDerivedStateFromError(error: unknown): State {
+    let normalizedError: Error;
+
+    if (error instanceof Error) {
+      normalizedError = error;
+    } else {
+      try {
+        normalizedError = new Error(
+          typeof error === 'string' ? error : JSON.stringify(error, null, 2)
+        );
+      } catch {
+        normalizedError = new Error(String(error));
+      }
+    }
+
+    return { hasError: true, error: normalizedError, showDiagnostics: false };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
