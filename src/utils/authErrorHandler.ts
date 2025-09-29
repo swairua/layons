@@ -2,6 +2,7 @@ import { AuthError } from '@supabase/supabase-js';
 import { AuthError } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 import { logError } from '@/utils/errorLogger';
+import { parseErrorMessage } from '@/utils/errorHelpers';
 
 export interface AuthErrorInfo {
   type: 'invalid_credentials' | 'email_not_confirmed' | 'network_error' | 'rate_limit' | 'server_error' | 'unknown';
@@ -10,26 +11,52 @@ export interface AuthErrorInfo {
   retry?: boolean;
 }
 
-export function analyzeAuthError(error: AuthError | Error): AuthErrorInfo {
-  // Safely extract error message with fallback
-  let errorMessage = '';
+const NON_MEANINGFUL_MESSAGES = new Set(['', '[object object]', 'null', 'undefined']);
+
+const sanitizeAuthMessage = (error: AuthError | Error): string => {
+  const candidates: string[] = [];
 
   if (error && typeof error === 'object') {
-    if ('message' in error && typeof error.message === 'string') {
-      errorMessage = error.message;
-    } else if ('error_description' in error && typeof (error as any).error_description === 'string') {
-      errorMessage = (error as any).error_description;
-    } else if ('details' in error && typeof (error as any).details === 'string') {
-      errorMessage = (error as any).details;
-    } else {
-      errorMessage = 'An authentication error occurred';
+    const authError = error as any;
+    if (typeof authError.message === 'string') {
+      candidates.push(authError.message);
     }
-  } else if (typeof error === 'string') {
-    errorMessage = error;
-  } else {
-    errorMessage = 'An unexpected authentication error occurred';
+    if (typeof authError.error_description === 'string') {
+      candidates.push(authError.error_description);
+    }
+    if (typeof authError.details === 'string') {
+      candidates.push(authError.details);
+    }
+    if (typeof authError.hint === 'string') {
+      candidates.push(authError.hint);
+    }
   }
 
+  if (typeof error === 'string') {
+    candidates.unshift(error);
+  }
+
+  const meaningfulCandidate = candidates.find(candidate => {
+    const normalized = candidate?.trim().toLowerCase();
+    return normalized && !NON_MEANINGFUL_MESSAGES.has(normalized);
+  });
+
+  if (meaningfulCandidate) {
+    return meaningfulCandidate.trim();
+  }
+
+  const parsed = parseErrorMessage(error);
+  const normalizedParsed = parsed.trim().toLowerCase();
+
+  if (!NON_MEANINGFUL_MESSAGES.has(normalizedParsed)) {
+    return parsed.trim();
+  }
+
+  return 'An unexpected authentication error occurred';
+};
+
+export function analyzeAuthError(error: AuthError | Error): AuthErrorInfo {
+  const errorMessage = sanitizeAuthMessage(error);
   const message = errorMessage.toLowerCase();
 
   if (message.includes('invalid login credentials')) {
@@ -75,9 +102,13 @@ export function analyzeAuthError(error: AuthError | Error): AuthErrorInfo {
     };
   }
 
+  const fallbackMessage = NON_MEANINGFUL_MESSAGES.has(message)
+    ? 'An unexpected authentication error occurred'
+    : errorMessage;
+
   return {
     type: 'unknown',
-    message: errorMessage || 'An unexpected error occurred',
+    message: fallbackMessage,
     action: 'Please try again or contact support if the problem persists',
     retry: true
   };
