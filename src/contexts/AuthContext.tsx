@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, SUPABASE_READY } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { initializeAuth, clearAuthTokens, safeAuthOperation } from '@/utils/authHelpers';
 import { logError, getUserFriendlyErrorMessage, isErrorType } from '@/utils/errorLogger';
@@ -219,6 +219,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializingRef.current = true;
     mountedRef.current = true;
 
+    // If Supabase isn't configured, skip auth initialization gracefully
+    if (!SUPABASE_READY) {
+      console.warn('Supabase not configured. Skipping auth initialization.');
+      setLoading(false);
+      setInitialized(true);
+      initializingRef.current = false;
+      return;
+    }
+
     const initializeAuthState = async () => {
       console.log('🚀 Starting fast auth initialization...');
 
@@ -400,6 +409,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [fetchProfile, updateLastLogin, handleAuthStateChange, user, initialized]);
 
   const signIn = useCallback(async (email: string, password: string) => {
+    if (!SUPABASE_READY) {
+      return { error: new Error('Authentication is not configured. Please set Supabase environment variables.') as any };
+    }
     const { data, error } = await safeAuthOperation(async () => {
       setLoading(true);
       return await supabase.auth.signInWithPassword({
@@ -438,6 +450,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const signUp = useCallback(async (email: string, password: string, fullName?: string) => {
+    if (!SUPABASE_READY) {
+      return { error: new Error('Authentication is not configured. Please set Supabase environment variables.') as any };
+    }
     const { data, error } = await safeAuthOperation(async () => {
       setLoading(true);
       return await supabase.auth.signUp({
@@ -469,6 +484,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const signOut = useCallback(async () => {
+    if (!SUPABASE_READY) {
+      // Nothing to sign out from
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+      return;
+    }
     try {
       console.log('🚪 Starting sign out process...');
       setLoading(true);
@@ -503,6 +525,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const resetPassword = useCallback(async (email: string) => {
+    if (!SUPABASE_READY) {
+      return { error: new Error('Authentication is not configured. Please set Supabase environment variables.') as any };
+    }
     const { data, error } = await safeAuthOperation(async () => {
       return await supabase.auth.resetPasswordForEmail(email);
     }, 'resetPassword');

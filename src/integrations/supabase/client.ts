@@ -2,35 +2,102 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Get environment variables with fallbacks
-const SUPABASE_URL = import.meta.env.NEXT_PUBLIC_SUPABASE_URL ||
-                     import.meta.env.VITE_SUPABASE_URL ||
-                     "https://klifzjcfnlaxminytmyh.supabase.co";
-
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-                                import.meta.env.VITE_SUPABASE_ANON_KEY ||
-                                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtsaWZ6amNmbmxheG1pbnl0bXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2ODg5NzcsImV4cCI6MjA3MTI2NDk3N30.kY9eVUh2hKZvOgixYTwggsznN4gD1ktNX4phXQ5TTdU";
-
-// Validate that we have valid values
-if (!SUPABASE_URL || SUPABASE_URL === 'undefined') {
-  console.error('❌ SUPABASE_URL is not defined. Please check your environment variables.');
-  throw new Error('Supabase URL is required but not found in environment variables.');
+// Read environment variables (support both process.env and import.meta.env)
+const processEnv: any = typeof process !== 'undefined' ? (process.env as any) : undefined;
+let metaEnv: any | undefined = undefined;
+try {
+  // import.meta may not be available in non-Vite environments; guard access
+  // @ts-ignore
+  metaEnv = (import.meta as any)?.env;
+} catch (e) {
+  metaEnv = undefined;
 }
 
-if (!SUPABASE_PUBLISHABLE_KEY || SUPABASE_PUBLISHABLE_KEY === 'undefined') {
-  console.error('❌ SUPABASE_PUBLISHABLE_KEY is not defined. Please check your environment variables.');
-  throw new Error('Supabase publishable key is required but not found in environment variables.');
+const SUPABASE_URL = (processEnv && (processEnv.NEXT_PUBLIC_SUPABASE_URL || processEnv.VITE_SUPABASE_URL)) || (metaEnv && (metaEnv.NEXT_PUBLIC_SUPABASE_URL || metaEnv.VITE_SUPABASE_URL)) || '';
+const SUPABASE_PUBLISHABLE_KEY = (processEnv && (processEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY || processEnv.VITE_SUPABASE_ANON_KEY)) || (metaEnv && (metaEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY || metaEnv.VITE_SUPABASE_ANON_KEY)) || '';
+
+// Warn instead of throwing at import time to avoid breaking SSR or tooling that imports this module
+if (!SUPABASE_URL) {
+  console.warn('Supabase URL is not set. Set NEXT_PUBLIC_SUPABASE_URL or VITE_SUPABASE_URL.');
+}
+if (!SUPABASE_PUBLISHABLE_KEY) {
+  console.warn('Supabase publishable key is not set. Set NEXT_PUBLIC_SUPABASE_ANON_KEY or VITE_SUPABASE_ANON_KEY.');
 }
 
-console.log('✅ Supabase client initializing with URL:', SUPABASE_URL.substring(0, 30) + '...');
+// If the project changed, clear any cached credentials from localStorage
+if (typeof window !== 'undefined' && SUPABASE_URL) {
+  try {
+    const projectRef = new URL(SUPABASE_URL).host.split('.')[0];
+    const storedRefKey = 'sb-project-ref';
+    const prevRef = localStorage.getItem(storedRefKey);
+    if (prevRef && prevRef !== projectRef) {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes('supabase') || key.includes('auth') || key.includes(prevRef))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+    }
+    localStorage.setItem(storedRefKey, projectRef);
+  } catch (err) {
+    // don't block app startup
+    // eslint-disable-next-line no-console
+    console.warn('Failed to clear previous Supabase keys:', err);
+  }
+}
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
+// Build options depending on environment (avoid passing localStorage on server)
+const supabaseOptions: any = {};
+if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+  supabaseOptions.auth = {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+  };
+} else {
+  supabaseOptions.auth = {
+    persistSession: false,
+    autoRefreshToken: false,
+  };
+}
+
+let _supabase: any;
+const MISSING_MSG = 'Supabase client not initialized: set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (or VITE_SUPABASE_ equivalents).';
+
+function createMissingProxy(msg: string) {
+  const fn = () => Promise.reject(new Error(msg));
+  const handler: ProxyHandler<any> = {
+    get() {
+      // return another proxy so chained property access won't throw
+      return createMissingProxy(msg);
+    },
+    apply() {
+      // when used as a function, return a rejected promise
+      return Promise.reject(new Error(msg));
+    },
+    construct() {
+      throw new Error(msg);
+    }
+  };
+  return new Proxy(fn, handler);
+}
+
+if (SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY) {
+  try {
+    _supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, supabaseOptions);
+  } catch (err) {
+    console.warn('Failed to create Supabase client:', err);
+    _supabase = createMissingProxy(MISSING_MSG);
   }
-});
+} else {
+  // Return a proxy that rejects calls gracefully
+  _supabase = createMissingProxy(MISSING_MSG);
+}
+
+export const SUPABASE_READY = Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
+export const supabase = _supabase as ReturnType<typeof createClient>;

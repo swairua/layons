@@ -97,8 +97,8 @@ export function LoginTest() {
             <CheckCircle className="h-4 w-4" />
             <AlertDescription>
               <strong>✅ Supabase Connected</strong><br />
-              URL: https://mfhcbgnkxpifbhrtmgbv.supabase.co<br />
-              Key: ...{process.env.VITE_SUPABASE_ANON_KEY?.slice(-10) || 'configured'}
+              URL: {import.meta.env.NEXT_PUBLIC_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL || 'not set'}<br />
+              Key: ...{(import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '').slice(-10) || 'configured'}
             </AlertDescription>
           </Alert>
 

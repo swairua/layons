@@ -197,13 +197,13 @@ export default function SupabaseTest() {
             <div>
               <span className="font-medium">URL:</span>
               <div className="font-mono text-muted-foreground">
-                https://mfhcbgnkxpifbhrtmgbv.supabase.co
+                {import.meta.env.NEXT_PUBLIC_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL || 'not set'}
               </div>
             </div>
             <div>
               <span className="font-medium">Project:</span>
               <div className="font-mono text-muted-foreground">
-                mfhcbgnkxpifbhrtmgbv
+                {(() => { const url = (import.meta.env.NEXT_PUBLIC_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL) as string | undefined; return url ? new URL(url).host.split('.')[0] : 'unknown'; })()}
               </div>
             </div>
           </div>

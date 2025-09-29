@@ -104,9 +104,13 @@ CREATE TRIGGER trigger_update_stock_movements_updated_at
   };
 
   const openSupabaseSQLEditor = () => {
-    const supabaseUrl = 'https://klifzjcfnlaxminytmyh.supabase.co';
-    const projectId = supabaseUrl.split('//')[1].split('.')[0];
-    window.open(`https://supabase.com/dashboard/project/${projectId}/sql`, '_blank');
+    const envUrl = import.meta.env.NEXT_PUBLIC_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL || '';
+    if (envUrl) {
+      const projectId = new URL(envUrl).host.split('.')[0];
+      window.open(`https://supabase.com/dashboard/project/${projectId}/sql`, '_blank');
+    } else {
+      window.open('https://supabase.com/dashboard', '_blank');
+    }
   };
 
   return (
