@@ -2,27 +2,38 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Get environment variables with fallbacks
-const SUPABASE_URL = import.meta.env.NEXT_PUBLIC_SUPABASE_URL ||
-                     import.meta.env.VITE_SUPABASE_URL ||
-                     "https://klifzjcfnlaxminytmyh.supabase.co";
-
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-                                import.meta.env.VITE_SUPABASE_ANON_KEY ||
-                                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtsaWZ6amNmbmxheG1pbnl0bXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2ODg5NzcsImV4cCI6MjA3MTI2NDk3N30.kY9eVUh2hKZvOgixYTwggsznN4gD1ktNX4phXQ5TTdU";
+// Read environment variables (no hardcoded fallbacks)
+const SUPABASE_URL = import.meta.env.NEXT_PUBLIC_SUPABASE_URL ?? import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Validate that we have valid values
 if (!SUPABASE_URL || SUPABASE_URL === 'undefined') {
-  console.error('❌ SUPABASE_URL is not defined. Please check your environment variables.');
   throw new Error('Supabase URL is required but not found in environment variables.');
 }
 
 if (!SUPABASE_PUBLISHABLE_KEY || SUPABASE_PUBLISHABLE_KEY === 'undefined') {
-  console.error('❌ SUPABASE_PUBLISHABLE_KEY is not defined. Please check your environment variables.');
   throw new Error('Supabase publishable key is required but not found in environment variables.');
 }
 
-console.log('✅ Supabase client initializing with URL:', SUPABASE_URL.substring(0, 30) + '...');
+// If the project changed, clear any cached credentials from localStorage
+if (typeof window !== 'undefined') {
+  try {
+    const projectRef = new URL(SUPABASE_URL).host.split('.')[0];
+    const storedRefKey = 'sb-project-ref';
+    const prevRef = localStorage.getItem(storedRefKey);
+    if (prevRef && prevRef !== projectRef) {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes('supabase') || key.includes('auth') || key.includes(prevRef))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+    }
+    localStorage.setItem(storedRefKey, projectRef);
+  } catch {}
+}
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
