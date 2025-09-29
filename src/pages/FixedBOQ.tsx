@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -52,7 +53,7 @@ export default function FixedBOQ() {
       if (error) throw error;
       setItems((data as FixedBOQItem[]) || []);
       if ((data || []).length === 0) {
-        toast.message('No Fixed BOQ items found for this company');
+        toast.info('No Fixed BOQ items found for this company');
       }
     } catch (err) {
       console.warn('Failed to load fixed_boq_items:', err);
