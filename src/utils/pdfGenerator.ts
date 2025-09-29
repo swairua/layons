@@ -209,7 +209,7 @@ export const generatePDF = (data: DocumentData) => {
       itemNo += 1;
       sectionTotal += (it.line_total || 0);
       rowsHtml += `<tr class="item-row">
-        <td class="num">${itemNo}</td>
+        <td class="num">${it.item_code ? String(it.item_code) : itemNo}</td>
         <td class="desc">${it.description}</td>
         <td class="qty">${it.quantity || ''}</td>
         <td class="unit">${it.unit_abbreviation || it.unit_of_measure || ''}</td>
