@@ -5,9 +5,13 @@
 
 const { createClient } = require('@supabase/supabase-js');
 
-// Use the same credentials as the application
-const SUPABASE_URL = "https://klifzjcfnlaxminytmyh.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtsaWZ6amNmbmxheG1pbnl0bXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2ODg5NzcsImV4cCI6MjA3MTI2NDk3N30.kY9eVUh2hKZvOgixYTwggsznN4gD1ktNX4phXQ5TTdU";
+// Use the same credentials as the application (from environment)
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+  throw new Error('Missing Supabase environment variables for extract script');
+}
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -18,7 +22,7 @@ async function extractCompleteSchema() {
     let sqlOutput = `-- =============================================
 -- COMPLETE BIOLEGEND DATABASE BACKUP
 -- Generated: ${new Date().toISOString()}
--- Project: klifzjcfnlaxminytmyh
+-- Project: ${new URL(SUPABASE_URL).host.split('.')[0]}
 -- =============================================
 
 -- Enable necessary extensions
