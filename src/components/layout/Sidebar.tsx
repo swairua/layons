@@ -74,6 +74,11 @@ const sidebarItems: SidebarItem[] = [
     href: '/boqs'
   },
   {
+    title: 'Fixed BOQ',
+    icon: FileSpreadsheet,
+    href: '/fixed-boq'
+  },
+  {
     title: 'Purchase Orders',
     icon: ShoppingCart,
     href: '/lpos'
