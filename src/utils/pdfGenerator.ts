@@ -179,19 +179,45 @@ export const generatePDF = (data: DocumentData) => {
   // If this is a BOQ, render a dedicated BOQ-style layout
   if (data.type === 'boq') {
     // Build table rows grouped by section markers (we used '➤ ' prefix for section rows)
-    const rowsHtml = (data.items || []).map((it) => {
+    let rowsHtml = '';
+    let currentSection = '';
+    let itemNo = 0;
+    let sectionTotal = 0;
+
+    const flushSectionTotal = () => {
+      if (itemNo > 0) {
+        rowsHtml += `<tr class="section-total">
+          <td class="num"></td>
+          <td colspan="4" class="label">SECTION TOTAL:</td>
+          <td class="amount">${formatCurrency(sectionTotal)}</td>
+        </tr>`;
+      }
+      itemNo = 0;
+      sectionTotal = 0;
+    };
+
+    (data.items || []).forEach((it) => {
       const isSection = (it.quantity === 0 && it.unit_price === 0);
       if (isSection) {
-        return `<tr class="section-row"><td colspan="5" class="section-title">${it.description.replace(/^➤\s*/, '')}</td></tr>`;
+        // Close previous section with a total row
+        flushSectionTotal();
+        currentSection = it.description.replace(/^➤\s*/, '');
+        rowsHtml += `<tr class="section-row"><td colspan="6" class="section-title">${currentSection}</td></tr>`;
+        return;
       }
-      return `<tr class="item-row">
+      itemNo += 1;
+      sectionTotal += (it.line_total || 0);
+      rowsHtml += `<tr class="item-row">
+        <td class="num">${itemNo}</td>
         <td class="desc">${it.description}</td>
         <td class="qty">${it.quantity || ''}</td>
         <td class="unit">${it.unit_abbreviation || it.unit_of_measure || ''}</td>
         <td class="rate">${formatCurrency(it.unit_price || 0)}</td>
         <td class="amount">${formatCurrency(it.line_total || 0)}</td>
       </tr>`;
-    }).join('');
+    });
+    // Flush last section total
+    flushSectionTotal();
 
     // Use the provided new logo for BOQ header by default, but allow company override if explicitly set
     const headerLogoUrl = 'https://cdn.builder.io/api/v1/image/assets%2Faea2aed103954999beb7bf5cf5e15336%2F7aa9262aadcc4a7e8b9131687529f20e?format=webp&width=800';
