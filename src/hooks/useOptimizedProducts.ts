@@ -133,8 +133,8 @@ export const usePopularProducts = (companyId?: string, limit: number = 20) => {
         const { data, error: authError } = await supabase.auth.getUser();
         const user = data?.user;
         if (authError) {
-          console.error('Authentication error:', authError);
-          throw new Error(`Authentication failed: ${authError.message || JSON.stringify(authError)}`);
+          logError('Authentication error detected in useOptimizedProducts:', authError, { context: 'useOptimizedProducts' });
+          throw new Error(`Authentication failed: ${authError && (authError as any).message ? (authError as any).message : JSON.stringify(authError)}`);
         }
         if (!user) {
           throw new Error('User not authenticated');
