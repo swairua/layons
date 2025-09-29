@@ -24,6 +24,7 @@ import UnitsNormalize from "./pages/settings/UnitsNormalize";
 import RemittanceAdvice from "./pages/RemittanceAdvice";
 import LPOs from "./pages/LPOs";
 import BOQs from "./pages/BOQs";
+import FixedBOQ from "./pages/FixedBOQ";
 import CreditNotes from "./pages/CreditNotes";
 import NotFound from "./pages/NotFound";
 import PaymentSynchronizationPage from "./pages/PaymentSynchronization";
@@ -157,6 +158,14 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <BOQs />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/fixed-boq"
+            element={
+              <ProtectedRoute>
+                <FixedBOQ />
               </ProtectedRoute>
             }
           />
