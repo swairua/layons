@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
@@ -83,7 +84,8 @@ export function PaymentAllocationStatus() {
 
       // Check 3: User Profile
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data, error: userError } = await supabase.auth.getUser();
+        const user = data?.user;
         if (user) {
           const { data: profile } = await supabase
             .from('profiles')
@@ -96,6 +98,8 @@ export function PaymentAllocationStatus() {
           } else {
             updateCheck(2, { status: 'error', details: 'No company link' });
           }
+        } else if (userError) {
+          updateCheck(2, { status: 'error', details: userError.message || 'Authentication error' });
         } else {
           updateCheck(2, { status: 'error', details: 'Not authenticated' });
         }
