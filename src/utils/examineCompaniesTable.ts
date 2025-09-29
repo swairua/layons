@@ -166,7 +166,7 @@ export async function associateUserWithCompany() {
     const { error: updateError } = await supabase
       .from('profiles')
       .update({ company_id: companyId })
-      .eq('id', user.id);
+      .eq('id', currentUser.id);
 
     if (updateError) {
       throw new Error(`Failed to update profile: ${updateError.message}`);
