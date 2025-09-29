@@ -266,8 +266,11 @@ export const generatePDF = (data: DocumentData) => {
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
         .items thead th { background:hsl(var(--primary)); color:#fff; font-weight:700; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding:8px; }
-        .item-row td.desc { width:60%; }
+        .item-row td.num { text-align:center; }
+        .item-row td.desc { width:55%; }
         .item-row td.qty, .item-row td.unit, .item-row td.rate, .item-row td.amount { text-align:right; }
+        .section-total td { font-weight:700; background:#fafafa; }
+        .section-total .label { text-align:right; padding-right:12px; }
         .totals { margin-top:10px; width:100%; }
         .totals .label { text-align:right; padding-right:12px; }
         .footer { margin-top:24px; display:flex; flex-direction:column; gap:18px; }
