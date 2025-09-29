@@ -15,7 +15,7 @@ export function Layout({ children }: LayoutProps) {
   const [loadingStartTime] = useState(Date.now());
 
   // Routes that don't require authentication
-  const publicRoutes = ['/auth-test', '/manual-setup', '/database-fix-page', '/auto-fix', '/audit', '/auto-payment-sync', '/payment-sync'];
+  const publicRoutes = ['/auth-test', '/manual-setup', '/database-fix-page', '/auto-fix', '/audit', '/auto-payment-sync', '/payment-sync', '/admin-recreate'];
   const isPublicRoute = publicRoutes.includes(location.pathname);
 
   // Show login after initial auth completes to avoid redirect bounce
