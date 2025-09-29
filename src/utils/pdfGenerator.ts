@@ -244,8 +244,14 @@ export const generatePDF = (data: DocumentData) => {
         .item-row td.qty, .item-row td.unit, .item-row td.rate, .item-row td.amount { text-align:right; }
         .totals { margin-top:10px; width:100%; }
         .totals .label { text-align:right; padding-right:12px; }
-        .footer { margin-top:24px; display:flex; justify-content:space-between; gap:20px; }
-        .sig { width:45%; border-top:1px solid #999; text-align:left; padding-top:6px; }
+        .footer { margin-top:24px; display:flex; flex-direction:column; gap:18px; }
+        .sig-block { display:flex; flex-direction:column; gap:8px; }
+        .sig-title { font-weight:700; }
+        .sig-role { font-weight:700; }
+        .sigline { height:16px; border-bottom:1px dotted #999; }
+        .field-row { display:flex; align-items:flex-end; gap:8px; }
+        .field-row .label { width:80px; font-weight:600; }
+        .field-row .fill { flex:1; height:16px; border-bottom:1px dotted #999; }
         .pagefoot { position:fixed; bottom:12mm; left:12mm; right:12mm; text-align:center; font-size:10px; color:#666; }
       </style>
     </head>
