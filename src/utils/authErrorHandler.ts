@@ -84,12 +84,9 @@ export function analyzeAuthError(error: AuthError | Error): AuthErrorInfo {
 export function handleAuthError(error: AuthError | Error): AuthErrorInfo {
   const errorInfo = analyzeAuthError(error);
   
-  // Log for debugging
-  console.error('Authentication error:', {
-    type: errorInfo.type,
-    message: errorInfo.message,
-    originalError: error
-  });
+  // Log for debugging using structured logger
+  import { logError } from '@/utils/errorLogger';
+  logError('Authentication error', error, { parsed: errorInfo });
 
   // Show appropriate toast
   if (errorInfo.retry) {
