@@ -1,4 +1,5 @@
 import React, { createContext, useContext, ReactNode } from 'react';
+import { useMemo } from 'react';
 import { useCompanies } from '@/hooks/useDatabase';
 
 interface CompanyContextType {
@@ -11,7 +12,30 @@ const CompanyContext = createContext<CompanyContextType | undefined>(undefined);
 
 export function CompanyProvider({ children }: { children: ReactNode }) {
   const { data: companies, isLoading, error } = useCompanies();
-  const currentCompany = companies?.[0] || null;
+  const defaultCompanyId = import.meta.env.VITE_DEFAULT_COMPANY_ID?.trim();
+  const defaultCompanyName = import.meta.env.VITE_DEFAULT_COMPANY_NAME?.trim().toLowerCase();
+
+  const currentCompany = useMemo(() => {
+    if (!companies || companies.length === 0) {
+      return null;
+    }
+
+    if (defaultCompanyId) {
+      const matchById = companies.find(company => company.id === defaultCompanyId);
+      if (matchById) {
+        return matchById;
+      }
+    }
+
+    if (defaultCompanyName) {
+      const matchByName = companies.find(company => company.name?.toLowerCase() === defaultCompanyName);
+      if (matchByName) {
+        return matchByName;
+      }
+    }
+
+    return companies[0];
+  }, [companies, defaultCompanyId, defaultCompanyName]);
 
   return (
     <CompanyContext.Provider value={{ currentCompany, isLoading, error }}>
