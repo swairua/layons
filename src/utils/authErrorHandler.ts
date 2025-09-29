@@ -1,5 +1,7 @@
 import { AuthError } from '@supabase/supabase-js';
+import { AuthError } from '@supabase/supabase-js';
 import { toast } from 'sonner';
+import { logError } from '@/utils/errorLogger';
 
 export interface AuthErrorInfo {
   type: 'invalid_credentials' | 'email_not_confirmed' | 'network_error' | 'rate_limit' | 'server_error' | 'unknown';
