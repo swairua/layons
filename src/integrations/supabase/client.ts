@@ -51,10 +51,37 @@ if (typeof window !== 'undefined' && SUPABASE_URL) {
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
+// Build options depending on environment (avoid passing localStorage on server)
+const supabaseOptions: any = {};
+if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+  supabaseOptions.auth = {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+  };
+} else {
+  supabaseOptions.auth = {
+    persistSession: false,
+    autoRefreshToken: false,
+  };
+}
+
+let _supabase: any;
+const MISSING_MSG = 'Supabase client not initialized: set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (or VITE_SUPABASE_ equivalents).';
+
+if (SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY) {
+  try {
+    _supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, supabaseOptions);
+  } catch (err) {
+    console.warn('Failed to create Supabase client:', err);
+    _supabase = new Proxy({}, { get() { throw new Error(MISSING_MSG); }, apply() { throw new Error(MISSING_MSG); } });
   }
-});
+} else {
+  // Return a proxy that throws useful error when used
+  _supabase = new Proxy({}, {
+    get() { throw new Error(MISSING_MSG); },
+    apply() { throw new Error(MISSING_MSG); },
+  });
+}
+
+export const supabase = _supabase as ReturnType<typeof createClient>;
