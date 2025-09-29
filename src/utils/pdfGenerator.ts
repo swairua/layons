@@ -322,8 +322,22 @@ export const generatePDF = (data: DocumentData) => {
         </div>
 
         <div class="footer">
-          <div class="sig">SIGNED: (CONTRACTOR)</div>
-          <div class="sig">SIGNED: (EMPLOYER)</div>
+          <div class="sig-block">
+            <div class="sig-title">SIGNED:</div>
+            <div class="sig-role">( CONTRACTOR )</div>
+            <div class="sigline"></div>
+            <div class="field-row"><div class="label">Address:</div><div class="fill"></div></div>
+            <div class="field-row"><div class="label">Tel No:</div><div class="fill"></div></div>
+            <div class="field-row"><div class="label">Date:</div><div class="fill"></div></div>
+          </div>
+          <div class="sig-block">
+            <div class="sig-title">SIGNED:</div>
+            <div class="sig-role">( EMPLOYER )</div>
+            <div class="sigline"></div>
+            <div class="field-row"><div class="label">Address:</div><div class="fill"></div></div>
+            <div class="field-row"><div class="label">Tel No:</div><div class="fill"></div></div>
+            <div class="field-row"><div class="label">Date:</div><div class="fill"></div></div>
+          </div>
         </div>
       </div>
       <div class="pagefoot">${company.name} • Generated on ${new Date().toLocaleDateString()}</div>
