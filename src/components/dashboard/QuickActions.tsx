@@ -1,12 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Plus, 
-  FileText, 
-  Receipt, 
-  Users, 
+import { Link } from 'react-router-dom';
+import {
+  Plus,
+  FileText,
+  Receipt,
+  Users,
   Package,
-  DollarSign 
+  DollarSign
 } from 'lucide-react';
 
 interface QuickAction {
@@ -14,7 +15,7 @@ interface QuickAction {
   description: string;
   icon: React.ComponentType<{ className?: string }>;
   variant: 'default' | 'success' | 'primary-gradient' | 'warning';
-  href: string;
+  to: string;
 }
 
 const quickActions: QuickAction[] = [
@@ -23,35 +24,35 @@ const quickActions: QuickAction[] = [
     description: 'Create a new quotation for a customer',
     icon: FileText,
     variant: 'primary-gradient',
-    href: '/quotations/new'
+    to: '/quotations'
   },
   {
     title: 'New Invoice',
     description: 'Generate an invoice from quotation',
     icon: Receipt,
     variant: 'success',
-    href: '/invoices/new'
+    to: '/invoices'
   },
   {
     title: 'Add Customer',
     description: 'Register a new customer',
     icon: Users,
     variant: 'default',
-    href: '/customers/new'
+    to: '/customers'
   },
   {
     title: 'Stock Entry',
     description: 'Add new inventory items',
     icon: Package,
     variant: 'warning',
-    href: '/inventory/new'
+    to: '/inventory'
   },
   {
     title: 'Record Payment',
     description: 'Log customer payment',
     icon: DollarSign,
     variant: 'success',
-    href: '/payments/new'
+    to: '/payments'
   }
 ];
 
@@ -69,14 +70,14 @@ export function QuickActions() {
             className="flex items-center justify-start space-x-3 h-auto p-4 text-left"
             asChild
           >
-            <a href={action.href}>
+            <Link to={action.to}>
               <action.icon className="h-5 w-5" />
               <div className="flex-1">
                 <div className="font-medium">{action.title}</div>
                 <div className="text-xs opacity-90">{action.description}</div>
               </div>
               <Plus className="h-4 w-4" />
-            </a>
+            </Link>
           </Button>
         ))}
       </CardContent>
