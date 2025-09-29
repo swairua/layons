@@ -193,6 +193,10 @@ export const generatePDF = (data: DocumentData) => {
       </tr>`;
     }).join('');
 
+    // Use the provided new logo for BOQ header by default, but allow company override if explicitly set
+    const headerLogoUrl = 'https://cdn.builder.io/api/v1/image/assets%2Faea2aed103954999beb7bf5cf5e15336%2F7aa9262aadcc4a7e8b9131687529f20e?format=webp&width=800';
+    const logoSrc = headerLogoUrl || company.logo_url || '';
+
     const htmlContentBOQ = `
     <!DOCTYPE html>
     <html>
@@ -210,79 +214,82 @@ export const generatePDF = (data: DocumentData) => {
         body { counter-reset: page; }
         .pagefoot::after { content: "Page " counter(page) ""; }
         .container { padding: 12mm; }
-        .top-headers { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+
+        /* Brand header like the mock */
+        .brand-header { border:1px solid #cfd4da; border-radius:4px; padding:12px 14px 10px; }
+        .brand-row { display:flex; align-items:center; justify-content:space-between; }
+        .brand-logo { height:48px; display:flex; align-items:center; }
+        .brand-logo img { height:48px; width:auto; object-fit:contain; }
+        .brand-tagline { font-size:18px; font-weight:800; color:#1f2937; letter-spacing:0.5px; }
+        .brand-accent { margin-top:10px; display:flex; align-items:center; gap:0; height:14px; }
+        .accent-yellow { flex:1; height:14px; background:#f4a300; position:relative; clip-path:polygon(0 0, calc(100% - 34px) 0, 100% 100%, 0 100%); }
+        .accent-stripes { width:88px; height:14px; background: repeating-linear-gradient(135deg, #ffffff 0 12px, #f4a300 12px 22px); }
+        .accent-black { width:140px; height:14px; background:#111111; }
+
+        .top-headers { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-top:10px; }
         .company { text-align:right; }
-        .company .name { font-size:18px; font-weight:700; color:hsl(var(--primary)); }
-        .subtitle { font-size:11px; color:#444; }
-        .title { text-align:center; font-size:20px; font-weight:700; margin:12px 0; color:hsl(var(--primary)); }
+        .company .name { font-size:12px; font-weight:700; color:#111; }
+        .company .details { font-size:10px; color:#333; line-height:1.4; }
+
+        .title { font-size:16px; font-weight:700; margin:14px 0 8px; color:#111; }
         .meta { display:flex; justify-content:space-between; margin-bottom:12px; }
-        .meta .left, .meta .right { width:48%; }
+        .meta .left, .meta .right { width:48%; font-size:12px; }
         .meta .left .field { margin-bottom:6px; }
-        .items { width:100%; border-collapse:collapse; margin-top:8px; }
+
+        .items { width:100%; border-collapse:collapse; margin-top:6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
         .items thead th { background:hsl(var(--primary)); color:#fff; font-weight:700; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding:8px; }
         .item-row td.desc { width:60%; }
         .item-row td.qty, .item-row td.unit, .item-row td.rate, .item-row td.amount { text-align:right; }
-        .totals { margin-top:12px; width:100%; }
+        .totals { margin-top:10px; width:100%; }
         .totals .label { text-align:right; padding-right:12px; }
-        .footer { margin-top:30px; display:flex; justify-content:space-between; gap:20px; }
+        .footer { margin-top:24px; display:flex; justify-content:space-between; gap:20px; }
         .sig { width:45%; border-top:1px solid #999; text-align:left; padding-top:6px; }
         .pagefoot { position:fixed; bottom:12mm; left:12mm; right:12mm; text-align:center; font-size:10px; color:#666; }
       </style>
     </head>
     <body>
       <div class="container">
-        <div class="header">
-          <div class="company-info">
-            <div class="logo">
-              ${company.logo_url ?
-                `<img src="${company.logo_url}" alt="${company.name} Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-                 <div style="display:none; width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">Logo not available</div>` :
-                `<div style="width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">No logo configured</div>`
-              }
+        <div class="brand-header">
+          <div class="brand-row">
+            <div class="brand-logo">
+              ${logoSrc ? `<img src="${logoSrc}" alt="${company.name} Logo" />` : ''}
             </div>
-            <div class="company-name">${company.name}</div>
-            <div class="company-details">
-              ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
+            <div class="brand-tagline">DESIGN & BUILD.</div>
+          </div>
+          <div class="brand-accent">
+            <div class="accent-yellow"></div>
+            <div class="accent-stripes"></div>
+            <div class="accent-black"></div>
+          </div>
+        </div>
+
+        <div class="top-headers">
+          <div class="subtitle">&nbsp;</div>
+          <div class="company">
+            <div class="name">${company.name}</div>
+            <div class="details">
               ${company.address ? `${company.address}<br>` : ''}
               ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
               ${company.phone ? `Tel: ${company.phone}<br>` : ''}
-              ${company.email ? `Email: ${company.email}` : ''}
-            </div>
-
-            <!-- Client Details Section -->
-            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e9ecef;">
-              <div class="section-title" style="font-size: 12px; font-weight: bold; color: hsl(var(--primary)); margin-bottom: 8px; text-transform: uppercase;">Client</div>
-              <div class="customer-name" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #212529;">${data.customer.name}</div>
-              <div class="customer-details" style="font-size: 10px; color: #666; line-height: 1.4;">
-                ${data.customer.email ? `${data.customer.email}<br>` : ''}
-                ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
-                ${data.customer.address ? `${data.customer.address}<br>` : ''}
-                ${data.customer.city ? `${data.customer.city}` : ''}
-                ${data.customer.country ? `, ${data.customer.country}` : ''}
-              </div>
-            </div>
-          </div>
-
-          <div class="document-info">
-            <div class="document-title">Bill of Quantities</div>
-            <div class="document-details">
-              <table>
-                <tr>
-                  <td class="label">BOQ #:</td>
-                  <td class="value">${data.number}</td>
-                </tr>
-                <tr>
-                  <td class="label">Date:</td>
-                  <td class="value">${formatDate(data.date)}</td>
-                </tr>
-              </table>
+              ${company.email ? `${company.email}` : ''}
             </div>
           </div>
         </div>
 
-        <div class="title">BILLS OF QUANTITIES</div>
+        <div class="title"></div>
+        <div class="meta">
+          <div class="left">
+            <div class="field"><strong>Client:</strong> ${data.customer.name}</div>
+            ${boqProject ? `<div class="field"><strong>Project:</strong> ${boqProject}</div>` : ''}
+            <div class="field"><strong>Subject:</strong> Bill of Quantities</div>
+            <div class="field"><strong>Date:</strong> ${formatDate(data.date)}</div>
+          </div>
+          <div class="right" style="text-align:right">
+            <div class="field"><strong>BOQ #:</strong> ${data.number}</div>
+          </div>
+        </div>
 
         <table class="items">
           <thead>
