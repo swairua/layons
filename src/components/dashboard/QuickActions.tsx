@@ -5,8 +5,7 @@ import {
   Plus,
   FileSpreadsheet,
   Users,
-  DollarSign,
-  CreditCard
+  DollarSign
 } from 'lucide-react';
 
 interface QuickAction {
