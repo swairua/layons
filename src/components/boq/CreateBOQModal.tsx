@@ -199,17 +199,21 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
         project_title: projectTitle || undefined,
         sections: sections.map(s => ({
           title: s.title || undefined,
-          items: s.items.map(i => {
-            // lookup unit name from units list
-            const unitObj = units.find((u: any) => u.id === i.unit);
-            return {
-              description: i.description,
-              quantity: i.quantity,
-              unit_id: i.unit || null,
-              unit_name: unitObj ? unitObj.name : i.unit || null,
-              rate: i.rate,
-            };
-          })
+          subsections: s.subsections.map(sub => ({
+            name: sub.name,
+            label: sub.label,
+            items: sub.items.map(i => {
+              // lookup unit name from units list
+              const unitObj = units.find((u: any) => u.id === i.unit);
+              return {
+                description: i.description,
+                quantity: i.quantity,
+                unit_id: i.unit || null,
+                unit_name: unitObj ? unitObj.name : i.unit || null,
+                rate: i.rate,
+              };
+            })
+          }))
         })),
         notes: notes || undefined,
       };
