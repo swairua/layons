@@ -259,8 +259,8 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
       const updates: { id: string; description: string }[] = [];
 
       for (const item of items) {
-        // Remove trailing figures like " 5,000.00" or " 40,000.00 (Kshs)"
-        const cleaned = item.description.replace(/\s+\d+[\d,]*(?:\.\d+)?(?:\s+\(Kshs\))?$/i, '').trim();
+        // Remove trailing figures and text like " 5,000.00", " 40,000.00 (Kshs)", " 10,000.00 TOTAL"
+        const cleaned = item.description.replace(/\s+\d+[\d,]*(?:\.\d+)?(?:\s+[A-Za-z()]+)*$/i, '').trim();
         if (cleaned !== item.description) {
           updates.push({ id: item.id, description: cleaned });
           cleanedCount++;
