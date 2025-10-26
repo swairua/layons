@@ -231,7 +231,7 @@ export const generatePDF = (data: DocumentData) => {
       <meta charset="UTF-8">
       <style>
         ${pdfRootVars}
-        @page { size: A4; margin: 12mm; }
+        @page { size: A4; margin: 0 0 12mm 0; }
         @media print {
           @page { counter-increment: page; }
         }
