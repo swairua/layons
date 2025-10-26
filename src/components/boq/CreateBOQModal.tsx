@@ -171,9 +171,9 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
   const validate = () => {
     if (!clientId) { toast.error('Please select a client'); return false; }
     if (!boqNumber || !boqDate) { toast.error('BOQ number and date are required'); return false; }
-    const hasItems = sections.some(s => s.items.length > 0);
+    const hasItems = sections.some(s => s.subsections.some(sub => sub.items.length > 0));
     if (!hasItems) { toast.error('Add at least one item'); return false; }
-    const hasInvalid = sections.some(s => s.items.some(i => !i.description || i.quantity <= 0 || i.rate < 0));
+    const hasInvalid = sections.some(s => s.subsections.some(sub => sub.items.some(i => !i.description || i.quantity <= 0 || i.rate < 0)));
     if (hasInvalid) { toast.error('Each item needs description, quantity > 0, and non-negative rate'); return false; }
     return true;
   };
