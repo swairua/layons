@@ -104,7 +104,7 @@ export default function BOQs() {
                         <Download className="h-4 w-4" />
                       </Button>
                       <Button size="icon" variant="ghost" onClick={handlePrint} title="Print">
-                        <Print className="h-4 w-4" />
+                        <Printer className="h-4 w-4" />
                       </Button>
                       <Button size="icon" variant="destructive" onClick={() => handleDelete(b.id)} title="Delete">
                         <Trash2 className="h-4 w-4" />
