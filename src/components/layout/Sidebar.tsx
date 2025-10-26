@@ -35,32 +35,12 @@ const sidebarItems: SidebarItem[] = [
     href: '/'
   },
   {
-    title: 'Sales',
-    icon: Receipt,
-    children: [
-      { title: 'Quotations', icon: FileText, href: '/quotations' },
-      { title: 'Invoices', icon: Receipt, href: '/invoices' },
-      { title: 'Proforma Invoices', icon: FileCheck, href: '/proforma' },
-      { title: 'Credit Notes', icon: RotateCcw, href: '/credit-notes' }
-    ]
-  },
-  {
     title: 'Payments',
     icon: DollarSign,
     children: [
       { title: 'Payments', icon: DollarSign, href: '/payments' },
       { title: 'Remittance Advice', icon: CreditCard, href: '/remittance' }
     ]
-  },
-  {
-    title: 'Inventory',
-    icon: Package,
-    href: '/inventory'
-  },
-  {
-    title: 'Delivery Notes',
-    icon: Truck,
-    href: '/delivery-notes'
   },
   {
     title: 'Customers',
