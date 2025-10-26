@@ -189,31 +189,14 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
           const item_code = line;
           const descParts: string[] = [];
           let j = i + 1;
-          let capturedQty = 0;
-          let capturedUnit = '';
-          let capturedRate = 0;
-          let capturedAmount = 0;
 
           while (j < lines.length && !letterLine.test(lines[j]) && !sectionLine.test(lines[j])) {
             const l = lines[j];
-            // Try to capture quantity/unit/rate/amount patterns
-            // Pattern 1: "12 Sm 200 2,400.00"
-            const m1 = l.match(/^(\d+[\d,]*(?:\.\d+)?)\s*(No|SM|Sm|sm|CM|Cm|cm|LM|Lm|lm|KG|Kg|kg|Item|ITEM)\b\s+(\d+[\d,]*(?:\.\d+)?)\s+(\d+[\d,]*(?:\.\d+)?)/);
-            // Pattern 2: "Item 58,200.00" or "ITEM 25,000.00"
-            const m2 = !m1 && l.match(/^(Item|ITEM)\b\s+(\d+[\d,]*(?:\.\d+)?)/);
-
-            if (m1) {
-              capturedQty = parseNumber(m1[1]);
-              capturedUnit = m1[2];
-              capturedRate = parseNumber(m1[3]);
-              capturedAmount = parseNumber(m1[4]);
-            } else if (m2) {
-              capturedQty = 1;
-              capturedUnit = 'Item';
-              capturedRate = parseNumber(m2[2]);
-              capturedAmount = capturedRate;
-            } else {
-              descParts.push(l);
+            // Remove trailing currency amounts and any trailing text (like "TOTAL", "Kshs", etc)
+            // Matches patterns like: "5,026.00", "40,000.00 (Kshs)", "10,000.00 TOTAL", etc
+            const cleanedLine = l.replace(/\s+\d+[\d,]*(?:\.\d+)?(?:\s+[A-Za-z()]+)*$/i, '').trim();
+            if (cleanedLine) {
+              descParts.push(cleanedLine);
             }
             j++;
           }
@@ -224,9 +207,9 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
             section: currentSection || 'General',
             item_code,
             description,
-            unit: capturedUnit || null,
-            default_qty: capturedQty || null,
-            default_rate: capturedRate || null,
+            unit: null,
+            default_qty: null,
+            default_rate: null,
             sort_order: order++,
           } as any);
 
@@ -263,6 +246,53 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
     } catch (err) {
       console.error('Import failed:', err);
       toast.error('Import failed. You can try smaller sections or verify formatting.');
+    }
+  };
+
+  const cleanupDescriptions = async () => {
+    if (!companyId) { toast.error('No company selected'); return; }
+    if (!items.length) { toast.error('No items to clean'); return; }
+
+    try {
+      setSeeding(true);
+      let cleanedCount = 0;
+      const updates: { id: string; description: string }[] = [];
+
+      for (const item of items) {
+        // Remove trailing figures and text like " 5,000.00", " 40,000.00 (Kshs)", " 10,000.00 TOTAL"
+        const cleaned = item.description.replace(/\s+\d+[\d,]*(?:\.\d+)?(?:\s+[A-Za-z()]+)*$/i, '').trim();
+        if (cleaned !== item.description) {
+          updates.push({ id: item.id, description: cleaned });
+          cleanedCount++;
+        }
+      }
+
+      if (cleanedCount === 0) {
+        toast.info('No descriptions to clean');
+        setSeeding(false);
+        return;
+      }
+
+      // Update in batches
+      const batchSize = 50;
+      for (let i = 0; i < updates.length; i += batchSize) {
+        const batch = updates.slice(i, i + batchSize);
+        for (const update of batch) {
+          const { error } = await supabase
+            .from('fixed_boq_items')
+            .update({ description: update.description })
+            .eq('id', update.id);
+          if (error) throw error;
+        }
+      }
+
+      toast.success(`Cleaned ${cleanedCount} descriptions`);
+      await fetchItems();
+    } catch (err) {
+      console.error('Cleanup failed:', err);
+      toast.error('Failed to clean descriptions');
+    } finally {
+      setSeeding(false);
     }
   };
 
@@ -352,6 +382,15 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
           </Button>
           <Button onClick={() => setImporting(true)} variant="secondary" disabled={!companyId}>
             <Upload className="h-4 w-4 mr-2" /> Import from Text
+          </Button>
+          <Button onClick={cleanupDescriptions} variant="outline" disabled={seeding || !items.length} title="Remove trailing figures from descriptions">
+            {seeding ? (
+              <>
+                <Database className="h-4 w-4 mr-2 animate-spin" /> Cleaning...
+              </>
+            ) : (
+              <>Clean Descriptions</>
+            )}
           </Button>
         </div>
       </div>
