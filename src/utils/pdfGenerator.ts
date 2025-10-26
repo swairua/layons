@@ -220,7 +220,7 @@ export const generatePDF = (data: DocumentData) => {
     flushSectionTotal();
 
     // Use the provided new logo for BOQ header by default, but allow company override if explicitly set
-    const headerLogoUrl = 'https://cdn.builder.io/api/v1/image/assets%2Faea2aed103954999beb7bf5cf5e15336%2F7aa9262aadcc4a7e8b9131687529f20e?format=webp&width=800';
+    const headerLogoUrl = 'https://cdn.builder.io/api/v1/image/assets%2F71cced7a9eba46908b96a4d2eb254873%2F43d7892b1b0247cdbd4d17a1a9d88c4e?format=webp&width=800';
     const logoSrc = headerLogoUrl || company.logo_url || '';
 
     const htmlContentBOQ = `
@@ -244,8 +244,8 @@ export const generatePDF = (data: DocumentData) => {
         /* Brand header like the mock */
         .brand-header { border:none; border-radius:0; padding:0 12mm; width:100%; margin:0; box-sizing:border-box; }
         .brand-row { display:flex; align-items:center; justify-content:flex-start; margin:0; padding:0; }
-        .brand-logo { height:80px; display:flex; align-items:center; justify-content:flex-start; flex:1; margin:0; padding:0; }
-        .brand-logo img { height:80px; width:100%; object-fit:cover; margin:0; padding:0; }
+        .brand-logo { height:90px; display:flex; align-items:center; justify-content:flex-start; flex:1; margin:0; padding:0; }
+        .brand-logo img { height:90px; width:auto; object-fit:contain; margin:0; padding:0; }
         .brand-accent { margin:0; display:flex; align-items:center; gap:0; height:14px; }
         .accent-yellow { flex:1; height:14px; background:#f4a300; position:relative; clip-path:polygon(0 0, calc(100% - 34px) 0, 100% 100%, 0 100%); }
         .accent-stripes { width:88px; height:14px; background: repeating-linear-gradient(135deg, #ffffff 0 12px, #f4a300 12px 22px); }
