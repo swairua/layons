@@ -333,77 +333,88 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
                     <div className="ml-auto text-sm text-muted-foreground">Section {sIdx + 1}</div>
                   </div>
 
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-1/2">Item Description</TableHead>
-                        <TableHead className="w-24">Qty</TableHead>
-                        <TableHead className="w-28">Unit</TableHead>
-                        <TableHead className="w-32">Rate</TableHead>
-                        <TableHead className="w-32 text-right">Amount</TableHead>
-                        <TableHead className="w-12"></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {section.items.map(row => (
-                        <TableRow key={row.id}>
-                          <TableCell>
-                            <Input value={row.description} onChange={e => updateItem(section.id, row.id, 'description', e.target.value)} placeholder="Describe item" />
-                          </TableCell>
-                          <TableCell>
-                            <Input type="number" min={0} value={row.quantity} onChange={e => updateItem(section.id, row.id, 'quantity', Number(e.target.value))} />
-                          </TableCell>
-                          <TableCell>
-                            <Select value={row.unit} onValueChange={(val) => {
-                              if (val === '__add_unit') {
-                                setPendingUnitTarget({ sectionId: section.id, itemId: row.id });
-                                setUnitModalOpen(true);
-                              } else {
-                                updateItem(section.id, row.id, 'unit', val);
-                              }
-                            }}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Unit" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {units.map((u: any) => (
-                                  <SelectItem key={u.id} value={u.id}>{u.name}{u.abbreviation ? ` (${u.abbreviation})` : ''}</SelectItem>
-                                ))}
-                                <SelectItem value="__add_unit">+ Add unit...</SelectItem>
-                              </SelectContent>
-                            </Select>
+                  {section.subsections.map((subsection) => (
+                    <div key={subsection.id} className="space-y-3 bg-muted/30 rounded-lg p-3 border border-border/50">
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm font-semibold">Subsection {subsection.name}: {subsection.label}</div>
+                        <div className="text-sm text-muted-foreground">Subtotal: {formatCurrency(calculateSubsectionTotal(subsection))}</div>
+                      </div>
 
-                            {/* Unit creation modal */}
-                            <CreateUnitModal open={unitModalOpen} onOpenChange={setUnitModalOpen} onCreated={(unitName) => {
-                              // set the new unit on the pending target
-                              if (pendingUnitTarget) {
-                                updateItem(pendingUnitTarget.sectionId, pendingUnitTarget.itemId, 'unit', unitName);
-                                setPendingUnitTarget(null);
-                              }
-                            }} />
-                          </TableCell>
-                          <TableCell>
-                            <Input type="number" min={0} value={row.rate} onChange={e => updateItem(section.id, row.id, 'rate', Number(e.target.value))} />
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {formatCurrency((row.quantity || 0) * (row.rate || 0))}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="icon" onClick={() => removeItem(section.id, row.id)}>
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      <TableRow>
-                        <TableCell colSpan={6}>
-                          <Button variant="outline" onClick={() => addItem(section.id)}>
-                            <Plus className="h-4 w-4 mr-2" /> Add Item
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-1/2">Item Description</TableHead>
+                            <TableHead className="w-24">Qty</TableHead>
+                            <TableHead className="w-28">Unit</TableHead>
+                            <TableHead className="w-32">Rate</TableHead>
+                            <TableHead className="w-32 text-right">Amount</TableHead>
+                            <TableHead className="w-12"></TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {subsection.items.map(row => (
+                            <TableRow key={row.id}>
+                              <TableCell>
+                                <Input value={row.description} onChange={e => updateItem(section.id, subsection.id, row.id, 'description', e.target.value)} placeholder="Describe item" />
+                              </TableCell>
+                              <TableCell>
+                                <Input type="number" min={0} value={row.quantity} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', Number(e.target.value))} />
+                              </TableCell>
+                              <TableCell>
+                                <Select value={row.unit} onValueChange={(val) => {
+                                  if (val === '__add_unit') {
+                                    setPendingUnitTarget({ sectionId: section.id, itemId: row.id });
+                                    setUnitModalOpen(true);
+                                  } else {
+                                    updateItem(section.id, subsection.id, row.id, 'unit', val);
+                                  }
+                                }}>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Unit" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {units.map((u: any) => (
+                                      <SelectItem key={u.id} value={u.id}>{u.name}{u.abbreviation ? ` (${u.abbreviation})` : ''}</SelectItem>
+                                    ))}
+                                    <SelectItem value="__add_unit">+ Add unit...</SelectItem>
+                                  </SelectContent>
+                                </Select>
+
+                                <CreateUnitModal open={unitModalOpen} onOpenChange={setUnitModalOpen} onCreated={(unitName) => {
+                                  if (pendingUnitTarget) {
+                                    updateItem(pendingUnitTarget.sectionId, subsection.id, pendingUnitTarget.itemId, 'unit', unitName);
+                                    setPendingUnitTarget(null);
+                                  }
+                                }} />
+                              </TableCell>
+                              <TableCell>
+                                <Input type="number" min={0} value={row.rate} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', Number(e.target.value))} />
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {formatCurrency((row.quantity || 0) * (row.rate || 0))}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <Button variant="ghost" size="icon" onClick={() => removeItem(section.id, subsection.id, row.id)}>
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                          <TableRow>
+                            <TableCell colSpan={6}>
+                              <Button variant="outline" size="sm" onClick={() => addItem(section.id, subsection.id)}>
+                                <Plus className="h-4 w-4 mr-2" /> Add Item
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ))}
+
+                  <div className="flex items-center justify-end gap-6 pt-2 border-t border-border">
+                    <div className="text-sm font-semibold">Section Total: {formatCurrency(calculateSectionTotal(section))}</div>
+                  </div>
                 </div>
               ))}
 
