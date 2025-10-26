@@ -154,9 +154,17 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
 
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
 
+  const calculateSubsectionTotal = (subsection: BOQSubsectionRow): number => {
+    return subsection.items.reduce((sum, item) => sum + ((item.quantity || 0) * (item.rate || 0)), 0);
+  };
+
+  const calculateSectionTotal = (section: BOQSectionRow): number => {
+    return section.subsections.reduce((sum, sub) => sum + calculateSubsectionTotal(sub), 0);
+  };
+
   const totals = useMemo(() => {
     let subtotal = 0;
-    sections.forEach(sec => sec.items.forEach(it => { subtotal += (it.quantity || 0) * (it.rate || 0); }));
+    sections.forEach(sec => { subtotal += calculateSectionTotal(sec); });
     return { subtotal };
   }, [sections]);
 
