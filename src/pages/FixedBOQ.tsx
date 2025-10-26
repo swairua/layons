@@ -373,27 +373,53 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
           ) : grouped.length === 0 ? (
             <div>No items yet. Click "Prepare Table" then "Import from Text".</div>
           ) : (
-            grouped.map(([section, arr]) => {
+            grouped.map(([section, arr], idx) => {
               const sectionTotal = sectionTotals[section] || 0;
+              const isFirst = idx === 0;
               return (
                 <div key={section} className="space-y-2">
                   <div className="font-semibold text-sm bg-muted/40 px-3 py-2 rounded">{section}</div>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead style={{ width: '50%' }}>Description</TableHead>
-                        <TableHead style={{ width: '10%' }}>Code</TableHead>
-                        <TableHead style={{ width: '10%', textAlign: 'right' }}>Qty</TableHead>
-                        <TableHead style={{ width: '15%', textAlign: 'right' }}>Unit</TableHead>
-                        <TableHead style={{ width: '15%', textAlign: 'right' }}>Unit Cost</TableHead>
-                        <TableHead style={{ width: '15%', textAlign: 'right' }}>Line Total</TableHead>
+                        <TableHead style={{ width: isFirst ? '10%' : '50%' }}>{isFirst ? 'Item' : 'Description'}</TableHead>
+                        <TableHead style={{ width: isFirst ? '70%' : '10%' }}>{isFirst ? 'Description' : 'Code'}</TableHead>
+                        {isFirst ? (
+                          <TableHead style={{ width: '20%', textAlign: 'right' }}>Amount (KSHS)</TableHead>
+                        ) : (
+                          <>
+                            <TableHead style={{ width: '10%', textAlign: 'right' }}>Qty</TableHead>
+                            <TableHead style={{ width: '15%', textAlign: 'right' }}>Unit</TableHead>
+                            <TableHead style={{ width: '15%', textAlign: 'right' }}>Unit Cost</TableHead>
+                            <TableHead style={{ width: '15%', textAlign: 'right' }}>Line Total</TableHead>
+                          </>
+                        )}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {arr.map((it) => {
+                        if (isFirst) {
+                          const amt = amount[it.id] ?? (it.default_rate ?? 0);
+                          return (
+                            <TableRow key={it.id}>
+                              <TableCell>{it.item_code || ''}</TableCell>
+                              <TableCell>{it.description}</TableCell>
+                              <TableCell className="text-right">
+                                <Input
+                                  type="number"
+                                  value={amt}
+                                  onChange={(e) => setAmount((prev) => ({ ...prev, [it.id]: Number(e.target.value) }))}
+                                  className="w-32 ml-auto text-right"
+                                  min={0}
+                                  step={0.01}
+                                />
+                              </TableCell>
+                            </TableRow>
+                          );
+                        }
                         const q = qty[it.id] ?? (it.default_qty ?? 0);
                         const r = rate[it.id] ?? (it.default_rate ?? 0);
-                        const amount = q * r;
+                        const line = (Number(q) || 0) * (Number(r) || 0);
                         return (
                           <TableRow key={it.id}>
                             <TableCell>{it.description}</TableCell>
@@ -420,13 +446,13 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
                               />
                             </TableCell>
                             <TableCell className="text-right font-medium">
-                              {new Intl.NumberFormat('en-KE', { style: 'currency', currency: currentCompany?.currency || 'KES' }).format(amount || 0)}
+                              {new Intl.NumberFormat('en-KE', { style: 'currency', currency: currentCompany?.currency || 'KES' }).format(line || 0)}
                             </TableCell>
                           </TableRow>
                         );
                       })}
                       <TableRow>
-                        <TableCell className="text-right font-semibold" colSpan={5}>SECTION TOTAL</TableCell>
+                        <TableCell className="text-right font-semibold" colSpan={isFirst ? 2 : 5}>SECTION TOTAL</TableCell>
                         <TableCell className="text-right font-semibold">
                           {new Intl.NumberFormat('en-KE', { style: 'currency', currency: currentCompany?.currency || 'KES' }).format(sectionTotal || 0)}
                         </TableCell>
