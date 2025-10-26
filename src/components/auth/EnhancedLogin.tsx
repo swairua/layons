@@ -5,8 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import { BiolegendLogo } from '@/components/ui/biolegend-logo';
-import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { toast } from 'sonner';
 import { handleAuthError } from '@/utils/authErrorHandler';
 import { useNavigate } from 'react-router-dom';
@@ -14,8 +12,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 export function EnhancedLogin() {
   const { signIn, loading } = useAuth();
-  const { currentCompany } = useCurrentCompany();
-  const brandName = currentCompany?.name || 'Layons Construction Limited';
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -60,7 +56,7 @@ export function EnhancedLogin() {
         toast.info('Invalid email or password. If you need access, contact the administrator.');
       }
     } else {
-      toast.success(`Welcome to ${brandName}!`);
+      toast.success('Signed in successfully!');
       navigate('/');
     }
     setSubmitting(false);
