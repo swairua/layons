@@ -356,6 +356,8 @@ export const generatePDF = (data: DocumentData) => {
         .item-row td.qty, .item-row td.unit, .item-row td.rate, .item-row td.amount { text-align:right; }
         .section-total td { font-weight:700; background:#fafafa; }
         .section-total .label { text-align:right; padding-right:12px; }
+        .preliminaries-section { margin-bottom:12px; }
+        .preliminaries-section .items { margin-top:0; }
         .subsection-row td { background:#fcfcfc; font-weight:600; }
         .subsection-title { padding:6px 8px; }
         .subsection-total td { font-weight:600; background:#fdfdfd; }
