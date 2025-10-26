@@ -8,6 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { Download, Database, PlusCircle, Upload } from 'lucide-react';
 import { generatePDF } from '@/utils/pdfGenerator';
+import { executeSQL, formatSQLForManualExecution } from '@/utils/execSQL';
+import { parseErrorMessage } from '@/utils/errorHelpers';
 
 interface FixedBOQItem {
   id: string;
@@ -39,6 +41,7 @@ export default function FixedBOQ() {
   const [importText, setImportText] = useState('');
   const [qty, setQty] = useState<Record<string, number>>({});
   const [rate, setRate] = useState<Record<string, number>>({});
+  const [amount, setAmount] = useState<Record<string, number>>({});
 
   const fetchItems = async () => {
     if (!companyId) return;
@@ -80,15 +83,22 @@ export default function FixedBOQ() {
 
   const sectionTotals = useMemo(() => {
     const totals: Record<string, number> = {};
-    grouped.forEach(([section, arr]) => {
-      totals[section] = arr.reduce((sum, it) => {
-        const q = qty[it.id] ?? (it.default_qty ?? 0);
-        const r = rate[it.id] ?? (it.default_rate ?? 0);
-        return sum + q * r;
-      }, 0);
+    grouped.forEach(([section, arr], idx) => {
+      if (idx === 0) {
+        totals[section] = arr.reduce((sum, it) => {
+          const a = amount[it.id] ?? (it.default_rate ?? 0);
+          return sum + (Number(a) || 0);
+        }, 0);
+      } else {
+        totals[section] = arr.reduce((sum, it) => {
+          const q = qty[it.id] ?? (it.default_qty ?? 0);
+          const r = rate[it.id] ?? (it.default_rate ?? 0);
+          return sum + (Number(q) || 0) * (Number(r) || 0);
+        }, 0);
+      }
     });
     return totals;
-  }, [grouped, qty, rate]);
+  }, [grouped, qty, rate, amount]);
 
   const totalAmount = useMemo(() => {
     return Object.values(sectionTotals).reduce((a, b) => a + b, 0);
@@ -130,13 +140,27 @@ EXCEPTION WHEN others THEN NULL; END $$;
 CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(company_id);
 `;
 
-      const { error } = await supabase.rpc('exec_sql', { sql });
-      if (error) throw error;
-      toast.success('Fixed BOQ table is ready');
+      const result = await executeSQL(sql);
+      if (result.error) {
+        const message = parseErrorMessage(result.error);
+        console.error('Schema setup failed:', result.error);
+        toast.error(`Schema setup failed: ${message}`);
+        throw result.error;
+      }
+      // If manual execution required, instruct user with formatted SQL
+      if ((result as any).manual_execution_required) {
+        console.warn('Manual SQL execution required for some statements.');
+        const formatted = formatSQLForManualExecution(sql);
+        console.log('SQL to run manually in Supabase SQL Editor:\n', formatted);
+        toast.info('Some statements require manual execution in Supabase SQL Editor. SQL copied to console.');
+      } else {
+        toast.success('Fixed BOQ table is ready');
+      }
       await fetchItems();
     } catch (err) {
+      const msg = parseErrorMessage(err);
       console.error('Schema setup via RPC failed:', err);
-      toast.error('Automatic SQL execution failed. Please run the SQL in Supabase SQL editor.');
+      toast.error(`Automatic SQL execution failed: ${msg}`);
     } finally {
       setSeeding(false);
     }
@@ -247,19 +271,34 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
 
     // Build BOQ-style items including section marker rows for section totals in PDF
     const pdfItems: Array<{ description: string; quantity: number; unit_price: number; line_total: number; unit_of_measure?: string } & { unit_abbreviation?: string }> = [];
-    grouped.forEach(([section, arr]) => {
+    grouped.forEach(([section, arr], idx) => {
       pdfItems.push({ description: `➤ ${section}`, quantity: 0, unit_price: 0, line_total: 0 });
-      arr.forEach((it) => {
-        const q = qty[it.id] ?? (it.default_qty ?? 0);
-        const r = rate[it.id] ?? (it.default_rate ?? 0);
-        pdfItems.push({
-          description: it.description,
-          quantity: q,
-          unit_price: r,
-          line_total: q * r,
-          unit_of_measure: it.unit || 'Item',
+      if (idx === 0) {
+        arr.forEach((it) => {
+          const a = amount[it.id] ?? (it.default_rate ?? 0);
+          const val = Number(a) || 0;
+          pdfItems.push({
+            description: `${it.item_code ? `${it.item_code} ` : ''}${it.description}`,
+            quantity: 1,
+            unit_price: val,
+            line_total: val,
+            unit_of_measure: 'Item',
+          });
         });
-      });
+      } else {
+        arr.forEach((it) => {
+          const q = qty[it.id] ?? (it.default_qty ?? 0);
+          const r = rate[it.id] ?? (it.default_rate ?? 0);
+          const line = (Number(q) || 0) * (Number(r) || 0);
+          pdfItems.push({
+            description: it.description,
+            quantity: q,
+            unit_price: r,
+            line_total: line,
+            unit_of_measure: it.unit || 'Item',
+          });
+        });
+      }
     });
 
     try {
@@ -349,27 +388,53 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
           ) : grouped.length === 0 ? (
             <div>No items yet. Click "Prepare Table" then "Import from Text".</div>
           ) : (
-            grouped.map(([section, arr]) => {
+            grouped.map(([section, arr], idx) => {
               const sectionTotal = sectionTotals[section] || 0;
+              const isFirst = idx === 0;
               return (
                 <div key={section} className="space-y-2">
                   <div className="font-semibold text-sm bg-muted/40 px-3 py-2 rounded">{section}</div>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead style={{ width: '50%' }}>Description</TableHead>
-                        <TableHead style={{ width: '10%' }}>Code</TableHead>
-                        <TableHead style={{ width: '10%', textAlign: 'right' }}>Qty</TableHead>
-                        <TableHead style={{ width: '15%', textAlign: 'right' }}>Unit</TableHead>
-                        <TableHead style={{ width: '15%', textAlign: 'right' }}>Unit Cost</TableHead>
-                        <TableHead style={{ width: '15%', textAlign: 'right' }}>Line Total</TableHead>
+                        <TableHead style={{ width: isFirst ? '10%' : '50%' }}>{isFirst ? 'Item' : 'Description'}</TableHead>
+                        <TableHead style={{ width: isFirst ? '70%' : '10%' }}>{isFirst ? 'Description' : 'Code'}</TableHead>
+                        {isFirst ? (
+                          <TableHead style={{ width: '20%', textAlign: 'right' }}>Amount (KSHS)</TableHead>
+                        ) : (
+                          <>
+                            <TableHead style={{ width: '10%', textAlign: 'right' }}>Qty</TableHead>
+                            <TableHead style={{ width: '15%', textAlign: 'right' }}>Unit</TableHead>
+                            <TableHead style={{ width: '15%', textAlign: 'right' }}>Unit Cost</TableHead>
+                            <TableHead style={{ width: '15%', textAlign: 'right' }}>Line Total</TableHead>
+                          </>
+                        )}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {arr.map((it) => {
+                        if (isFirst) {
+                          const amt = amount[it.id] ?? (it.default_rate ?? 0);
+                          return (
+                            <TableRow key={it.id}>
+                              <TableCell>{it.item_code || ''}</TableCell>
+                              <TableCell>{it.description}</TableCell>
+                              <TableCell className="text-right">
+                                <Input
+                                  type="number"
+                                  value={amt}
+                                  onChange={(e) => setAmount((prev) => ({ ...prev, [it.id]: Number(e.target.value) }))}
+                                  className="w-32 ml-auto text-right"
+                                  min={0}
+                                  step={0.01}
+                                />
+                              </TableCell>
+                            </TableRow>
+                          );
+                        }
                         const q = qty[it.id] ?? (it.default_qty ?? 0);
                         const r = rate[it.id] ?? (it.default_rate ?? 0);
-                        const amount = q * r;
+                        const line = (Number(q) || 0) * (Number(r) || 0);
                         return (
                           <TableRow key={it.id}>
                             <TableCell>{it.description}</TableCell>
@@ -396,13 +461,13 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
                               />
                             </TableCell>
                             <TableCell className="text-right font-medium">
-                              {new Intl.NumberFormat('en-KE', { style: 'currency', currency: currentCompany?.currency || 'KES' }).format(amount || 0)}
+                              {new Intl.NumberFormat('en-KE', { style: 'currency', currency: currentCompany?.currency || 'KES' }).format(line || 0)}
                             </TableCell>
                           </TableRow>
                         );
                       })}
                       <TableRow>
-                        <TableCell className="text-right font-semibold" colSpan={5}>SECTION TOTAL</TableCell>
+                        <TableCell className="text-right font-semibold" colSpan={isFirst ? 2 : 5}>SECTION TOTAL</TableCell>
                         <TableCell className="text-right font-semibold">
                           {new Intl.NumberFormat('en-KE', { style: 'currency', currency: currentCompany?.currency || 'KES' }).format(sectionTotal || 0)}
                         </TableCell>

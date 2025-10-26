@@ -178,46 +178,88 @@ export const generatePDF = (data: DocumentData) => {
 
   // If this is a BOQ, render a dedicated BOQ-style layout
   if (data.type === 'boq') {
-    // Build table rows grouped by section markers (we used '➤ ' prefix for section rows)
+    // Build table rows; support Sections, Subsections, and their totals
     let rowsHtml = '';
     let currentSection = '';
     let itemNo = 0;
-    let sectionTotal = 0;
 
-    const flushSectionTotal = () => {
+    // Detect if subsections are present (items produced by boqPdfGenerator)
+    const hasSubsections = (data.items || []).some((it) => typeof it.description === 'string' && it.description.toLowerCase().includes('subsection'));
+
+    // Keep track of section totals to compute final total as sum of section totals
+    const sectionTotals: number[] = [];
+
+    // Helpers to detect row kinds
+    const isSectionHeader = (d: string) => d.startsWith('➤ ');
+    const isSubsectionHeader = (d: string) => /^\s*[→-]?\s*subsection\s+[^:]+:\s*/i.test(d);
+    const isSubsectionSubtotal = (d: string) => /^subsection\s+[^\s]+\s+subtotal\s*$/i.test(d);
+    const isSectionTotalRow = (d: string) => /^section\s+total$/i.test(d);
+
+    if (hasSubsections) {
+      (data.items || []).forEach((it) => {
+        const desc = String(it.description || '');
+
+        if (isSectionHeader(desc)) {
+          currentSection = desc.replace(/^➤\s*/, '');
+          itemNo = 0;
+          rowsHtml += `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\">${currentSection}</td></tr>`;
+          return;
+        }
+
+        if (isSubsectionSubtotal(desc)) {
+          rowsHtml += `<tr class=\"subsection-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">${desc}</td>\n          <td class=\"amount\">${formatCurrency(it.line_total || 0)}</td>\n        </tr>`;
+          return;
+        }
+
+        if (isSubsectionHeader(desc)) {
+          rowsHtml += `<tr class=\"subsection-row\"><td class=\"num\"></td><td colspan=\"5\" class=\"subsection-title\">${desc.replace(/^\s*[→-]?\s*/, '')}</td></tr>`;
+          return;
+        }
+
+        if (isSectionTotalRow(desc)) {
+          const total = Number(it.line_total || 0);
+          sectionTotals.push(total);
+          rowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(total)}</td>\n        </tr>`;
+          itemNo = 0;
+          return;
+        }
+
+        // Regular item row within subsection
+        itemNo += 1;
+        rowsHtml += `<tr class=\"item-row\">\n        <td class=\"num\">${itemNo}</td>\n        <td class=\"desc\">${it.description}</td>\n        <td class=\"qty\">${it.quantity || ''}</td>\n        <td class=\"unit\">${(it as any).unit_abbreviation || it.unit_of_measure || ''}</td>\n        <td class=\"rate\">${formatCurrency(it.unit_price || 0)}</td>\n        <td class=\"amount\">${formatCurrency(it.line_total || 0)}</td>\n      </tr>`;
+      });
+    } else {
+      // Legacy behavior: section headers are items with qty=0 and unit_price=0; totals are computed per section
+      let runningSectionTotal = 0;
+      (data.items || []).forEach((it) => {
+        const isSection = (it.quantity === 0 && it.unit_price === 0);
+        if (isSection) {
+          if (itemNo > 0) {
+            rowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(runningSectionTotal)}</td>\n        </tr>`;
+            sectionTotals.push(runningSectionTotal);
+          }
+          runningSectionTotal = 0;
+          itemNo = 0;
+          currentSection = it.description.replace(/^➤\s*/, '');
+          rowsHtml += `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\">${currentSection}</td></tr>`;
+          return;
+        }
+        itemNo += 1;
+        const line = (it.line_total || 0);
+        runningSectionTotal += line;
+        rowsHtml += `<tr class=\"item-row\">\n        <td class=\"num\">${itemNo}</td>\n        <td class=\"desc\">${it.description}</td>\n        <td class=\"qty\">${it.quantity || ''}</td>\n        <td class=\"unit\">${(it as any).unit_abbreviation || it.unit_of_measure || ''}</td>\n        <td class=\"rate\">${formatCurrency(it.unit_price || 0)}</td>\n        <td class=\"amount\">${formatCurrency(line)}</td>\n      </tr>`;
+      });
+      // Flush last section
       if (itemNo > 0) {
-        rowsHtml += `<tr class="section-total">
-          <td class="num"></td>
-          <td colspan="4" class="label">SECTION TOTAL:</td>
-          <td class="amount">${formatCurrency(sectionTotal)}</td>
-        </tr>`;
+        rowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(runningSectionTotal)}</td>\n        </tr>`;
+        sectionTotals.push(runningSectionTotal);
       }
-      itemNo = 0;
-      sectionTotal = 0;
-    };
+    }
 
-    (data.items || []).forEach((it) => {
-      const isSection = (it.quantity === 0 && it.unit_price === 0);
-      if (isSection) {
-        // Close previous section with a total row
-        flushSectionTotal();
-        currentSection = it.description.replace(/^➤\s*/, '');
-        rowsHtml += `<tr class="section-row"><td colspan="6" class="section-title">${currentSection}</td></tr>`;
-        return;
-      }
-      itemNo += 1;
-      sectionTotal += (it.line_total || 0);
-      rowsHtml += `<tr class="item-row">
-        <td class="num">${itemNo}</td>
-        <td class="desc">${it.description}</td>
-        <td class="qty">${it.quantity || ''}</td>
-        <td class="unit">${it.unit_abbreviation || it.unit_of_measure || ''}</td>
-        <td class="rate">${formatCurrency(it.unit_price || 0)}</td>
-        <td class="amount">${formatCurrency(it.line_total || 0)}</td>
-      </tr>`;
-    });
-    // Flush last section total
-    flushSectionTotal();
+    // Compute grand total for BOQ as sum of section totals if present; otherwise fallback to provided total
+    const grandTotalForBOQ = (sectionTotals.length > 0)
+      ? sectionTotals.reduce((a, b) => a + b, 0)
+      : (data.total_amount || data.subtotal || 0);
 
     // Use the provided new logo for BOQ header by default, but allow company override if explicitly set
     const headerLogoUrl = 'https://cdn.builder.io/api/v1/image/assets%2F71cced7a9eba46908b96a4d2eb254873%2F43d7892b1b0247cdbd4d17a1a9d88c4e?format=webp&width=800';
@@ -270,6 +312,10 @@ export const generatePDF = (data: DocumentData) => {
         .item-row td.qty, .item-row td.unit, .item-row td.rate, .item-row td.amount { text-align:right; }
         .section-total td { font-weight:700; background:#fafafa; }
         .section-total .label { text-align:right; padding-right:12px; }
+        .subsection-row td { background:#fcfcfc; font-weight:600; }
+        .subsection-title { padding:6px 8px; }
+        .subsection-total td { font-weight:600; background:#fdfdfd; }
+        .subsection-total .label { text-align:right; padding-right:12px; }
         .totals { margin-top:10px; width:100%; }
         .totals .label { text-align:right; padding-right:12px; }
         .footer { margin-top:24px; display:flex; flex-direction:column; gap:18px; }
@@ -344,7 +390,7 @@ export const generatePDF = (data: DocumentData) => {
           <table style="width:100%; margin-top:8px;">
             <tr>
               <td class="label" style="text-align:right; font-weight:700;">TOTAL:</td>
-              <td style="width:150px; text-align:right; font-weight:700;">${formatCurrency(data.total_amount || data.subtotal || 0)}</td>
+              <td style="width:150px; text-align:right; font-weight:700;">${formatCurrency(grandTotalForBOQ)}</td>
             </tr>
           </table>
         </div>
