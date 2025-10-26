@@ -48,8 +48,16 @@ export function downloadBOQPDF(doc: BoqDocument, company?: { name: string; logo_
     // Handle new subsection structure
     if (section.subsections && section.subsections.length > 0) {
       section.subsections.forEach((subsection) => {
-        flatItems.push({ description: `  → Subsection ${subsection.name}: ${subsection.label}`, quantity: 0, unit_price: 0, line_total: 0 });
+        // Add subsection header as bold/special row
+        flatItems.push({
+          description: `→ Subsection ${subsection.name}: ${subsection.label}`,
+          quantity: 0,
+          unit_price: 0,
+          line_total: 0,
+          _isSectionHeader: true
+        });
 
+        // Add items for this subsection
         subsection.items.forEach((it) => {
           const qty = safeN(it.quantity ?? 1);
           const rate = safeN(it.rate ?? (it.amount ? it.amount : 0));
@@ -71,14 +79,15 @@ export function downloadBOQPDF(doc: BoqDocument, company?: { name: string; logo_
           return sum + (qty * rate);
         }, 0);
         flatItems.push({
-          description: `  Subsection ${subsection.name} Subtotal`,
+          description: `Subsection ${subsection.name} Subtotal`,
           quantity: 0,
           unit_price: 0,
           line_total: subsectionTotal,
+          _isSubtotal: true
         });
       });
 
-      // Add section total row
+      // Add section total row (sum of all subsections)
       const sectionTotal = section.subsections.reduce((sum, sub) => {
         return sum + sub.items.reduce((subSum, it) => {
           const qty = safeN(it.quantity ?? 1);
@@ -91,6 +100,7 @@ export function downloadBOQPDF(doc: BoqDocument, company?: { name: string; logo_
         quantity: 0,
         unit_price: 0,
         line_total: sectionTotal,
+        _isSectionTotal: true
       });
     } else if (section.items && section.items.length > 0) {
       // Handle legacy structure (backward compatibility)
