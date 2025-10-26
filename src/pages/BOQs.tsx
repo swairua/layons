@@ -131,7 +131,7 @@ export default function BOQs() {
                   <Download className="h-4 w-4 mr-2" /> Download PDF
                 </Button>
                 <Button onClick={handlePrint}>
-                  <Print className="h-4 w-4 mr-2" /> Print
+                  <Printer className="h-4 w-4 mr-2" /> Print
                 </Button>
               </div>
             </div>
