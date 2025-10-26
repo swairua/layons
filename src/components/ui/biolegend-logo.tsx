@@ -24,8 +24,8 @@ export function BiolegendLogo({ className, size = "md", showText = true }: Biole
   };
 
   const { currentCompany } = useCurrentCompany();
-  const logoSrc = currentCompany?.logo_url || 'https://cdn.builder.io/api/v1/image/assets%2Fb048b36350454e4dba55aefd37788f9c%2Fbd04dab542504461a2451b061741034c?format=webp&width=800';
-  const companyName = currentCompany?.name || 'Layons Construction Limited';
+  const logoSrc = currentCompany?.logo_url || 'https://cdn.builder.io/api/v1/image/assets%2Fb67e6ae4f83f4f708ce37b0c48a6007b%2Fee8caf2220b549139e083b6ef1cb50b9?format=webp&width=800';
+  const companyName = currentCompany?.name || 'LAYONS CONSTRUCTION LTD';
 
   return (
     <div className={cn("flex items-center space-x-3", className)}>

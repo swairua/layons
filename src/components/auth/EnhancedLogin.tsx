@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +20,13 @@ export function EnhancedLogin() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    toast.success('Ready to sign in', {
+      description: 'Enter your credentials to access the system',
+      duration: 3000
+    });
+  }, []);
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
@@ -46,20 +53,22 @@ export function EnhancedLogin() {
     }
 
     setSubmitting(true);
-    const { error } = await signIn(formData.email, formData.password);
+    try {
+      const { error } = await signIn(formData.email, formData.password);
 
-    if (error) {
-      const errorInfo = handleAuthError(error);
-
-
-      if (errorInfo.type === 'invalid_credentials') {
-        toast.info('Invalid email or password. If you need access, contact the administrator.');
+      if (error) {
+        // Ensure error is properly formatted before passing to handler
+        handleAuthError(error);
+      } else {
+        navigate('/');
       }
-    } else {
-      toast.success('Signed in successfully!');
-      navigate('/');
+    } catch (unexpectedError) {
+      // Catch any unexpected errors and format them properly
+      console.error('Unexpected sign in error:', unexpectedError);
+      toast.error('An unexpected error occurred. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
 
   const handleInputChange = (field: keyof typeof formData) => (
@@ -75,6 +84,17 @@ export function EnhancedLogin() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader className="text-center space-y-4">
+          <div className="flex flex-col items-center space-y-2">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets%2Fb67e6ae4f83f4f708ce37b0c48a6007b%2F48f23de3fcba4c9287bda886160b6f8a?format=webp&width=800"
+              alt="Layons Construction Limited"
+              className="h-24 w-auto"
+            />
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-primary">LAYONS</h1>
+              <p className="text-sm text-muted-foreground">CONSTRUCTION LTD</p>
+            </div>
+          </div>
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">
               Sign in to access your business management system
