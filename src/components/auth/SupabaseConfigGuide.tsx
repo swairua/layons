@@ -34,7 +34,7 @@ export function SupabaseConfigGuide() {
 
   const adminCredentials = {
     email: 'info@construction.com',
-    password: 'Medplus#2025!'
+    password: 'Password123'
   };
 
   const manualUserSQL = `-- Create admin user manually in SQL Editor

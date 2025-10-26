@@ -9,7 +9,7 @@ import { safeAuthOperation, isRateLimited, getRateLimitTimeRemaining, clearAuthT
 
 const ADMIN_CREDENTIALS = {
   email: 'info@construction.com',
-  password: 'Medplus#2025!',
+  password: 'Password123',
   fullName: 'System Administrator'
 };
 
