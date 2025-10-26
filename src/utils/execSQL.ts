@@ -7,11 +7,15 @@ import { parseErrorMessage } from '@/utils/errorHelpers';
  */
 export async function executeSQL(sql: string): Promise<{ error?: any; data?: any }> {
   try {
-    // First try using the exec_sql RPC function if it exists
-    const { data, error } = await supabase.rpc('exec_sql', {
-      sql_query: sql
-    });
-    
+    // First try using the exec_sql RPC function with common param name "sql"
+    let rpc = await supabase.rpc('exec_sql', { sql });
+
+    // If that failed due to parameter mismatch, try "sql_query"
+    if (rpc.error && (rpc.error.message?.toLowerCase().includes('named') || rpc.error.message?.toLowerCase().includes('argument') || rpc.error.message?.toLowerCase().includes('parameter') || rpc.error.message?.toLowerCase().includes('no function matches'))) {
+      rpc = await supabase.rpc('exec_sql', { sql_query: sql as any });
+    }
+    const { data, error } = rpc;
+
     if (error) {
       // If exec_sql doesn't exist, we'll get a function not found error
       if (error.message?.includes('function exec_sql') || error.code === '42883') {
@@ -21,7 +25,7 @@ export async function executeSQL(sql: string): Promise<{ error?: any; data?: any
       const errorMessage = parseErrorMessage(error);
       return { error: new Error(errorMessage) };
     }
-    
+
     return { data };
   } catch (rpcError: any) {
     // Alternative method: try to execute statements using schema introspection
@@ -97,10 +101,13 @@ export async function executeSQL(sql: string): Promise<{ error?: any; data?: any
  */
 export async function checkExecSQLAvailable(): Promise<boolean> {
   try {
-    const { error } = await supabase.rpc('exec_sql', {
-      sql_query: 'SELECT 1;'
-    });
-    
+    // Try with sql first
+    let test = await supabase.rpc('exec_sql', { sql: 'SELECT 1;' });
+    if (test.error) {
+      // Try alternate param name
+      test = await supabase.rpc('exec_sql', { sql_query: 'SELECT 1;' as any });
+    }
+    const { error } = test;
     return !error || !error.message?.includes('function exec_sql');
   } catch {
     return false;
