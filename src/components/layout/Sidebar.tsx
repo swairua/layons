@@ -84,15 +84,6 @@ const sidebarItems: SidebarItem[] = [
     href: '/lpos'
   },
   {
-    title: 'Reports',
-    icon: BarChart3,
-    children: [
-      { title: 'Sales Reports', icon: BarChart3, href: '/reports/sales' },
-      { title: 'Inventory Reports', icon: Package, href: '/reports/inventory' },
-      { title: 'Customer Statements', icon: FileSpreadsheet, href: '/reports/statements' }
-    ]
-  },
-  {
     title: 'Settings',
     icon: Settings,
     children: [
