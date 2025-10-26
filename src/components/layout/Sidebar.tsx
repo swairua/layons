@@ -3,22 +3,15 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import {
   Building2,
-  FileText,
-  Receipt,
   Package,
   DollarSign,
-  Truck,
-  BarChart3,
   Settings,
   ChevronDown,
   ChevronRight,
   Home,
   Users,
-  FileCheck,
   CreditCard,
   FileSpreadsheet,
-  ShoppingCart,
-  RotateCcw
 } from 'lucide-react';
 import { BiolegendLogo } from '@/components/ui/biolegend-logo';
 
@@ -36,34 +29,6 @@ const sidebarItems: SidebarItem[] = [
     href: '/'
   },
   {
-    title: 'Sales',
-    icon: Receipt,
-    children: [
-      { title: 'Quotations', icon: FileText, href: '/quotations' },
-      { title: 'Invoices', icon: Receipt, href: '/invoices' },
-      { title: 'Proforma Invoices', icon: FileCheck, href: '/proforma' },
-      { title: 'Credit Notes', icon: RotateCcw, href: '/credit-notes' }
-    ]
-  },
-  {
-    title: 'Payments',
-    icon: DollarSign,
-    children: [
-      { title: 'Payments', icon: DollarSign, href: '/payments' },
-      { title: 'Remittance Advice', icon: CreditCard, href: '/remittance' }
-    ]
-  },
-  {
-    title: 'Inventory',
-    icon: Package,
-    href: '/inventory'
-  },
-  {
-    title: 'Delivery Notes',
-    icon: Truck,
-    href: '/delivery-notes'
-  },
-  {
     title: 'Customers',
     icon: Users,
     href: '/customers'
@@ -79,17 +44,11 @@ const sidebarItems: SidebarItem[] = [
     href: '/fixed-boq'
   },
   {
-    title: 'Purchase Orders',
-    icon: ShoppingCart,
-    href: '/lpos'
-  },
-  {
-    title: 'Reports',
-    icon: BarChart3,
+    title: 'Payments',
+    icon: DollarSign,
     children: [
-      { title: 'Sales Reports', icon: BarChart3, href: '/reports/sales' },
-      { title: 'Inventory Reports', icon: Package, href: '/reports/inventory' },
-      { title: 'Customer Statements', icon: FileSpreadsheet, href: '/reports/statements' }
+      { title: 'Payments', icon: DollarSign, href: '/payments' },
+      { title: 'Remittance Advice', icon: CreditCard, href: '/remittance' }
     ]
   },
   {
@@ -105,7 +64,7 @@ const sidebarItems: SidebarItem[] = [
 
 export function Sidebar() {
   const location = useLocation();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['Sales', 'Reports']);
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const toggleExpanded = (title: string) => {
     setExpandedItems(prev => 

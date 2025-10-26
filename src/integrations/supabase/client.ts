@@ -2,14 +2,12 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Get environment variables with fallbacks
-const SUPABASE_URL = import.meta.env.NEXT_PUBLIC_SUPABASE_URL ||
-                     import.meta.env.VITE_SUPABASE_URL ||
-                     "https://klifzjcfnlaxminytmyh.supabase.co";
+// Get environment variables - must be set in .env.local or via environment
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ||
+                     import.meta.env.NEXT_PUBLIC_SUPABASE_URL;
 
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-                                import.meta.env.VITE_SUPABASE_ANON_KEY ||
-                                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtsaWZ6amNmbmxheG1pbnl0bXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2ODg5NzcsImV4cCI6MjA3MTI2NDk3N30.kY9eVUh2hKZvOgixYTwggsznN4gD1ktNX4phXQ5TTdU";
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ||
+                                import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 // Validate that we have valid values
 if (!SUPABASE_URL || SUPABASE_URL === 'undefined') {
@@ -30,7 +28,14 @@ console.log('✅ Supabase client initializing with URL:', SUPABASE_URL.substring
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: localStorage,
+    storageKey: 'sb-auth-token',
     persistSession: true,
     autoRefreshToken: true,
-  }
+    detectSessionInUrl: true,
+  },
+  global: {
+    headers: {
+      'x-client-info': 'supabase-js/web',
+    },
+  },
 });

@@ -3,10 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import {
   Plus,
-  FileText,
-  Receipt,
+  FileSpreadsheet,
   Users,
-  Package,
   DollarSign
 } from 'lucide-react';
 
@@ -20,20 +18,6 @@ interface QuickAction {
 
 const quickActions: QuickAction[] = [
   {
-    title: 'New Quotation',
-    description: 'Create a new quotation for a customer',
-    icon: FileText,
-    variant: 'primary-gradient',
-    to: '/quotations'
-  },
-  {
-    title: 'New Invoice',
-    description: 'Generate an invoice from quotation',
-    icon: Receipt,
-    variant: 'success',
-    to: '/invoices'
-  },
-  {
     title: 'Add Customer',
     description: 'Register a new customer',
     icon: Users,
@@ -41,11 +25,11 @@ const quickActions: QuickAction[] = [
     to: '/customers'
   },
   {
-    title: 'Stock Entry',
-    description: 'Add new inventory items',
-    icon: Package,
-    variant: 'warning',
-    to: '/inventory'
+    title: 'New BOQ',
+    description: 'Create a new bill of quantities',
+    icon: FileSpreadsheet,
+    variant: 'primary-gradient',
+    to: '/boqs'
   },
   {
     title: 'Record Payment',

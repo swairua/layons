@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Layers, Plus, Eye, Download, Trash2 } from 'lucide-react';
+import { Layers, Plus, Eye, Download, Trash2, Printer } from 'lucide-react';
 import { CreateBOQModal } from '@/components/boq/CreateBOQModal';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
@@ -19,7 +19,7 @@ export default function BOQs() {
 
   const [viewing, setViewing] = useState<any | null>(null);
 
-  const handleDownload = async (boq: any) => {
+  const handleDownloadPDF = async (boq: any) => {
     try {
       await downloadBOQPDF(boq.data, currentCompany ? {
         name: currentCompany.name,
@@ -35,6 +35,10 @@ export default function BOQs() {
       console.error('Download failed', err);
       toast.error('Failed to download BOQ');
     }
+  };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   const handleDelete = async (id: string) => {
@@ -96,8 +100,11 @@ export default function BOQs() {
                       <Button size="icon" variant="ghost" onClick={() => setViewing(b)} title="View">
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button size="icon" variant="ghost" onClick={() => handleDownload(b)} title="Download">
+                      <Button size="icon" variant="ghost" onClick={() => handleDownloadPDF(b)} title="Download PDF">
                         <Download className="h-4 w-4" />
+                      </Button>
+                      <Button size="icon" variant="ghost" onClick={handlePrint} title="Print">
+                        <Printer className="h-4 w-4" />
                       </Button>
                       <Button size="icon" variant="destructive" onClick={() => handleDelete(b.id)} title="Delete">
                         <Trash2 className="h-4 w-4" />
@@ -120,8 +127,11 @@ export default function BOQs() {
               <h2 className="text-xl font-semibold">BOQ {viewing.number}</h2>
               <div className="flex items-center gap-2">
                 <Button variant="ghost" onClick={() => { setViewing(null); }}>Close</Button>
-                <Button onClick={() => handleDownload(viewing)}>
-                  <Download className="h-4 w-4 mr-2" /> Download
+                <Button onClick={() => handleDownloadPDF(viewing)}>
+                  <Download className="h-4 w-4 mr-2" /> Download PDF
+                </Button>
+                <Button onClick={handlePrint}>
+                  <Printer className="h-4 w-4 mr-2" /> Print
                 </Button>
               </div>
             </div>
