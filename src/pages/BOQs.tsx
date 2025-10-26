@@ -127,8 +127,11 @@ export default function BOQs() {
               <h2 className="text-xl font-semibold">BOQ {viewing.number}</h2>
               <div className="flex items-center gap-2">
                 <Button variant="ghost" onClick={() => { setViewing(null); }}>Close</Button>
-                <Button onClick={() => handleDownload(viewing)}>
-                  <Download className="h-4 w-4 mr-2" /> Download
+                <Button onClick={() => handleDownloadPDF(viewing)}>
+                  <Download className="h-4 w-4 mr-2" /> Download PDF
+                </Button>
+                <Button onClick={handlePrint}>
+                  <Print className="h-4 w-4 mr-2" /> Print
                 </Button>
               </div>
             </div>
