@@ -30,7 +30,14 @@ console.log('✅ Supabase client initializing with URL:', SUPABASE_URL.substring
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: localStorage,
+    storageKey: 'sb-auth-token',
     persistSession: true,
     autoRefreshToken: true,
-  }
+    detectSessionInUrl: true,
+  },
+  global: {
+    headers: {
+      'x-client-info': 'supabase-js/web',
+    },
+  },
 });
