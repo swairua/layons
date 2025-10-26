@@ -213,7 +213,11 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
               capturedRate = parseNumber(m2[2]);
               capturedAmount = capturedRate;
             } else {
-              descParts.push(l);
+              // Remove trailing currency amounts like "5,026.00" from descriptions
+              const cleanedLine = l.replace(/\s+\d+[\d,]*(?:\.\d+)?(?:\s+\(Kshs\))?$/, '').trim();
+              if (cleanedLine) {
+                descParts.push(cleanedLine);
+              }
             }
             j++;
           }
