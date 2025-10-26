@@ -12,6 +12,10 @@ import {
   Users,
   CreditCard,
   FileSpreadsheet,
+  ShoppingCart,
+  Receipt,
+  FileText,
+  Truck,
 } from 'lucide-react';
 import { BiolegendLogo } from '@/components/ui/biolegend-logo';
 
@@ -32,6 +36,17 @@ const sidebarItems: SidebarItem[] = [
     title: 'Customers',
     icon: Users,
     href: '/customers'
+  },
+  {
+    title: 'Sales',
+    icon: ShoppingCart,
+    children: [
+      { title: 'Quotations', icon: FileText, href: '/quotations' },
+      { title: 'Invoices', icon: Receipt, href: '/invoices' },
+      { title: 'Credit Notes', icon: CreditCard, href: '/credit-notes' },
+      { title: 'Proforma', icon: FileText, href: '/proforma' },
+      { title: 'Delivery Notes', icon: Truck, href: '/delivery-notes' }
+    ]
   },
   {
     title: 'BOQs',
