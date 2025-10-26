@@ -8,7 +8,6 @@ import {
   Package,
   DollarSign,
   Truck,
-  BarChart3,
   Settings,
   ChevronDown,
   ChevronRight,
