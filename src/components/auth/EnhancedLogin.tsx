@@ -75,12 +75,16 @@ export function EnhancedLogin() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader className="text-center space-y-4">
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center space-y-2">
             <img
               src="https://cdn.builder.io/api/v1/image/assets%2Fb67e6ae4f83f4f708ce37b0c48a6007b%2F48f23de3fcba4c9287bda886160b6f8a?format=webp&width=800"
               alt="Layons Construction Limited"
               className="h-24 w-auto"
             />
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-primary">LAYONS</h1>
+              <p className="text-sm text-muted-foreground">CONSTRUCTION LTD</p>
+            </div>
           </div>
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">
