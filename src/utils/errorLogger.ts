@@ -2,6 +2,7 @@
  * Utility for consistent error logging that prevents [object Object] console messages
  */
 
+import { parseErrorMessage } from './errorHelpers';
 
 export interface ErrorDetails {
   message?: string;
