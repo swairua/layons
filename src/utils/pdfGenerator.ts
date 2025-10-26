@@ -39,6 +39,12 @@ export interface DocumentData {
     balance?: number;
     days_overdue?: number;
     due_date?: string;
+    item_code?: string;
+  }>;
+  preliminaries_items?: Array<{
+    item_code: string;
+    description: string;
+    line_total: number;
   }>;
   subtotal?: number;
   tax_amount?: number;
@@ -178,6 +184,43 @@ export const generatePDF = (data: DocumentData) => {
 
   // If this is a BOQ, render a dedicated BOQ-style layout
   if (data.type === 'boq') {
+    // Build preliminaries table HTML if present
+    let preliminariesHtml = '';
+    let preliminariesTotal = 0;
+    if (data.preliminaries_items && data.preliminaries_items.length > 0) {
+      preliminariesHtml = `
+        <div class="preliminaries-section">
+          <table class="items">
+            <thead>
+              <tr>
+                <th style="width:10%">ITEM</th>
+                <th style="width:70%; text-align:left">DESCRIPTION</th>
+                <th style="width:20%">AMOUNT (KSHS)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="section-row"><td colspan="3" class="section-title">SECTION NO. 1: PRELIMINARIES</td></tr>
+      `;
+      let itemNo = 1;
+      data.preliminaries_items.forEach((item) => {
+        preliminariesHtml += `<tr class="item-row">
+          <td class="num" style="text-align:center; width:10%">${item.item_code || ''}</td>
+          <td class="desc" style="width:70%">${item.description}</td>
+          <td class="amount" style="width:20%; text-align:right; font-weight:600">${formatCurrency(item.line_total || 0)}</td>
+        </tr>`;
+        preliminariesTotal += item.line_total || 0;
+      });
+      preliminariesHtml += `
+              <tr class="section-total">
+                <td colspan="2" class="label" style="text-align:right; font-weight:700">SECTION TOTAL:</td>
+                <td class="amount" style="text-align:right; font-weight:700">${formatCurrency(preliminariesTotal)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
     // Build table rows; support Sections, Subsections, and their totals
     let rowsHtml = '';
     let currentSection = '';
@@ -257,9 +300,10 @@ export const generatePDF = (data: DocumentData) => {
     }
 
     // Compute grand total for BOQ as sum of section totals if present; otherwise fallback to provided total
-    const grandTotalForBOQ = (sectionTotals.length > 0)
+    let mainSectionsTotal = (sectionTotals.length > 0)
       ? sectionTotals.reduce((a, b) => a + b, 0)
       : (data.total_amount || data.subtotal || 0);
+    const grandTotalForBOQ = preliminariesTotal + mainSectionsTotal;
 
     // Use the provided new logo for BOQ header by default, but allow company override if explicitly set
     const headerLogoUrl = 'https://cdn.builder.io/api/v1/image/assets%2F71cced7a9eba46908b96a4d2eb254873%2F43d7892b1b0247cdbd4d17a1a9d88c4e?format=webp&width=800';
@@ -312,6 +356,8 @@ export const generatePDF = (data: DocumentData) => {
         .item-row td.qty, .item-row td.unit, .item-row td.rate, .item-row td.amount { text-align:right; }
         .section-total td { font-weight:700; background:#fafafa; }
         .section-total .label { text-align:right; padding-right:12px; }
+        .preliminaries-section { margin-bottom:12px; }
+        .preliminaries-section .items { margin-top:0; }
         .subsection-row td { background:#fcfcfc; font-weight:600; }
         .subsection-title { padding:6px 8px; }
         .subsection-total td { font-weight:600; background:#fdfdfd; }
@@ -369,6 +415,8 @@ export const generatePDF = (data: DocumentData) => {
             <div class="field"><strong>BOQ #:</strong> ${data.number}</div>
           </div>
         </div>
+
+        ${preliminariesHtml}
 
         <table class="items">
           <thead>
