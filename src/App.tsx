@@ -43,6 +43,8 @@ const App = () => {
     // Suppress ResizeObserver loop errors
     enableResizeObserverErrorSuppression();
 
+    // Ensure database functions exist on app startup
+    ensureDatabaseFunctionsExist();
   }, []);
 
   return (
