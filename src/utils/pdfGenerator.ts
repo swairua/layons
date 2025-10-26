@@ -242,7 +242,7 @@ export const generatePDF = (data: DocumentData) => {
         .container { padding: 12mm; }
 
         /* Brand header like the mock */
-        .brand-header { border:none; border-radius:0; padding:0; width:100%; margin:0; }
+        .brand-header { border:none; border-radius:0; padding:0 12mm; width:100%; margin:0; box-sizing:border-box; }
         .brand-row { display:flex; align-items:center; justify-content:flex-start; margin:0; padding:0; }
         .brand-logo { height:80px; display:flex; align-items:center; justify-content:flex-start; flex:1; margin:0; padding:0; }
         .brand-logo img { height:80px; width:100%; object-fit:cover; margin:0; padding:0; }
