@@ -106,9 +106,14 @@ export function analyzeAuthError(error: AuthError | Error): AuthErrorInfo {
     ? 'An unexpected authentication error occurred'
     : errorMessage;
 
+  // Ensure message is always a string
+  const finalMessage = typeof fallbackMessage === 'string'
+    ? fallbackMessage
+    : 'An unexpected authentication error occurred';
+
   return {
     type: 'unknown',
-    message: fallbackMessage,
+    message: finalMessage,
     action: 'Please try again or contact support if the problem persists',
     retry: true
   };
