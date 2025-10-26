@@ -242,7 +242,7 @@ export const generatePDF = (data: DocumentData) => {
         .container { padding: 12mm; }
 
         /* Brand header like the mock */
-        .brand-header { border:1px solid #cfd4da; border-radius:4px; padding:12px 14px 10px; }
+        .brand-header { border:none; border-radius:0; padding:12px 12mm 10px; width:100%; }
         .brand-row { display:flex; align-items:center; justify-content:space-between; }
         .brand-logo { height:48px; display:flex; align-items:center; }
         .brand-logo img { height:48px; width:auto; object-fit:contain; }
@@ -285,21 +285,21 @@ export const generatePDF = (data: DocumentData) => {
       </style>
     </head>
     <body>
-      <div class="container">
-        <div class="brand-header">
-          <div class="brand-row">
-            <div class="brand-logo">
-              ${logoSrc ? `<img src="${logoSrc}" alt="${company.name} Logo" />` : ''}
-            </div>
-            <div class="brand-tagline">DESIGN & BUILD.</div>
+      <div class="brand-header">
+        <div class="brand-row">
+          <div class="brand-logo">
+            ${logoSrc ? `<img src="${logoSrc}" alt="${company.name} Logo" />` : ''}
           </div>
-          <div class="brand-accent">
-            <div class="accent-yellow"></div>
-            <div class="accent-stripes"></div>
-            <div class="accent-black"></div>
-          </div>
+          <div class="brand-tagline">DESIGN & BUILD.</div>
         </div>
+        <div class="brand-accent">
+          <div class="accent-yellow"></div>
+          <div class="accent-stripes"></div>
+          <div class="accent-black"></div>
+        </div>
+      </div>
 
+      <div class="container">
         <div class="top-headers">
           <div class="subtitle">&nbsp;</div>
           <div class="company">
@@ -369,6 +369,7 @@ export const generatePDF = (data: DocumentData) => {
             <div class="field-row"><div class="label">Date:</div><div class="fill"></div></div>
           </div>
         </div>
+      </div>
       </div>
       <div class="pagefoot">${company.name} • Generated on ${new Date().toLocaleDateString()}</div>
     </body>
