@@ -12,6 +12,10 @@ import {
   Users,
   CreditCard,
   FileSpreadsheet,
+  ShoppingCart,
+  Receipt,
+  FileText,
+  Truck,
 } from 'lucide-react';
 import { BiolegendLogo } from '@/components/ui/biolegend-logo';
 
