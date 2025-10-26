@@ -8,11 +8,19 @@ export interface BoqItem {
   unit?: string; // legacy fallback
   rate?: number; // KES per unit
   amount?: number; // optional; if omitted computed as qty*rate
+  unit_abbreviation?: string; // abbreviation for the unit
+}
+
+export interface BoqSubsection {
+  name: string; // "A", "B", "C", etc.
+  label: string; // "Materials", "Labor", etc.
+  items: BoqItem[];
 }
 
 export interface BoqSection {
   title?: string; // optional section title like "BILL NO. 01: DEMOLITIONS"
-  items: BoqItem[];
+  subsections?: BoqSubsection[]; // new subsections support
+  items?: BoqItem[]; // legacy items support (for backwards compatibility)
 }
 
 export interface BoqDocument {
