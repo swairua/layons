@@ -53,15 +53,22 @@ export function EnhancedLogin() {
     }
 
     setSubmitting(true);
-    const { error } = await signIn(formData.email, formData.password);
+    try {
+      const { error } = await signIn(formData.email, formData.password);
 
-    if (error) {
-      const errorInfo = handleAuthError(error);
-      // handleAuthError already displays the appropriate toast
-    } else {
-      navigate('/');
+      if (error) {
+        // Ensure error is properly formatted before passing to handler
+        handleAuthError(error);
+      } else {
+        navigate('/');
+      }
+    } catch (unexpectedError) {
+      // Catch any unexpected errors and format them properly
+      console.error('Unexpected sign in error:', unexpectedError);
+      toast.error('An unexpected error occurred. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
 
   const handleInputChange = (field: keyof typeof formData) => (
