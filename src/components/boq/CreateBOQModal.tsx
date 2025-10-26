@@ -122,20 +122,32 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
     setSections(prev => prev.map(s => s.id === sectionId ? { ...s, title } : s));
   };
 
-  const addItem = (sectionId: string) => {
-    setSections(prev => prev.map(s => s.id === sectionId ? { ...s, items: [...s.items, defaultItem()] } : s));
+  const addItem = (sectionId: string, subsectionId: string) => {
+    setSections(prev => prev.map(s => s.id === sectionId ? {
+      ...s,
+      subsections: s.subsections.map(sub => sub.id === subsectionId ? { ...sub, items: [...sub.items, defaultItem()] } : sub)
+    } : s));
   };
 
-  const removeItem = (sectionId: string, itemId: string) => {
-    setSections(prev => prev.map(s => s.id === sectionId ? { ...s, items: s.items.filter(i => i.id !== itemId) } : s));
+  const removeItem = (sectionId: string, subsectionId: string, itemId: string) => {
+    setSections(prev => prev.map(s => s.id === sectionId ? {
+      ...s,
+      subsections: s.subsections.map(sub => sub.id === subsectionId ? { ...sub, items: sub.items.filter(i => i.id !== itemId) } : sub)
+    } : s));
   };
 
-  const updateItem = (sectionId: string, itemId: string, field: keyof BOQItemRow, value: string | number) => {
+  const updateItem = (sectionId: string, subsectionId: string, itemId: string, field: keyof BOQItemRow, value: string | number) => {
     setSections(prev => prev.map(s => {
       if (s.id !== sectionId) return s;
       return {
         ...s,
-        items: s.items.map(i => i.id === itemId ? { ...i, [field]: field === 'description' || field === 'unit' ? String(value) : Number(value) } : i)
+        subsections: s.subsections.map(sub => {
+          if (sub.id !== subsectionId) return sub;
+          return {
+            ...sub,
+            items: sub.items.map(i => i.id === itemId ? { ...i, [field]: field === 'description' || field === 'unit' ? String(value) : Number(value) } : i)
+          };
+        })
       };
     }));
   };
