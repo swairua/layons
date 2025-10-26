@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Layers, Plus, Eye, Download, Trash2, Printer } from 'lucide-react';
+import { Layers, Plus, Eye, Download, Trash2 } from 'lucide-react';
 import { CreateBOQModal } from '@/components/boq/CreateBOQModal';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
@@ -35,10 +35,6 @@ export default function BOQs() {
       console.error('Download failed', err);
       toast.error('Failed to download BOQ');
     }
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   const handleDelete = async (id: string) => {
@@ -102,9 +98,6 @@ export default function BOQs() {
                       </Button>
                       <Button size="icon" variant="ghost" onClick={() => handleDownloadPDF(b)} title="Download PDF">
                         <Download className="h-4 w-4" />
-                      </Button>
-                      <Button size="icon" variant="ghost" onClick={handlePrint} title="Print">
-                        <Printer className="h-4 w-4" />
                       </Button>
                       <Button size="icon" variant="destructive" onClick={() => handleDelete(b.id)} title="Delete">
                         <Trash2 className="h-4 w-4" />
