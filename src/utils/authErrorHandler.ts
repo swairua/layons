@@ -116,19 +116,28 @@ export function analyzeAuthError(error: AuthError | Error): AuthErrorInfo {
 
 export function handleAuthError(error: AuthError | Error): AuthErrorInfo {
   const errorInfo = analyzeAuthError(error);
-  
+
   // Log for debugging using structured logger
   logError('Authentication error', error, { parsed: errorInfo });
 
-  // Show appropriate toast
+  // Ensure the message is a string and not an object
+  const messageToShow = typeof errorInfo.message === 'string'
+    ? errorInfo.message
+    : 'An unexpected authentication error occurred';
+
+  const descriptionToShow = typeof errorInfo.action === 'string'
+    ? errorInfo.action
+    : undefined;
+
+  // Show appropriate toast with guaranteed string values
   if (errorInfo.retry) {
-    toast.error(errorInfo.message, {
-      description: errorInfo.action,
+    toast.error(messageToShow, {
+      description: descriptionToShow,
       duration: 5000
     });
   } else {
-    toast.error(errorInfo.message, {
-      description: errorInfo.action,
+    toast.error(messageToShow, {
+      description: descriptionToShow,
       duration: 8000
     });
   }
