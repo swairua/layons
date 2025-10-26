@@ -189,35 +189,13 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
           const item_code = line;
           const descParts: string[] = [];
           let j = i + 1;
-          let capturedQty = 0;
-          let capturedUnit = '';
-          let capturedRate = 0;
-          let capturedAmount = 0;
 
           while (j < lines.length && !letterLine.test(lines[j]) && !sectionLine.test(lines[j])) {
             const l = lines[j];
-            // Try to capture quantity/unit/rate/amount patterns
-            // Pattern 1: "12 Sm 200 2,400.00"
-            const m1 = l.match(/^(\d+[\d,]*(?:\.\d+)?)\s*(No|SM|Sm|sm|CM|Cm|cm|LM|Lm|lm|KG|Kg|kg|Item|ITEM)\b\s+(\d+[\d,]*(?:\.\d+)?)\s+(\d+[\d,]*(?:\.\d+)?)/);
-            // Pattern 2: "Item 58,200.00" or "ITEM 25,000.00"
-            const m2 = !m1 && l.match(/^(Item|ITEM)\b\s+(\d+[\d,]*(?:\.\d+)?)/);
-
-            if (m1) {
-              capturedQty = parseNumber(m1[1]);
-              capturedUnit = m1[2];
-              capturedRate = parseNumber(m1[3]);
-              capturedAmount = parseNumber(m1[4]);
-            } else if (m2) {
-              capturedQty = 1;
-              capturedUnit = 'Item';
-              capturedRate = parseNumber(m2[2]);
-              capturedAmount = capturedRate;
-            } else {
-              // Remove trailing currency amounts like "5,026.00" from descriptions
-              const cleanedLine = l.replace(/\s+\d+[\d,]*(?:\.\d+)?(?:\s+\(Kshs\))?$/, '').trim();
-              if (cleanedLine) {
-                descParts.push(cleanedLine);
-              }
+            // Remove trailing currency amounts like "5,026.00" or "40,000.00 (Kshs)"
+            const cleanedLine = l.replace(/\s+\d+[\d,]*(?:\.\d+)?(?:\s+\(Kshs\))?$/i, '').trim();
+            if (cleanedLine) {
+              descParts.push(cleanedLine);
             }
             j++;
           }
@@ -228,9 +206,9 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
             section: currentSection || 'General',
             item_code,
             description,
-            unit: capturedUnit || null,
-            default_qty: capturedQty || null,
-            default_rate: capturedRate || null,
+            unit: null,
+            default_qty: null,
+            default_rate: null,
             sort_order: order++,
           } as any);
 
