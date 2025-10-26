@@ -91,24 +91,26 @@ export default function FixedBOQ() {
     return grouped.length > 1 ? grouped.slice(1) : [];
   }, [grouped]);
 
+  const preliminariesTotal = useMemo(() => {
+    if (!preliminaries) return 0;
+    const [, arr] = preliminaries;
+    return arr.reduce((sum, it) => {
+      const a = amount[it.id] ?? (it.default_rate ?? 0);
+      return sum + (Number(a) || 0);
+    }, 0);
+  }, [preliminaries, amount]);
+
   const sectionTotals = useMemo(() => {
     const totals: Record<string, number> = {};
-    grouped.forEach(([section, arr], idx) => {
-      if (idx === 0) {
-        totals[section] = arr.reduce((sum, it) => {
-          const a = amount[it.id] ?? (it.default_rate ?? 0);
-          return sum + (Number(a) || 0);
-        }, 0);
-      } else {
-        totals[section] = arr.reduce((sum, it) => {
-          const q = qty[it.id] ?? (it.default_qty ?? 0);
-          const r = rate[it.id] ?? (it.default_rate ?? 0);
-          return sum + (Number(q) || 0) * (Number(r) || 0);
-        }, 0);
-      }
+    mainSections.forEach(([section, arr]) => {
+      totals[section] = arr.reduce((sum, it) => {
+        const q = qty[it.id] ?? (it.default_qty ?? 0);
+        const r = rate[it.id] ?? (it.default_rate ?? 0);
+        return sum + (Number(q) || 0) * (Number(r) || 0);
+      }, 0);
     });
     return totals;
-  }, [grouped, qty, rate, amount]);
+  }, [mainSections, qty, rate]);
 
   const totalAmount = useMemo(() => {
     return Object.values(sectionTotals).reduce((a, b) => a + b, 0);
