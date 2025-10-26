@@ -404,6 +404,15 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
           <Button onClick={() => setImporting(true)} variant="secondary" disabled={!companyId}>
             <Upload className="h-4 w-4 mr-2" /> Import from Text
           </Button>
+          <Button onClick={cleanupDescriptions} variant="outline" disabled={seeding || !items.length} title="Remove trailing figures from descriptions">
+            {seeding ? (
+              <>
+                <Database className="h-4 w-4 mr-2 animate-spin" /> Cleaning...
+              </>
+            ) : (
+              <>Clean Descriptions</>
+            )}
+          </Button>
         </div>
       </div>
 
