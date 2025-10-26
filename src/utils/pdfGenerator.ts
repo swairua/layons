@@ -195,57 +195,66 @@ export const generatePDF = (data: DocumentData) => {
     const isSubsectionSubtotal = (d: string) => /^subsection\s+[^\s]+\s+subtotal\s*$/i.test(d);
     const isSectionTotalRow = (d: string) => /^section\s+total$/i.test(d);
 
-    (data.items || []).forEach((it) => {
-      const desc = String(it.description || '');
+    if (hasSubsections) {
+      (data.items || []).forEach((it) => {
+        const desc = String(it.description || '');
 
-      if (isSectionHeader(desc)) {
-        // Start a new section; reset item numbering
-        currentSection = desc.replace(/^➤\s*/, '');
-        itemNo = 0;
-        rowsHtml += `<tr class="section-row"><td colspan="6" class="section-title">${currentSection}</td></tr>`;
-        return;
+        if (isSectionHeader(desc)) {
+          currentSection = desc.replace(/^➤\s*/, '');
+          itemNo = 0;
+          rowsHtml += `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\">${currentSection}</td></tr>`;
+          return;
+        }
+
+        if (isSubsectionSubtotal(desc)) {
+          rowsHtml += `<tr class=\"subsection-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">${desc}</td>\n          <td class=\"amount\">${formatCurrency(it.line_total || 0)}</td>\n        </tr>`;
+          return;
+        }
+
+        if (isSubsectionHeader(desc)) {
+          rowsHtml += `<tr class=\"subsection-row\"><td class=\"num\"></td><td colspan=\"5\" class=\"subsection-title\">${desc.replace(/^\s*[→-]?\s*/, '')}</td></tr>`;
+          return;
+        }
+
+        if (isSectionTotalRow(desc)) {
+          const total = Number(it.line_total || 0);
+          sectionTotals.push(total);
+          rowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(total)}</td>\n        </tr>`;
+          itemNo = 0;
+          return;
+        }
+
+        // Regular item row within subsection
+        itemNo += 1;
+        rowsHtml += `<tr class=\"item-row\">\n        <td class=\"num\">${itemNo}</td>\n        <td class=\"desc\">${it.description}</td>\n        <td class=\"qty\">${it.quantity || ''}</td>\n        <td class=\"unit\">${(it as any).unit_abbreviation || it.unit_of_measure || ''}</td>\n        <td class=\"rate\">${formatCurrency(it.unit_price || 0)}</td>\n        <td class=\"amount\">${formatCurrency(it.line_total || 0)}</td>\n      </tr>`;
+      });
+    } else {
+      // Legacy behavior: section headers are items with qty=0 and unit_price=0; totals are computed per section
+      let runningSectionTotal = 0;
+      (data.items || []).forEach((it) => {
+        const isSection = (it.quantity === 0 && it.unit_price === 0);
+        if (isSection) {
+          if (itemNo > 0) {
+            rowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(runningSectionTotal)}</td>\n        </tr>`;
+            sectionTotals.push(runningSectionTotal);
+          }
+          runningSectionTotal = 0;
+          itemNo = 0;
+          currentSection = it.description.replace(/^➤\s*/, '');
+          rowsHtml += `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\">${currentSection}</td></tr>`;
+          return;
+        }
+        itemNo += 1;
+        const line = (it.line_total || 0);
+        runningSectionTotal += line;
+        rowsHtml += `<tr class=\"item-row\">\n        <td class=\"num\">${itemNo}</td>\n        <td class=\"desc\">${it.description}</td>\n        <td class=\"qty\">${it.quantity || ''}</td>\n        <td class=\"unit\">${(it as any).unit_abbreviation || it.unit_of_measure || ''}</td>\n        <td class=\"rate\">${formatCurrency(it.unit_price || 0)}</td>\n        <td class=\"amount\">${formatCurrency(line)}</td>\n      </tr>`;
+      });
+      // Flush last section
+      if (itemNo > 0) {
+        rowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(runningSectionTotal)}</td>\n        </tr>`;
+        sectionTotals.push(runningSectionTotal);
       }
-
-      if (hasSubsections && isSubsectionHeader(desc)) {
-        // Render a lightweight subsection heading row
-        rowsHtml += `<tr class="subsection-row"><td class="num"></td><td colspan="5" class="subsection-title">${desc.replace(/^\s*[→-]?\s*/, '')}</td></tr>`;
-        return;
-      }
-
-      if (hasSubsections && isSubsectionSubtotal(desc)) {
-        // Right-aligned subtotal label and amount
-        rowsHtml += `<tr class="subsection-total">
-          <td class="num"></td>
-          <td colspan="4" class="label">${desc}</td>
-          <td class="amount">${formatCurrency(it.line_total || 0)}</td>
-        </tr>`;
-        return;
-      }
-
-      if (hasSubsections && isSectionTotalRow(desc)) {
-        const total = Number(it.line_total || 0);
-        sectionTotals.push(total);
-        rowsHtml += `<tr class="section-total">
-          <td class="num"></td>
-          <td colspan="4" class="label">SECTION TOTAL:</td>
-          <td class="amount">${formatCurrency(total)}</td>
-        </tr>`;
-        // Reset item numbering for next section
-        itemNo = 0;
-        return;
-      }
-
-      // Regular item row
-      itemNo += 1;
-      rowsHtml += `<tr class="item-row">
-        <td class="num">${itemNo}</td>
-        <td class="desc">${it.description}</td>
-        <td class="qty">${it.quantity || ''}</td>
-        <td class="unit">${(it as any).unit_abbreviation || it.unit_of_measure || ''}</td>
-        <td class="rate">${formatCurrency(it.unit_price || 0)}</td>
-        <td class="amount">${formatCurrency(it.line_total || 0)}</td>
-      </tr>`;
-    });
+    }
 
     // Compute grand total for BOQ as sum of section totals if present; otherwise fallback to provided total
     const grandTotalForBOQ = (sectionTotals.length > 0)
