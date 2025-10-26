@@ -83,15 +83,22 @@ export default function FixedBOQ() {
 
   const sectionTotals = useMemo(() => {
     const totals: Record<string, number> = {};
-    grouped.forEach(([section, arr]) => {
-      totals[section] = arr.reduce((sum, it) => {
-        const q = qty[it.id] ?? (it.default_qty ?? 0);
-        const r = rate[it.id] ?? (it.default_rate ?? 0);
-        return sum + q * r;
-      }, 0);
+    grouped.forEach(([section, arr], idx) => {
+      if (idx === 0) {
+        totals[section] = arr.reduce((sum, it) => {
+          const a = amount[it.id] ?? (it.default_rate ?? 0);
+          return sum + (Number(a) || 0);
+        }, 0);
+      } else {
+        totals[section] = arr.reduce((sum, it) => {
+          const q = qty[it.id] ?? (it.default_qty ?? 0);
+          const r = rate[it.id] ?? (it.default_rate ?? 0);
+          return sum + (Number(q) || 0) * (Number(r) || 0);
+        }, 0);
+      }
     });
     return totals;
-  }, [grouped, qty, rate]);
+  }, [grouped, qty, rate, amount]);
 
   const totalAmount = useMemo(() => {
     return Object.values(sectionTotals).reduce((a, b) => a + b, 0);
