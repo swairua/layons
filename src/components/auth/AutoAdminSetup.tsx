@@ -9,7 +9,7 @@ import { safeAuthOperation, isRateLimited, getRateLimitTimeRemaining, clearAuthT
 
 const ADMIN_CREDENTIALS = {
   email: 'info@construction.com',
-  password: 'Medplus#2025!',
+  password: 'Password123',
   fullName: 'System Administrator'
 };
 
@@ -472,7 +472,7 @@ export function AutoAdminSetup() {
                 <p className="text-xs font-medium text-muted-foreground mb-1">Default Admin Credentials:</p>
                 <div className="text-xs text-muted-foreground space-y-1">
                   <p><strong>Email:</strong> info@construction.com</p>
-                  <p><strong>Password:</strong> Medplus#2025!</p>
+                  <p><strong>Password:</strong> Password123</p>
                 </div>
               </div>
             </div>

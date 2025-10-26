@@ -34,7 +34,7 @@ export function SupabaseConfigGuide() {
 
   const adminCredentials = {
     email: 'info@construction.com',
-    password: 'Medplus#2025!'
+    password: 'Password123'
   };
 
   const manualUserSQL = `-- Create admin user manually in SQL Editor
@@ -56,7 +56,7 @@ INSERT INTO auth.users (
   gen_random_uuid(),
   '00000000-0000-0000-0000-000000000000',
   'info@construction.com',
-  crypt('Medplus#2025!', gen_salt('bf')),
+  -- Note: Update password hash in Supabase dashboard for Password123
   NOW(),
   NOW(),
   NOW(),

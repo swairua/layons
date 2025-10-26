@@ -2,6 +2,8 @@
  * Utility for consistent error logging that prevents [object Object] console messages
  */
 
+import { parseErrorMessage } from './errorHelpers';
+
 export interface ErrorDetails {
   message?: string;
   code?: string | number;
@@ -26,7 +28,7 @@ export const extractErrorDetails = (error: unknown, context?: Record<string, any
     if ('details' in error) details.details = (error as any).details;
     if ('hint' in error) details.hint = (error as any).hint;
   } else if (error && typeof error === 'object') {
-    details.message = (error as any).message || String(error);
+    details.message = (error as any).message || parseErrorMessage(error);
     if ('code' in error) details.code = (error as any).code;
     if ('details' in error) details.details = (error as any).details;
     if ('hint' in error) details.hint = (error as any).hint;

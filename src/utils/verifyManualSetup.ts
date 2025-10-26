@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { parseErrorMessage } from './errorHelpers';
 
 /**
  * Verify the setup after manual SQL execution
@@ -188,7 +189,7 @@ export async function testCoreSystemAfterSetup() {
       tests.errors.push(`Quotation access: ${error.message}`);
     }
   } catch (error) {
-    tests.errors.push(`Quotation test failed: ${error}`);
+    tests.errors.push(`Quotation test failed: ${parseErrorMessage(error)}`);
   }
 
   // Test inventory system
@@ -205,7 +206,7 @@ export async function testCoreSystemAfterSetup() {
       tests.errors.push(`Inventory access: ${error.message}`);
     }
   } catch (error) {
-    tests.errors.push(`Inventory test failed: ${error}`);
+    tests.errors.push(`Inventory test failed: ${parseErrorMessage(error)}`);
   }
 
   // Test customer system
@@ -222,7 +223,7 @@ export async function testCoreSystemAfterSetup() {
       tests.errors.push(`Customer access: ${error.message}`);
     }
   } catch (error) {
-    tests.errors.push(`Customer test failed: ${error}`);
+    tests.errors.push(`Customer test failed: ${parseErrorMessage(error)}`);
   }
 
   const workingCount = [tests.quotationCreation, tests.inventoryAccess, tests.customerAccess].filter(Boolean).length;

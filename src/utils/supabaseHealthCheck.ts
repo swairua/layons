@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { parseErrorMessage } from './errorHelpers';
 
 interface HealthCheckResult {
   isHealthy: boolean;
@@ -39,7 +40,7 @@ export const checkSupabaseHealth = async (): Promise<HealthCheckResult> => {
         canCreateUsers = true;
       }
     } catch (authError) {
-      issues.push(`Auth service unavailable: ${authError}`);
+      issues.push(`Auth service unavailable: ${parseErrorMessage(authError)}`);
       isHealthy = false;
     }
 
@@ -55,7 +56,7 @@ export const checkSupabaseHealth = async (): Promise<HealthCheckResult> => {
     }
 
   } catch (error) {
-    issues.push(`General connection error: ${error}`);
+    issues.push(`General connection error: ${parseErrorMessage(error)}`);
     isHealthy = false;
   }
 

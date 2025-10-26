@@ -32,7 +32,7 @@ export function EmailLoginConfigGuide() {
 
   const adminCredentials = {
     email: 'info@construction.com',
-    password: 'Medplus#2025!'
+    password: 'Password123'
   };
 
   return (
@@ -157,7 +157,7 @@ export function EmailLoginConfigGuide() {
                     <p className="font-medium">Email Configuration</p>
                     <ul className="text-sm space-y-1">
                       <li>• "Enable email confirmations": OFF</li>
-                      <li>• "Allow disposable email": Either</li>
+                      <li>��� "Allow disposable email": Either</li>
                       <li>• "Double confirm email changes": Either</li>
                       <li>• "Secure email change": Either</li>
                     </ul>

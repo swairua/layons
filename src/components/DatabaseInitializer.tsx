@@ -8,6 +8,7 @@ import { getDatabaseStatus } from '@/utils/setupDatabase';
 import { createSuperAdmin } from '@/utils/createSuperAdmin';
 import { ManualSQLSetup } from '@/components/ManualSQLSetup';
 import { toast } from 'sonner';
+import { parseErrorMessage } from '@/utils/errorHelpers';
 
 export function DatabaseInitializer() {
   const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
@@ -39,7 +40,8 @@ export function DatabaseInitializer() {
         setAdminCredentials(result.credentials);
         toast.success('Super admin created successfully!');
       } else {
-        toast.error(`Admin creation failed: ${result.error}`);
+        const errorMsg = typeof result.error === 'string' ? result.error : parseErrorMessage(result.error);
+        toast.error(`Admin creation failed: ${errorMsg}`);
       }
       
     } catch (error) {
