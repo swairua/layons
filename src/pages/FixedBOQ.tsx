@@ -118,8 +118,15 @@ export default function FixedBOQ() {
   }, [sectionTotals, preliminariesTotal]);
 
   const totalQuantity = useMemo(() => {
-    return items.reduce((sum, it) => sum + (qty[it.id] ?? (it.default_qty ?? 0)), 0);
-  }, [items, qty]);
+    // Only count quantities from main sections (exclude preliminaries)
+    let total = 0;
+    mainSections.forEach(([, arr]) => {
+      arr.forEach((it) => {
+        total += qty[it.id] ?? (it.default_qty ?? 0);
+      });
+    });
+    return total;
+  }, [mainSections, qty]);
 
   const ensureSchemaAndSeed = async () => {
     if (!companyId) { toast.error('No company selected'); return; }
