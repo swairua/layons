@@ -30,14 +30,6 @@ const sidebarItems: SidebarItem[] = [
     href: '/'
   },
   {
-    title: 'Payments',
-    icon: DollarSign,
-    children: [
-      { title: 'Payments', icon: DollarSign, href: '/payments' },
-      { title: 'Remittance Advice', icon: CreditCard, href: '/remittance' }
-    ]
-  },
-  {
     title: 'Customers',
     icon: Users,
     href: '/customers'
@@ -53,9 +45,12 @@ const sidebarItems: SidebarItem[] = [
     href: '/fixed-boq'
   },
   {
-    title: 'Purchase Orders',
-    icon: ShoppingCart,
-    href: '/lpos'
+    title: 'Payments',
+    icon: DollarSign,
+    children: [
+      { title: 'Payments', icon: DollarSign, href: '/payments' },
+      { title: 'Remittance Advice', icon: CreditCard, href: '/remittance' }
+    ]
   },
   {
     title: 'Settings',
