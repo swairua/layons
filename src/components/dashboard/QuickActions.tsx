@@ -37,13 +37,6 @@ const quickActions: QuickAction[] = [
     icon: DollarSign,
     variant: 'success',
     to: '/payments'
-  },
-  {
-    title: 'Remittance Advice',
-    description: 'Create remittance advice',
-    icon: CreditCard,
-    variant: 'warning',
-    to: '/remittance'
   }
 ];
 
