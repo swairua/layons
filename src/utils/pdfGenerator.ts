@@ -414,6 +414,8 @@ export const generatePDF = (data: DocumentData) => {
           </div>
         </div>
 
+        ${preliminariesHtml}
+
         <table class="items">
           <thead>
             <tr>
