@@ -79,11 +79,7 @@ export function EnhancedLogin() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto">
-            <BiolegendLogo size="xl" showText={false} />
-          </div>
           <div className="space-y-2">
-            <CardTitle className="text-2xl font-bold biolegend-brand">{brandName}</CardTitle>
             <p className="text-sm text-muted-foreground">
               Sign in to access your business management system
             </p>
