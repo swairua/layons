@@ -138,7 +138,7 @@ export function handleAuthError(error: AuthError | Error): AuthErrorInfo {
 
 export const DEFAULT_ADMIN_CREDENTIALS = {
   email: 'info@construction.com',
-  password: 'Medplus#2025!'
+  password: 'Password123'
 };
 
 export function getAdminCredentialsHelp(): string {
