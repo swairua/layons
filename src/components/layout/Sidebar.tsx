@@ -3,21 +3,16 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import {
   Building2,
-  FileText,
-  Receipt,
   Package,
   DollarSign,
-  Truck,
   Settings,
   ChevronDown,
   ChevronRight,
   Home,
   Users,
-  FileCheck,
   CreditCard,
   FileSpreadsheet,
   ShoppingCart,
-  RotateCcw
 } from 'lucide-react';
 import { BiolegendLogo } from '@/components/ui/biolegend-logo';
 
