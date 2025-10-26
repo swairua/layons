@@ -39,6 +39,12 @@ export interface DocumentData {
     balance?: number;
     days_overdue?: number;
     due_date?: string;
+    item_code?: string;
+  }>;
+  preliminaries_items?: Array<{
+    item_code: string;
+    description: string;
+    line_total: number;
   }>;
   subtotal?: number;
   tax_amount?: number;
