@@ -319,27 +319,20 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
   const handleDownloadPDF = async () => {
     if (!currentCompany) { toast.error('Company not loaded'); return; }
 
-    // Build BOQ-style items including section marker rows for section totals in PDF
+    // Build preliminaries items separately
+    const preliminariesItems = preliminaries ? preliminaries[1].map((it) => {
+      const a = amount[it.id] ?? (it.default_rate ?? 0);
+      return {
+        item_code: it.item_code || '',
+        description: it.description,
+        line_total: Number(a) || 0,
+      };
+    }) : [];
+
+    // Build main section items
     const pdfItems: Array<{ description: string; quantity: number; unit_price: number; line_total: number; unit_of_measure?: string } & { unit_abbreviation?: string }> = [];
 
-    // Add preliminaries section if it exists
-    if (preliminaries) {
-      const [section, arr] = preliminaries;
-      pdfItems.push({ description: `➤ ${section}`, quantity: 0, unit_price: 0, line_total: 0 });
-      arr.forEach((it) => {
-        const a = amount[it.id] ?? (it.default_rate ?? 0);
-        const val = Number(a) || 0;
-        pdfItems.push({
-          description: `${it.item_code ? `${it.item_code} ` : ''}${it.description}`,
-          quantity: 1,
-          unit_price: val,
-          line_total: val,
-          unit_of_measure: 'Item',
-        });
-      });
-    }
-
-    // Add main sections
+    // Add main sections only
     mainSections.forEach(([section, arr]) => {
       pdfItems.push({ description: `➤ ${section}`, quantity: 0, unit_price: 0, line_total: 0 });
       arr.forEach((it) => {
