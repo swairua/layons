@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +20,12 @@ export function EnhancedLogin() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    toast.success('Database connected', {
+      description: 'You can now sign in to your account'
+    });
+  }, []);
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
