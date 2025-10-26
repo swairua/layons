@@ -41,6 +41,7 @@ export default function FixedBOQ() {
   const [importText, setImportText] = useState('');
   const [qty, setQty] = useState<Record<string, number>>({});
   const [rate, setRate] = useState<Record<string, number>>({});
+  const [amount, setAmount] = useState<Record<string, number>>({});
 
   const fetchItems = async () => {
     if (!companyId) return;
