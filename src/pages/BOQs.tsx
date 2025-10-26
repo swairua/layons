@@ -123,9 +123,6 @@ export default function BOQs() {
                 <Button onClick={() => handleDownloadPDF(viewing)}>
                   <Download className="h-4 w-4 mr-2" /> Download PDF
                 </Button>
-                <Button onClick={handlePrint}>
-                  <Printer className="h-4 w-4 mr-2" /> Print
-                </Button>
               </div>
             </div>
 
