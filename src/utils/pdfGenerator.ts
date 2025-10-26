@@ -191,8 +191,8 @@ export const generatePDF = (data: DocumentData) => {
 
     // Helpers to detect row kinds
     const isSectionHeader = (d: string) => d.startsWith('➤ ');
-    const isSubsectionHeader = (d: string) => /(^|\s)[→-]?\s*subsection\s+/i.test(d);
-    const isSubsectionSubtotal = (d: string) => /^subsection\s+[^\s]+\s+subtotal/i.test(d);
+    const isSubsectionHeader = (d: string) => /^\s*[→-]?\s*subsection\s+[^:]+:\s*/i.test(d);
+    const isSubsectionSubtotal = (d: string) => /^subsection\s+[^\s]+\s+subtotal\s*$/i.test(d);
     const isSectionTotalRow = (d: string) => /^section\s+total$/i.test(d);
 
     (data.items || []).forEach((it) => {
