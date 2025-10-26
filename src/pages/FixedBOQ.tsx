@@ -365,6 +365,7 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
           logo_url: currentCompany.logo_url || undefined,
         },
         items: pdfItems,
+        preliminaries_items: preliminariesItems,
         subtotal: totalAmount,
         total_amount: totalAmount,
         notes: 'Fixed BOQ generated from predefined item list.'
