@@ -133,42 +133,101 @@ export default function BOQs() {
               <div><strong>Contractor:</strong> {viewing.contractor || '-'}</div>
               <div className="pt-2"><strong>Notes:</strong><div className="whitespace-pre-wrap">{viewing.data?.notes || '-'}</div></div>
 
-              <div className="pt-4">
+              <div className="pt-4 space-y-4">
                 {viewing.data?.sections?.map((sec: any, idx: number) => (
-                  <div key={idx} className="mb-4">
-                    <div className="font-medium">{sec.title}</div>
-                    <div className="mt-2">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="text-left text-muted-foreground border-b">
-                            <th>Description</th><th>Qty</th><th>Unit</th><th>Rate</th><th>Amount</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {sec.items.map((it: any, i: number) => (
-                            <tr key={i}>
-                              <td>{it.description}</td>
-                              <td>{it.quantity}</td>
-                              <td>{
-                                // Prefer unit abbreviation from units table when unit_id is present
-                                (() => {
-                                  if (it.unit_id && units) {
-                                    const u = units.find((x: any) => x.id === it.unit_id);
-                                    if (u) return u.abbreviation || u.name;
-                                  }
-                                  // legacy fields
-                                  if (it.unit_name) return it.unit_name;
-                                  if (it.unit) return it.unit;
-                                  return '-';
-                                })()
-                              }</td>
-                              <td>{new Intl.NumberFormat('en-KE', { style: 'currency', currency: viewing.currency || 'KES' }).format(Number(it.rate || 0))}</td>
-                              <td>{new Intl.NumberFormat('en-KE', { style: 'currency', currency: viewing.currency || 'KES' }).format(Number((it.quantity || 0) * (it.rate || 0)))}</td>
+                  <div key={idx} className="border border-border rounded-lg p-4">
+                    <div className="font-medium text-lg mb-3">{sec.title}</div>
+
+                    {sec.subsections && sec.subsections.length > 0 ? (
+                      <div className="space-y-3">
+                        {sec.subsections.map((sub: any, subIdx: number) => {
+                          const subsectionTotal = (sub.items || []).reduce((sum: number, it: any) => {
+                            return sum + ((it.quantity || 0) * (it.rate || 0));
+                          }, 0);
+
+                          return (
+                            <div key={subIdx} className="bg-muted/30 rounded p-3 border border-border/50">
+                              <div className="flex justify-between items-center mb-2">
+                                <div className="font-semibold text-sm">Subsection {sub.name}: {sub.label}</div>
+                                <div className="text-sm font-semibold">{new Intl.NumberFormat('en-KE', { style: 'currency', currency: viewing.currency || 'KES' }).format(subsectionTotal)}</div>
+                              </div>
+                              <table className="w-full text-xs">
+                                <thead>
+                                  <tr className="text-left text-muted-foreground border-b">
+                                    <th>Description</th><th>Qty</th><th>Unit</th><th>Rate</th><th className="text-right">Amount</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {(sub.items || []).map((it: any, i: number) => (
+                                    <tr key={i}>
+                                      <td>{it.description}</td>
+                                      <td>{it.quantity}</td>
+                                      <td>{
+                                        (() => {
+                                          if (it.unit_id && units) {
+                                            const u = units.find((x: any) => x.id === it.unit_id);
+                                            if (u) return u.abbreviation || u.name;
+                                          }
+                                          if (it.unit_name) return it.unit_name;
+                                          if (it.unit) return it.unit;
+                                          return '-';
+                                        })()
+                                      }</td>
+                                      <td>{new Intl.NumberFormat('en-KE', { style: 'currency', currency: viewing.currency || 'KES' }).format(Number(it.rate || 0))}</td>
+                                      <td className="text-right">{new Intl.NumberFormat('en-KE', { style: 'currency', currency: viewing.currency || 'KES' }).format(Number((it.quantity || 0) * (it.rate || 0)))}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          );
+                        })}
+
+                        {(() => {
+                          const sectionTotal = (sec.subsections || []).reduce((sum: number, sub: any) => {
+                            return sum + (sub.items || []).reduce((subSum: number, it: any) => {
+                              return subSum + ((it.quantity || 0) * (it.rate || 0));
+                            }, 0);
+                          }, 0);
+                          return (
+                            <div className="flex justify-end font-semibold text-sm pt-2 border-t border-border">
+                              <div>Section Total: {new Intl.NumberFormat('en-KE', { style: 'currency', currency: viewing.currency || 'KES' }).format(sectionTotal)}</div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                      <div className="mt-2">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="text-left text-muted-foreground border-b">
+                              <th>Description</th><th>Qty</th><th>Unit</th><th>Rate</th><th>Amount</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                          </thead>
+                          <tbody>
+                            {(sec.items || []).map((it: any, i: number) => (
+                              <tr key={i}>
+                                <td>{it.description}</td>
+                                <td>{it.quantity}</td>
+                                <td>{
+                                  (() => {
+                                    if (it.unit_id && units) {
+                                      const u = units.find((x: any) => x.id === it.unit_id);
+                                      if (u) return u.abbreviation || u.name;
+                                    }
+                                    if (it.unit_name) return it.unit_name;
+                                    if (it.unit) return it.unit;
+                                    return '-';
+                                  })()
+                                }</td>
+                                <td>{new Intl.NumberFormat('en-KE', { style: 'currency', currency: viewing.currency || 'KES' }).format(Number(it.rate || 0))}</td>
+                                <td>{new Intl.NumberFormat('en-KE', { style: 'currency', currency: viewing.currency || 'KES' }).format(Number((it.quantity || 0) * (it.rate || 0)))}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
