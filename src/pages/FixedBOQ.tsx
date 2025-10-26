@@ -113,8 +113,9 @@ export default function FixedBOQ() {
   }, [mainSections, qty, rate]);
 
   const totalAmount = useMemo(() => {
-    return Object.values(sectionTotals).reduce((a, b) => a + b, 0);
-  }, [sectionTotals]);
+    const mainTotal = Object.values(sectionTotals).reduce((a, b) => a + b, 0);
+    return preliminariesTotal + mainTotal;
+  }, [sectionTotals, preliminariesTotal]);
 
   const totalQuantity = useMemo(() => {
     return items.reduce((sum, it) => sum + (qty[it.id] ?? (it.default_qty ?? 0)), 0);
