@@ -192,8 +192,9 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
 
           while (j < lines.length && !letterLine.test(lines[j]) && !sectionLine.test(lines[j])) {
             const l = lines[j];
-            // Remove trailing currency amounts like "5,026.00" or "40,000.00 (Kshs)"
-            const cleanedLine = l.replace(/\s+\d+[\d,]*(?:\.\d+)?(?:\s+\(Kshs\))?$/i, '').trim();
+            // Remove trailing currency amounts and any trailing text (like "TOTAL", "Kshs", etc)
+            // Matches patterns like: "5,026.00", "40,000.00 (Kshs)", "10,000.00 TOTAL", etc
+            const cleanedLine = l.replace(/\s+\d+[\d,]*(?:\.\d+)?(?:\s+[A-Za-z()]+)*$/i, '').trim();
             if (cleanedLine) {
               descParts.push(cleanedLine);
             }
