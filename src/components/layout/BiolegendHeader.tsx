@@ -7,9 +7,9 @@ export function BiolegendHeader() {
       <div className="flex items-center space-x-3">
         <BiolegendLogo size="md" showText={true} className="text-primary-foreground" />
       </div>
-      
+
       <div className="text-right text-sm">
-        <div className="font-semibold">LAYONS CONSTRUCTION LIMITED</div>
+        <div className="font-semibold">LAYONS CONSTRUCTION LTD</div>
         <div className="text-xs opacity-90">&nbsp;</div>
         <div className="text-xs opacity-90">&nbsp;</div>
         <div className="text-xs opacity-90">layonscoltd@gmail.com</div>
@@ -24,7 +24,7 @@ export function BiolegendCompanyInfo() {
     <div className="space-y-2">
       <div className="flex items-center space-x-2">
         <Building2 className="h-4 w-4 text-primary" />
-        <span className="font-semibold">LAYONS CONSTRUCTION LIMITED</span>
+        <span className="font-semibold">LAYONS CONSTRUCTION LTD</span>
       </div>
       <div className="text-sm text-muted-foreground space-y-1">
         <div>&nbsp;</div>
