@@ -270,6 +270,53 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
     }
   };
 
+  const cleanupDescriptions = async () => {
+    if (!companyId) { toast.error('No company selected'); return; }
+    if (!items.length) { toast.error('No items to clean'); return; }
+
+    try {
+      setSeeding(true);
+      let cleanedCount = 0;
+      const updates: { id: string; description: string }[] = [];
+
+      for (const item of items) {
+        // Remove trailing figures like " 5,000.00" or " 40,000.00 (Kshs)"
+        const cleaned = item.description.replace(/\s+\d+[\d,]*(?:\.\d+)?(?:\s+\(Kshs\))?$/i, '').trim();
+        if (cleaned !== item.description) {
+          updates.push({ id: item.id, description: cleaned });
+          cleanedCount++;
+        }
+      }
+
+      if (cleanedCount === 0) {
+        toast.info('No descriptions to clean');
+        setSeeding(false);
+        return;
+      }
+
+      // Update in batches
+      const batchSize = 50;
+      for (let i = 0; i < updates.length; i += batchSize) {
+        const batch = updates.slice(i, i + batchSize);
+        for (const update of batch) {
+          const { error } = await supabase
+            .from('fixed_boq_items')
+            .update({ description: update.description })
+            .eq('id', update.id);
+          if (error) throw error;
+        }
+      }
+
+      toast.success(`Cleaned ${cleanedCount} descriptions`);
+      await fetchItems();
+    } catch (err) {
+      console.error('Cleanup failed:', err);
+      toast.error('Failed to clean descriptions');
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   const handleDownloadPDF = async () => {
     if (!currentCompany) { toast.error('Company not loaded'); return; }
 
