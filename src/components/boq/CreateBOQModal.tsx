@@ -62,10 +62,20 @@ const defaultItem = (): BOQItemRow => ({
   rate: 0,
 });
 
+const defaultSubsection = (name: string, label: string): BOQSubsectionRow => ({
+  id: `subsection-${crypto.randomUUID()}`,
+  name,
+  label,
+  items: [defaultItem()],
+});
+
 const defaultSection = (): BOQSectionRow => ({
   id: `section-${crypto.randomUUID()}`,
   title: 'General',
-  items: [defaultItem()],
+  subsections: [
+    defaultSubsection('A', 'Materials'),
+    defaultSubsection('B', 'Labor'),
+  ],
 });
 
 export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
