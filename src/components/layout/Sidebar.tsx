@@ -12,7 +12,6 @@ import {
   Users,
   CreditCard,
   FileSpreadsheet,
-  ShoppingCart,
 } from 'lucide-react';
 import { BiolegendLogo } from '@/components/ui/biolegend-logo';
 
