@@ -243,10 +243,9 @@ export const generatePDF = (data: DocumentData) => {
 
         /* Brand header like the mock */
         .brand-header { border:none; border-radius:0; padding:12px 12mm 10px; width:100%; }
-        .brand-row { display:flex; align-items:center; justify-content:space-between; }
-        .brand-logo { height:48px; display:flex; align-items:center; }
-        .brand-logo img { height:48px; width:auto; object-fit:contain; }
-        .brand-tagline { font-size:18px; font-weight:800; color:#1f2937; letter-spacing:0.5px; }
+        .brand-row { display:flex; align-items:center; justify-content:flex-start; }
+        .brand-logo { height:48px; display:flex; align-items:center; flex:1; }
+        .brand-logo img { height:48px; width:100%; object-fit:contain; }
         .brand-accent { margin-top:10px; display:flex; align-items:center; gap:0; height:14px; }
         .accent-yellow { flex:1; height:14px; background:#f4a300; position:relative; clip-path:polygon(0 0, calc(100% - 34px) 0, 100% 100%, 0 100%); }
         .accent-stripes { width:88px; height:14px; background: repeating-linear-gradient(135deg, #ffffff 0 12px, #f4a300 12px 22px); }
@@ -290,7 +289,6 @@ export const generatePDF = (data: DocumentData) => {
           <div class="brand-logo">
             ${logoSrc ? `<img src="${logoSrc}" alt="${company.name} Logo" />` : ''}
           </div>
-          <div class="brand-tagline">DESIGN & BUILD.</div>
         </div>
         <div class="brand-accent">
           <div class="accent-yellow"></div>
