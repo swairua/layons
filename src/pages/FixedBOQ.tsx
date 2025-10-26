@@ -8,6 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { Download, Database, PlusCircle, Upload } from 'lucide-react';
 import { generatePDF } from '@/utils/pdfGenerator';
+import { executeSQL, formatSQLForManualExecution } from '@/utils/execSQL';
+import { parseErrorMessage } from '@/utils/errorHelpers';
 
 interface FixedBOQItem {
   id: string;
@@ -130,13 +132,27 @@ EXCEPTION WHEN others THEN NULL; END $$;
 CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(company_id);
 `;
 
-      const { error } = await supabase.rpc('exec_sql', { sql });
-      if (error) throw error;
-      toast.success('Fixed BOQ table is ready');
+      const result = await executeSQL(sql);
+      if (result.error) {
+        const message = parseErrorMessage(result.error);
+        console.error('Schema setup failed:', result.error);
+        toast.error(`Schema setup failed: ${message}`);
+        throw result.error;
+      }
+      // If manual execution required, instruct user with formatted SQL
+      if ((result as any).manual_execution_required) {
+        console.warn('Manual SQL execution required for some statements.');
+        const formatted = formatSQLForManualExecution(sql);
+        console.log('SQL to run manually in Supabase SQL Editor:\n', formatted);
+        toast.info('Some statements require manual execution in Supabase SQL Editor. SQL copied to console.');
+      } else {
+        toast.success('Fixed BOQ table is ready');
+      }
       await fetchItems();
     } catch (err) {
+      const msg = parseErrorMessage(err);
       console.error('Schema setup via RPC failed:', err);
-      toast.error('Automatic SQL execution failed. Please run the SQL in Supabase SQL editor.');
+      toast.error(`Automatic SQL execution failed: ${msg}`);
     } finally {
       setSeeding(false);
     }
