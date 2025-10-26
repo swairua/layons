@@ -56,13 +56,8 @@ export function EnhancedLogin() {
 
     if (error) {
       const errorInfo = handleAuthError(error);
-
-
-      if (errorInfo.type === 'invalid_credentials') {
-        toast.info('Invalid email or password. If you need access, contact the administrator.');
-      }
+      // handleAuthError already displays the appropriate toast
     } else {
-      toast.success('Signed in successfully!');
       navigate('/');
     }
     setSubmitting(false);
