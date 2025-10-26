@@ -22,9 +22,25 @@ export function EnhancedLogin() {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    toast.success('Database connected', {
-      description: 'You can now sign in to your account'
-    });
+    // Verify database connection and show status
+    const checkConnection = async () => {
+      try {
+        const { data, error } = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/`,
+          { method: 'HEAD' }
+        ).then(() => ({ data: true, error: null })).catch(() => ({ data: null, error: true }));
+
+        if (!error && data) {
+          toast.success('System ready', {
+            description: 'You can now sign in to your account'
+          });
+        }
+      } catch {
+        // Silent fail - don't show error toast on load
+      }
+    };
+
+    checkConnection();
   }, []);
 
   const validateForm = () => {
