@@ -41,10 +41,17 @@ interface BOQItemRow {
   rate: number;
 }
 
+interface BOQSubsectionRow {
+  id: string;
+  name: string; // "A", "B", "C", etc.
+  label: string; // "Materials", "Labor", etc.
+  items: BOQItemRow[];
+}
+
 interface BOQSectionRow {
   id: string;
   title: string;
-  items: BOQItemRow[];
+  subsections: BOQSubsectionRow[];
 }
 
 const defaultItem = (): BOQItemRow => ({
