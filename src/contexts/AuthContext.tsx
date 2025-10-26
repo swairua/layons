@@ -222,6 +222,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const initializeAuthState = async () => {
       console.log('🚀 Starting fast auth initialization...');
 
+      // Try to restore session from localStorage first for instant restore on page reload
+      try {
+        const cachedSession = localStorage.getItem('sb-auth-token');
+        if (cachedSession) {
+          try {
+            const sessionData = JSON.parse(cachedSession);
+            if (sessionData?.session?.user && mountedRef.current) {
+              console.log('📦 Restored session from localStorage cache');
+              setSession(sessionData.session);
+              setUser(sessionData.session.user);
+              setLoading(false);
+              setInitialized(true);
+
+              // Fetch profile in background
+              fetchProfile(sessionData.session.user.id)
+                .then(userProfile => {
+                  if (mountedRef.current) {
+                    setProfile(userProfile);
+                    console.log('✅ Profile loaded from cache');
+                  }
+                })
+                .catch(err => console.warn('Profile cache load failed:', err));
+
+              return;
+            }
+          } catch (parseError) {
+            console.warn('⚠️ Failed to parse cached session:', parseError);
+          }
+        }
+      } catch (storageError) {
+        console.warn('⚠️ Failed to read from localStorage:', storageError);
+      }
+
       // Always start the app immediately - don't block on auth
       const startAppImmediately = () => {
         if (mountedRef.current) {
