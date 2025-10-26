@@ -38,6 +38,17 @@ const sidebarItems: SidebarItem[] = [
     href: '/customers'
   },
   {
+    title: 'Sales',
+    icon: ShoppingCart,
+    children: [
+      { title: 'Quotations', icon: FileText, href: '/quotations' },
+      { title: 'Invoices', icon: Receipt, href: '/invoices' },
+      { title: 'Credit Notes', icon: CreditCard, href: '/credit-notes' },
+      { title: 'Proforma', icon: FileText, href: '/proforma' },
+      { title: 'Delivery Notes', icon: Truck, href: '/delivery-notes' }
+    ]
+  },
+  {
     title: 'BOQs',
     icon: FileSpreadsheet,
     href: '/boqs'
