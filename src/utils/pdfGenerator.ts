@@ -184,6 +184,43 @@ export const generatePDF = (data: DocumentData) => {
 
   // If this is a BOQ, render a dedicated BOQ-style layout
   if (data.type === 'boq') {
+    // Build preliminaries table HTML if present
+    let preliminariesHtml = '';
+    let preliminariesTotal = 0;
+    if (data.preliminaries_items && data.preliminaries_items.length > 0) {
+      preliminariesHtml = `
+        <div class="preliminaries-section">
+          <table class="items">
+            <thead>
+              <tr>
+                <th style="width:10%">ITEM</th>
+                <th style="width:70%; text-align:left">DESCRIPTION</th>
+                <th style="width:20%">AMOUNT (KSHS)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="section-row"><td colspan="3" class="section-title">SECTION NO. 1: PRELIMINARIES</td></tr>
+      `;
+      let itemNo = 1;
+      data.preliminaries_items.forEach((item) => {
+        preliminariesHtml += `<tr class="item-row">
+          <td class="num" style="text-align:center; width:10%">${item.item_code || ''}</td>
+          <td class="desc" style="width:70%">${item.description}</td>
+          <td class="amount" style="width:20%; text-align:right; font-weight:600">${formatCurrency(item.line_total || 0)}</td>
+        </tr>`;
+        preliminariesTotal += item.line_total || 0;
+      });
+      preliminariesHtml += `
+              <tr class="section-total">
+                <td colspan="2" class="label" style="text-align:right; font-weight:700">SECTION TOTAL:</td>
+                <td class="amount" style="text-align:right; font-weight:700">${formatCurrency(preliminariesTotal)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
     // Build table rows; support Sections, Subsections, and their totals
     let rowsHtml = '';
     let currentSection = '';
