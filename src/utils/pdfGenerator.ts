@@ -300,9 +300,10 @@ export const generatePDF = (data: DocumentData) => {
     }
 
     // Compute grand total for BOQ as sum of section totals if present; otherwise fallback to provided total
-    const grandTotalForBOQ = (sectionTotals.length > 0)
+    let mainSectionsTotal = (sectionTotals.length > 0)
       ? sectionTotals.reduce((a, b) => a + b, 0)
       : (data.total_amount || data.subtotal || 0);
+    const grandTotalForBOQ = preliminariesTotal + mainSectionsTotal;
 
     // Use the provided new logo for BOQ header by default, but allow company override if explicitly set
     const headerLogoUrl = 'https://cdn.builder.io/api/v1/image/assets%2F71cced7a9eba46908b96a4d2eb254873%2F43d7892b1b0247cdbd4d17a1a9d88c4e?format=webp&width=800';
