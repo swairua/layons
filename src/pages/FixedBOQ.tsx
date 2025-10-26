@@ -271,19 +271,34 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
 
     // Build BOQ-style items including section marker rows for section totals in PDF
     const pdfItems: Array<{ description: string; quantity: number; unit_price: number; line_total: number; unit_of_measure?: string } & { unit_abbreviation?: string }> = [];
-    grouped.forEach(([section, arr]) => {
+    grouped.forEach(([section, arr], idx) => {
       pdfItems.push({ description: `➤ ${section}`, quantity: 0, unit_price: 0, line_total: 0 });
-      arr.forEach((it) => {
-        const q = qty[it.id] ?? (it.default_qty ?? 0);
-        const r = rate[it.id] ?? (it.default_rate ?? 0);
-        pdfItems.push({
-          description: it.description,
-          quantity: q,
-          unit_price: r,
-          line_total: q * r,
-          unit_of_measure: it.unit || 'Item',
+      if (idx === 0) {
+        arr.forEach((it) => {
+          const a = amount[it.id] ?? (it.default_rate ?? 0);
+          const val = Number(a) || 0;
+          pdfItems.push({
+            description: `${it.item_code ? `${it.item_code} ` : ''}${it.description}`,
+            quantity: 1,
+            unit_price: val,
+            line_total: val,
+            unit_of_measure: 'Item',
+          });
         });
-      });
+      } else {
+        arr.forEach((it) => {
+          const q = qty[it.id] ?? (it.default_qty ?? 0);
+          const r = rate[it.id] ?? (it.default_rate ?? 0);
+          const line = (Number(q) || 0) * (Number(r) || 0);
+          pdfItems.push({
+            description: it.description,
+            quantity: q,
+            unit_price: r,
+            line_total: line,
+            unit_of_measure: it.unit || 'Item',
+          });
+        });
+      }
     });
 
     try {
