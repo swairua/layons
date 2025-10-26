@@ -19,7 +19,7 @@ export default function BOQs() {
 
   const [viewing, setViewing] = useState<any | null>(null);
 
-  const handleDownload = async (boq: any) => {
+  const handleDownloadPDF = async (boq: any) => {
     try {
       await downloadBOQPDF(boq.data, currentCompany ? {
         name: currentCompany.name,
@@ -35,6 +35,10 @@ export default function BOQs() {
       console.error('Download failed', err);
       toast.error('Failed to download BOQ');
     }
+  };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   const handleDelete = async (id: string) => {
