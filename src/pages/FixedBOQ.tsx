@@ -81,6 +81,16 @@ export default function FixedBOQ() {
     return Array.from(map.entries());
   }, [items]);
 
+  // Extract preliminaries (first section) separately
+  const preliminaries = useMemo(() => {
+    return grouped.length > 0 ? grouped[0] : null;
+  }, [grouped]);
+
+  // Main sections (all except first)
+  const mainSections = useMemo(() => {
+    return grouped.length > 1 ? grouped.slice(1) : [];
+  }, [grouped]);
+
   const sectionTotals = useMemo(() => {
     const totals: Record<string, number> = {};
     grouped.forEach(([section, arr], idx) => {
