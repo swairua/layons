@@ -565,10 +565,10 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
             })
           )}
 
-          {mainSections.length > 0 && (
+          {(mainSections.length > 0 || preliminaries) && (
             <div className="flex justify-end border-t pt-3 text-sm font-semibold">
               <div className="space-x-6">
-                <span>Total Qty: {totalQuantity.toLocaleString()}</span>
+                {mainSections.length > 0 && <span>Total Qty: {totalQuantity.toLocaleString()}</span>}
                 <span>
                   Total Amount: {new Intl.NumberFormat('en-KE', { style: 'currency', currency: currentCompany?.currency || 'KES' }).format(totalAmount || 0)}
                 </span>
