@@ -187,7 +187,7 @@ export function Sidebar() {
             <Building2 className="h-4 w-4 text-sidebar-primary" />
             <div>
               <div className="font-medium">Layons Construction Limited</div>
-              <div className="text-xs text-sidebar-foreground/60">Healthcare & Pharmaceuticals</div>
+              <div className="text-xs text-sidebar-foreground/60">Construction</div>
             </div>
           </div>
         </div>
