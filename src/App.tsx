@@ -43,8 +43,15 @@ const App = () => {
     // Suppress ResizeObserver loop errors
     enableResizeObserverErrorSuppression();
 
-    // Ensure database functions exist on app startup
-    ensureDatabaseFunctionsExist();
+    // Ensure database functions exist on app startup (non-blocking)
+    // Wrapped in try-catch to prevent startup failures
+    try {
+      ensureDatabaseFunctionsExist().catch((err) => {
+        console.error('Database function initialization failed:', err);
+      });
+    } catch (err) {
+      console.error('Error calling ensureDatabaseFunctionsExist:', err);
+    }
   }, []);
 
   return (
