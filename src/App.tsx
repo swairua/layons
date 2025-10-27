@@ -61,6 +61,7 @@ const App = () => {
       <Toaster />
       <Sonner />
       <Layout>
+        <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
         <Routes>
           {/* Dashboard */}
           <Route 
@@ -344,6 +345,7 @@ const App = () => {
           {/* 404 Page */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
       </Layout>
     </TooltipProvider>
   );
