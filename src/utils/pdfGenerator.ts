@@ -624,10 +624,6 @@ export const generatePDF = (data: DocumentData) => {
             </table>
           </div>
 
-          <!-- Bank Details -->
-          <div class="bank-details">
-            <strong>Payments to: Layons Construction Limited. For bank details, contact: layonscoltd@gmail.com / 0720717463</strong>
-          </div>
         </div>
       `;
     });
