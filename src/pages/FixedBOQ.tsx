@@ -571,7 +571,7 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => handleDeleteItem(it.id, it.description)}
+                                onClick={() => handleDeleteClick(it.id, it.description)}
                                 title="Delete item"
                                 className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                               >
