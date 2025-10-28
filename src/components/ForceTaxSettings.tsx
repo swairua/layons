@@ -67,13 +67,16 @@ export function ForceTaxSettings({ companyId }: ForceTaxSettingsProps) {
     }
   };
 
-  const handleDeleteTax = async (taxId: string) => {
-    if (!confirm('Are you sure you want to delete this tax setting?')) {
-      return;
-    }
+  const handleDeleteClick = (taxId: string, taxName: string) => {
+    setDeleteDialog({ open: true, taxId, taxName });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.taxId) return;
 
     try {
-      await deleteTaxSetting.mutateAsync(taxId);
+      await deleteTaxSetting.mutateAsync(deleteDialog.taxId);
+      setDeleteDialog({ open: false });
     } catch (error) {
       console.error('Delete tax error:', error);
     }
