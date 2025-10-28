@@ -200,49 +200,16 @@ Website: www.biolegendscientific.co.ke`;
     }
   };
 
+  const convertQuotationMutation = useConvertQuotationToInvoice();
+
   const handleConvertToInvoice = async (quotation: Quotation) => {
     try {
-      // Validate required fields
-      if (!currentCompany?.id) {
-        toast.error('No company selected. Please ensure you are associated with a company.');
+      if (!quotation.id) {
+        toast.error('Invalid quotation. Cannot convert to invoice.');
         return;
       }
 
-      if (!profile?.id) {
-        toast.error('User not authenticated. Please sign in and try again.');
-        return;
-      }
-
-      if (!quotation.customers?.id) {
-        toast.error('Invalid customer data. Cannot convert quotation to invoice.');
-        return;
-      }
-
-      // TODO: In a real app, this would create an invoice from the quotation data
-      const invoiceData = {
-        company_id: currentCompany.id,
-        customer_id: quotation.customers.id,
-        quotation_id: quotation.id,
-        invoice_date: new Date().toISOString().split('T')[0],
-        due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        status: 'draft',
-        subtotal: quotation.subtotal || 0,
-        tax_amount: quotation.tax_amount || 0,
-        total_amount: quotation.total_amount,
-        paid_amount: 0,
-        balance_due: quotation.total_amount,
-        terms_and_conditions: quotation.terms_and_conditions || 'Payment due within 30 days of invoice date.',
-        notes: `Converted from quotation ${quotation.quotation_number}`,
-        created_by: profile.id
-      };
-
-      // Simulate conversion
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      toast.success(`Quotation ${quotation.quotation_number} converted to invoice successfully!`);
-
-      // TODO: Navigate to the new invoice or refresh quotations
-      refetch();
+      await convertQuotationMutation.mutateAsync(quotation.id);
     } catch (error) {
       console.error('Error converting quotation to invoice:', error);
 
