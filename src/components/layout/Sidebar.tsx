@@ -16,7 +16,7 @@ import {
   Receipt,
   FileText,
   Truck,
-  LogBook,
+  History,
 } from 'lucide-react';
 import { BiolegendLogo } from '@/components/ui/biolegend-logo';
 
@@ -70,7 +70,7 @@ const sidebarItems: SidebarItem[] = [
   },
   {
     title: 'Audit Logs',
-    icon: LogBook,
+    icon: History,
     href: '/audit-logs'
   },
   {
