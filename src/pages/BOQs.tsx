@@ -39,11 +39,16 @@ export default function BOQs() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this BOQ? This action cannot be undone.')) return;
+  const handleDeleteClick = (id: string, number: string) => {
+    setDeleteDialog({ open: true, boqId: id, boqNumber: number });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.boqId) return;
     try {
-      await deleteBOQ.mutateAsync(id);
+      await deleteBOQ.mutateAsync(deleteDialog.boqId);
       toast.success('BOQ deleted');
+      setDeleteDialog({ open: false });
     } catch (err) {
       console.error('Delete failed', err);
       toast.error('Failed to delete BOQ');
