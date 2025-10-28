@@ -371,7 +371,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                   }
                 }
               } catch (bgError) {
-                console.warn('⚠️ Background auth retry failed:', bgError);
+                const bgErrorMsg = bgError instanceof Error ? bgError.message : String(bgError);
+                console.warn('⚠️ Background auth retry failed:', bgErrorMsg);
                 // Silent failure - app is already running
               }
             };
