@@ -12,35 +12,35 @@ DECLARE
     year_part TEXT;
     proforma_number TEXT;
 BEGIN
-    -- Get current year
+    -- Get current year and month
     year_part := EXTRACT(year FROM CURRENT_DATE)::TEXT;
-    
-    -- Get the next number for this year and company
+
+    -- Get the next number for this month/year and company (format: YYYYMMDD)
     SELECT COALESCE(MAX(
-        CASE 
-            WHEN proforma_number ~ ('^PF-' || year_part || '-[0-9]+$') 
-            THEN CAST(SPLIT_PART(proforma_number, '-', 3) AS INTEGER)
+        CASE
+            WHEN proforma_number ~ ('^[0-9]{4}' || LPAD(EXTRACT(month FROM CURRENT_DATE)::TEXT, 2, '0') || year_part || '$')
+            THEN CAST(SUBSTRING(proforma_number FROM 1 FOR 4) AS INTEGER)
             ELSE 0
         END
     ), 0) + 1
     INTO next_number
-    FROM proforma_invoices 
+    FROM proforma_invoices
     WHERE company_id = company_uuid
-    AND proforma_number LIKE 'PF-' || year_part || '-%';
-    
+    AND proforma_number LIKE '%' || LPAD(EXTRACT(month FROM CURRENT_DATE)::TEXT, 2, '0') || year_part;
+
     -- If no proforma_invoices table exists, return a simple fallback
     IF NOT FOUND THEN
         next_number := 1;
     END IF;
-    
-    -- Format as PF-YYYY-NNNN
-    proforma_number := 'PF-' || year_part || '-' || LPAD(next_number::TEXT, 4, '0');
+
+    -- Format as YYYYMMDD (e.g., 0001102024)
+    proforma_number := LPAD(next_number::TEXT, 4, '0') || LPAD(EXTRACT(month FROM CURRENT_DATE)::TEXT, 2, '0') || year_part;
     
     RETURN proforma_number;
 EXCEPTION
     WHEN OTHERS THEN
         -- Fallback: return a timestamp-based number if anything fails
-        RETURN 'PF-' || year_part || '-' || LPAD(EXTRACT(epoch FROM CURRENT_TIMESTAMP)::TEXT, 10, '0');
+        RETURN LPAD((EXTRACT(epoch FROM CURRENT_TIMESTAMP)::BIGINT % 10000)::TEXT, 4, '0') || LPAD(EXTRACT(month FROM CURRENT_DATE)::TEXT, 2, '0') || year_part;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
