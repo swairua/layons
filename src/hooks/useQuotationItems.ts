@@ -267,7 +267,6 @@ export const useConvertQuotationToInvoice = () => {
         total_amount: quotation.total_amount,
         notes: quotation.notes,
         terms_and_conditions: quotation.terms_and_conditions,
-        affects_inventory: true,
         created_by: createdBy
       };
 
