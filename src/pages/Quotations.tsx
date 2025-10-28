@@ -212,7 +212,13 @@ Website: www.biolegendscientific.co.ke`;
         return;
       }
 
-      await convertQuotationMutation.mutateAsync(quotation.id);
+      setConvertingQuotationId(quotation.id);
+      try {
+        await convertQuotationMutation.mutateAsync(quotation.id);
+        toast.success(`Quotation ${quotation.quotation_number} converted to invoice successfully!`);
+      } finally {
+        setConvertingQuotationId(null);
+      }
     } catch (error) {
       console.error('Error converting quotation to invoice:', error);
 
