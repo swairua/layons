@@ -436,7 +436,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
             description: item.description,
             quantity: item.quantity,
             unit_price: item.unit_price,
-            discount_percentage: 0,
+            discount_percentage: item.discount_percentage || 0,
             tax_percentage: item.vat_percentage || 0,
             tax_amount: calculateTaxAmount(item),
             tax_inclusive: item.vat_inclusive || false,
