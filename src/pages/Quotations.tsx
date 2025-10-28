@@ -455,6 +455,15 @@ Website: www.biolegendscientific.co.ke`;
                           >
                             <Download className="h-4 w-4" />
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteQuotation(quotation)}
+                            title="Delete quotation"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
 
                         {/* Conditional Action Buttons */}
