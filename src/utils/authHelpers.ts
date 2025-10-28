@@ -29,7 +29,8 @@ export const clearAuthTokens = () => {
     console.log('✅ Cleared all auth tokens');
     return true;
   } catch (error) {
-    console.error('Error clearing auth tokens:', error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error('Error clearing auth tokens:', errorMsg);
     return false;
   }
 };
@@ -222,7 +223,8 @@ export const initializeAuth = async () => {
     }
 
   } catch (error: any) {
-    console.warn('⚠️ Background auth check failed:', error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.warn('⚠️ Background auth check failed:', errorMsg);
     return { session: null, error: error };
   }
 };
