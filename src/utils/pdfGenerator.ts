@@ -1383,46 +1383,107 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
 
 // Function for quotation PDF generation
 export const downloadQuotationPDF = async (quotation: any, company?: CompanyDetails) => {
-  const documentData: DocumentData = {
-    type: 'quotation',
-    number: quotation.quotation_number,
-    date: quotation.quotation_date,
-    valid_until: quotation.valid_until,
-    company: company, // Pass company details
-    customer: {
-      name: quotation.customers?.name || 'Unknown Customer',
-      email: quotation.customers?.email,
-      phone: quotation.customers?.phone,
-      address: quotation.customers?.address,
-      city: quotation.customers?.city,
-      country: quotation.customers?.country,
-    },
-    items: quotation.quotation_items?.map((item: any) => {
-      const quantity = Number(item.quantity || 0);
-      const unitPrice = Number(item.unit_price || 0);
-      const taxAmount = Number(item.tax_amount || 0);
-      const discountAmount = Number(item.discount_amount || 0);
-      const computedLineTotal = quantity * unitPrice - discountAmount + taxAmount;
+  const items = quotation.quotation_items?.map((item: any) => {
+    const quantity = Number(item.quantity || 0);
+    const unitPrice = Number(item.unit_price || 0);
+    const taxAmount = Number(item.tax_amount || 0);
+    const discountAmount = Number(item.discount_amount || 0);
+    const computedLineTotal = quantity * unitPrice - discountAmount + taxAmount;
 
+    return {
+      description: item.description || item.product_name || item.products?.name || 'Unknown Item',
+      quantity: quantity,
+      unit_price: unitPrice,
+      discount_percentage: Number(item.discount_percentage || 0),
+      discount_amount: discountAmount,
+      tax_percentage: Number(item.tax_percentage || 0),
+      tax_amount: taxAmount,
+      tax_inclusive: item.tax_inclusive || false,
+      line_total: Number(item.line_total ?? computedLineTotal),
+      unit_of_measure: item.products?.unit_of_measure || item.unit_of_measure || 'pcs',
+      section_name: item.section_name,
+      section_labor_cost: Number(item.section_labor_cost || 0),
+    };
+  }) || [];
+
+  // Check if items have sections
+  const hasSections = items.some((item: any) => item.section_name);
+
+  let documentData: DocumentData;
+
+  if (hasSections) {
+    // Group items by section
+    const sectionMap = new Map<string, any[]>();
+    items.forEach((item: any) => {
+      const sectionName = item.section_name || 'Untitled Section';
+      if (!sectionMap.has(sectionName)) {
+        sectionMap.set(sectionName, []);
+      }
+      sectionMap.get(sectionName)!.push(item);
+    });
+
+    // Create sections array with labor costs
+    const sections = Array.from(sectionMap.entries()).map(([sectionName, sectionItems]) => {
+      const laborCost = sectionItems.length > 0 ? sectionItems[0].section_labor_cost : 0;
       return {
-        description: item.description || item.product_name || item.products?.name || 'Unknown Item',
-        quantity: quantity,
-        unit_price: unitPrice,
-        discount_percentage: Number(item.discount_percentage || 0),
-        discount_amount: discountAmount,
-        tax_percentage: Number(item.tax_percentage || 0),
-        tax_amount: taxAmount,
-        tax_inclusive: item.tax_inclusive || false,
-        line_total: Number(item.line_total ?? computedLineTotal),
-        unit_of_measure: item.products?.unit_of_measure || item.unit_of_measure || 'pcs',
+        name: sectionName,
+        items: sectionItems.map(item => ({
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          tax_percentage: item.tax_percentage,
+          tax_amount: item.tax_amount,
+          line_total: item.line_total,
+        })),
+        labor_cost: laborCost,
       };
-    }) || [],
-    subtotal: quotation.subtotal,
-    tax_amount: quotation.tax_amount,
-    total_amount: quotation.total_amount,
-    notes: quotation.notes,
-    terms_and_conditions: quotation.terms_and_conditions,
-  };
+    });
+
+    documentData = {
+      type: 'quotation',
+      number: quotation.quotation_number,
+      date: quotation.quotation_date,
+      valid_until: quotation.valid_until,
+      company: company,
+      customer: {
+        name: quotation.customers?.name || 'Unknown Customer',
+        email: quotation.customers?.email,
+        phone: quotation.customers?.phone,
+        address: quotation.customers?.address,
+        city: quotation.customers?.city,
+        country: quotation.customers?.country,
+      },
+      items: items,
+      sections: sections,
+      subtotal: quotation.subtotal,
+      tax_amount: quotation.tax_amount,
+      total_amount: quotation.total_amount,
+      notes: quotation.notes,
+      terms_and_conditions: quotation.terms_and_conditions,
+    };
+  } else {
+    documentData = {
+      type: 'quotation',
+      number: quotation.quotation_number,
+      date: quotation.quotation_date,
+      valid_until: quotation.valid_until,
+      company: company,
+      customer: {
+        name: quotation.customers?.name || 'Unknown Customer',
+        email: quotation.customers?.email,
+        phone: quotation.customers?.phone,
+        address: quotation.customers?.address,
+        city: quotation.customers?.city,
+        country: quotation.customers?.country,
+      },
+      items: items,
+      subtotal: quotation.subtotal,
+      tax_amount: quotation.tax_amount,
+      total_amount: quotation.total_amount,
+      notes: quotation.notes,
+      terms_and_conditions: quotation.terms_and_conditions,
+    };
+  }
 
   return generatePDF(documentData);
 };
