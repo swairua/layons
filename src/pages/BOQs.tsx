@@ -18,6 +18,7 @@ export default function BOQs() {
   const { data: boqs = [], isLoading } = useBOQs(companyId);
   const deleteBOQ = useDeleteBOQ();
   const { data: units = [] } = useUnits(companyId);
+  const { logDelete } = useAuditLog();
 
   const [viewing, setViewing] = useState<any | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; boqId?: string; boqNumber?: string }>({ open: false });
