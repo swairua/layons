@@ -110,12 +110,17 @@ export default function Invoices() {
   const { data: invoices, isLoading, error, refetch } = useInvoices(currentCompany?.id);
   const deleteInvoice = useDeleteInvoice();
 
-  const handleDeleteInvoice = async (invoice: Invoice) => {
-    if (!confirm(`Delete invoice ${invoice.invoice_number}? This action cannot be undone.`)) return;
+  const handleDeleteClick = (invoice: Invoice) => {
+    setDeleteDialog({ open: true, invoice });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.invoice) return;
     try {
-      await deleteInvoice.mutateAsync(invoice.id);
+      await deleteInvoice.mutateAsync(deleteDialog.invoice.id);
       toast.success('Invoice deleted successfully');
       refetch();
+      setDeleteDialog({ open: false });
     } catch (err) {
       console.error('Delete failed', err);
       toast.error('Failed to delete invoice');
