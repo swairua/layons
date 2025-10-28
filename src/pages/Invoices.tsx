@@ -17,13 +17,13 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Label } from '@/components/ui/label';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from '@/components/ui/table';
 import {
   Plus,
@@ -41,6 +41,7 @@ import {
 } from 'lucide-react';
 import { useCompanies, useDeleteInvoice } from '@/hooks/useDatabase';
 import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { toast } from 'sonner';
 import { parseErrorMessage } from '@/utils/errorHelpers';
 import { CreateInvoiceModal } from '@/components/invoices/CreateInvoiceModal';
@@ -48,6 +49,7 @@ import { EditInvoiceModal } from '@/components/invoices/EditInvoiceModal';
 import { ViewInvoiceModal } from '@/components/invoices/ViewInvoiceModal';
 import { RecordPaymentModal } from '@/components/payments/RecordPaymentModal';
 import { CreateDeliveryNoteModal } from '@/components/delivery/CreateDeliveryNoteModal';
+import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { downloadInvoicePDF } from '@/utils/pdfGenerator';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -92,6 +94,7 @@ export default function Invoices() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showDeliveryNoteModal, setShowDeliveryNoteModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; invoice?: Invoice }>({ open: false });
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState('all');
@@ -103,17 +106,38 @@ export default function Invoices() {
 
   const { data: companies } = useCompanies();
   const currentCompany = companies?.[0];
-  
+  const { logDelete } = useAuditLog();
+
   // Use the fixed invoices hook
   const { data: invoices, isLoading, error, refetch } = useInvoices(currentCompany?.id);
   const deleteInvoice = useDeleteInvoice();
 
-  const handleDeleteInvoice = async (invoice: Invoice) => {
-    if (!confirm(`Delete invoice ${invoice.invoice_number}? This action cannot be undone.`)) return;
+  const handleDeleteClick = (invoice: Invoice) => {
+    setDeleteDialog({ open: true, invoice });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.invoice || !currentCompany?.id) return;
     try {
-      await deleteInvoice.mutateAsync(invoice.id);
+      await deleteInvoice.mutateAsync(deleteDialog.invoice.id);
+
+      // Log the delete action
+      await logDelete(
+        currentCompany.id,
+        'invoice',
+        deleteDialog.invoice.id,
+        deleteDialog.invoice.invoice_number,
+        deleteDialog.invoice.invoice_number,
+        {
+          customerName: deleteDialog.invoice.customers?.name,
+          totalAmount: deleteDialog.invoice.total_amount,
+          deletedAt: new Date().toISOString(),
+        }
+      );
+
       toast.success('Invoice deleted successfully');
       refetch();
+      setDeleteDialog({ open: false });
     } catch (err) {
       console.error('Delete failed', err);
       toast.error('Failed to delete invoice');
@@ -603,7 +627,7 @@ Website:`;
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleDeleteInvoice(invoice)}
+                          onClick={() => handleDeleteClick(invoice)}
                           title="Delete invoice"
                           className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
@@ -699,6 +723,15 @@ Website:`;
           setShowDeliveryNoteModal(false);
           toast.success('Delivery note created successfully!');
         }}
+      />
+
+      <ConfirmationDialog
+        open={deleteDialog.open}
+        title="Delete Invoice"
+        description={deleteDialog.invoice ? `Are you sure you want to delete invoice ${deleteDialog.invoice.invoice_number}? This action cannot be undone.` : ''}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDialog({ open: false })}
+        confirmText="Delete"
       />
     </div>
   );

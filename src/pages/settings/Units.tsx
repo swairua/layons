@@ -6,6 +6,7 @@ import { Edit, Trash2, Plus } from 'lucide-react';
 import { useUnits, useCreateUnit, useUpdateUnit, useDeleteUnit } from '@/hooks/useDatabase';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { CreateUnitModal } from '@/components/units/CreateUnitModal';
+import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { toast } from 'sonner';
 
 export default function UnitsSettings() {
@@ -17,13 +18,20 @@ export default function UnitsSettings() {
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; unitId?: string; unitName?: string }>({ open: false });
 
   const handleEdit = (u: any) => setEditing(u);
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete unit?')) return;
+
+  const handleDeleteClick = (id: string, name: string) => {
+    setDeleteDialog({ open: true, unitId: id, unitName: name });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.unitId) return;
     try {
-      await deleteUnit.mutateAsync(id);
+      await deleteUnit.mutateAsync(deleteDialog.unitId);
       toast.success('Unit deleted');
+      setDeleteDialog({ open: false });
     } catch (err) {
       console.error(err);
       toast.error('Failed to delete unit');
@@ -69,7 +77,7 @@ export default function UnitsSettings() {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Button size="icon" variant="ghost" onClick={() => handleEdit(u)} title="Edit"><Edit className="h-4 w-4" /></Button>
-                      <Button size="icon" variant="destructive" onClick={() => handleDelete(u.id)} title="Delete"><Trash2 className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="destructive" onClick={() => handleDeleteClick(u.id, u.name)} title="Delete"><Trash2 className="h-4 w-4" /></Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -104,6 +112,15 @@ export default function UnitsSettings() {
           </div>
         </div>
       )}
+
+      <ConfirmationDialog
+        open={deleteDialog.open}
+        title="Delete Unit"
+        description={deleteDialog.unitName ? `Are you sure you want to delete unit "${deleteDialog.unitName}"?` : ''}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDialog({ open: false })}
+        confirmText="Delete"
+      />
     </div>
   );
 }

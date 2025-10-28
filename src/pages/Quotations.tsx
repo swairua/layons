@@ -4,13 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from '@/components/ui/table';
 import {
   Plus,
@@ -27,10 +27,12 @@ import {
 import { useQuotations, useCompanies, useDeleteQuotation } from '@/hooks/useDatabase';
 import { useConvertQuotationToInvoice } from '@/hooks/useQuotationItems';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { toast } from 'sonner';
 import { CreateQuotationModal } from '@/components/quotations/CreateQuotationModal';
 import { ViewQuotationModal } from '@/components/quotations/ViewQuotationModal';
 import { EditQuotationModal } from '@/components/quotations/EditQuotationModal';
+import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { downloadQuotationPDF } from '@/utils/pdfGenerator';
 
 interface Quotation {
@@ -81,6 +83,7 @@ export default function Quotations() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
   const [convertingQuotationId, setConvertingQuotationId] = useState<string | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; quotation?: Quotation }>({ open: false });
 
   // Get current user and company from context
   const { profile, loading: authLoading } = useAuth();
@@ -89,12 +92,17 @@ export default function Quotations() {
   const { data: quotations, isLoading, error, refetch } = useQuotations(currentCompany?.id);
   const deleteQuotation = useDeleteQuotation();
 
-  const handleDeleteQuotation = async (quotation: Quotation) => {
-    if (!confirm(`Delete quotation ${quotation.quotation_number}? This action cannot be undone.`)) return;
+  const handleDeleteClick = (quotation: Quotation) => {
+    setDeleteDialog({ open: true, quotation });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.quotation) return;
     try {
-      await deleteQuotation.mutateAsync(quotation.id);
+      await deleteQuotation.mutateAsync(deleteDialog.quotation.id);
       toast.success('Quotation deleted successfully');
       refetch();
+      setDeleteDialog({ open: false });
     } catch (err) {
       console.error('Delete failed', err);
       toast.error('Failed to delete quotation');
@@ -458,7 +466,7 @@ Website: www.biolegendscientific.co.ke`;
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleDeleteQuotation(quotation)}
+                            onClick={() => handleDeleteClick(quotation)}
                             title="Delete quotation"
                             className="text-destructive hover:text-destructive hover:bg-destructive/10"
                           >
@@ -524,6 +532,15 @@ Website: www.biolegendscientific.co.ke`;
         onOpenChange={setShowEditModal}
         quotation={selectedQuotation}
         onSuccess={handleEditSuccess}
+      />
+
+      <ConfirmationDialog
+        open={deleteDialog.open}
+        title="Delete Quotation"
+        description={deleteDialog.quotation ? `Are you sure you want to delete quotation ${deleteDialog.quotation.quotation_number}? This action cannot be undone.` : ''}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDialog({ open: false })}
+        confirmText="Delete"
       />
     </div>
   );

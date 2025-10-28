@@ -3,9 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Layers, Plus, Eye, Download, Trash2 } from 'lucide-react';
 import { CreateBOQModal } from '@/components/boq/CreateBOQModal';
+import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { useBOQs, useDeleteBOQ, useUnits } from '@/hooks/useDatabase';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { downloadBOQPDF } from '@/utils/boqPdfGenerator';
 import { toast } from 'sonner';
 
@@ -16,8 +18,10 @@ export default function BOQs() {
   const { data: boqs = [], isLoading } = useBOQs(companyId);
   const deleteBOQ = useDeleteBOQ();
   const { data: units = [] } = useUnits(companyId);
+  const { logDelete } = useAuditLog();
 
   const [viewing, setViewing] = useState<any | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; boqId?: string; boqNumber?: string }>({ open: false });
 
   const handleDownloadPDF = async (boq: any) => {
     try {
@@ -37,11 +41,27 @@ export default function BOQs() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this BOQ? This action cannot be undone.')) return;
+  const handleDeleteClick = (id: string, number: string) => {
+    setDeleteDialog({ open: true, boqId: id, boqNumber: number });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.boqId || !companyId) return;
     try {
-      await deleteBOQ.mutateAsync(id);
+      await deleteBOQ.mutateAsync(deleteDialog.boqId);
+
+      // Log the delete action
+      await logDelete(
+        companyId,
+        'boq',
+        deleteDialog.boqId,
+        deleteDialog.boqNumber,
+        deleteDialog.boqNumber,
+        { deletedAt: new Date().toISOString() }
+      );
+
       toast.success('BOQ deleted');
+      setDeleteDialog({ open: false });
     } catch (err) {
       console.error('Delete failed', err);
       toast.error('Failed to delete BOQ');
@@ -99,7 +119,7 @@ export default function BOQs() {
                       <Button size="icon" variant="ghost" onClick={() => handleDownloadPDF(b)} title="Download PDF">
                         <Download className="h-4 w-4" />
                       </Button>
-                      <Button size="icon" variant="destructive" onClick={() => handleDelete(b.id)} title="Delete">
+                      <Button size="icon" variant="destructive" onClick={() => handleDeleteClick(b.id, b.number)} title="Delete">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -235,6 +255,15 @@ export default function BOQs() {
           </div>
         </div>
       )}
+
+      <ConfirmationDialog
+        open={deleteDialog.open}
+        title="Delete BOQ"
+        description={`Are you sure you want to delete BOQ ${deleteDialog.boqNumber}? This action cannot be undone.`}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDialog({ open: false })}
+        confirmText="Delete"
+      />
     </div>
   );
 }

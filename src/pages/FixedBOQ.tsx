@@ -10,6 +10,7 @@ import { Download, Database, PlusCircle, Upload, Trash2 } from 'lucide-react';
 import { generatePDF } from '@/utils/pdfGenerator';
 import { executeSQL, formatSQLForManualExecution } from '@/utils/execSQL';
 import { parseErrorMessage } from '@/utils/errorHelpers';
+import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 
 interface FixedBOQItem {
   id: string;
@@ -42,6 +43,7 @@ export default function FixedBOQ() {
   const [qty, setQty] = useState<Record<string, number>>({});
   const [rate, setRate] = useState<Record<string, number>>({});
   const [amount, setAmount] = useState<Record<string, number>>({});
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; itemId?: string; description?: string }>({ open: false });
 
   const fetchItems = async () => {
     if (!companyId) return;
@@ -316,15 +318,20 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
     }
   };
 
-  const handleDeleteItem = async (id: string, description: string) => {
-    if (!confirm(`Delete "${description}"? This action cannot be undone.`)) return;
+  const handleDeleteClick = (id: string, description: string) => {
+    setDeleteDialog({ open: true, itemId: id, description });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.itemId) return;
     try {
       const { error } = await supabase
         .from('fixed_boq_items')
         .delete()
-        .eq('id', id);
+        .eq('id', deleteDialog.itemId);
       if (error) throw error;
       toast.success('Item deleted successfully');
+      setDeleteDialog({ open: false });
       await fetchItems();
     } catch (err) {
       console.error('Delete failed:', err);
@@ -564,7 +571,7 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => handleDeleteItem(it.id, it.description)}
+                                onClick={() => handleDeleteClick(it.id, it.description)}
                                 title="Delete item"
                                 className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                               >
@@ -599,6 +606,15 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
           )}
         </CardContent>
       </Card>
+
+      <ConfirmationDialog
+        open={deleteDialog.open}
+        title="Delete Item"
+        description={deleteDialog.description ? `Are you sure you want to delete "${deleteDialog.description}"? This action cannot be undone.` : ''}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDialog({ open: false })}
+        confirmText="Delete"
+      />
     </div>
   );
 }

@@ -7,10 +7,11 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Plus, Edit, Trash2, Check, X, Zap } from 'lucide-react';
-import { 
-  useForceTaxSettings, 
-  useForceCreateTaxSetting, 
-  useForceUpdateTaxSetting, 
+import { ConfirmationDialog } from '@/components/ConfirmationDialog';
+import {
+  useForceTaxSettings,
+  useForceCreateTaxSetting,
+  useForceUpdateTaxSetting,
   useForceDeleteTaxSetting,
   useForceSetupTaxSettings
 } from '@/hooks/useForceTaxSettings';
@@ -24,6 +25,7 @@ export function ForceTaxSettings({ companyId }: ForceTaxSettingsProps) {
   const [editingTax, setEditingTax] = useState<string | null>(null);
   const [newTax, setNewTax] = useState({ name: '', rate: 0, is_default: false });
   const [showNewTaxForm, setShowNewTaxForm] = useState(false);
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; taxId?: string; taxName?: string }>({ open: false });
 
   const { data: taxSettings, isLoading, error } = useForceTaxSettings(companyId);
   const createTaxSetting = useForceCreateTaxSetting();
@@ -65,13 +67,16 @@ export function ForceTaxSettings({ companyId }: ForceTaxSettingsProps) {
     }
   };
 
-  const handleDeleteTax = async (taxId: string) => {
-    if (!confirm('Are you sure you want to delete this tax setting?')) {
-      return;
-    }
+  const handleDeleteClick = (taxId: string, taxName: string) => {
+    setDeleteDialog({ open: true, taxId, taxName });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.taxId) return;
 
     try {
-      await deleteTaxSetting.mutateAsync(taxId);
+      await deleteTaxSetting.mutateAsync(deleteDialog.taxId);
+      setDeleteDialog({ open: false });
     } catch (error) {
       console.error('Delete tax error:', error);
     }
@@ -227,7 +232,7 @@ export function ForceTaxSettings({ companyId }: ForceTaxSettingsProps) {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleDeleteTax(tax.id)}
+                      onClick={() => handleDeleteClick(tax.id, tax.name)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -245,6 +250,15 @@ export function ForceTaxSettings({ companyId }: ForceTaxSettingsProps) {
           </div>
         )}
       </CardContent>
+
+      <ConfirmationDialog
+        open={deleteDialog.open}
+        title="Delete Tax Setting"
+        description={deleteDialog.taxName ? `Are you sure you want to delete tax setting "${deleteDialog.taxName}"?` : ''}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDialog({ open: false })}
+        confirmText="Delete"
+      />
     </Card>
   );
 }

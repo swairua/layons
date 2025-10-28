@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { useCompanies, useUpdateCompany, useCreateCompany, useTaxSettings, useCreateTaxSetting, useUpdateTaxSetting, useDeleteTaxSetting } from '@/hooks/useDatabase';
 import { toast } from 'sonner';
 import { ForceTaxSettings } from '@/components/ForceTaxSettings';
+import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { getUserFriendlyMessage, logError } from '@/utils/errorParser';
 import { parseErrorMessage } from '@/utils/errorHelpers';
@@ -27,6 +28,7 @@ export default function CompanySettings() {
   const [fixingCurrency, setFixingCurrency] = useState(false);
   const [testingStorage, setTestingStorage] = useState(false);
   const [storageStatus, setStorageStatus] = useState<'unknown' | 'available' | 'unavailable'>('unknown');
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; taxId?: string; taxName?: string }>({ open: false });
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [companyData, setCompanyData] = useState({
     name: 'Layons Construction Limited',
@@ -551,14 +553,17 @@ export default function CompanySettings() {
     }
   };
 
-  const handleDeleteTax = async (taxId: string) => {
-    if (!confirm('Are you sure you want to delete this tax setting?')) {
-      return;
-    }
+  const handleDeleteClick = (taxId: string, taxName: string) => {
+    setDeleteDialog({ open: true, taxId, taxName });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.taxId) return;
 
     try {
-      await deleteTaxSetting.mutateAsync(taxId);
+      await deleteTaxSetting.mutateAsync(deleteDialog.taxId);
       toast.success('Tax setting deleted successfully');
+      setDeleteDialog({ open: false });
     } catch (error) {
       console.error('Tax deletion error:', error);
 
@@ -938,6 +943,15 @@ export default function CompanySettings() {
         )}
 
       </div>
+
+      <ConfirmationDialog
+        open={deleteDialog.open}
+        title="Delete Tax Setting"
+        description={deleteDialog.taxName ? `Are you sure you want to delete tax setting "${deleteDialog.taxName}"?` : ''}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDialog({ open: false })}
+        confirmText="Delete"
+      />
     </div>
   );
 }
