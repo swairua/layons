@@ -1741,7 +1741,6 @@ export const generatePDF = (data: DocumentData) => {
         <!-- Bank Details (only for invoices and quotations) -->
         ${(data.type === 'invoice' || data.type === 'quotation') ? `
         <div class="bank-details">
-          <strong>Payments to: Layons Construction Limited. For bank details, contact: layonscoltd@gmail.com / 0720717463</strong>
         </div>
         ` : ''}
 
