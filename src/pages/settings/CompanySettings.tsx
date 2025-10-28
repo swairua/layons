@@ -943,6 +943,15 @@ export default function CompanySettings() {
         )}
 
       </div>
+
+      <ConfirmationDialog
+        open={deleteDialog.open}
+        title="Delete Tax Setting"
+        description={deleteDialog.taxName ? `Are you sure you want to delete tax setting "${deleteDialog.taxName}"?` : ''}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDialog({ open: false })}
+        confirmText="Delete"
+      />
     </div>
   );
 }
