@@ -1060,16 +1060,12 @@ export const generatePDF = (data: DocumentData) => {
                 <th style="width: 15%;">Rate</th>
                 <th style="width: 15%;">Amount</th>
                 ` : `
-                <th style="width: 5%;">#</th>
-                <th style="width: ${visibleColumns.discountPercentage || visibleColumns.discountBeforeVat || visibleColumns.discountAmount || visibleColumns.taxPercentage || visibleColumns.taxAmount ? '30%' : '40%'};">Description</th>
+                <th style="width: 5%;">Item #</th>
+                <th style="width: 35%;">Description</th>
+                <th style="width: 12%;">Unit</th>
                 <th style="width: 10%;">Qty</th>
-                <th style="width: 15%;">Unit Price</th>
-                ${visibleColumns.discountPercentage ? '<th style=\"width: 10%;\">Disc %</th>' : ''}
-                ${visibleColumns.discountBeforeVat ? '<th style=\"width: 12%;\">Disc Before VAT</th>' : ''}
-                ${visibleColumns.discountAmount ? '<th style=\"width: 12%;\">Disc Amount</th>' : ''}
-                ${visibleColumns.taxPercentage ? '<th style=\"width: 10%;\">Tax %</th>' : ''}
-                ${visibleColumns.taxAmount ? '<th style=\"width: 12%;\">Tax Amount</th>' : ''}
-                <th style="width: 15%;">Total</th>
+                <th style="width: 18%;">Unit Price</th>
+                <th style="width: 20%;">Total</th>
                 `}
               </tr>
             </thead>
@@ -1109,13 +1105,9 @@ export const generatePDF = (data: DocumentData) => {
                   <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
                   <td class="amount-cell">${formatCurrency(item.line_total)}</td>
                   ` : `
-                  <td>${item.quantity}</td>
+                  <td>${item.unit_of_measure || 'pcs'}</td>
+                  <td class="center">${item.quantity}</td>
                   <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
-                  ${visibleColumns.discountPercentage ? `<td>${item.discount_percentage || 0}%</td>` : ''}
-                  ${visibleColumns.discountBeforeVat ? `<td>${(item.discount_before_vat || 0)}%</td>` : ''}
-                  ${visibleColumns.discountAmount ? `<td class=\"amount-cell\">${formatCurrency(item.discount_amount || 0)}</td>` : ''}
-                  ${visibleColumns.taxPercentage ? `<td>${item.tax_percentage || 0}%</td>` : ''}
-                  ${visibleColumns.taxAmount ? `<td class=\"amount-cell\">${formatCurrency(item.tax_amount || 0)}</td>` : ''}
                   <td class="amount-cell">${formatCurrency(item.line_total)}</td>
                   `}
                   `}
@@ -1136,7 +1128,7 @@ export const generatePDF = (data: DocumentData) => {
               <td class="amount">${formatCurrency(data.subtotal)}</td>
             </tr>
             ` : ''}
-            ${data.tax_amount ? `
+            ${data.tax_amount && data.tax_amount > 0 ? `
             <tr>
               <td class="label">Tax Amount:</td>
               <td class="amount">${formatCurrency(data.tax_amount)}</td>
@@ -1186,7 +1178,8 @@ export const generatePDF = (data: DocumentData) => {
         </div>
         ` : ''}
 
-        <!-- Footer -->
+        <!-- Footer (only for non-invoice/quotation types) -->
+        ${(data.type !== 'invoice' && data.type !== 'quotation') ? `
         <div class="footer">
           <strong>Thank you for your business!</strong><br>
           <strong>${company.name}</strong><br>
@@ -1197,7 +1190,108 @@ export const generatePDF = (data: DocumentData) => {
           ${data.type === 'remittance' ? '<br><em>This remittance advice details payments made to your account</em>' : ''}
           ${data.type === 'lpo' ? '<br><em>This Local Purchase Order serves as an official request for goods/services</em>' : ''}
         </div>
+        ` : ''}
       </div>
+
+      <!-- Last Page for Invoices and Quotations -->
+      ${(data.type === 'invoice' || data.type === 'quotation') ? `
+      <div class="page" style="page-break-before: always; position: relative;">
+        <div style="padding: 20mm;">
+
+          <!-- Terms Section -->
+          <div style="margin-bottom: 25px;">
+            <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Terms;</h3>
+            <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
+              <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows; a. 50% Upon Order b. 40% As Progressive c. 10% Upon Completion</li>
+              <li style="margin-bottom: 6px;">All work will be executed based on the drawings and samples approved by the client</li>
+              <li style="margin-bottom: 6px;">Any Changes/alterations to the scope of work outlined will affect the final quantity will be measured, and charges will be applied on a pro-rata basis at the agreed rate</li>
+              <li style="margin-bottom: 6px;">We are not responsible for any damages caused by negligence from other Sub Contractors Hired by the Client.</li>
+              <li style="margin-bottom: 6px;">The quotation does not include statutory fees.</li>
+              <li style="margin-bottom: 6px;">The work shall be completed within weeks from the day of Order.</li>
+            </ol>
+          </div>
+
+          <!-- Acceptance of Quote Section -->
+          <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
+            <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Acceptance of Quote;</h3>
+            <p style="font-size: 11px; margin: 0; color: #333;">The above prices specifications and terms are satisfactory.</p>
+          </div>
+
+          <!-- Contractor and Client Section -->
+          <div style="display: flex; gap: 40px; margin-bottom: 25px; margin-top: 30px;">
+            <!-- Contractor Section -->
+            <div style="flex: 1;">
+              <div style="font-size: 11px; line-height: 1.8; color: #333;">
+                <div><strong>Contractor;</strong> ${company.name}</div>
+                <div><strong>Tel No;</strong> ${company.phone || '____________'}</div>
+                <div><strong>Signed;</strong> ________________________</div>
+              </div>
+            </div>
+
+            <!-- Stamp Area -->
+            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 120px; border: 2px dashed #999; border-radius: 8px; background: #f9f9f9;">
+              <div style="font-size: 14px; color: #999; font-weight: bold;">STAMP</div>
+            </div>
+          </div>
+
+          <!-- Client Section -->
+          <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
+            <div style="font-size: 11px; line-height: 1.8; color: #333;">
+              <div><strong>Client;</strong> ________________________</div>
+              <div><strong>Tel No;</strong> ________________________</div>
+            </div>
+          </div>
+
+          <!-- Prepaired By Section -->
+          <div style="margin-bottom: 20px; padding-top: 15px; border-top: 1px solid #ddd;">
+            <div style="font-size: 11px; color: #333;"><strong>PREPAIRED BY;</strong> ${company.name}</div>
+          </div>
+
+          <!-- Account Details Section -->
+          <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd;">
+            <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase;">Account Details;</h3>
+            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
+              <tr>
+                <td style="width: 30%;"><strong>BANK;</strong></td>
+                <td style="width: 70%;">CO-OPERATIVE BANK OF KENYA</td>
+              </tr>
+              <tr>
+                <td><strong>ACCOUNT NAME;</strong></td>
+                <td>LAYONS CONSTRUCTION LIMITED</td>
+              </tr>
+              <tr>
+                <td><strong>ACCOUNT NUMBER;</strong></td>
+                <td>01192659527000</td>
+              </tr>
+              <tr>
+                <td><strong>BRANCH;</strong></td>
+                <td>JUJA</td>
+              </tr>
+              <tr>
+                <td><strong>SWIFT CODE;</strong></td>
+                <td>KCOOKENA</td>
+              </tr>
+              <tr>
+                <td><strong>BANK CODE;</strong></td>
+                <td>11000</td>
+              </tr>
+              <tr>
+                <td><strong>BRANCH CODE;</strong></td>
+                <td>11124</td>
+              </tr>
+              <tr>
+                <td><strong>PAYBILL;</strong></td>
+                <td>400200</td>
+              </tr>
+              <tr>
+                <td><strong>ACCOUNT;</strong></td>
+                <td>01192659527000</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      ` : ''}
     </body>
     </html>
   `;
