@@ -117,9 +117,24 @@ export default function Invoices() {
   };
 
   const handleDeleteConfirm = async () => {
-    if (!deleteDialog.invoice) return;
+    if (!deleteDialog.invoice || !currentCompany?.id) return;
     try {
       await deleteInvoice.mutateAsync(deleteDialog.invoice.id);
+
+      // Log the delete action
+      await logDelete(
+        currentCompany.id,
+        'invoice',
+        deleteDialog.invoice.id,
+        deleteDialog.invoice.invoice_number,
+        deleteDialog.invoice.invoice_number,
+        {
+          customerName: deleteDialog.invoice.customers?.name,
+          totalAmount: deleteDialog.invoice.total_amount,
+          deletedAt: new Date().toISOString(),
+        }
+      );
+
       toast.success('Invoice deleted successfully');
       refetch();
       setDeleteDialog({ open: false });
