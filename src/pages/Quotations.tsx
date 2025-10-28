@@ -452,10 +452,11 @@ Website: www.biolegendscientific.co.ke`;
                               variant="outline"
                               size="sm"
                               onClick={() => handleConvertToInvoice(quotation)}
+                              disabled={convertQuotationMutation.isPending}
                               className="bg-success-light text-success border-success/20 hover:bg-success hover:text-success-foreground"
                             >
                               <FileText className="h-4 w-4 mr-1" />
-                              <span className="hidden sm:inline">Convert</span>
+                              <span className="hidden sm:inline">{convertQuotationMutation.isPending ? 'Converting...' : 'Convert'}</span>
                             </Button>
                           )}
                         </div>
