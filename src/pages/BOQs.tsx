@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Layers, Plus, Eye, Download, Trash2 } from 'lucide-react';
 import { CreateBOQModal } from '@/components/boq/CreateBOQModal';
+import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { useBOQs, useDeleteBOQ, useUnits } from '@/hooks/useDatabase';
@@ -18,6 +19,7 @@ export default function BOQs() {
   const { data: units = [] } = useUnits(companyId);
 
   const [viewing, setViewing] = useState<any | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; boqId?: string; boqNumber?: string }>({ open: false });
 
   const handleDownloadPDF = async (boq: any) => {
     try {
