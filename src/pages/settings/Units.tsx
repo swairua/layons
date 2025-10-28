@@ -112,6 +112,15 @@ export default function UnitsSettings() {
           </div>
         </div>
       )}
+
+      <ConfirmationDialog
+        open={deleteDialog.open}
+        title="Delete Unit"
+        description={deleteDialog.unitName ? `Are you sure you want to delete unit "${deleteDialog.unitName}"?` : ''}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDialog({ open: false })}
+        confirmText="Delete"
+      />
     </div>
   );
 }
