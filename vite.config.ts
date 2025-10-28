@@ -4,19 +4,12 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  const isDev = mode === "development";
-  const isDeployed = process.env.NODE_ENV === "production" || typeof window === "undefined";
-
   return {
     server: {
       host: "::",
       port: 8080,
       middlewareMode: false,
-      hmr: isDev ? false : {
-        protocol: "wss",
-        host: undefined,
-        port: undefined,
-      },
+      hmr: true,
     },
     plugins: [
       react(),
