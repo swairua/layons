@@ -553,14 +553,17 @@ export default function CompanySettings() {
     }
   };
 
-  const handleDeleteTax = async (taxId: string) => {
-    if (!confirm('Are you sure you want to delete this tax setting?')) {
-      return;
-    }
+  const handleDeleteClick = (taxId: string, taxName: string) => {
+    setDeleteDialog({ open: true, taxId, taxName });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.taxId) return;
 
     try {
-      await deleteTaxSetting.mutateAsync(taxId);
+      await deleteTaxSetting.mutateAsync(deleteDialog.taxId);
       toast.success('Tax setting deleted successfully');
+      setDeleteDialog({ open: false });
     } catch (error) {
       console.error('Tax deletion error:', error);
 
