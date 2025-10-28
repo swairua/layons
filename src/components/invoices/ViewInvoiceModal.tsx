@@ -321,7 +321,6 @@ export function ViewInvoiceModal({
                               <TableHead>Product</TableHead>
                               <TableHead>Qty</TableHead>
                               <TableHead>Unit Price</TableHead>
-                              <TableHead>Discount %</TableHead>
                               <TableHead>Tax %</TableHead>
                               <TableHead className="text-right">Line Total</TableHead>
                             </TableRow>
@@ -341,7 +340,6 @@ export function ViewInvoiceModal({
                                 </TableCell>
                                 <TableCell>{item.quantity}</TableCell>
                                 <TableCell>{formatCurrency(item.unit_price)}</TableCell>
-                                <TableCell>{item.discount_percentage || 0}%</TableCell>
                                 <TableCell>{item.tax_percentage || 0}%</TableCell>
                                 <TableCell className="text-right font-semibold">
                                   {formatCurrency(item.line_total)}
@@ -383,7 +381,6 @@ export function ViewInvoiceModal({
                     <TableHead>Product</TableHead>
                     <TableHead>Qty</TableHead>
                     <TableHead>Unit Price</TableHead>
-                    <TableHead>Discount %</TableHead>
                     <TableHead>Tax %</TableHead>
                     <TableHead className="text-right">Line Total</TableHead>
                   </TableRow>
@@ -403,7 +400,6 @@ export function ViewInvoiceModal({
                       </TableCell>
                       <TableCell>{item.quantity}</TableCell>
                       <TableCell>{formatCurrency(item.unit_price)}</TableCell>
-                      <TableCell>{item.discount_percentage || 0}%</TableCell>
                       <TableCell>{item.tax_percentage || 0}%</TableCell>
                       <TableCell className="text-right font-semibold">
                         {formatCurrency(item.line_total)}
