@@ -87,6 +87,19 @@ export default function Quotations() {
   const { data: companies } = useCompanies();
   const currentCompany = companies?.[0];
   const { data: quotations, isLoading, error, refetch } = useQuotations(currentCompany?.id);
+  const deleteQuotation = useDeleteQuotation();
+
+  const handleDeleteQuotation = async (quotation: Quotation) => {
+    if (!confirm(`Delete quotation ${quotation.quotation_number}? This action cannot be undone.`)) return;
+    try {
+      await deleteQuotation.mutateAsync(quotation.id);
+      toast.success('Quotation deleted successfully');
+      refetch();
+    } catch (err) {
+      console.error('Delete failed', err);
+      toast.error('Failed to delete quotation');
+    }
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
