@@ -1128,7 +1128,7 @@ export const generatePDF = (data: DocumentData) => {
               <td class="amount">${formatCurrency(data.subtotal)}</td>
             </tr>
             ` : ''}
-            ${data.tax_amount ? `
+            ${data.tax_amount && data.tax_amount > 0 ? `
             <tr>
               <td class="label">Tax Amount:</td>
               <td class="amount">${formatCurrency(data.tax_amount)}</td>
