@@ -316,6 +316,22 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
     }
   };
 
+  const handleDeleteItem = async (id: string, description: string) => {
+    if (!confirm(`Delete "${description}"? This action cannot be undone.`)) return;
+    try {
+      const { error } = await supabase
+        .from('fixed_boq_items')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      toast.success('Item deleted successfully');
+      await fetchItems();
+    } catch (err) {
+      console.error('Delete failed:', err);
+      toast.error('Failed to delete item');
+    }
+  };
+
   const handleDownloadPDF = async () => {
     if (!currentCompany) { toast.error('Company not loaded'); return; }
 
