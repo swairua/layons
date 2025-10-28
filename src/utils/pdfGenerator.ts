@@ -40,6 +40,8 @@ export interface DocumentData {
     days_overdue?: number;
     due_date?: string;
     item_code?: string;
+    section_name?: string;
+    section_labor_cost?: number;
   }>;
   preliminaries_items?: Array<{
     item_code: string;
@@ -63,6 +65,19 @@ export interface DocumentData {
   tracking_number?: string;
   delivered_by?: string;
   received_by?: string;
+  // Quotation sections
+  sections?: Array<{
+    name: string;
+    items: Array<{
+      description: string;
+      quantity: number;
+      unit_price: number;
+      tax_percentage?: number;
+      tax_amount?: number;
+      line_total: number;
+    }>;
+    labor_cost: number;
+  }>;
 }
 
 // Company details interface
@@ -473,6 +488,553 @@ export const generatePDF = (data: DocumentData) => {
     `;
 
     printWindow.document.write(htmlContentBOQ);
+    printWindow.document.close();
+
+    printWindow.onload = () => setTimeout(() => printWindow.print(), 500);
+    setTimeout(() => { if (printWindow && !printWindow.closed) printWindow.print(); }, 1000);
+
+    return printWindow;
+  }
+
+  // Handle quotations with sections
+  if (data.type === 'quotation' && data.sections && data.sections.length > 0) {
+    let pagesHtml = '';
+
+    // Render one section per page
+    data.sections.forEach((section, sectionIndex) => {
+      const sectionMaterialsTotal = section.items.reduce((sum, item) => sum + (item.line_total || 0), 0);
+      const sectionLaborCost = section.labor_cost || 0;
+      const sectionTotal = sectionMaterialsTotal + sectionLaborCost;
+      const sectionTaxAmount = section.items.reduce((sum, item) => sum + (item.tax_amount || 0), 0);
+
+      pagesHtml += `
+        <div class="page" style="page-break-after: always;">
+          <!-- Header Section -->
+          <div class="header">
+            <div class="company-info">
+              <div class="logo">
+                ${company.logo_url ?
+                  `<img src="${company.logo_url}" alt="${company.name} Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                   <div style="display:none; width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">Logo not available</div>` :
+                  `<div style="width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">No logo configured</div>`
+                }
+              </div>
+              <div class="company-name">${company.name}</div>
+              <div class="company-details">
+                ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
+                ${company.address ? `${company.address}<br>` : ''}
+                ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
+                ${company.phone ? `Tel: ${company.phone}<br>` : ''}
+                ${company.email ? `Email: ${company.email}` : ''}
+              </div>
+
+              <!-- Client Details Section -->
+              <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e9ecef;">
+                <div class="section-title" style="font-size: 12px; font-weight: bold; color: hsl(var(--primary)); margin-bottom: 8px; text-transform: uppercase;">Client</div>
+                <div class="customer-name" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #212529;">${data.customer.name}</div>
+                <div class="customer-details" style="font-size: 10px; color: #666; line-height: 1.4;">
+                  ${data.customer.email ? `${data.customer.email}<br>` : ''}
+                  ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
+                  ${data.customer.address ? `${data.customer.address}<br>` : ''}
+                  ${data.customer.city ? `${data.customer.city}` : ''}
+                  ${data.customer.country ? `, ${data.customer.country}` : ''}
+                </div>
+              </div>
+            </div>
+
+            <div class="document-info">
+              <div class="document-title">Quotation - Section ${sectionIndex + 1}</div>
+              <div class="document-details">
+                <table>
+                  <tr>
+                    <td class="label">Quotation #:</td>
+                    <td class="value">${data.number}</td>
+                  </tr>
+                  <tr>
+                    <td class="label">Date:</td>
+                    <td class="value">${formatDate(data.date)}</td>
+                  </tr>
+                  ${data.valid_until ? `
+                  <tr>
+                    <td class="label">Valid Until:</td>
+                    <td class="value">${formatDate(data.valid_until)}</td>
+                  </tr>
+                  ` : ''}
+                  <tr>
+                    <td class="label">Amount:</td>
+                    <td class="value" style="font-weight: bold; color: hsl(var(--primary));">${formatCurrency(sectionTotal)}</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section Title -->
+          <div class="section-title" style="margin: 25px 0 15px 0; padding: 10px; background: #f8f9fa; border-left: 4px solid hsl(var(--primary));">${section.name}</div>
+
+          <!-- Items Table -->
+          <div class="items-section">
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th style="width: 5%;">Item #</th>
+                  <th style="width: 35%;">Description</th>
+                  <th style="width: 10%;">Qty</th>
+                  <th style="width: 18%;">Unit Price</th>
+                  <th style="width: 20%;">Total</th>
+                  <th style="width: 12%;">Tax</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${section.items.map((item, itemIndex) => `
+                  <tr>
+                    <td>${itemIndex + 1}</td>
+                    <td class="description-cell">${item.description}</td>
+                    <td class="center">${item.quantity}</td>
+                    <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
+                    <td class="amount-cell">${formatCurrency(item.line_total)}</td>
+                    <td class="amount-cell">${item.tax_amount ? formatCurrency(item.tax_amount) : '-'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Section Totals -->
+          <div class="totals-section">
+            <table class="totals-table">
+              <tr>
+                <td class="label">Materials Subtotal:</td>
+                <td class="amount">${formatCurrency(sectionMaterialsTotal)}</td>
+              </tr>
+              <tr>
+                <td class="label">Labor Cost:</td>
+                <td class="amount">${formatCurrency(sectionLaborCost)}</td>
+              </tr>
+              ${sectionTaxAmount > 0 ? `
+              <tr>
+                <td class="label">Tax Amount:</td>
+                <td class="amount">${formatCurrency(sectionTaxAmount)}</td>
+              </tr>
+              ` : ''}
+              <tr class="total-row">
+                <td class="label">Section Total:</td>
+                <td class="amount">${formatCurrency(sectionTotal)}</td>
+              </tr>
+            </table>
+          </div>
+
+        </div>
+      `;
+    });
+
+    // Add Summary Page
+    const grandTotal = data.sections.reduce((sum, sec) => {
+      const secTotal = sec.items.reduce((s, item) => s + (item.line_total || 0), 0) + (sec.labor_cost || 0);
+      return sum + secTotal;
+    }, 0);
+
+    const totalMaterials = data.sections.reduce((sum, sec) => {
+      return sum + sec.items.reduce((s, item) => s + (item.line_total || 0), 0);
+    }, 0);
+
+    const totalLabor = data.sections.reduce((sum, sec) => sum + (sec.labor_cost || 0), 0);
+    const totalTax = data.sections.reduce((sum, sec) => sum + sec.items.reduce((s, item) => s + (item.tax_amount || 0), 0), 0);
+
+    pagesHtml += `
+      <div class="page" style="position: relative;">
+        <!-- Header Section -->
+        <div class="header">
+          <div class="company-info">
+            <div class="logo">
+              ${company.logo_url ?
+                `<img src="${company.logo_url}" alt="${company.name} Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                 <div style="display:none; width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">Logo not available</div>` :
+                `<div style="width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">No logo configured</div>`
+              }
+            </div>
+            <div class="company-name">${company.name}</div>
+            <div class="company-details">
+              ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
+              ${company.address ? `${company.address}<br>` : ''}
+              ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
+              ${company.phone ? `Tel: ${company.phone}<br>` : ''}
+              ${company.email ? `Email: ${company.email}` : ''}
+            </div>
+
+            <!-- Client Details Section -->
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e9ecef;">
+              <div class="section-title" style="font-size: 12px; font-weight: bold; color: hsl(var(--primary)); margin-bottom: 8px; text-transform: uppercase;">Client</div>
+              <div class="customer-name" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #212529;">${data.customer.name}</div>
+              <div class="customer-details" style="font-size: 10px; color: #666; line-height: 1.4;">
+                ${data.customer.email ? `${data.customer.email}<br>` : ''}
+                ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
+                ${data.customer.address ? `${data.customer.address}<br>` : ''}
+                ${data.customer.city ? `${data.customer.city}` : ''}
+                ${data.customer.country ? `, ${data.customer.country}` : ''}
+              </div>
+            </div>
+          </div>
+
+          <div class="document-info">
+            <div class="document-title">Quotation Summary</div>
+            <div class="document-details">
+              <table>
+                <tr>
+                  <td class="label">Quotation #:</td>
+                  <td class="value">${data.number}</td>
+                </tr>
+                <tr>
+                  <td class="label">Date:</td>
+                  <td class="value">${formatDate(data.date)}</td>
+                </tr>
+                ${data.valid_until ? `
+                <tr>
+                  <td class="label">Valid Until:</td>
+                  <td class="value">${formatDate(data.valid_until)}</td>
+                </tr>
+                ` : ''}
+                <tr>
+                  <td class="label">Grand Total:</td>
+                  <td class="value" style="font-weight: bold; color: hsl(var(--primary));">${formatCurrency(grandTotal)}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary Table -->
+        <div class="items-section">
+          <h3 style="margin-top: 25px; margin-bottom: 15px; font-size: 14px; color: hsl(var(--primary));">Quotation Summary by Section</h3>
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th style="width: 40%;">Section</th>
+                <th style="width: 20%;">Materials</th>
+                <th style="width: 20%;">Labor</th>
+                <th style="width: 20%;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.sections.map((section) => {
+                const matTotal = section.items.reduce((sum, item) => sum + (item.line_total || 0), 0);
+                const secTotal = matTotal + (section.labor_cost || 0);
+                return `
+                  <tr>
+                    <td class="description-cell">${section.name}</td>
+                    <td class="amount-cell">${formatCurrency(matTotal)}</td>
+                    <td class="amount-cell">${formatCurrency(section.labor_cost || 0)}</td>
+                    <td class="amount-cell" style="font-weight: bold;">${formatCurrency(secTotal)}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Grand Totals -->
+        <div class="totals-section">
+          <table class="totals-table">
+            <tr>
+              <td class="label">Total Materials:</td>
+              <td class="amount">${formatCurrency(totalMaterials)}</td>
+            </tr>
+            <tr>
+              <td class="label">Total Labor:</td>
+              <td class="amount">${formatCurrency(totalLabor)}</td>
+            </tr>
+            ${totalTax > 0 ? `
+            <tr>
+              <td class="label">Total Tax:</td>
+              <td class="amount">${formatCurrency(totalTax)}</td>
+            </tr>
+            ` : ''}
+            <tr class="total-row">
+              <td class="label">GRAND TOTAL:</td>
+              <td class="amount">${formatCurrency(grandTotal)}</td>
+            </tr>
+          </table>
+        </div>
+
+      </div>
+    `;
+
+    const htmlContentWithSections = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Quotation ${data.number}</title>
+        <meta charset="UTF-8">
+        <style>
+          ${pdfRootVars}
+          @page {
+            size: A4;
+            margin: 15mm;
+          }
+
+          * {
+            box-sizing: border-box;
+          }
+
+          body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            line-height: 1.4;
+            font-size: 12px;
+            background: white;
+          }
+
+          .page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20mm;
+            position: relative;
+          }
+
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid hsl(var(--primary));
+          }
+
+          .company-info {
+            flex: 1;
+          }
+
+          .logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border-radius: 4px;
+            overflow: hidden;
+          }
+
+          .logo img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+          }
+
+          .company-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #212529;
+          }
+
+          .company-details {
+            font-size: 10px;
+            color: #666;
+            line-height: 1.6;
+          }
+
+          .document-info {
+            text-align: right;
+            flex: 1;
+          }
+
+          .document-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: hsl(var(--primary));
+            text-transform: uppercase;
+          }
+
+          .document-details table {
+            width: 100%;
+            margin-top: 10px;
+          }
+
+          .document-details td {
+            padding: 4px 0;
+          }
+
+          .document-details .label {
+            font-weight: bold;
+            color: #495057;
+            width: 40%;
+          }
+
+          .document-details .value {
+            text-align: right;
+            color: #212529;
+          }
+
+          .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: hsl(var(--primary));
+            margin: 0 0 15px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .customer-name {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #212529;
+          }
+
+          .customer-details {
+            color: #666;
+            line-height: 1.6;
+          }
+
+          .items-section {
+            margin: 30px 0;
+          }
+
+          .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 11px;
+            border: 2px solid hsl(var(--primary));
+            border-radius: 8px;
+            overflow: hidden;
+          }
+
+          .items-table thead {
+            background: hsl(var(--primary));
+            color: white;
+          }
+
+          .items-table th {
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-right: 1px solid rgba(255,255,255,0.2);
+          }
+
+          .items-table th:last-child {
+            border-right: none;
+          }
+
+          .items-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e9ecef;
+            border-right: 1px solid #e9ecef;
+            text-align: center;
+            vertical-align: top;
+          }
+
+          .items-table td:last-child {
+            border-right: none;
+          }
+
+          .items-table tbody tr:last-child td {
+            border-bottom: none;
+          }
+
+          .items-table tbody tr:nth-child(even) {
+            background: #f8f9fa;
+          }
+
+          .description-cell {
+            text-align: left !important;
+            max-width: 200px;
+            word-wrap: break-word;
+          }
+
+          .amount-cell {
+            text-align: right !important;
+            font-weight: 500;
+          }
+
+          .center {
+            text-align: center !important;
+          }
+
+          .totals-section {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+          }
+
+          .totals-table {
+            width: 350px;
+            border-collapse: collapse;
+            font-size: 12px;
+          }
+
+          .totals-table td {
+            padding: 8px 15px;
+            border: none;
+          }
+
+          .totals-table .label {
+            text-align: left;
+            color: #495057;
+            font-weight: 500;
+          }
+
+          .totals-table .amount {
+            text-align: right;
+            font-weight: 600;
+            color: #212529;
+          }
+
+          .totals-table .total-row {
+            border-top: 2px solid hsl(var(--primary));
+            background: #f8f9fa;
+          }
+
+          .totals-table .total-row .label {
+            font-size: 14px;
+            font-weight: bold;
+            color: hsl(var(--primary));
+          }
+
+          .totals-table .total-row .amount {
+            font-size: 16px;
+            font-weight: bold;
+            color: hsl(var(--primary));
+          }
+
+          @media print {
+            body {
+              background: white;
+            }
+
+            .page {
+              box-shadow: none;
+              margin: 0;
+              padding: 0;
+            }
+          }
+
+          @media screen {
+            body {
+              background: #f5f5f5;
+              padding: 20px;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        ${pagesHtml}
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContentWithSections);
     printWindow.document.close();
 
     printWindow.onload = () => setTimeout(() => printWindow.print(), 500);
@@ -1368,46 +1930,107 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
 
 // Function for quotation PDF generation
 export const downloadQuotationPDF = async (quotation: any, company?: CompanyDetails) => {
-  const documentData: DocumentData = {
-    type: 'quotation',
-    number: quotation.quotation_number,
-    date: quotation.quotation_date,
-    valid_until: quotation.valid_until,
-    company: company, // Pass company details
-    customer: {
-      name: quotation.customers?.name || 'Unknown Customer',
-      email: quotation.customers?.email,
-      phone: quotation.customers?.phone,
-      address: quotation.customers?.address,
-      city: quotation.customers?.city,
-      country: quotation.customers?.country,
-    },
-    items: quotation.quotation_items?.map((item: any) => {
-      const quantity = Number(item.quantity || 0);
-      const unitPrice = Number(item.unit_price || 0);
-      const taxAmount = Number(item.tax_amount || 0);
-      const discountAmount = Number(item.discount_amount || 0);
-      const computedLineTotal = quantity * unitPrice - discountAmount + taxAmount;
+  const items = quotation.quotation_items?.map((item: any) => {
+    const quantity = Number(item.quantity || 0);
+    const unitPrice = Number(item.unit_price || 0);
+    const taxAmount = Number(item.tax_amount || 0);
+    const discountAmount = Number(item.discount_amount || 0);
+    const computedLineTotal = quantity * unitPrice - discountAmount + taxAmount;
 
+    return {
+      description: item.description || item.product_name || item.products?.name || 'Unknown Item',
+      quantity: quantity,
+      unit_price: unitPrice,
+      discount_percentage: Number(item.discount_percentage || 0),
+      discount_amount: discountAmount,
+      tax_percentage: Number(item.tax_percentage || 0),
+      tax_amount: taxAmount,
+      tax_inclusive: item.tax_inclusive || false,
+      line_total: Number(item.line_total ?? computedLineTotal),
+      unit_of_measure: item.products?.unit_of_measure || item.unit_of_measure || 'pcs',
+      section_name: item.section_name,
+      section_labor_cost: Number(item.section_labor_cost || 0),
+    };
+  }) || [];
+
+  // Check if items have sections
+  const hasSections = items.some((item: any) => item.section_name);
+
+  let documentData: DocumentData;
+
+  if (hasSections) {
+    // Group items by section
+    const sectionMap = new Map<string, any[]>();
+    items.forEach((item: any) => {
+      const sectionName = item.section_name || 'Untitled Section';
+      if (!sectionMap.has(sectionName)) {
+        sectionMap.set(sectionName, []);
+      }
+      sectionMap.get(sectionName)!.push(item);
+    });
+
+    // Create sections array with labor costs
+    const sections = Array.from(sectionMap.entries()).map(([sectionName, sectionItems]) => {
+      const laborCost = sectionItems.length > 0 ? sectionItems[0].section_labor_cost : 0;
       return {
-        description: item.description || item.product_name || item.products?.name || 'Unknown Item',
-        quantity: quantity,
-        unit_price: unitPrice,
-        discount_percentage: Number(item.discount_percentage || 0),
-        discount_amount: discountAmount,
-        tax_percentage: Number(item.tax_percentage || 0),
-        tax_amount: taxAmount,
-        tax_inclusive: item.tax_inclusive || false,
-        line_total: Number(item.line_total ?? computedLineTotal),
-        unit_of_measure: item.products?.unit_of_measure || item.unit_of_measure || 'pcs',
+        name: sectionName,
+        items: sectionItems.map(item => ({
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          tax_percentage: item.tax_percentage,
+          tax_amount: item.tax_amount,
+          line_total: item.line_total,
+        })),
+        labor_cost: laborCost,
       };
-    }) || [],
-    subtotal: quotation.subtotal,
-    tax_amount: quotation.tax_amount,
-    total_amount: quotation.total_amount,
-    notes: quotation.notes,
-    terms_and_conditions: quotation.terms_and_conditions,
-  };
+    });
+
+    documentData = {
+      type: 'quotation',
+      number: quotation.quotation_number,
+      date: quotation.quotation_date,
+      valid_until: quotation.valid_until,
+      company: company,
+      customer: {
+        name: quotation.customers?.name || 'Unknown Customer',
+        email: quotation.customers?.email,
+        phone: quotation.customers?.phone,
+        address: quotation.customers?.address,
+        city: quotation.customers?.city,
+        country: quotation.customers?.country,
+      },
+      items: items,
+      sections: sections,
+      subtotal: quotation.subtotal,
+      tax_amount: quotation.tax_amount,
+      total_amount: quotation.total_amount,
+      notes: quotation.notes,
+      terms_and_conditions: quotation.terms_and_conditions,
+    };
+  } else {
+    documentData = {
+      type: 'quotation',
+      number: quotation.quotation_number,
+      date: quotation.quotation_date,
+      valid_until: quotation.valid_until,
+      company: company,
+      customer: {
+        name: quotation.customers?.name || 'Unknown Customer',
+        email: quotation.customers?.email,
+        phone: quotation.customers?.phone,
+        address: quotation.customers?.address,
+        city: quotation.customers?.city,
+        country: quotation.customers?.country,
+      },
+      items: items,
+      subtotal: quotation.subtotal,
+      tax_amount: quotation.tax_amount,
+      total_amount: quotation.total_amount,
+      notes: quotation.notes,
+      terms_and_conditions: quotation.terms_and_conditions,
+    };
+  }
 
   return generatePDF(documentData);
 };

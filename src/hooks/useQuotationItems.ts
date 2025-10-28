@@ -170,16 +170,47 @@ export const useCreateQuotationWithItems = () => {
 
       // Then create the quotation items if any
       if (items.length > 0) {
-        const quotationItems = items.map((item, index) => ({
-          ...item,
-          quotation_id: quotationData.id,
-          sort_order: index + 1
-        }));
-        
-        const { error: itemsError } = await supabase
+        const quotationItems = items.map((item, index) => {
+          const baseItem = {
+            quotation_id: quotationData.id,
+            product_id: item.product_id,
+            description: item.description,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            discount_percentage: item.discount_percentage || 0,
+            tax_percentage: item.tax_percentage || 0,
+            tax_amount: item.tax_amount || 0,
+            tax_inclusive: item.tax_inclusive || false,
+            line_total: item.line_total,
+            sort_order: index + 1
+          } as any;
+
+          // Add section metadata if available
+          if (item.section_name) {
+            baseItem.section_name = item.section_name;
+          }
+          if (item.section_labor_cost !== undefined) {
+            baseItem.section_labor_cost = item.section_labor_cost;
+          }
+
+          return baseItem;
+        });
+
+        let itemsError: any = null;
+        const { error } = await supabase
           .from('quotation_items')
           .insert(quotationItems);
-        
+        itemsError = error as any;
+
+        // Fallback: if the database doesn't support section fields, try without them
+        if (itemsError && (itemsError.code === 'PGRST204' || String(itemsError.message || '').toLowerCase().includes('section'))) {
+          const minimalItems = quotationItems.map(({ section_name, section_labor_cost, ...rest }) => rest);
+          const retry = await supabase
+            .from('quotation_items')
+            .insert(minimalItems);
+          itemsError = retry.error as any;
+        }
+
         if (itemsError) throw itemsError;
       }
       
