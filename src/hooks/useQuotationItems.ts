@@ -21,8 +21,6 @@ export interface InvoiceItem {
   description: string;
   quantity: number;
   unit_price: number;
-  discount_percentage?: number;
-  discount_before_vat?: number;
   tax_setting_id?: string;
   tax_percentage?: number;
   tax_amount?: number;
@@ -35,34 +33,30 @@ export interface InvoiceItem {
 export const calculateLineItemTotal = (item: {
   quantity: number;
   unit_price: number;
-  discount_percentage?: number;
   tax_percentage?: number;
   tax_inclusive?: boolean;
 }) => {
-  const { quantity, unit_price, discount_percentage = 0, tax_percentage = 0, tax_inclusive = false } = item;
-  
+  const { quantity, unit_price, tax_percentage = 0, tax_inclusive = false } = item;
+
   const baseAmount = quantity * unit_price;
-  const discountAmount = baseAmount * (discount_percentage / 100);
-  const afterDiscount = baseAmount - discountAmount;
-  
+
   let taxAmount = 0;
   let lineTotal = 0;
-  
+
   if (tax_inclusive) {
     // Tax is already included in the unit price
-    lineTotal = afterDiscount;
-    taxAmount = afterDiscount - (afterDiscount / (1 + tax_percentage / 100));
+    lineTotal = baseAmount;
+    taxAmount = baseAmount - (baseAmount / (1 + tax_percentage / 100));
   } else {
     // Tax is added on top
-    taxAmount = afterDiscount * (tax_percentage / 100);
-    lineTotal = afterDiscount + taxAmount;
+    taxAmount = baseAmount * (tax_percentage / 100);
+    lineTotal = baseAmount + taxAmount;
   }
-  
+
   return {
     line_total: lineTotal,
     tax_amount: taxAmount,
-    subtotal: afterDiscount,
-    discount_amount: discountAmount
+    subtotal: baseAmount
   };
 };
 
@@ -177,7 +171,6 @@ export const useCreateQuotationWithItems = () => {
             description: item.description,
             quantity: item.quantity,
             unit_price: item.unit_price,
-            discount_percentage: item.discount_percentage || 0,
             tax_percentage: item.tax_percentage || 0,
             tax_amount: item.tax_amount || 0,
             tax_inclusive: item.tax_inclusive || false,
@@ -286,8 +279,6 @@ export const useConvertQuotationToInvoice = () => {
           description: item.description,
           quantity: item.quantity,
           unit_price: item.unit_price,
-          discount_percentage: item.discount_percentage,
-          discount_before_vat: item.discount_before_vat || 0,
           tax_percentage: item.tax_percentage,
           tax_amount: item.tax_amount,
           tax_inclusive: item.tax_inclusive,
@@ -303,17 +294,8 @@ export const useConvertQuotationToInvoice = () => {
           itemsError = res.error as any;
         }
 
-        // Fallback: remove discount_before_vat if schema doesn't have it
-        if (itemsError && (itemsError.code === 'PGRST204' || String(itemsError.message || '').toLowerCase().includes('discount_before_vat'))) {
-          const minimalItems = invoiceItems.map(({ discount_before_vat, ...rest }) => rest);
-          const retry = await supabase
-            .from('invoice_items')
-            .insert(minimalItems);
-          itemsError = retry.error as any;
-        }
-
         if (itemsError) throw itemsError;
-        
+
         // Create stock movements
         const stockMovements = invoiceItems
           .filter(item => item.product_id && item.quantity > 0)
@@ -431,15 +413,6 @@ export const useCreateInvoiceWithItems = () => {
             .from('invoice_items')
             .insert(invoiceItems);
           itemsError = res.error as any;
-        }
-
-        // Fallback: remove discount_before_vat if schema doesn't have it
-        if (itemsError && (itemsError.code === 'PGRST204' || String(itemsError.message || '').toLowerCase().includes('discount_before_vat'))) {
-          const minimalItems = invoiceItems.map(({ discount_before_vat, ...rest }) => rest);
-          const retry = await supabase
-            .from('invoice_items')
-            .insert(minimalItems);
-          itemsError = retry.error as any;
         }
 
         if (itemsError) throw itemsError;
@@ -602,15 +575,6 @@ export const useUpdateInvoiceWithItems = () => {
           itemsError = res.error as any;
         }
 
-        // Fallback: remove discount_before_vat if schema doesn't have it
-        if (itemsError && (itemsError.code === 'PGRST204' || String(itemsError.message || '').toLowerCase().includes('discount_before_vat'))) {
-          const minimalItems = invoiceItems.map(({ discount_before_vat, ...rest }) => rest);
-          const retry = await supabase
-            .from('invoice_items')
-            .insert(minimalItems);
-          itemsError = retry.error as any;
-        }
-
         if (itemsError) throw itemsError;
 
         // Create new stock movements if affects inventory
@@ -718,8 +682,6 @@ export const useCreateProformaWithItems = () => {
           description: item.description,
           quantity: item.quantity,
           unit_price: item.unit_price,
-          discount_percentage: item.discount_percentage || 0,
-          discount_amount: item.discount_amount || 0,
           tax_percentage: item.tax_percentage || 0,
           tax_amount: item.tax_amount || 0,
           tax_inclusive: !!item.tax_inclusive,
@@ -732,14 +694,7 @@ export const useCreateProformaWithItems = () => {
           .insert(proformaItems);
 
         if (itemsError) {
-          const msg = (itemsError.message || JSON.stringify(itemsError)).toLowerCase();
-          if (msg.includes('discount_percentage')) {
-            const minimalItems = proformaItems.map(({ discount_percentage, ...rest }) => rest);
-            const retry = await supabase.from('proforma_items').insert(minimalItems);
-            if (retry.error) throw retry.error;
-          } else {
-            throw itemsError;
-          }
+          throw itemsError;
         }
       }
 

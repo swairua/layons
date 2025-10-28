@@ -414,11 +414,10 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
       const invoiceItems = sections.flatMap((section, sectionIndex) =>
         section.items.map(item => ({
           product_id: item.product_id,
-            description: item.description,
-            quantity: item.quantity,
-            unit_price: item.unit_price,
-            discount_percentage: 0,
-            tax_percentage: item.tax_percentage || 0,
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          tax_percentage: item.tax_percentage || 0,
           tax_amount: calculateTaxAmount(item),
           tax_inclusive: item.tax_inclusive || false,
           line_total: item.line_total,

@@ -259,7 +259,6 @@ export function ViewQuotationModal({
                       <TableHead className="text-center">Qty</TableHead>
                       <TableHead className="text-center">Unit Pack</TableHead>
                       <TableHead className="text-right">Unit Price</TableHead>
-                      <TableHead className="text-center">Discount %</TableHead>
                       <TableHead className="text-right">Total Price</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -277,7 +276,6 @@ export function ViewQuotationModal({
                         <TableCell className="text-center">{item.quantity}</TableCell>
                         <TableCell className="text-center">{item.products?.unit_of_measure || 'Each'}</TableCell>
                         <TableCell className="text-right">{formatCurrency(item.unit_price)}</TableCell>
-                        <TableCell className="text-center">{item.discount_percentage || 0}%</TableCell>
                         <TableCell className="text-right font-semibold">{formatCurrency(item.line_total)}</TableCell>
                       </TableRow>
                     ))}
@@ -297,12 +295,6 @@ export function ViewQuotationModal({
                       <span>Subtotal:</span>
                       <span className="font-semibold">{formatCurrency(quotation.subtotal || 0)}</span>
                     </div>
-                    {quotation.discount_amount > 0 && (
-                      <div className="flex justify-between">
-                        <span>Discount:</span>
-                        <span className="font-semibold text-destructive">-{formatCurrency(quotation.discount_amount)}</span>
-                      </div>
-                    )}
                     <div className="flex justify-between">
                       <span>Tax:</span>
                       <span className="font-semibold">{formatCurrency(quotation.tax_amount || 0)}</span>

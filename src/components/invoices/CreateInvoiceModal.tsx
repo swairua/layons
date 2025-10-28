@@ -429,7 +429,6 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
             description: item.description,
             quantity: item.quantity,
             unit_price: item.unit_price,
-            discount_percentage: 0,
             tax_percentage: item.tax_percentage || 0,
             tax_amount: calculateTaxAmount(item),
             tax_inclusive: item.tax_inclusive || false,
