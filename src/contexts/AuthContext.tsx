@@ -5,6 +5,34 @@ import { toast } from 'sonner';
 import { initializeAuth, clearAuthTokens, safeAuthOperation } from '@/utils/authHelpers';
 import { logError, getUserFriendlyErrorMessage, isErrorType } from '@/utils/errorLogger';
 
+// Helper function to safely format error for display
+const formatErrorForDisplay = (error: unknown): string => {
+  if (!error) return 'Unknown error occurred';
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  if (typeof error === 'object') {
+    const errorObj = error as any;
+    if (errorObj.message && typeof errorObj.message === 'string') {
+      return errorObj.message;
+    }
+    if (errorObj.error_description && typeof errorObj.error_description === 'string') {
+      return errorObj.error_description;
+    }
+    if (errorObj.details && typeof errorObj.details === 'string') {
+      return errorObj.details;
+    }
+  }
+
+  return 'An unexpected error occurred';
+};
+
 export interface UserProfile {
   id: string;
   email: string;
