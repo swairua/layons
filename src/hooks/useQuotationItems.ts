@@ -294,17 +294,8 @@ export const useConvertQuotationToInvoice = () => {
           itemsError = res.error as any;
         }
 
-        // Fallback: remove discount_before_vat if schema doesn't have it
-        if (itemsError && (itemsError.code === 'PGRST204' || String(itemsError.message || '').toLowerCase().includes('discount_before_vat'))) {
-          const minimalItems = invoiceItems.map(({ discount_before_vat, ...rest }) => rest);
-          const retry = await supabase
-            .from('invoice_items')
-            .insert(minimalItems);
-          itemsError = retry.error as any;
-        }
-
         if (itemsError) throw itemsError;
-        
+
         // Create stock movements
         const stockMovements = invoiceItems
           .filter(item => item.product_id && item.quantity > 0)
@@ -422,15 +413,6 @@ export const useCreateInvoiceWithItems = () => {
             .from('invoice_items')
             .insert(invoiceItems);
           itemsError = res.error as any;
-        }
-
-        // Fallback: remove discount_before_vat if schema doesn't have it
-        if (itemsError && (itemsError.code === 'PGRST204' || String(itemsError.message || '').toLowerCase().includes('discount_before_vat'))) {
-          const minimalItems = invoiceItems.map(({ discount_before_vat, ...rest }) => rest);
-          const retry = await supabase
-            .from('invoice_items')
-            .insert(minimalItems);
-          itemsError = retry.error as any;
         }
 
         if (itemsError) throw itemsError;
@@ -591,15 +573,6 @@ export const useUpdateInvoiceWithItems = () => {
             .from('invoice_items')
             .insert(invoiceItems);
           itemsError = res.error as any;
-        }
-
-        // Fallback: remove discount_before_vat if schema doesn't have it
-        if (itemsError && (itemsError.code === 'PGRST204' || String(itemsError.message || '').toLowerCase().includes('discount_before_vat'))) {
-          const minimalItems = invoiceItems.map(({ discount_before_vat, ...rest }) => rest);
-          const retry = await supabase
-            .from('invoice_items')
-            .insert(minimalItems);
-          itemsError = retry.error as any;
         }
 
         if (itemsError) throw itemsError;
