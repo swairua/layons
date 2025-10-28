@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
-import { Download, Database, PlusCircle, Upload } from 'lucide-react';
+import { Download, Database, PlusCircle, Upload, Trash2 } from 'lucide-react';
 import { generatePDF } from '@/utils/pdfGenerator';
 import { executeSQL, formatSQLForManualExecution } from '@/utils/execSQL';
 import { parseErrorMessage } from '@/utils/errorHelpers';
