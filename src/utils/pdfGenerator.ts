@@ -723,12 +723,13 @@ export const generatePDF = (data: DocumentData) => {
               </tr>
             </thead>
             <tbody>
-              ${data.sections.map((section) => {
+              ${data.sections.map((section, idx) => {
+                const sectionLetter = String.fromCharCode(65 + idx);
                 const matTotal = section.items.reduce((sum, item) => sum + (item.line_total || 0), 0);
                 const secTotal = matTotal + (section.labor_cost || 0);
                 return `
                   <tr>
-                    <td class="description-cell">${section.name}</td>
+                    <td class="description-cell">${sectionLetter}. ${section.name}</td>
                     <td class="amount-cell">${formatCurrency(matTotal)}</td>
                     <td class="amount-cell">${formatCurrency(section.labor_cost || 0)}</td>
                     <td class="amount-cell" style="font-weight: bold;">${formatCurrency(secTotal)}</td>
