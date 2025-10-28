@@ -21,8 +21,11 @@ import {
   Download,
   Send,
   DollarSign,
-  Edit
+  Edit,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
+import { useState, useMemo } from 'react';
 
 interface ViewInvoiceModalProps {
   open: boolean;
@@ -34,6 +37,12 @@ interface ViewInvoiceModalProps {
   onRecordPayment: () => void;
 }
 
+interface InvoiceSection {
+  name: string;
+  items: any[];
+  labor_cost: number;
+}
+
 export function ViewInvoiceModal({ 
   open, 
   onOpenChange, 
@@ -43,6 +52,8 @@ export function ViewInvoiceModal({
   onSend, 
   onRecordPayment 
 }: ViewInvoiceModalProps) {
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+
   if (!invoice) return null;
 
   const formatCurrency = (amount: number) => {
@@ -77,6 +88,47 @@ export function ViewInvoiceModal({
       default:
         return 'bg-muted text-muted-foreground border-muted-foreground/20';
     }
+  };
+
+  // Group items by section
+  const sections: InvoiceSection[] = useMemo(() => {
+    const sectionMap = new Map<string, InvoiceSection>();
+    
+    (invoice.invoice_items || []).forEach((item: any) => {
+      const sectionName = item.section_name || 'Items';
+      
+      if (!sectionMap.has(sectionName)) {
+        sectionMap.set(sectionName, {
+          name: sectionName,
+          items: [],
+          labor_cost: item.section_labor_cost || 0
+        });
+      }
+      
+      sectionMap.get(sectionName)!.items.push(item);
+    });
+
+    return Array.from(sectionMap.values());
+  }, [invoice.invoice_items]);
+
+  const hasSections = sections.length > 1 || (sections.length === 1 && sections[0].name !== 'Items');
+
+  const toggleSection = (sectionName: string) => {
+    const newExpanded = new Set(expandedSections);
+    if (newExpanded.has(sectionName)) {
+      newExpanded.delete(sectionName);
+    } else {
+      newExpanded.add(sectionName);
+    }
+    setExpandedSections(newExpanded);
+  };
+
+  const calculateSectionMaterials = (section: InvoiceSection) => {
+    return section.items.reduce((sum, item) => sum + (item.line_total || 0), 0);
+  };
+
+  const calculateSectionTotal = (section: InvoiceSection) => {
+    return calculateSectionMaterials(section) + section.labor_cost;
   };
 
   return (
@@ -237,6 +289,93 @@ export function ViewInvoiceModal({
               <div className="text-center py-8 text-muted-foreground">
                 No items found for this invoice
               </div>
+            ) : hasSections ? (
+              <div className="space-y-4">
+                {sections.map((section) => (
+                  <div key={section.name} className="border rounded-lg">
+                    <div
+                      className="p-4 bg-slate-50 cursor-pointer hover:bg-slate-100 flex items-center justify-between"
+                      onClick={() => toggleSection(section.name)}
+                    >
+                      <div className="flex items-center gap-2">
+                        {expandedSections.has(section.name) ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                        <h3 className="font-semibold">{section.name}</h3>
+                        <Badge variant="outline" className="text-xs">
+                          {section.items.length} items
+                        </Badge>
+                      </div>
+                      <div className="font-semibold">
+                        {formatCurrency(calculateSectionTotal(section))}
+                      </div>
+                    </div>
+
+                    {expandedSections.has(section.name) && (
+                      <div className="p-4 space-y-4">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Product</TableHead>
+                              <TableHead>Qty</TableHead>
+                              <TableHead>Unit Price</TableHead>
+                              <TableHead>Discount %</TableHead>
+                              <TableHead>Tax %</TableHead>
+                              <TableHead className="text-right">Line Total</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {section.items.map((item: any, index: number) => (
+                              <TableRow key={item.id || index}>
+                                <TableCell>
+                                  <div>
+                                    <div className="font-medium">
+                                      {item.products?.name || item.description || 'Unknown Product'}
+                                    </div>
+                                    {item.description && item.description !== item.products?.name && (
+                                      <div className="text-sm text-muted-foreground">{item.description}</div>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell>{item.quantity}</TableCell>
+                                <TableCell>{formatCurrency(item.unit_price)}</TableCell>
+                                <TableCell>{item.discount_percentage || 0}%</TableCell>
+                                <TableCell>{item.tax_percentage || 0}%</TableCell>
+                                <TableCell className="text-right font-semibold">
+                                  {formatCurrency(item.line_total)}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+
+                        {section.labor_cost > 0 && (
+                          <div className="border-t pt-4">
+                            <div className="flex justify-end">
+                              <div className="w-80 space-y-1 text-sm">
+                                <div className="flex justify-between">
+                                  <span>Materials:</span>
+                                  <span className="font-semibold">{formatCurrency(calculateSectionMaterials(section))}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Labor Cost:</span>
+                                  <span className="font-semibold">{formatCurrency(section.labor_cost)}</span>
+                                </div>
+                                <div className="flex justify-between border-t pt-1 font-semibold">
+                                  <span>Section Total:</span>
+                                  <span>{formatCurrency(calculateSectionTotal(section))}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             ) : (
               <Table>
                 <TableHeader>
@@ -306,6 +445,17 @@ export function ViewInvoiceModal({
             </div>
           </CardContent>
         </Card>
+
+        {invoice.terms_and_conditions && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Terms and Conditions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm whitespace-pre-wrap">{invoice.terms_and_conditions}</p>
+            </CardContent>
+          </Card>
+        )}
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
