@@ -44,7 +44,6 @@ interface InvoiceItem {
   description: string;
   quantity: number;
   unit_price: number;
-  discount_percentage: number;
   tax_percentage: number;
   tax_amount: number;
   tax_inclusive: boolean;
@@ -107,29 +106,25 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
     product.product_code.toLowerCase().includes(searchProduct.toLowerCase())
   ) || [];
 
-  const calculateItemTotal = (quantity: number, unitPrice: number, discountPercentage: number, taxPercentage: number, taxInclusive: boolean) => {
+  const calculateItemTotal = (quantity: number, unitPrice: number, taxPercentage: number, taxInclusive: boolean) => {
     const baseAmount = quantity * unitPrice;
-    const discountAmount = baseAmount * (discountPercentage / 100);
-    const afterDiscount = baseAmount - discountAmount;
 
     if (taxPercentage === 0 || !taxInclusive) {
-      return afterDiscount;
+      return baseAmount;
     }
 
-    const taxAmount = afterDiscount * (taxPercentage / 100);
-    return afterDiscount + taxAmount;
+    const taxAmount = baseAmount * (taxPercentage / 100);
+    return baseAmount + taxAmount;
   };
 
   const calculateTaxAmount = (item: InvoiceItem) => {
     const baseAmount = item.quantity * item.unit_price;
-    const discountAmount = baseAmount * (item.discount_percentage / 100);
-    const afterDiscount = baseAmount - discountAmount;
 
     if (item.tax_percentage === 0 || !item.tax_inclusive) {
       return 0;
     }
 
-    return afterDiscount * (item.tax_percentage / 100);
+    return baseAmount * (item.tax_percentage / 100);
   };
 
   const addSection = () => {
@@ -186,7 +181,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
               ? {
                   ...item,
                   quantity: item.quantity + 1,
-                  line_total: calculateItemTotal(item.quantity + 1, item.unit_price, item.discount_percentage, item.tax_percentage, item.tax_inclusive),
+                  line_total: calculateItemTotal(item.quantity + 1, item.unit_price, item.tax_percentage, item.tax_inclusive),
                   tax_amount: calculateTaxAmount({ ...item, quantity: item.quantity + 1 })
                 }
               : item
@@ -202,11 +197,10 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
         description: product.description || product.name,
         quantity: 1,
         unit_price: price,
-        discount_percentage: 0,
         tax_percentage: defaultTaxRate,
         tax_amount: 0,
         tax_inclusive: true,
-        line_total: calculateItemTotal(1, price, 0, defaultTaxRate, true)
+        line_total: calculateItemTotal(1, price, defaultTaxRate, true)
       };
 
       newItem.tax_amount = calculateTaxAmount(newItem);
@@ -233,7 +227,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(quantity, item.unit_price, item.discount_percentage, item.tax_percentage, item.tax_inclusive);
+            const lineTotal = calculateItemTotal(quantity, item.unit_price, item.tax_percentage, item.tax_inclusive);
             const taxAmount = calculateTaxAmount({ ...item, quantity });
             return { ...item, quantity, line_total: lineTotal, tax_amount: taxAmount };
           }
@@ -251,27 +245,9 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(item.quantity, unitPrice, item.discount_percentage, item.tax_percentage, item.tax_inclusive);
+            const lineTotal = calculateItemTotal(item.quantity, unitPrice, item.tax_percentage, item.tax_inclusive);
             const taxAmount = calculateTaxAmount({ ...item, unit_price: unitPrice });
             return { ...item, unit_price: unitPrice, line_total: lineTotal, tax_amount: taxAmount };
-          }
-          return item;
-        })
-      };
-    }));
-  };
-
-  const updateItemDiscount = (sectionId: string, itemId: string, discountPercentage: number) => {
-    setSections(sections.map(section => {
-      if (section.id !== sectionId) return section;
-
-      return {
-        ...section,
-        items: section.items.map(item => {
-          if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, discountPercentage, item.tax_percentage, item.tax_inclusive);
-            const taxAmount = calculateTaxAmount({ ...item, discount_percentage: discountPercentage });
-            return { ...item, discount_percentage: discountPercentage, line_total: lineTotal, tax_amount: taxAmount };
           }
           return item;
         })
@@ -287,7 +263,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, item.discount_percentage, taxPercentage, item.tax_inclusive);
+            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, taxPercentage, item.tax_inclusive);
             const taxAmount = calculateTaxAmount({ ...item, tax_percentage: taxPercentage });
             return { ...item, tax_percentage: taxPercentage, line_total: lineTotal, tax_amount: taxAmount };
           }
@@ -313,7 +289,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
               newTaxPercentage = 0;
             }
 
-            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, item.discount_percentage, newTaxPercentage, taxInclusive);
+            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, newTaxPercentage, taxInclusive);
             const taxAmount = calculateTaxAmount({ ...item, tax_inclusive: taxInclusive, tax_percentage: newTaxPercentage });
             return { ...item, tax_inclusive: taxInclusive, tax_percentage: newTaxPercentage, line_total: lineTotal, tax_amount: taxAmount };
           }
@@ -453,7 +429,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
             description: item.description,
             quantity: item.quantity,
             unit_price: item.unit_price,
-            discount_percentage: item.discount_percentage || 0,
+            discount_percentage: 0,
             tax_percentage: item.tax_percentage || 0,
             tax_amount: calculateTaxAmount(item),
             tax_inclusive: item.tax_inclusive || false,
@@ -767,7 +743,6 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                   <TableHead>Product</TableHead>
                                   <TableHead className="w-20">Qty</TableHead>
                                   <TableHead className="w-24">Unit Price</TableHead>
-                                  <TableHead className="w-20">Disc. %</TableHead>
                                   <TableHead className="w-16">Tax %</TableHead>
                                   <TableHead className="w-16">Inc. Tax</TableHead>
                                   <TableHead className="text-right">Total</TableHead>
@@ -796,16 +771,6 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                         onChange={(e) => updateItemPrice(section.id, item.id, parseFloat(e.target.value) || 0)}
                                         className="w-20 h-8"
                                         step="0.01"
-                                      />
-                                    </TableCell>
-                                    <TableCell>
-                                      <Input
-                                        type="number"
-                                        value={item.discount_percentage || 0}
-                                        onChange={(e) => updateItemDiscount(section.id, item.id, parseFloat(e.target.value) || 0)}
-                                        className="w-16 h-8"
-                                        step="0.01"
-                                        placeholder="0"
                                       />
                                     </TableCell>
                                     <TableCell>
