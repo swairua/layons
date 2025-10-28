@@ -42,7 +42,6 @@ interface QuotationItem {
   description: string;
   quantity: number;
   unit_price: number;
-  discount_percentage: number;
   vat_percentage: number;
   vat_inclusive: boolean;
   line_total: number;
@@ -100,29 +99,25 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
     product.product_code.toLowerCase().includes(searchProduct.toLowerCase())
   ) || [];
 
-  const calculateItemTotal = (quantity: number, unitPrice: number, discountPercentage: number, taxPercentage: number, taxInclusive: boolean) => {
+  const calculateItemTotal = (quantity: number, unitPrice: number, taxPercentage: number, taxInclusive: boolean) => {
     const baseAmount = quantity * unitPrice;
-    const discountAmount = baseAmount * (discountPercentage / 100);
-    const afterDiscount = baseAmount - discountAmount;
 
     if (taxPercentage === 0 || !taxInclusive) {
-      return afterDiscount;
+      return baseAmount;
     }
 
-    const taxAmount = afterDiscount * (taxPercentage / 100);
-    return afterDiscount + taxAmount;
+    const taxAmount = baseAmount * (taxPercentage / 100);
+    return baseAmount + taxAmount;
   };
 
   const calculateTaxAmount = (item: QuotationItem) => {
     const baseAmount = item.quantity * item.unit_price;
-    const discountAmount = baseAmount * (item.discount_percentage / 100);
-    const afterDiscount = baseAmount - discountAmount;
 
     if (item.vat_percentage === 0 || !item.vat_inclusive) {
       return 0;
     }
 
-    return afterDiscount * (item.vat_percentage / 100);
+    return baseAmount * (item.vat_percentage / 100);
   };
 
   const addSection = () => {
@@ -176,7 +171,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
           ...section,
           items: section.items.map(item =>
             item.id === existingItem.id
-              ? { ...item, quantity: item.quantity + 1, line_total: calculateItemTotal(item.quantity + 1, item.unit_price, item.discount_percentage, item.vat_percentage, item.vat_inclusive) }
+              ? { ...item, quantity: item.quantity + 1, line_total: calculateItemTotal(item.quantity + 1, item.unit_price, item.vat_percentage, item.vat_inclusive) }
               : item
           )
         };
@@ -189,10 +184,9 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
         description: product.description || product.name,
         quantity: 1,
         unit_price: product.selling_price,
-        discount_percentage: 0,
         vat_percentage: 0,
         vat_inclusive: false,
-        line_total: calculateItemTotal(1, product.selling_price, 0, 0, false)
+        line_total: calculateItemTotal(1, product.selling_price, 0, false)
       };
 
       return {
@@ -217,7 +211,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(quantity, item.unit_price, item.discount_percentage, item.vat_percentage, item.vat_inclusive);
+            const lineTotal = calculateItemTotal(quantity, item.unit_price, item.vat_percentage, item.vat_inclusive);
             return { ...item, quantity, line_total: lineTotal };
           }
           return item;
@@ -234,25 +228,8 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(item.quantity, unitPrice, item.discount_percentage, item.vat_percentage, item.vat_inclusive);
+            const lineTotal = calculateItemTotal(item.quantity, unitPrice, item.vat_percentage, item.vat_inclusive);
             return { ...item, unit_price: unitPrice, line_total: lineTotal };
-          }
-          return item;
-        })
-      };
-    }));
-  };
-
-  const updateItemDiscount = (sectionId: string, itemId: string, discountPercentage: number) => {
-    setSections(sections.map(section => {
-      if (section.id !== sectionId) return section;
-
-      return {
-        ...section,
-        items: section.items.map(item => {
-          if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, discountPercentage, item.vat_percentage, item.vat_inclusive);
-            return { ...item, discount_percentage: discountPercentage, line_total: lineTotal };
           }
           return item;
         })
@@ -268,7 +245,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, item.discount_percentage, vatPercentage, item.vat_inclusive);
+            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, vatPercentage, item.vat_inclusive);
             return { ...item, vat_percentage: vatPercentage, line_total: lineTotal };
           }
           return item;
@@ -293,7 +270,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
               newVatPercentage = 0;
             }
 
-            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, item.discount_percentage, newVatPercentage, vatInclusive);
+            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, newVatPercentage, vatInclusive);
             return { ...item, vat_inclusive: vatInclusive, vat_percentage: newVatPercentage, line_total: lineTotal };
           }
           return item;
@@ -436,7 +413,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
             description: item.description,
             quantity: item.quantity,
             unit_price: item.unit_price,
-            discount_percentage: item.discount_percentage || 0,
+            discount_percentage: 0,
             tax_percentage: item.vat_percentage || 0,
             tax_amount: calculateTaxAmount(item),
             tax_inclusive: item.vat_inclusive || false,
@@ -755,7 +732,6 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                   <TableHead>Product</TableHead>
                                   <TableHead className="w-16">Qty</TableHead>
                                   <TableHead className="w-24">Unit Price</TableHead>
-                                  <TableHead className="w-20">Disc. %</TableHead>
                                   <TableHead className="w-20">VAT %</TableHead>
                                   <TableHead className="w-20">VAT Incl.</TableHead>
                                   <TableHead className="w-24">Line Total</TableHead>
@@ -787,17 +763,6 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                         onChange={(e) => updateItemPrice(section.id, item.id, parseFloat(e.target.value) || 0)}
                                         className="w-24 h-8"
                                         step="0.01"
-                                      />
-                                    </TableCell>
-                                    <TableCell>
-                                      <Input
-                                        type="number"
-                                        value={item.discount_percentage || 0}
-                                        onChange={(e) => updateItemDiscount(section.id, item.id, parseFloat(e.target.value) || 0)}
-                                        className="w-20 h-8"
-                                        min="0"
-                                        max="100"
-                                        step="0.1"
                                       />
                                     </TableCell>
                                     <TableCell>
