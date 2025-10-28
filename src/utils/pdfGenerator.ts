@@ -1060,16 +1060,12 @@ export const generatePDF = (data: DocumentData) => {
                 <th style="width: 15%;">Rate</th>
                 <th style="width: 15%;">Amount</th>
                 ` : `
-                <th style="width: 5%;">#</th>
-                <th style="width: ${visibleColumns.discountPercentage || visibleColumns.discountBeforeVat || visibleColumns.discountAmount || visibleColumns.taxPercentage || visibleColumns.taxAmount ? '30%' : '40%'};">Description</th>
+                <th style="width: 5%;">Item #</th>
+                <th style="width: 35%;">Item Description</th>
+                <th style="width: 12%;">SI Unit</th>
                 <th style="width: 10%;">Qty</th>
-                <th style="width: 15%;">Unit Price</th>
-                ${visibleColumns.discountPercentage ? '<th style=\"width: 10%;\">Disc %</th>' : ''}
-                ${visibleColumns.discountBeforeVat ? '<th style=\"width: 12%;\">Disc Before VAT</th>' : ''}
-                ${visibleColumns.discountAmount ? '<th style=\"width: 12%;\">Disc Amount</th>' : ''}
-                ${visibleColumns.taxPercentage ? '<th style=\"width: 10%;\">Tax %</th>' : ''}
-                ${visibleColumns.taxAmount ? '<th style=\"width: 12%;\">Tax Amount</th>' : ''}
-                <th style="width: 15%;">Total</th>
+                <th style="width: 18%;">Unit Price</th>
+                <th style="width: 20%;">Row Total</th>
                 `}
               </tr>
             </thead>
@@ -1109,13 +1105,9 @@ export const generatePDF = (data: DocumentData) => {
                   <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
                   <td class="amount-cell">${formatCurrency(item.line_total)}</td>
                   ` : `
-                  <td>${item.quantity}</td>
+                  <td>${item.unit_of_measure || item.unit_of_measure || 'pcs'}</td>
+                  <td class="center">${item.quantity}</td>
                   <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
-                  ${visibleColumns.discountPercentage ? `<td>${item.discount_percentage || 0}%</td>` : ''}
-                  ${visibleColumns.discountBeforeVat ? `<td>${(item.discount_before_vat || 0)}%</td>` : ''}
-                  ${visibleColumns.discountAmount ? `<td class=\"amount-cell\">${formatCurrency(item.discount_amount || 0)}</td>` : ''}
-                  ${visibleColumns.taxPercentage ? `<td>${item.tax_percentage || 0}%</td>` : ''}
-                  ${visibleColumns.taxAmount ? `<td class=\"amount-cell\">${formatCurrency(item.tax_amount || 0)}</td>` : ''}
                   <td class="amount-cell">${formatCurrency(item.line_total)}</td>
                   `}
                   `}
