@@ -677,7 +677,7 @@ export const generatePDF = (data: DocumentData) => {
           </div>
 
           <div class="document-info">
-            <div class="document-title">Quotation Summary</div>
+            <div class="document-title">${data.type === 'invoice' ? 'Invoice Summary' : data.type === 'proforma' ? 'Proforma Invoice Summary' : 'Quotation Summary'}</div>
             <div class="document-details">
               <table>
                 <tr>
