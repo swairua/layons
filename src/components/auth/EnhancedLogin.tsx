@@ -64,8 +64,14 @@ export function EnhancedLogin() {
       }
     } catch (unexpectedError) {
       // Catch any unexpected errors and format them properly
+      const errorMessage = unexpectedError instanceof Error
+        ? unexpectedError.message
+        : typeof unexpectedError === 'string'
+        ? unexpectedError
+        : 'An unexpected error occurred. Please try again.';
+
       console.error('Unexpected sign in error:', unexpectedError);
-      toast.error('An unexpected error occurred. Please try again.');
+      toast.error(errorMessage);
     } finally {
       setSubmitting(false);
     }
