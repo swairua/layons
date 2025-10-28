@@ -4,13 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from '@/components/ui/table';
 import {
   Plus,
@@ -31,6 +31,7 @@ import { toast } from 'sonner';
 import { CreateQuotationModal } from '@/components/quotations/CreateQuotationModal';
 import { ViewQuotationModal } from '@/components/quotations/ViewQuotationModal';
 import { EditQuotationModal } from '@/components/quotations/EditQuotationModal';
+import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { downloadQuotationPDF } from '@/utils/pdfGenerator';
 
 interface Quotation {
