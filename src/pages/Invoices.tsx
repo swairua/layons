@@ -106,7 +106,8 @@ export default function Invoices() {
 
   const { data: companies } = useCompanies();
   const currentCompany = companies?.[0];
-  
+  const { logDelete } = useAuditLog();
+
   // Use the fixed invoices hook
   const { data: invoices, isLoading, error, refetch } = useInvoices(currentCompany?.id);
   const deleteInvoice = useDeleteInvoice();
