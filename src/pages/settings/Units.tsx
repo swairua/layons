@@ -6,6 +6,7 @@ import { Edit, Trash2, Plus } from 'lucide-react';
 import { useUnits, useCreateUnit, useUpdateUnit, useDeleteUnit } from '@/hooks/useDatabase';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { CreateUnitModal } from '@/components/units/CreateUnitModal';
+import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { toast } from 'sonner';
 
 export default function UnitsSettings() {
