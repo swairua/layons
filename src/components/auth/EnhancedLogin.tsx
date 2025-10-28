@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/utils/safeToast';
 import { handleAuthError } from '@/utils/authErrorHandler';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -64,8 +64,14 @@ export function EnhancedLogin() {
       }
     } catch (unexpectedError) {
       // Catch any unexpected errors and format them properly
+      const errorMessage = unexpectedError instanceof Error
+        ? unexpectedError.message
+        : typeof unexpectedError === 'string'
+        ? unexpectedError
+        : 'An unexpected error occurred. Please try again.';
+
       console.error('Unexpected sign in error:', unexpectedError);
-      toast.error('An unexpected error occurred. Please try again.');
+      toast.error(errorMessage);
     } finally {
       setSubmitting(false);
     }
