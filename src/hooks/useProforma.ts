@@ -533,10 +533,13 @@ export const useGenerateProformaNumber = () => {
 
         return data;
       } catch (error) {
-        // Fallback to client-side generation
-        const timestamp = Date.now().toString().slice(-6);
-        const year = new Date().getFullYear();
-        const fallbackNumber = `PF-${year}-${timestamp}`;
+        // Fallback to client-side generation using new format: {4_digit_seq}{MM}{YYYY}
+        const now = new Date();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        const timestamp = Date.now();
+        const seq = String(timestamp % 10000).padStart(4, '0');
+        const fallbackNumber = `${seq}${month}${year}`;
 
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         console.warn('Proforma number generation failed, using fallback:', errorMessage);

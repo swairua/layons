@@ -280,7 +280,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             console.log('✅ Quick session check completed');
             resolve({ session: sessionData.session, error: null });
           } catch (fetchError) {
-            console.warn('⚠️ Quick session fetch error:', fetchError);
+            const fetchErrorMsg = fetchError instanceof Error ? fetchError.message : String(fetchError);
+            console.warn('⚠️ Quick session fetch error:', fetchErrorMsg);
             resolve({ session: null, error: fetchError });
           }
         });
@@ -371,7 +372,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                   }
                 }
               } catch (bgError) {
-                console.warn('⚠️ Background auth retry failed:', bgError);
+                const bgErrorMsg = bgError instanceof Error ? bgError.message : String(bgError);
+                console.warn('⚠️ Background auth retry failed:', bgErrorMsg);
                 // Silent failure - app is already running
               }
             };
@@ -381,7 +383,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }, 2000); // Start background retry after 2 seconds
 
       } catch (error) {
-        console.warn('⚠️ Quick auth check failed:', error);
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.warn('⚠️ Quick auth check failed:', errorMsg);
 
         // Handle specific error types silently
         if (error instanceof Error) {

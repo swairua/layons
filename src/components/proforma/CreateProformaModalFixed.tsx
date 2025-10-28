@@ -156,9 +156,12 @@ export const CreateProformaModalFixed = ({
           // Set error for notification (if auto-fix failed or different error)
           setFunctionError(errorMessage);
 
-          const timestamp = Date.now().toString().slice(-6);
-          const year = new Date().getFullYear();
-          const fallbackNumber = `PF-${year}-${timestamp}`;
+          const now = new Date();
+          const month = String(now.getMonth() + 1).padStart(2, '0');
+          const year = now.getFullYear();
+          const timestamp = Date.now();
+          const seq = String(timestamp % 10000).padStart(4, '0');
+          const fallbackNumber = `${seq}${month}${year}`;
           setProformaNumber(fallbackNumber);
 
           console.info('Using fallback proforma number:', fallbackNumber);

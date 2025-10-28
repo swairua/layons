@@ -756,10 +756,7 @@ export const generatePDF = (data: DocumentData) => {
           </table>
         </div>
 
-        <!-- Bank Details -->
-        <div style="background: #f8f9fa; padding: 10px; margin: 15px 0; border-left: 4px solid hsl(var(--primary)); font-size: 10px; color: #333; text-align: center; border-radius: 4px; font-weight: 600;">
-          <strong>Payments to: Layons Construction Limited. For bank details, contact: layonscoltd@gmail.com / 0720717463</strong>
-        </div>
+        <!-- Bank Details removed -->
 
       </div>
     `;
@@ -1741,7 +1738,6 @@ export const generatePDF = (data: DocumentData) => {
         <!-- Bank Details (only for invoices and quotations) -->
         ${(data.type === 'invoice' || data.type === 'quotation') ? `
         <div class="bank-details">
-          <strong>Payments to: Layons Construction Limited. For bank details, contact: layonscoltd@gmail.com / 0720717463</strong>
         </div>
         ` : ''}
 

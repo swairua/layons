@@ -29,7 +29,8 @@ export const clearAuthTokens = () => {
     console.log('✅ Cleared all auth tokens');
     return true;
   } catch (error) {
-    console.error('Error clearing auth tokens:', error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error('Error clearing auth tokens:', errorMsg);
     return false;
   }
 };
@@ -76,6 +77,30 @@ export const getRateLimitTimeRemaining = (): number => {
 };
 
 /**
+ * Extract meaningful error message from various error types
+ */
+const extractErrorMessage = (error: any): string => {
+  if (!error) return 'An unknown error occurred';
+
+  // If it's already a string
+  if (typeof error === 'string') return error;
+
+  // If it's an Error with message
+  if (error instanceof Error) return error.message;
+
+  // For Supabase AuthError and similar objects
+  if (typeof error === 'object') {
+    if (error.message && typeof error.message === 'string') return error.message;
+    if (error.error_description && typeof error.error_description === 'string') return error.error_description;
+    if (error.error && typeof error.error === 'string') return error.error;
+    if (error.details && typeof error.details === 'string') return error.details;
+    if (error.msg && typeof error.msg === 'string') return error.msg;
+  }
+
+  return 'An unexpected authentication error occurred';
+};
+
+/**
  * Safe auth operation with rate limiting protection
  */
 export const safeAuthOperation = async <T>(
@@ -89,30 +114,34 @@ export const safeAuthOperation = async <T>(
       const error = new Error(`Rate limited. Please wait ${remaining} seconds before trying again.`);
       return { data: null, error };
     }
-    
+
     const result = await operation();
     return { data: result, error: null };
-    
+
   } catch (error: any) {
+    const errorMessage = extractErrorMessage(error);
+
     // Check if this is a rate limit error
-    if (error?.message?.includes('rate limit') || error?.message?.includes('Rate limit')) {
+    if (errorMessage.includes('rate limit') || errorMessage.includes('Rate limit')) {
       markRateLimited();
       const remaining = getRateLimitTimeRemaining();
       const rateLimitError = new Error(`Rate limit reached. Please wait ${remaining} seconds before trying again.`);
       return { data: null, error: rateLimitError };
     }
-    
+
     // Check if this is an invalid token error
-    if (error?.message?.includes('Invalid Refresh Token') || 
-        error?.message?.includes('Refresh Token Not Found') ||
-        error?.message?.includes('invalid_token')) {
+    if (errorMessage.includes('Invalid Refresh Token') ||
+        errorMessage.includes('Refresh Token Not Found') ||
+        errorMessage.includes('invalid_token')) {
       console.warn('Clearing invalid auth tokens');
       clearAuthTokens();
       const tokenError = new Error('Authentication tokens were invalid and have been cleared. Please sign in again.');
       return { data: null, error: tokenError };
     }
-    
-    return { data: null, error: error as Error };
+
+    // Return a properly formatted Error object
+    const formattedError = new Error(errorMessage);
+    return { data: null, error: formattedError };
   }
 };
 
@@ -194,7 +223,8 @@ export const initializeAuth = async () => {
     }
 
   } catch (error: any) {
-    console.warn('⚠️ Background auth check failed:', error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.warn('⚠️ Background auth check failed:', errorMsg);
     return { session: null, error: error };
   }
 };

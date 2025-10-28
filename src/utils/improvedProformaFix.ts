@@ -120,15 +120,17 @@ export async function generateNextProformaNumber(): Promise<string> {
     let nextNumber = 1;
     if (lastProforma && lastProforma.length > 0) {
       const lastNumber = lastProforma[0].proforma_number;
-      // Extract number from format like PF-2024-001
-      const match = lastNumber.match(/PF-\d{4}-(\d+)/);
+      // Extract number from format like 00011002024
+      const match = lastNumber.match(/^(\d{4})/);
       if (match) {
         nextNumber = parseInt(match[1], 10) + 1;
       }
     }
 
-    const year = new Date().getFullYear();
-    return `PF-${year}-${nextNumber.toString().padStart(3, '0')}`;
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    return `${nextNumber.toString().padStart(4, '0')}${month}${year}`;
   } catch (error) {
     throw new Error(`Failed to generate proforma number: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
