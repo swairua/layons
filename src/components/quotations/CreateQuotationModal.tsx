@@ -42,6 +42,7 @@ interface QuotationItem {
   description: string;
   quantity: number;
   unit_price: number;
+  discount_percentage: number;
   vat_percentage: number;
   vat_inclusive: boolean;
   line_total: number;
@@ -99,25 +100,29 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
     product.product_code.toLowerCase().includes(searchProduct.toLowerCase())
   ) || [];
 
-  const calculateItemTotal = (quantity: number, unitPrice: number, taxPercentage: number, taxInclusive: boolean) => {
+  const calculateItemTotal = (quantity: number, unitPrice: number, discountPercentage: number, taxPercentage: number, taxInclusive: boolean) => {
     const baseAmount = quantity * unitPrice;
+    const discountAmount = baseAmount * (discountPercentage / 100);
+    const afterDiscount = baseAmount - discountAmount;
 
     if (taxPercentage === 0 || !taxInclusive) {
-      return baseAmount;
+      return afterDiscount;
     }
 
-    const taxAmount = baseAmount * (taxPercentage / 100);
-    return baseAmount + taxAmount;
+    const taxAmount = afterDiscount * (taxPercentage / 100);
+    return afterDiscount + taxAmount;
   };
 
   const calculateTaxAmount = (item: QuotationItem) => {
     const baseAmount = item.quantity * item.unit_price;
+    const discountAmount = baseAmount * (item.discount_percentage / 100);
+    const afterDiscount = baseAmount - discountAmount;
 
     if (item.vat_percentage === 0 || !item.vat_inclusive) {
       return 0;
     }
 
-    return baseAmount * (item.vat_percentage / 100);
+    return afterDiscount * (item.vat_percentage / 100);
   };
 
   const addSection = () => {
@@ -171,7 +176,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
           ...section,
           items: section.items.map(item =>
             item.id === existingItem.id
-              ? { ...item, quantity: item.quantity + 1, line_total: calculateItemTotal(item.quantity + 1, item.unit_price, item.vat_percentage, item.vat_inclusive) }
+              ? { ...item, quantity: item.quantity + 1, line_total: calculateItemTotal(item.quantity + 1, item.unit_price, item.discount_percentage, item.vat_percentage, item.vat_inclusive) }
               : item
           )
         };
@@ -184,9 +189,10 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
         description: product.description || product.name,
         quantity: 1,
         unit_price: product.selling_price,
+        discount_percentage: 0,
         vat_percentage: 0,
         vat_inclusive: false,
-        line_total: calculateItemTotal(1, product.selling_price, 0, false)
+        line_total: calculateItemTotal(1, product.selling_price, 0, 0, false)
       };
 
       return {
