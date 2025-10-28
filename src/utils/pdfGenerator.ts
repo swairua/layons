@@ -649,7 +649,7 @@ export const generatePDF = (data: DocumentData) => {
     const totalTax = data.sections.reduce((sum, sec) => sum + sec.items.reduce((s, item) => s + (item.tax_amount || 0), 0), 0);
 
     pagesHtml += `
-      <div class="page" style="position: relative;">
+      <div class="page" style="position: relative; page-break-before: always;">
         <!-- Header Section -->
         <div class="header">
           <div class="company-info">
