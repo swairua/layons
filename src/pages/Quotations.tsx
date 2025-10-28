@@ -79,7 +79,8 @@ export default function Quotations() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
-  
+  const [convertingQuotationId, setConvertingQuotationId] = useState<string | null>(null);
+
   // Get current user and company from context
   const { profile, loading: authLoading } = useAuth();
   const { data: companies } = useCompanies();
