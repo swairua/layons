@@ -1,6 +1,5 @@
 import { AuthError } from '@supabase/supabase-js';
-import { AuthError } from '@supabase/supabase-js';
-import { toast } from 'sonner';
+import { toast } from '@/utils/safeToast';
 import { logError } from '@/utils/errorLogger';
 import { parseErrorMessage } from '@/utils/errorHelpers';
 
