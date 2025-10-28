@@ -465,7 +465,7 @@ Website: www.biolegendscientific.co.ke`;
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleDeleteQuotation(quotation)}
+                            onClick={() => handleDeleteClick(quotation)}
                             title="Delete quotation"
                             className="text-destructive hover:text-destructive hover:bg-destructive/10"
                           >
