@@ -280,7 +280,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             console.log('✅ Quick session check completed');
             resolve({ session: sessionData.session, error: null });
           } catch (fetchError) {
-            console.warn('⚠️ Quick session fetch error:', fetchError);
+            const fetchErrorMsg = fetchError instanceof Error ? fetchError.message : String(fetchError);
+            console.warn('⚠️ Quick session fetch error:', fetchErrorMsg);
             resolve({ session: null, error: fetchError });
           }
         });
