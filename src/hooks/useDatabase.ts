@@ -1484,6 +1484,41 @@ export const useCreateQuotation = () => {
   });
 };
 
+// Delete Quotation
+export const useDeleteQuotation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('quotations')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['quotations'] });
+    },
+  });
+};
+
+// Delete Invoice
+export const useDeleteInvoice = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('invoices')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invoices_fixed'] });
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+    },
+  });
+};
+
 // Stock movements hooks
 export const useStockMovements = (companyId?: string) => {
   return useQuery({
