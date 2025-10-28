@@ -40,6 +40,8 @@ export interface DocumentData {
     days_overdue?: number;
     due_date?: string;
     item_code?: string;
+    section_name?: string;
+    section_labor_cost?: number;
   }>;
   preliminaries_items?: Array<{
     item_code: string;
@@ -63,6 +65,19 @@ export interface DocumentData {
   tracking_number?: string;
   delivered_by?: string;
   received_by?: string;
+  // Quotation sections
+  sections?: Array<{
+    name: string;
+    items: Array<{
+      description: string;
+      quantity: number;
+      unit_price: number;
+      tax_percentage?: number;
+      tax_amount?: number;
+      line_total: number;
+    }>;
+    labor_cost: number;
+  }>;
 }
 
 // Company details interface
