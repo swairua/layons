@@ -269,69 +269,109 @@ export function ViewQuotationModal({
             </Card>
           </div>
 
-          {/* Items Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Items</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {quotation.quotation_items && quotation.quotation_items.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Item Description</TableHead>
-                      <TableHead className="text-center">Qty</TableHead>
-                      <TableHead className="text-center">Unit Pack</TableHead>
-                      <TableHead className="text-right">Unit Price</TableHead>
-                      <TableHead className="text-right">Total Price</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {quotation.quotation_items.map((item: any, index: number) => (
-                      <TableRow key={index}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{item.description}</div>
-                            {item.products?.name && item.products.name !== item.description && (
-                              <div className="text-sm text-muted-foreground">{item.products.name}</div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">{item.quantity}</TableCell>
-                        <TableCell className="text-center">{item.products?.unit_of_measure || 'Each'}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(item.unit_price)}</TableCell>
-                        <TableCell className="text-right font-semibold">{formatCurrency(item.line_total)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  No items found for this quotation
-                </div>
-              )}
+          {/* Items by Sections */}
+          {quotation.quotation_items && quotation.quotation_items.length > 0 ? (
+            <div className="space-y-6">
+              {sectionNames.map((sectionName) => {
+                const sectionItems = groupedSections[sectionName];
+                const materialsCost = calculateSectionMaterials(sectionItems);
+                const laborCost = sectionItems[0]?.section_labor_cost || 0;
+                const sectionTotal = calculateSectionTotal(sectionItems);
 
-              {/* Totals */}
-              <div className="mt-6 border-t pt-4">
-                <div className="flex justify-end">
-                  <div className="w-80 space-y-2">
-                    <div className="flex justify-between">
-                      <span>Subtotal:</span>
-                      <span className="font-semibold">{formatCurrency(quotation.subtotal || 0)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Tax:</span>
-                      <span className="font-semibold">{formatCurrency(quotation.tax_amount || 0)}</span>
-                    </div>
-                    <div className="flex justify-between text-lg border-t pt-2">
-                      <span className="font-bold">Total Amount:</span>
-                      <span className="font-bold text-primary">{formatCurrency(quotation.total_amount || 0)}</span>
+                return (
+                  <Card key={sectionName} className="break-inside-avoid">
+                    <CardHeader className="bg-muted/50 pb-3">
+                      <CardTitle className="text-lg">{sectionName}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Item Description</TableHead>
+                            <TableHead className="text-center">Qty</TableHead>
+                            <TableHead className="text-center">Unit</TableHead>
+                            <TableHead className="text-right">Unit Price</TableHead>
+                            <TableHead className="text-right">Amount</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {sectionItems.map((item: any, index: number) => (
+                            <TableRow key={index}>
+                              <TableCell>
+                                <div>
+                                  <div className="font-medium">{item.description}</div>
+                                  {item.products?.name && item.products.name !== item.description && (
+                                    <div className="text-sm text-muted-foreground">{item.products.name}</div>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-center">{item.quantity}</TableCell>
+                              <TableCell className="text-center">{item.products?.unit_of_measure || 'Each'}</TableCell>
+                              <TableCell className="text-right">{formatCurrency(item.unit_price)}</TableCell>
+                              <TableCell className="text-right font-semibold">{formatCurrency(item.line_total)}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+
+                      {/* Section Totals */}
+                      <div className="mt-6 border-t pt-4">
+                        <div className="flex justify-end">
+                          <div className="w-80 space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Total {sectionName}:</span>
+                              <span className="font-semibold">{formatCurrency(materialsCost)}</span>
+                            </div>
+                            {laborCost > 0 && (
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">{sectionName} Labor:</span>
+                                <span className="font-semibold">{formatCurrency(laborCost)}</span>
+                              </div>
+                            )}
+                            <div className="flex justify-between border-t pt-2">
+                              <span className="font-semibold">Section Total:</span>
+                              <span className="font-bold text-primary">{formatCurrency(sectionTotal)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+
+              {/* Grand Totals */}
+              <Card>
+                <CardHeader className="bg-primary/10 pb-3">
+                  <CardTitle className="text-lg">Summary</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <div className="flex justify-end">
+                    <div className="w-80 space-y-2">
+                      <div className="flex justify-between">
+                        <span>Total Materials:</span>
+                        <span className="font-semibold">{formatCurrency(quotation.subtotal || 0)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Tax:</span>
+                        <span className="font-semibold">{formatCurrency(quotation.tax_amount || 0)}</span>
+                      </div>
+                      <div className="flex justify-between text-lg border-t pt-2">
+                        <span className="font-bold">Grand Total:</span>
+                        <span className="font-bold text-primary">{formatCurrency(quotation.total_amount || 0)}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="text-center py-8 text-muted-foreground">
+                No items found for this quotation
+              </CardContent>
+            </Card>
+          )}
 
           {/* Notes and Terms */}
           {(quotation.notes || quotation.terms_and_conditions) && (
