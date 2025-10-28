@@ -27,7 +27,9 @@ import {
   Trash2, 
   Search,
   Calculator,
-  Receipt
+  Receipt,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useCustomers, useProducts, useTaxSettings } from '@/hooks/useDatabase';
 import { useUpdateInvoiceWithItems } from '@/hooks/useQuotationItems';
@@ -42,11 +44,18 @@ interface InvoiceItem {
   quantity: number;
   unit_price: number;
   discount_percentage: number;
-  discount_before_vat?: number;
   tax_percentage: number;
   tax_amount: number;
   tax_inclusive: boolean;
   line_total: number;
+}
+
+interface InvoiceSection {
+  id: string;
+  name: string;
+  items: InvoiceItem[];
+  labor_cost: number;
+  expanded: boolean;
 }
 
 interface EditInvoiceModalProps {
@@ -64,9 +73,10 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
   const [notes, setNotes] = useState('');
   const [termsAndConditions, setTermsAndConditions] = useState('');
   
-  const [items, setItems] = useState<InvoiceItem[]>([]);
+  const [sections, setSections] = useState<InvoiceSection[]>([]);
   const [searchProduct, setSearchProduct] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newSectionName, setNewSectionName] = useState('');
 
   const { currentCompany } = useCurrentCompany();
   const { data: customers, isLoading: loadingCustomers } = useCustomers(currentCompany?.id);
@@ -76,7 +86,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
 
   // Get default tax rate
   const defaultTax = taxSettings?.find(tax => tax.is_default && tax.is_active);
-  const defaultTaxRate = defaultTax?.rate || 16; // Fallback to 16% if no default is set
+  const defaultTaxRate = defaultTax?.rate || 16;
 
   // Load invoice data when modal opens
   useEffect(() => {
@@ -88,23 +98,41 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
       setNotes(invoice.notes || '');
       setTermsAndConditions(invoice.terms_and_conditions || '');
 
-      // Convert invoice items to local format
-      const invoiceItems = (invoice.invoice_items || []).map((item: any, index: number) => ({
-        id: item.id || `existing-${index}`,
-        product_id: item.product_id || '',
-        product_name: item.products?.name || 'Unknown Product',
-        description: item.description || '',
-        quantity: item.quantity || 0,
-        unit_price: item.unit_price || 0,
-        discount_percentage: item.discount_percentage || 0,
-        discount_before_vat: item.discount_before_vat || 0,
-        tax_percentage: item.tax_percentage || 16,
-        tax_amount: item.tax_amount || 0,
-        tax_inclusive: item.tax_inclusive || false,
-        line_total: item.line_total || 0,
-      }));
-      
-      setItems(invoiceItems);
+      // Group invoice items by section
+      const sectionMap = new Map<string, any[]>();
+      (invoice.invoice_items || []).forEach((item: any, index: number) => {
+        const sectionName = item.section_name || 'General Items';
+        if (!sectionMap.has(sectionName)) {
+          sectionMap.set(sectionName, []);
+        }
+        sectionMap.get(sectionName)!.push({ ...item, originalIndex: index });
+      });
+
+      // Convert to sections state
+      const loadedSections: InvoiceSection[] = Array.from(sectionMap.entries()).map(([sectionName, items]) => {
+        const laborCost = items.length > 0 ? (items[0].section_labor_cost || 0) : 0;
+        return {
+          id: `section-${sectionName}`,
+          name: sectionName,
+          labor_cost: laborCost,
+          expanded: true,
+          items: items.map((item: any, index: number) => ({
+            id: item.id || `existing-${index}`,
+            product_id: item.product_id || '',
+            product_name: item.products?.name || 'Unknown Product',
+            description: item.description || '',
+            quantity: item.quantity || 0,
+            unit_price: item.unit_price || 0,
+            discount_percentage: item.discount_percentage || 0,
+            tax_percentage: item.tax_percentage || 16,
+            tax_amount: item.tax_amount || 0,
+            tax_inclusive: item.tax_inclusive || false,
+            line_total: item.line_total || 0,
+          }))
+        };
+      });
+
+      setSections(loadedSections);
     }
   }, [invoice, open]);
 
@@ -113,148 +141,231 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
     product.product_code.toLowerCase().includes(searchProduct.toLowerCase())
   ) || [];
 
-  const calculateLineTotal = (item: InvoiceItem, quantity?: number, unitPrice?: number, discountPercentage?: number, taxPercentage?: number, taxInclusive?: boolean) => {
-    const qty = quantity ?? item.quantity;
-    const price = unitPrice ?? item.unit_price;
-    const discount = discountPercentage ?? item.discount_percentage;
-    const tax = taxPercentage ?? item.tax_percentage;
+  const calculateItemTotal = (quantity: number, unitPrice: number, discountPercentage: number, taxPercentage: number, taxInclusive: boolean) => {
+    const baseAmount = quantity * unitPrice;
+    const discountAmount = baseAmount * (discountPercentage / 100);
+    const afterDiscount = baseAmount - discountAmount;
 
-    let subtotal = qty * price;
-    let discountAmount = subtotal * (discount / 100);
-    let afterDiscount = subtotal - discountAmount;
-
-    let taxAmount = 0;
-    let lineTotal = 0;
-
-    if (tax === 0) {
-      // No VAT applied
-      lineTotal = afterDiscount;
-      taxAmount = 0;
-    } else {
-      // Both inclusive and exclusive now add VAT on top
-      taxAmount = afterDiscount * (tax / 100);
-      lineTotal = afterDiscount + taxAmount;
+    if (taxPercentage === 0 || !taxInclusive) {
+      return afterDiscount;
     }
 
-    return { lineTotal, taxAmount };
+    const taxAmount = afterDiscount * (taxPercentage / 100);
+    return afterDiscount + taxAmount;
   };
 
-  const addItem = (product: any) => {
-    const existingItem = items.find(item => item.product_id === product.id);
-    
-    if (existingItem) {
-      updateItemQuantity(existingItem.id, existingItem.quantity + 1);
+  const calculateTaxAmount = (item: InvoiceItem) => {
+    const baseAmount = item.quantity * item.unit_price;
+    const discountAmount = baseAmount * (item.discount_percentage / 100);
+    const afterDiscount = baseAmount - discountAmount;
+
+    if (item.tax_percentage === 0 || !item.tax_inclusive) {
+      return 0;
+    }
+
+    return afterDiscount * (item.tax_percentage / 100);
+  };
+
+  const addSection = () => {
+    if (!newSectionName.trim()) {
+      toast.error('Please enter a section name');
       return;
     }
 
-    const newItem: InvoiceItem = {
-      id: `temp-${Date.now()}`,
-      product_id: product.id,
-      product_name: product.name,
-      description: product.description || product.name,
-      quantity: 1,
-      unit_price: product.selling_price,
-      discount_percentage: 0,
-      discount_before_vat: 0,
-      tax_percentage: 0,
-      tax_amount: 0,
-      tax_inclusive: false,
-      line_total: product.selling_price
+    const newSection: InvoiceSection = {
+      id: `section-${Date.now()}`,
+      name: newSectionName,
+      items: [],
+      labor_cost: 0,
+      expanded: true
     };
 
-    const { lineTotal, taxAmount } = calculateLineTotal(newItem);
-    newItem.line_total = lineTotal;
-    newItem.tax_amount = taxAmount;
+    setSections([...sections, newSection]);
+    setNewSectionName('');
+  };
 
-    setItems([...items, newItem]);
+  const removeSection = (sectionId: string) => {
+    setSections(sections.filter(s => s.id !== sectionId));
+  };
+
+  const updateSectionName = (sectionId: string, name: string) => {
+    setSections(sections.map(s =>
+      s.id === sectionId ? { ...s, name } : s
+    ));
+  };
+
+  const updateSectionLaborCost = (sectionId: string, laborCost: number) => {
+    setSections(sections.map(s =>
+      s.id === sectionId ? { ...s, labor_cost: laborCost } : s
+    ));
+  };
+
+  const toggleSectionExpanded = (sectionId: string) => {
+    setSections(sections.map(s =>
+      s.id === sectionId ? { ...s, expanded: !s.expanded } : s
+    ));
+  };
+
+  const addItemToSection = (sectionId: string, product: any) => {
+    setSections(sections.map(section => {
+      if (section.id !== sectionId) return section;
+
+      const existingItem = section.items.find(item => item.product_id === product.id);
+
+      if (existingItem) {
+        return {
+          ...section,
+          items: section.items.map(item =>
+            item.id === existingItem.id
+              ? {
+                  ...item,
+                  quantity: item.quantity + 1,
+                  line_total: calculateItemTotal(item.quantity + 1, item.unit_price, item.discount_percentage, item.tax_percentage, item.tax_inclusive),
+                  tax_amount: calculateTaxAmount({ ...item, quantity: item.quantity + 1 })
+                }
+              : item
+          )
+        };
+      }
+
+      const price = Number(product.selling_price || product.unit_price || 0);
+      const newItem: InvoiceItem = {
+        id: `temp-${Date.now()}`,
+        product_id: product.id,
+        product_name: product.name,
+        description: product.description || product.name,
+        quantity: 1,
+        unit_price: price,
+        discount_percentage: 0,
+        tax_percentage: defaultTaxRate,
+        tax_amount: 0,
+        tax_inclusive: true,
+        line_total: calculateItemTotal(1, price, 0, defaultTaxRate, true)
+      };
+
+      newItem.tax_amount = calculateTaxAmount(newItem);
+
+      return {
+        ...section,
+        items: [...section.items, newItem]
+      };
+    }));
+
     setSearchProduct('');
   };
 
-  const updateItemQuantity = (itemId: string, quantity: number) => {
+  const updateItemQuantity = (sectionId: string, itemId: string, quantity: number) => {
     if (quantity <= 0) {
-      removeItem(itemId);
+      removeItem(sectionId, itemId);
       return;
     }
 
-    setItems(items.map(item => {
-      if (item.id === itemId) {
-        const { lineTotal, taxAmount } = calculateLineTotal(item, quantity);
-        return { ...item, quantity, line_total: lineTotal, tax_amount: taxAmount };
-      }
-      return item;
+    setSections(sections.map(section => {
+      if (section.id !== sectionId) return section;
+
+      return {
+        ...section,
+        items: section.items.map(item => {
+          if (item.id === itemId) {
+            const lineTotal = calculateItemTotal(quantity, item.unit_price, item.discount_percentage, item.tax_percentage, item.tax_inclusive);
+            const taxAmount = calculateTaxAmount({ ...item, quantity });
+            return { ...item, quantity, line_total: lineTotal, tax_amount: taxAmount };
+          }
+          return item;
+        })
+      };
     }));
   };
 
-  const updateItemPrice = (itemId: string, unitPrice: number) => {
-    setItems(items.map(item => {
-      if (item.id === itemId) {
-        const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, unitPrice);
-        return { ...item, unit_price: unitPrice, line_total: lineTotal, tax_amount: taxAmount };
-      }
-      return item;
+  const updateItemPrice = (sectionId: string, itemId: string, unitPrice: number) => {
+    setSections(sections.map(section => {
+      if (section.id !== sectionId) return section;
+
+      return {
+        ...section,
+        items: section.items.map(item => {
+          if (item.id === itemId) {
+            const lineTotal = calculateItemTotal(item.quantity, unitPrice, item.discount_percentage, item.tax_percentage, item.tax_inclusive);
+            const taxAmount = calculateTaxAmount({ ...item, unit_price: unitPrice });
+            return { ...item, unit_price: unitPrice, line_total: lineTotal, tax_amount: taxAmount };
+          }
+          return item;
+        })
+      };
     }));
   };
 
-  const updateItemDiscount = (itemId: string, discountPercentage: number) => {
-    setItems(items.map(item => {
-      if (item.id === itemId) {
-        const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, undefined, discountPercentage);
-        return { ...item, discount_percentage: discountPercentage, line_total: lineTotal, tax_amount: taxAmount };
-      }
-      return item;
+  const updateItemDiscount = (sectionId: string, itemId: string, discountPercentage: number) => {
+    setSections(sections.map(section => {
+      if (section.id !== sectionId) return section;
+
+      return {
+        ...section,
+        items: section.items.map(item => {
+          if (item.id === itemId) {
+            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, discountPercentage, item.tax_percentage, item.tax_inclusive);
+            const taxAmount = calculateTaxAmount({ ...item, discount_percentage: discountPercentage });
+            return { ...item, discount_percentage: discountPercentage, line_total: lineTotal, tax_amount: taxAmount };
+          }
+          return item;
+        })
+      };
     }));
   };
 
-  const updateItemDiscountBeforeVat = (itemId: string, discountBeforeVat: number) => {
-    setItems(items.map(item => {
-      if (item.id === itemId) {
-        return { ...item, discount_before_vat: discountBeforeVat };
-      }
-      return item;
+  const updateItemTax = (sectionId: string, itemId: string, taxPercentage: number) => {
+    setSections(sections.map(section => {
+      if (section.id !== sectionId) return section;
+
+      return {
+        ...section,
+        items: section.items.map(item => {
+          if (item.id === itemId) {
+            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, item.discount_percentage, taxPercentage, item.tax_inclusive);
+            const taxAmount = calculateTaxAmount({ ...item, tax_percentage: taxPercentage });
+            return { ...item, tax_percentage: taxPercentage, line_total: lineTotal, tax_amount: taxAmount };
+          }
+          return item;
+        })
+      };
     }));
   };
 
-  const updateItemTax = (itemId: string, taxPercentage: number) => {
-    setItems(items.map(item => {
-      if (item.id === itemId) {
-        const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, undefined, undefined, taxPercentage);
-        return { ...item, tax_percentage: taxPercentage, line_total: lineTotal, tax_amount: taxAmount };
-      }
-      return item;
+  const updateItemTaxInclusive = (sectionId: string, itemId: string, taxInclusive: boolean) => {
+    setSections(sections.map(section => {
+      if (section.id !== sectionId) return section;
+
+      return {
+        ...section,
+        items: section.items.map(item => {
+          if (item.id === itemId) {
+            let newTaxPercentage = item.tax_percentage;
+            if (taxInclusive && item.tax_percentage === 0) {
+              newTaxPercentage = defaultTaxRate;
+            }
+            if (!taxInclusive) {
+              newTaxPercentage = 0;
+            }
+
+            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, item.discount_percentage, newTaxPercentage, taxInclusive);
+            const taxAmount = calculateTaxAmount({ ...item, tax_inclusive: taxInclusive, tax_percentage: newTaxPercentage });
+            return { ...item, tax_inclusive: taxInclusive, tax_percentage: newTaxPercentage, line_total: lineTotal, tax_amount: taxAmount };
+          }
+          return item;
+        })
+      };
     }));
   };
 
-  const updateItemTaxInclusive = (itemId: string, taxInclusive: boolean) => {
-    setItems(items.map(item => {
-      if (item.id === itemId) {
-        // When checking VAT Inclusive, auto-apply default tax rate if no VAT is set
-        let newTaxPercentage = item.tax_percentage;
-        if (taxInclusive && item.tax_percentage === 0) {
-          newTaxPercentage = defaultTaxRate;
-        }
-        // When unchecking VAT Inclusive, reset VAT to 0
-        if (!taxInclusive) {
-          newTaxPercentage = 0;
-        }
+  const removeItem = (sectionId: string, itemId: string) => {
+    setSections(sections.map(section => {
+      if (section.id !== sectionId) return section;
 
-        const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, undefined, undefined, newTaxPercentage, taxInclusive);
-        console.log(`VAT Inclusive changed for item ${itemId}:`, {
-          taxInclusive,
-          quantity: item.quantity,
-          unitPrice: item.unit_price,
-          oldTaxPercentage: item.tax_percentage,
-          newTaxPercentage,
-          oldLineTotal: item.line_total,
-          newLineTotal: lineTotal
-        });
-        return { ...item, tax_inclusive: taxInclusive, tax_percentage: newTaxPercentage, line_total: lineTotal, tax_amount: taxAmount };
-      }
-      return item;
+      return {
+        ...section,
+        items: section.items.filter(item => item.id !== itemId)
+      };
     }));
-  };
-
-  const removeItem = (itemId: string) => {
-    setItems(items.filter(item => item.id !== itemId));
   };
 
   const formatCurrency = (amount: number) => {
@@ -266,15 +377,32 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
     }).format(amount);
   };
 
-  const subtotal = items.reduce((sum, item) => {
-    // Always use base amount for subtotal (unit price × quantity × discount)
-    // VAT is calculated separately and added for exclusive, or extracted for inclusive
-    const itemSubtotal = (item.quantity * item.unit_price) * (1 - item.discount_percentage / 100);
-    return sum + itemSubtotal;
-  }, 0);
-  const taxAmount = items.reduce((sum, item) => sum + (item.tax_amount || 0), 0);
-  const totalAmount = items.reduce((sum, item) => sum + item.line_total, 0);
-  const balanceDue = totalAmount - (invoice?.paid_amount || 0);
+  const calculateSectionMaterialsTotal = (section: InvoiceSection) => {
+    return section.items.reduce((sum, item) => sum + item.line_total, 0);
+  };
+
+  const calculateSectionTotalWithLabor = (section: InvoiceSection) => {
+    return calculateSectionMaterialsTotal(section) + section.labor_cost;
+  };
+
+  const calculateGrandTotal = () => {
+    return sections.reduce((sum, section) => sum + calculateSectionTotalWithLabor(section), 0);
+  };
+
+  const calculateTotalMaterials = () => {
+    return sections.reduce((sum, section) => sum + calculateSectionMaterialsTotal(section), 0);
+  };
+
+  const calculateTotalLabor = () => {
+    return sections.reduce((sum, section) => sum + section.labor_cost, 0);
+  };
+
+  const getTotalTax = () => {
+    return sections.reduce((sum, section) => {
+      const sectionTax = section.items.reduce((itemSum, item) => itemSum + calculateTaxAmount(item), 0);
+      return sum + sectionTax;
+    }, 0);
+  };
 
   const handleSubmit = async () => {
     if (!selectedCustomerId) {
@@ -282,38 +410,48 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
       return;
     }
 
-    if (items.length === 0) {
-      toast.error('Please add at least one item');
+    if (sections.length === 0 || sections.every(s => s.items.length === 0)) {
+      toast.error('Please add at least one item to a section');
       return;
     }
 
     setIsSubmitting(true);
     try {
+      const totalMaterials = calculateTotalMaterials();
+      const totalLabor = calculateTotalLabor();
+      const totalTax = getTotalTax();
+      const grandTotal = calculateGrandTotal();
+      const balanceDue = grandTotal - (invoice?.paid_amount || 0);
+
       const invoiceData = {
         customer_id: selectedCustomerId,
         invoice_date: invoiceDate,
         due_date: dueDate,
         lpo_number: lpoNumber || null,
-        subtotal: subtotal,
-        tax_amount: taxAmount,
-        total_amount: totalAmount,
+        subtotal: totalMaterials,
+        tax_amount: totalTax,
+        total_amount: grandTotal,
         balance_due: balanceDue,
         terms_and_conditions: termsAndConditions,
         notes: notes,
       };
 
-      const invoiceItems = items.map(item => ({
-        product_id: item.product_id,
-        description: item.description,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-        discount_percentage: item.discount_percentage,
-        discount_before_vat: item.discount_before_vat || 0,
-        tax_percentage: item.tax_percentage,
-        tax_amount: item.tax_amount,
-        tax_inclusive: item.tax_inclusive,
-        line_total: item.line_total
-      }));
+      const invoiceItems = sections.flatMap((section, sectionIndex) =>
+        section.items.map(item => ({
+          product_id: item.product_id,
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          discount_percentage: item.discount_percentage || 0,
+          tax_percentage: item.tax_percentage || 0,
+          tax_amount: calculateTaxAmount(item),
+          tax_inclusive: item.tax_inclusive || false,
+          line_total: item.line_total,
+          section_name: section.name,
+          section_labor_cost: section.labor_cost,
+          sort_order: sectionIndex
+        }))
+      );
 
       await updateInvoiceWithItems.mutateAsync({
         invoiceId: invoice.id,
@@ -346,14 +484,12 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
         </DialogHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Invoice Details */}
           <div className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Invoice Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Customer Selection */}
                 <div className="space-y-2">
                   <Label htmlFor="customer">Customer *</Label>
                   <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
@@ -374,7 +510,6 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                   </Select>
                 </div>
 
-                {/* Dates */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="invoice_date">Invoice Date *</Label>
@@ -396,7 +531,6 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                   </div>
                 </div>
 
-                {/* LPO Number */}
                 <div className="space-y-2">
                   <Label htmlFor="lpo_number">LPO Number (Optional)</Label>
                   <Input
@@ -408,7 +542,6 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                   />
                 </div>
 
-                {/* Notes */}
                 <div className="space-y-2">
                   <Label htmlFor="notes">Notes</Label>
                   <Textarea
@@ -420,7 +553,6 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                   />
                 </div>
 
-                {/* Terms and Conditions */}
                 <div className="space-y-2">
                   <Label htmlFor="terms">Terms and Conditions</Label>
                   <Textarea
@@ -434,7 +566,6 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
             </Card>
           </div>
 
-          {/* Right Column - Product Selection */}
           <div className="space-y-4">
             <Card>
               <CardHeader>
@@ -442,7 +573,6 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {/* Product Search */}
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
@@ -453,7 +583,6 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                     />
                   </div>
 
-                  {/* Product List */}
                   {searchProduct && (
                     <div className="max-h-64 overflow-y-auto border rounded-lg">
                       {loadingProducts ? (
@@ -464,16 +593,17 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                         filteredProducts.map((product) => (
                           <div
                             key={product.id}
-                            className="p-3 hover:bg-muted/50 cursor-pointer border-b last:border-b-0 transition-smooth"
-                            onClick={() => addItem(product)}
+                            className="p-3 hover:bg-muted/50 cursor-pointer border-b last:border-b-0"
+                            onClick={() => {
+                              if (sections.length === 0) {
+                                toast.info('Please create a section first');
+                              }
+                            }}
                           >
                             <div className="flex justify-between items-start">
                               <div>
                                 <div className="font-medium">{product.name}</div>
                                 <div className="text-sm text-muted-foreground">{product.product_code}</div>
-                                {product.description && (
-                                  <div className="text-xs text-muted-foreground mt-1">{product.description}</div>
-                                )}
                               </div>
                               <div className="text-right">
                                 <div className="font-semibold">{formatCurrency(product.selling_price)}</div>
@@ -491,156 +621,254 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
           </div>
         </div>
 
-        {/* Items Table */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span>Invoice Items</span>
-              <Badge variant="outline">{items.length} items</Badge>
+              <span>Invoice Sections</span>
+              <Badge variant="outline">{sections.length} sections</Badge>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            {items.length === 0 ? (
+          <CardContent className="space-y-4">
+            <div className="flex gap-2">
+              <Input
+                placeholder="New section name (e.g., Materials, Installation)"
+                value={newSectionName}
+                onChange={(e) => setNewSectionName(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && addSection()}
+              />
+              <Button onClick={addSection} size="sm">
+                <Plus className="h-4 w-4 mr-1" />
+                Add Section
+              </Button>
+            </div>
+
+            {sections.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                No items added yet. Search and select products to add them.
+                No sections found. Create a section to organize items.
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Qty</TableHead>
-                    <TableHead>Unit Price</TableHead>
-                    <TableHead>Discount %</TableHead>
-                    <TableHead>Disc. Before VAT</TableHead>
-                    <TableHead>Tax %</TableHead>
-                    <TableHead>Tax Incl.</TableHead>
-                    <TableHead>Line Total</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {items.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{item.product_name}</div>
-                          <div className="text-sm text-muted-foreground">{item.description}</div>
+              <div className="space-y-4">
+                {sections.map((section) => (
+                  <Card key={section.id} className="border">
+                    <CardHeader className="pb-3 cursor-pointer" onClick={() => toggleSectionExpanded(section.id)}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {section.expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                          <CardTitle className="text-base">{section.name}</CardTitle>
+                          <Badge variant="outline">{section.items.length} items</Badge>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={item.quantity}
-                          onChange={(e) => updateItemQuantity(item.id, parseInt(e.target.value) || 0)}
-                          className="w-20"
-                          min="1"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={item.unit_price}
-                          onChange={(e) => updateItemPrice(item.id, parseFloat(e.target.value) || 0)}
-                          className="w-24"
-                          step="0.01"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={item.discount_percentage}
-                          onChange={(e) => updateItemDiscount(item.id, parseFloat(e.target.value) || 0)}
-                          className="w-20"
-                          min="0"
-                          max="100"
-                          step="0.1"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={item.discount_before_vat || 0}
-                          onChange={(e) => updateItemDiscountBeforeVat(item.id, parseFloat(e.target.value) || 0)}
-                          className="w-24"
-                          step="0.01"
-                          placeholder="0.00"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={item.tax_percentage}
-                          onChange={(e) => updateItemTax(item.id, parseFloat(e.target.value) || 0)}
-                          className="w-20"
-                          min="0"
-                          max="100"
-                          step="0.1"
-                          disabled={item.tax_inclusive}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Checkbox
-                          checked={item.tax_inclusive}
-                          onCheckedChange={(checked) => updateItemTaxInclusive(item.id, !!checked)}
-                        />
-                      </TableCell>
-                      <TableCell className="font-semibold">
-                        {formatCurrency(item.line_total)}
-                      </TableCell>
-                      <TableCell>
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => removeItem(item.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeSection(section.id);
+                          }}
                           className="text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
+                      </div>
+                    </CardHeader>
 
-            {/* Totals */}
-            {items.length > 0 && (
-              <div className="mt-6 border-t pt-4">
-                <div className="flex justify-end">
-                  <div className="w-80 space-y-2">
-                    <div className="flex justify-between">
-                      <span>Subtotal:</span>
-                      <span className="font-semibold">{formatCurrency(subtotal)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Tax:</span>
-                      <span className="font-semibold">{formatCurrency(taxAmount)}</span>
-                    </div>
-                    <div className="flex justify-between text-lg border-t pt-2">
-                      <span className="font-bold">Total:</span>
-                      <span className="font-bold text-primary">{formatCurrency(totalAmount)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-muted-foreground">
-                      <span>Paid:</span>
-                      <span>{formatCurrency(invoice?.paid_amount || 0)}</span>
-                    </div>
-                    <div className="flex justify-between text-lg border-t pt-2">
-                      <span className="font-bold">Balance Due:</span>
-                      <span className="font-bold text-destructive">{formatCurrency(balanceDue)}</span>
-                    </div>
-                  </div>
-                </div>
+                    {section.expanded && (
+                      <CardContent className="space-y-4 pt-0">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Section Name</Label>
+                            <Input
+                              value={section.name}
+                              onChange={(e) => updateSectionName(section.id, e.target.value)}
+                              placeholder="Section name"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Labor Cost</Label>
+                            <Input
+                              type="number"
+                              value={section.labor_cost}
+                              onChange={(e) => updateSectionLaborCost(section.id, parseFloat(e.target.value) || 0)}
+                              placeholder="0.00"
+                              step="0.01"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-sm">Add Products to Section</Label>
+                          <div className="max-h-48 overflow-y-auto border rounded-lg">
+                            {(filteredProducts || []).map((product) => (
+                              <div
+                                key={product.id}
+                                className="p-2 hover:bg-muted/50 cursor-pointer border-b last:border-b-0 text-sm"
+                                onClick={() => addItemToSection(section.id, product)}
+                              >
+                                <div className="flex justify-between">
+                                  <span className="font-medium">{product.name}</span>
+                                  <span>{formatCurrency(product.selling_price)}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {section.items.length > 0 && (
+                          <div className="overflow-x-auto">
+                            <Table className="text-sm">
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Product</TableHead>
+                                  <TableHead className="w-20">Qty</TableHead>
+                                  <TableHead className="w-24">Unit Price</TableHead>
+                                  <TableHead className="w-20">Disc. %</TableHead>
+                                  <TableHead className="w-16">Tax %</TableHead>
+                                  <TableHead className="w-16">Inc. Tax</TableHead>
+                                  <TableHead className="text-right">Total</TableHead>
+                                  <TableHead className="w-8"></TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {section.items.map((item) => (
+                                  <TableRow key={item.id}>
+                                    <TableCell className="text-xs">
+                                      <div className="font-medium">{item.product_name}</div>
+                                    </TableCell>
+                                    <TableCell>
+                                      <Input
+                                        type="number"
+                                        value={item.quantity}
+                                        onChange={(e) => updateItemQuantity(section.id, item.id, parseInt(e.target.value) || 0)}
+                                        className="w-16 h-8"
+                                        min="1"
+                                      />
+                                    </TableCell>
+                                    <TableCell>
+                                      <Input
+                                        type="number"
+                                        value={item.unit_price}
+                                        onChange={(e) => updateItemPrice(section.id, item.id, parseFloat(e.target.value) || 0)}
+                                        className="w-20 h-8"
+                                        step="0.01"
+                                      />
+                                    </TableCell>
+                                    <TableCell>
+                                      <Input
+                                        type="number"
+                                        value={item.discount_percentage || 0}
+                                        onChange={(e) => updateItemDiscount(section.id, item.id, parseFloat(e.target.value) || 0)}
+                                        className="w-16 h-8"
+                                        step="0.01"
+                                        placeholder="0"
+                                      />
+                                    </TableCell>
+                                    <TableCell>
+                                      <Input
+                                        type="number"
+                                        value={item.tax_percentage}
+                                        onChange={(e) => updateItemTax(section.id, item.id, parseFloat(e.target.value) || 0)}
+                                        className="w-14 h-8"
+                                        min="0"
+                                        max="100"
+                                        step="0.1"
+                                        disabled={item.tax_inclusive}
+                                      />
+                                    </TableCell>
+                                    <TableCell>
+                                      <Checkbox
+                                        checked={item.tax_inclusive}
+                                        onCheckedChange={(checked) => updateItemTaxInclusive(section.id, item.id, !!checked)}
+                                      />
+                                    </TableCell>
+                                    <TableCell className="text-right font-semibold text-sm">
+                                      {formatCurrency(item.line_total)}
+                                    </TableCell>
+                                    <TableCell>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => removeItem(section.id, item.id)}
+                                        className="text-destructive hover:text-destructive h-8 w-8"
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </Button>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+
+                            <div className="mt-4 border-t pt-3 space-y-1 text-sm">
+                              <div className="flex justify-end pr-4">
+                                <div className="w-60 space-y-1">
+                                  <div className="flex justify-between">
+                                    <span>Materials:</span>
+                                    <span className="font-semibold">{formatCurrency(calculateSectionMaterialsTotal(section))}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>Labor Cost:</span>
+                                    <span className="font-semibold">{formatCurrency(section.labor_cost)}</span>
+                                  </div>
+                                  <div className="flex justify-between border-t pt-1 font-bold">
+                                    <span>Section Total:</span>
+                                    <span>{formatCurrency(calculateSectionTotalWithLabor(section))}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    )}
+                  </Card>
+                ))}
               </div>
             )}
           </CardContent>
         </Card>
 
+        {sections.length > 0 && (
+          <Card className="bg-slate-50">
+            <CardContent className="pt-6">
+              <div className="flex justify-end">
+                <div className="w-80 space-y-2">
+                  <div className="flex justify-between">
+                    <span>Total Materials:</span>
+                    <span className="font-semibold">{formatCurrency(calculateTotalMaterials())}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Labor:</span>
+                    <span className="font-semibold">{formatCurrency(calculateTotalLabor())}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Tax:</span>
+                    <span className="font-semibold">{formatCurrency(getTotalTax())}</span>
+                  </div>
+                  <div className="flex justify-between text-lg border-t pt-2 font-bold">
+                    <span>Grand Total:</span>
+                    <span className="text-primary">{formatCurrency(calculateGrandTotal())}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-muted-foreground pt-1">
+                    <span>Paid:</span>
+                    <span>{formatCurrency(invoice?.paid_amount || 0)}</span>
+                  </div>
+                  <div className="flex justify-between text-lg border-t pt-2 font-bold">
+                    <span>Balance Due:</span>
+                    <span className="text-destructive">{formatCurrency(calculateGrandTotal() - (invoice?.paid_amount || 0))}</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting || !selectedCustomerId || items.length === 0}>
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting || !selectedCustomerId || sections.every(s => s.items.length === 0)}
+          >
             <Calculator className="h-4 w-4 mr-2" />
             {isSubmitting ? 'Updating...' : 'Update Invoice'}
           </Button>
