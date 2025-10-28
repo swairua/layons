@@ -91,12 +91,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return profileData;
     } catch (error) {
       // Use proper error logging utilities to prevent [object Object]
-      try {
-        logError('Exception fetching profile:', error, { userId, context: 'fetchProfile' });
-      } catch (logError) {
-        // If logging fails, just continue silently
-        console.error('Failed to log profile fetch error:', logError);
-      }
+      logError('Exception fetching profile:', error, { userId, context: 'fetchProfile' });
 
       // Handle specific error types using the error type checker
       if (isErrorType(error, 'auth')) {
