@@ -106,6 +106,19 @@ export default function Invoices() {
   
   // Use the fixed invoices hook
   const { data: invoices, isLoading, error, refetch } = useInvoices(currentCompany?.id);
+  const deleteInvoice = useDeleteInvoice();
+
+  const handleDeleteInvoice = async (invoice: Invoice) => {
+    if (!confirm(`Delete invoice ${invoice.invoice_number}? This action cannot be undone.`)) return;
+    try {
+      await deleteInvoice.mutateAsync(invoice.id);
+      toast.success('Invoice deleted successfully');
+      refetch();
+    } catch (err) {
+      console.error('Delete failed', err);
+      toast.error('Failed to delete invoice');
+    }
+  };
 
   // Filter and search logic
   const filteredInvoices = invoices?.filter(invoice => {
