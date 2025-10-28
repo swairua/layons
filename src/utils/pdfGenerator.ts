@@ -496,8 +496,8 @@ export const generatePDF = (data: DocumentData) => {
     return printWindow;
   }
 
-  // Handle quotations with sections
-  if (data.type === 'quotation' && data.sections && data.sections.length > 0) {
+  // Handle quotations, invoices, and proformas with sections
+  if ((data.type === 'quotation' || data.type === 'invoice' || data.type === 'proforma') && data.sections && data.sections.length > 0) {
     let pagesHtml = '';
 
     // Render one section per page
