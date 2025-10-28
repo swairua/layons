@@ -707,6 +707,15 @@ Website:`;
           toast.success('Delivery note created successfully!');
         }}
       />
+
+      <ConfirmationDialog
+        open={deleteDialog.open}
+        title="Delete Invoice"
+        description={deleteDialog.invoice ? `Are you sure you want to delete invoice ${deleteDialog.invoice.invoice_number}? This action cannot be undone.` : ''}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDialog({ open: false })}
+        confirmText="Delete"
+      />
     </div>
   );
 }
