@@ -77,7 +77,7 @@ export default function UnitsSettings() {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Button size="icon" variant="ghost" onClick={() => handleEdit(u)} title="Edit"><Edit className="h-4 w-4" /></Button>
-                      <Button size="icon" variant="destructive" onClick={() => handleDelete(u.id)} title="Delete"><Trash2 className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="destructive" onClick={() => handleDeleteClick(u.id, u.name)} title="Delete"><Trash2 className="h-4 w-4" /></Button>
                     </div>
                   </TableCell>
                 </TableRow>
