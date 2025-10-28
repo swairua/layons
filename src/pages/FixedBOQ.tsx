@@ -43,6 +43,7 @@ export default function FixedBOQ() {
   const [qty, setQty] = useState<Record<string, number>>({});
   const [rate, setRate] = useState<Record<string, number>>({});
   const [amount, setAmount] = useState<Record<string, number>>({});
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; itemId?: string; description?: string }>({ open: false });
 
   const fetchItems = async () => {
     if (!companyId) return;
