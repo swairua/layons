@@ -318,15 +318,20 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
     }
   };
 
-  const handleDeleteItem = async (id: string, description: string) => {
-    if (!confirm(`Delete "${description}"? This action cannot be undone.`)) return;
+  const handleDeleteClick = (id: string, description: string) => {
+    setDeleteDialog({ open: true, itemId: id, description });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.itemId) return;
     try {
       const { error } = await supabase
         .from('fixed_boq_items')
         .delete()
-        .eq('id', id);
+        .eq('id', deleteDialog.itemId);
       if (error) throw error;
       toast.success('Item deleted successfully');
+      setDeleteDialog({ open: false });
       await fetchItems();
     } catch (err) {
       console.error('Delete failed:', err);
