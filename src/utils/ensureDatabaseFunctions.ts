@@ -56,16 +56,20 @@ RETURNS TEXT AS $$
 DECLARE
     next_number INTEGER;
     year_part VARCHAR(4);
+    month_part VARCHAR(2);
+    current_pattern VARCHAR(6);
 BEGIN
     year_part := EXTRACT(YEAR FROM CURRENT_DATE)::VARCHAR;
-    
-    SELECT COALESCE(MAX(CAST(SUBSTRING(remittance_number FROM '[0-9]+$') AS INTEGER)), 0) + 1
+    month_part := LPAD(EXTRACT(MONTH FROM CURRENT_DATE)::VARCHAR, 2, '0');
+    current_pattern := month_part || year_part;
+
+    SELECT COALESCE(MAX(CAST(SUBSTRING(remittance_number FROM '^[0-9]{4}') AS INTEGER)), 0) + 1
     INTO next_number
-    FROM remittances 
-    WHERE company_id = company_uuid 
-    AND remittance_number LIKE 'REM-' || year_part || '-%';
-    
-    RETURN 'REM-' || year_part || '-' || LPAD(next_number::VARCHAR, 3, '0');
+    FROM remittances
+    WHERE company_id = company_uuid
+    AND remittance_number LIKE '%' || current_pattern;
+
+    RETURN LPAD(next_number::VARCHAR, 4, '0') || current_pattern;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -76,16 +80,20 @@ RETURNS TEXT AS $$
 DECLARE
     next_number INTEGER;
     year_part VARCHAR(4);
+    month_part VARCHAR(2);
+    current_pattern VARCHAR(6);
 BEGIN
     year_part := EXTRACT(YEAR FROM CURRENT_DATE)::VARCHAR;
-    
-    SELECT COALESCE(MAX(CAST(SUBSTRING(proforma_number FROM '[0-9]+$') AS INTEGER)), 0) + 1
+    month_part := LPAD(EXTRACT(MONTH FROM CURRENT_DATE)::VARCHAR, 2, '0');
+    current_pattern := month_part || year_part;
+
+    SELECT COALESCE(MAX(CAST(SUBSTRING(proforma_number FROM '^[0-9]{4}') AS INTEGER)), 0) + 1
     INTO next_number
-    FROM proformas 
-    WHERE company_id = company_uuid 
-    AND proforma_number LIKE 'PF-' || year_part || '-%';
-    
-    RETURN 'PF-' || year_part || '-' || LPAD(next_number::VARCHAR, 3, '0');
+    FROM proformas
+    WHERE company_id = company_uuid
+    AND proforma_number LIKE '%' || current_pattern;
+
+    RETURN LPAD(next_number::VARCHAR, 4, '0') || current_pattern;
 END;
 $$ LANGUAGE plpgsql;
 `;
