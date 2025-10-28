@@ -39,7 +39,6 @@ interface QuotationItem {
   description: string;
   quantity: number;
   unit_price: number;
-  discount_percentage: number;
   tax_percentage: number;
   tax_amount: number;
   tax_inclusive: boolean;
@@ -91,7 +90,6 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
         description: item.description || '',
         quantity: item.quantity || 0,
         unit_price: item.unit_price || 0,
-        discount_percentage: item.discount_percentage || 0,
         tax_percentage: item.tax_percentage || 16,
         tax_amount: item.tax_amount || 0,
         tax_inclusive: item.tax_inclusive || false,
@@ -107,27 +105,22 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
     product.product_code.toLowerCase().includes(searchProduct.toLowerCase())
   ) || [];
 
-  const calculateLineTotal = (item: QuotationItem, quantity?: number, unitPrice?: number, discountPercentage?: number, taxPercentage?: number, taxInclusive?: boolean) => {
+  const calculateLineTotal = (item: QuotationItem, quantity?: number, unitPrice?: number, taxPercentage?: number, taxInclusive?: boolean) => {
     const qty = quantity ?? item.quantity;
     const price = unitPrice ?? item.unit_price;
-    const discount = discountPercentage ?? item.discount_percentage;
     const tax = taxPercentage ?? item.tax_percentage;
 
-    let subtotal = qty * price;
-    let discountAmount = subtotal * (discount / 100);
-    let afterDiscount = subtotal - discountAmount;
+    const subtotal = qty * price;
 
     let taxAmount = 0;
     let lineTotal = 0;
 
     if (tax === 0) {
-      // No VAT applied
-      lineTotal = afterDiscount;
+      lineTotal = subtotal;
       taxAmount = 0;
     } else {
-      // Both inclusive and exclusive now add VAT on top
-      taxAmount = afterDiscount * (tax / 100);
-      lineTotal = afterDiscount + taxAmount;
+      taxAmount = subtotal * (tax / 100);
+      lineTotal = subtotal + taxAmount;
     }
 
     return { lineTotal, taxAmount };
@@ -202,9 +195,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
   };
 
   const subtotal = items.reduce((sum, item) => {
-    // Always use base amount for subtotal (unit price × quantity × discount)
-    // VAT is calculated separately and added for exclusive, or extracted for inclusive
-    const itemSubtotal = (item.quantity * item.unit_price) * (1 - item.discount_percentage / 100);
+    const itemSubtotal = item.quantity * item.unit_price;
     return sum + itemSubtotal;
   }, 0);
   const taxAmount = items.reduce((sum, item) => sum + (item.tax_amount || 0), 0);
@@ -400,8 +391,8 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                     <TableHead>Product</TableHead>
                     <TableHead>Qty</TableHead>
                     <TableHead>Unit Price</TableHead>
-                    <TableHead>VAT %</TableHead>
-                    <TableHead>VAT Incl.</TableHead>
+                    <TableHead>Tax %</TableHead>
+                    <TableHead>Tax Incl.</TableHead>
                     <TableHead>Line Total</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
