@@ -768,7 +768,7 @@ export const generatePDF = (data: DocumentData) => {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Quotation ${data.number}</title>
+        <title>${data.type === 'invoice' ? 'Invoice' : data.type === 'proforma' ? 'Proforma Invoice' : 'Quotation'} ${data.number}</title>
         <meta charset="UTF-8">
         <style>
           ${pdfRootVars}
