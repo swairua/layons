@@ -1061,11 +1061,11 @@ export const generatePDF = (data: DocumentData) => {
                 <th style="width: 15%;">Amount</th>
                 ` : `
                 <th style="width: 5%;">Item #</th>
-                <th style="width: 35%;">Item Description</th>
-                <th style="width: 12%;">SI Unit</th>
+                <th style="width: 35%;">Description</th>
+                <th style="width: 12%;">Unit</th>
                 <th style="width: 10%;">Qty</th>
                 <th style="width: 18%;">Unit Price</th>
-                <th style="width: 20%;">Row Total</th>
+                <th style="width: 20%;">Total</th>
                 `}
               </tr>
             </thead>
