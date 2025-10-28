@@ -507,9 +507,17 @@ export const generatePDF = (data: DocumentData) => {
       const sectionTotal = sectionMaterialsTotal + sectionLaborCost;
       const sectionTaxAmount = section.items.reduce((sum, item) => sum + (item.tax_amount || 0), 0);
 
+      // Generate alphabetical section letter (A, B, C, etc.)
+      const sectionLetter = String.fromCharCode(65 + sectionIndex); // 65 = 'A'
+      const sectionTitleWithLetter = `${sectionLetter}. ${section.name.toUpperCase()}`;
+
+      // Only show header on first section page
+      const showHeader = sectionIndex === 0;
+
       pagesHtml += `
         <div class="page" style="page-break-after: always;">
-          <!-- Header Section -->
+          ${showHeader ? `
+          <!-- Header Section (only on first page) -->
           <div class="header">
             <div class="company-info">
               <div class="logo">
@@ -543,7 +551,7 @@ export const generatePDF = (data: DocumentData) => {
             </div>
 
             <div class="document-info">
-              <div class="document-title">${data.type === 'invoice' ? 'Invoice' : data.type === 'proforma' ? 'Proforma Invoice' : 'Quotation'} - Section ${sectionIndex + 1}</div>
+              <div class="document-title">${data.type === 'invoice' ? 'Invoice' : data.type === 'proforma' ? 'Proforma Invoice' : 'Quotation'}</div>
               <div class="document-details">
                 <table>
                   <tr>
@@ -560,17 +568,14 @@ export const generatePDF = (data: DocumentData) => {
                     <td class="value">${formatDate(data.valid_until)}</td>
                   </tr>
                   ` : ''}
-                  <tr>
-                    <td class="label">Amount:</td>
-                    <td class="value" style="font-weight: bold; color: hsl(var(--primary));">${formatCurrency(sectionTotal)}</td>
-                  </tr>
                 </table>
               </div>
             </div>
           </div>
+          ` : ''}
 
-          <!-- Section Title -->
-          <div class="section-title" style="margin: 25px 0 15px 0; padding: 10px; background: #f8f9fa; border-left: 4px solid hsl(var(--primary));">${section.name}</div>
+          <!-- Section Title with alphabetical letter -->
+          <div class="section-title" style="margin: ${showHeader ? '25px 0 15px 0' : '20px 0 15px 0'}; padding: 12px; background: #f8f9fa; border-left: 4px solid hsl(var(--primary)); font-size: 14px; font-weight: bold; text-transform: uppercase;">${sectionTitleWithLetter}</div>
 
           <!-- Items Table -->
           <div class="items-section">
@@ -604,21 +609,23 @@ export const generatePDF = (data: DocumentData) => {
           <div class="totals-section">
             <table class="totals-table">
               <tr>
-                <td class="label">Materials Subtotal:</td>
+                <td class="label">TOTAL ${sectionLetter} MATERIALS:</td>
                 <td class="amount">${formatCurrency(sectionMaterialsTotal)}</td>
               </tr>
+              ${sectionLaborCost > 0 ? `
               <tr>
-                <td class="label">Labor Cost:</td>
+                <td class="label">${sectionLetter} LABOR:</td>
                 <td class="amount">${formatCurrency(sectionLaborCost)}</td>
               </tr>
+              ` : ''}
               ${sectionTaxAmount > 0 ? `
               <tr>
-                <td class="label">Tax Amount:</td>
+                <td class="label">TAX AMOUNT:</td>
                 <td class="amount">${formatCurrency(sectionTaxAmount)}</td>
               </tr>
               ` : ''}
               <tr class="total-row">
-                <td class="label">Section Total:</td>
+                <td class="label">TOTAL ${sectionLetter} COST:</td>
                 <td class="amount">${formatCurrency(sectionTotal)}</td>
               </tr>
             </table>
@@ -642,7 +649,7 @@ export const generatePDF = (data: DocumentData) => {
     const totalTax = data.sections.reduce((sum, sec) => sum + sec.items.reduce((s, item) => s + (item.tax_amount || 0), 0), 0);
 
     pagesHtml += `
-      <div class="page" style="position: relative;">
+      <div class="page" style="position: relative; page-break-before: always;">
         <!-- Header Section -->
         <div class="header">
           <div class="company-info">
@@ -716,12 +723,13 @@ export const generatePDF = (data: DocumentData) => {
               </tr>
             </thead>
             <tbody>
-              ${data.sections.map((section) => {
+              ${data.sections.map((section, idx) => {
+                const sectionLetter = String.fromCharCode(65 + idx);
                 const matTotal = section.items.reduce((sum, item) => sum + (item.line_total || 0), 0);
                 const secTotal = matTotal + (section.labor_cost || 0);
                 return `
                   <tr>
-                    <td class="description-cell">${section.name}</td>
+                    <td class="description-cell">${sectionLetter}. ${section.name}</td>
                     <td class="amount-cell">${formatCurrency(matTotal)}</td>
                     <td class="amount-cell">${formatCurrency(section.labor_cost || 0)}</td>
                     <td class="amount-cell" style="font-weight: bold;">${formatCurrency(secTotal)}</td>

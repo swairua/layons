@@ -46,7 +46,7 @@ interface Quotation {
   quotation_date: string;
   valid_until?: string;
   total_amount: number;
-  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired';
+  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired' | 'processed';
   quotation_items?: any[];
   subtotal?: number;
   tax_amount?: number;
@@ -61,6 +61,8 @@ function getStatusColor(status: string) {
     case 'sent':
       return 'bg-warning-light text-warning border-warning/20';
     case 'accepted':
+      return 'bg-success-light text-success border-success/20';
+    case 'processed':
       return 'bg-success-light text-success border-success/20';
     case 'rejected':
       return 'bg-destructive-light text-destructive border-destructive/20';
@@ -77,7 +79,8 @@ export default function Quotations() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
-  
+  const [convertingQuotationId, setConvertingQuotationId] = useState<string | null>(null);
+
   // Get current user and company from context
   const { profile, loading: authLoading } = useAuth();
   const { data: companies } = useCompanies();
@@ -209,7 +212,13 @@ Website: www.biolegendscientific.co.ke`;
         return;
       }
 
-      await convertQuotationMutation.mutateAsync(quotation.id);
+      setConvertingQuotationId(quotation.id);
+      try {
+        await convertQuotationMutation.mutateAsync(quotation.id);
+        toast.success(`Quotation ${quotation.quotation_number} converted to invoice successfully!`);
+      } finally {
+        setConvertingQuotationId(null);
+      }
     } catch (error) {
       console.error('Error converting quotation to invoice:', error);
 
@@ -447,16 +456,17 @@ Website: www.biolegendscientific.co.ke`;
                               <span className="hidden sm:inline">Send</span>
                             </Button>
                           )}
-                          {quotation.status === 'accepted' && (
+                          {quotation.status !== 'processed' && (
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleConvertToInvoice(quotation)}
-                              disabled={convertQuotationMutation.isPending}
+                              disabled={convertingQuotationId === quotation.id || !quotation.quotation_items?.length}
+                              title={!quotation.quotation_items?.length ? 'Quotation must have items to convert' : 'Convert to invoice'}
                               className="bg-success-light text-success border-success/20 hover:bg-success hover:text-success-foreground"
                             >
                               <FileText className="h-4 w-4 mr-1" />
-                              <span className="hidden sm:inline">{convertQuotationMutation.isPending ? 'Converting...' : 'Convert'}</span>
+                              <span className="hidden sm:inline">{convertingQuotationId === quotation.id ? 'Converting...' : 'Convert'}</span>
                             </Button>
                           )}
                         </div>

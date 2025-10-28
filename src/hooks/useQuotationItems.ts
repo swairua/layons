@@ -267,7 +267,6 @@ export const useConvertQuotationToInvoice = () => {
         total_amount: quotation.total_amount,
         notes: quotation.notes,
         terms_and_conditions: quotation.terms_and_conditions,
-        affects_inventory: true,
         created_by: createdBy
       };
 
@@ -289,7 +288,6 @@ export const useConvertQuotationToInvoice = () => {
           unit_price: item.unit_price,
           discount_percentage: item.discount_percentage,
           discount_before_vat: item.discount_before_vat || 0,
-          tax_setting_id: item.tax_setting_id,
           tax_percentage: item.tax_percentage,
           tax_amount: item.tax_amount,
           tax_inclusive: item.tax_inclusive,
@@ -355,10 +353,10 @@ export const useConvertQuotationToInvoice = () => {
         }
       }
       
-      // Update quotation status
+      // Update quotation status to processed
       await supabase
         .from('quotations')
-        .update({ status: 'converted' })
+        .update({ status: 'processed' })
         .eq('id', quotationId);
       
       return invoice;
