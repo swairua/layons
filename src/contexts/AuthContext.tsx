@@ -381,7 +381,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }, 2000); // Start background retry after 2 seconds
 
       } catch (error) {
-        console.warn('⚠️ Quick auth check failed:', error);
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.warn('⚠️ Quick auth check failed:', errorMsg);
 
         // Handle specific error types silently
         if (error instanceof Error) {
