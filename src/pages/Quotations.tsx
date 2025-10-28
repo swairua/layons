@@ -62,6 +62,8 @@ function getStatusColor(status: string) {
       return 'bg-warning-light text-warning border-warning/20';
     case 'accepted':
       return 'bg-success-light text-success border-success/20';
+    case 'processed':
+      return 'bg-success-light text-success border-success/20';
     case 'rejected':
       return 'bg-destructive-light text-destructive border-destructive/20';
     case 'expired':
