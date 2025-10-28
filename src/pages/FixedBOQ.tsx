@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
-import { Download, Database, PlusCircle, Upload } from 'lucide-react';
+import { Download, Database, PlusCircle, Upload, Trash2 } from 'lucide-react';
 import { generatePDF } from '@/utils/pdfGenerator';
 import { executeSQL, formatSQLForManualExecution } from '@/utils/execSQL';
 import { parseErrorMessage } from '@/utils/errorHelpers';
@@ -316,6 +316,22 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
     }
   };
 
+  const handleDeleteItem = async (id: string, description: string) => {
+    if (!confirm(`Delete "${description}"? This action cannot be undone.`)) return;
+    try {
+      const { error } = await supabase
+        .from('fixed_boq_items')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      toast.success('Item deleted successfully');
+      await fetchItems();
+    } catch (err) {
+      console.error('Delete failed:', err);
+      toast.error('Failed to delete item');
+    }
+  };
+
   const handleDownloadPDF = async () => {
     if (!currentCompany) { toast.error('Company not loaded'); return; }
 
@@ -502,12 +518,13 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead style={{ width: '50%' }}>Description</TableHead>
-                        <TableHead style={{ width: '10%' }}>Code</TableHead>
-                        <TableHead style={{ width: '10%', textAlign: 'right' }}>Qty</TableHead>
-                        <TableHead style={{ width: '15%', textAlign: 'right' }}>Unit</TableHead>
-                        <TableHead style={{ width: '15%', textAlign: 'right' }}>Unit Cost</TableHead>
-                        <TableHead style={{ width: '15%', textAlign: 'right' }}>Line Total</TableHead>
+                        <TableHead style={{ width: '40%' }}>Description</TableHead>
+                        <TableHead style={{ width: '8%' }}>Code</TableHead>
+                        <TableHead style={{ width: '8%', textAlign: 'right' }}>Qty</TableHead>
+                        <TableHead style={{ width: '12%', textAlign: 'right' }}>Unit</TableHead>
+                        <TableHead style={{ width: '13%', textAlign: 'right' }}>Unit Cost</TableHead>
+                        <TableHead style={{ width: '13%', textAlign: 'right' }}>Line Total</TableHead>
+                        <TableHead style={{ width: '6%', textAlign: 'center' }}>Action</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -543,11 +560,22 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
                             <TableCell className="text-right font-medium">
                               {new Intl.NumberFormat('en-KE', { style: 'currency', currency: currentCompany?.currency || 'KES' }).format(line || 0)}
                             </TableCell>
+                            <TableCell className="text-center">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeleteItem(it.id, it.description)}
+                                title="Delete item"
+                                className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
                           </TableRow>
                         );
                       })}
                       <TableRow>
-                        <TableCell className="text-right font-semibold" colSpan={5}>SECTION TOTAL</TableCell>
+                        <TableCell className="text-right font-semibold" colSpan={6}>SECTION TOTAL</TableCell>
                         <TableCell className="text-right font-semibold">
                           {new Intl.NumberFormat('en-KE', { style: 'currency', currency: currentCompany?.currency || 'KES' }).format(sectionTotal || 0)}
                         </TableCell>

@@ -12,18 +12,19 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { 
-  Plus, 
-  Search, 
+import {
+  Plus,
+  Search,
   Filter,
   Eye,
   Edit,
   FileText,
   Download,
   Calendar,
-  Send
+  Send,
+  Trash2
 } from 'lucide-react';
-import { useQuotations, useCompanies } from '@/hooks/useDatabase';
+import { useQuotations, useCompanies, useDeleteQuotation } from '@/hooks/useDatabase';
 import { useConvertQuotationToInvoice } from '@/hooks/useQuotationItems';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -86,6 +87,19 @@ export default function Quotations() {
   const { data: companies } = useCompanies();
   const currentCompany = companies?.[0];
   const { data: quotations, isLoading, error, refetch } = useQuotations(currentCompany?.id);
+  const deleteQuotation = useDeleteQuotation();
+
+  const handleDeleteQuotation = async (quotation: Quotation) => {
+    if (!confirm(`Delete quotation ${quotation.quotation_number}? This action cannot be undone.`)) return;
+    try {
+      await deleteQuotation.mutateAsync(quotation.id);
+      toast.success('Quotation deleted successfully');
+      refetch();
+    } catch (err) {
+      console.error('Delete failed', err);
+      toast.error('Failed to delete quotation');
+    }
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
@@ -440,6 +454,15 @@ Website: www.biolegendscientific.co.ke`;
                             title="Download PDF"
                           >
                             <Download className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteQuotation(quotation)}
+                            title="Delete quotation"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
 

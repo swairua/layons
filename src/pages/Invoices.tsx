@@ -36,9 +36,10 @@ import {
   Send,
   Calendar,
   Receipt,
-  Truck
+  Truck,
+  Trash2
 } from 'lucide-react';
-import { useCompanies } from '@/hooks/useDatabase';
+import { useCompanies, useDeleteInvoice } from '@/hooks/useDatabase';
 import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
 import { toast } from 'sonner';
 import { parseErrorMessage } from '@/utils/errorHelpers';
@@ -105,6 +106,19 @@ export default function Invoices() {
   
   // Use the fixed invoices hook
   const { data: invoices, isLoading, error, refetch } = useInvoices(currentCompany?.id);
+  const deleteInvoice = useDeleteInvoice();
+
+  const handleDeleteInvoice = async (invoice: Invoice) => {
+    if (!confirm(`Delete invoice ${invoice.invoice_number}? This action cannot be undone.`)) return;
+    try {
+      await deleteInvoice.mutateAsync(invoice.id);
+      toast.success('Invoice deleted successfully');
+      refetch();
+    } catch (err) {
+      console.error('Delete failed', err);
+      toast.error('Failed to delete invoice');
+    }
+  };
 
   // Filter and search logic
   const filteredInvoices = invoices?.filter(invoice => {
@@ -558,8 +572,8 @@ Website:`;
                           <Eye className="h-4 w-4" />
                         </Button>
                         {invoice.status === 'draft' && (
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="icon"
                             onClick={() => handleEditInvoice(invoice)}
                             title="Edit invoice"
@@ -586,11 +600,20 @@ Website:`;
                             <Truck className="h-4 w-4" />
                           </Button>
                         )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteInvoice(invoice)}
+                          title="Delete invoice"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                         {invoice.status !== 'paid' && (
                           <>
                             {invoice.status === 'draft' && (
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 size="sm"
                                 onClick={() => handleSendInvoice(invoice.id)}
                                 className="bg-primary-light text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground"
