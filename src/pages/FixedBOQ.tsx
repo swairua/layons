@@ -10,6 +10,7 @@ import { Download, Database, PlusCircle, Upload, Trash2 } from 'lucide-react';
 import { generatePDF } from '@/utils/pdfGenerator';
 import { executeSQL, formatSQLForManualExecution } from '@/utils/execSQL';
 import { parseErrorMessage } from '@/utils/errorHelpers';
+import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 
 interface FixedBOQItem {
   id: string;
