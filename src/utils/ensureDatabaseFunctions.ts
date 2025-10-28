@@ -9,17 +9,19 @@ DECLARE
     next_number INTEGER;
     year_part VARCHAR(4);
     month_part VARCHAR(2);
+    current_pattern VARCHAR(6);
 BEGIN
     year_part := EXTRACT(YEAR FROM CURRENT_DATE)::VARCHAR;
     month_part := LPAD(EXTRACT(MONTH FROM CURRENT_DATE)::VARCHAR, 2, '0');
+    current_pattern := month_part || year_part;
 
     SELECT COALESCE(MAX(CAST(SUBSTRING(quotation_number FROM '^[0-9]{4}') AS INTEGER)), 0) + 1
     INTO next_number
     FROM quotations
     WHERE company_id = company_uuid
-    AND quotation_number LIKE LPAD(next_number::VARCHAR, 4, '0') || month_part || year_part;
+    AND quotation_number LIKE current_pattern;
 
-    RETURN LPAD(next_number::VARCHAR, 4, '0') || month_part || year_part;
+    RETURN LPAD(next_number::VARCHAR, 4, '0') || current_pattern;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -31,17 +33,19 @@ DECLARE
     next_number INTEGER;
     year_part VARCHAR(4);
     month_part VARCHAR(2);
+    current_pattern VARCHAR(6);
 BEGIN
     year_part := EXTRACT(YEAR FROM CURRENT_DATE)::VARCHAR;
     month_part := LPAD(EXTRACT(MONTH FROM CURRENT_DATE)::VARCHAR, 2, '0');
+    current_pattern := month_part || year_part;
 
     SELECT COALESCE(MAX(CAST(SUBSTRING(invoice_number FROM '^[0-9]{4}') AS INTEGER)), 0) + 1
     INTO next_number
     FROM invoices
     WHERE company_id = company_uuid
-    AND invoice_number LIKE LPAD(next_number::VARCHAR, 4, '0') || month_part || year_part;
+    AND invoice_number LIKE current_pattern;
 
-    RETURN LPAD(next_number::VARCHAR, 4, '0') || month_part || year_part;
+    RETURN LPAD(next_number::VARCHAR, 4, '0') || current_pattern;
 END;
 $$ LANGUAGE plpgsql;
 
