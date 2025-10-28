@@ -1105,7 +1105,7 @@ export const generatePDF = (data: DocumentData) => {
                   <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
                   <td class="amount-cell">${formatCurrency(item.line_total)}</td>
                   ` : `
-                  <td>${item.unit_of_measure || item.unit_of_measure || 'pcs'}</td>
+                  <td>${item.unit_of_measure || 'pcs'}</td>
                   <td class="center">${item.quantity}</td>
                   <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
                   <td class="amount-cell">${formatCurrency(item.line_total)}</td>
