@@ -18,13 +18,20 @@ export default function UnitsSettings() {
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; unitId?: string; unitName?: string }>({ open: false });
 
   const handleEdit = (u: any) => setEditing(u);
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete unit?')) return;
+
+  const handleDeleteClick = (id: string, name: string) => {
+    setDeleteDialog({ open: true, unitId: id, unitName: name });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.unitId) return;
     try {
-      await deleteUnit.mutateAsync(id);
+      await deleteUnit.mutateAsync(deleteDialog.unitId);
       toast.success('Unit deleted');
+      setDeleteDialog({ open: false });
     } catch (err) {
       console.error(err);
       toast.error('Failed to delete unit');
