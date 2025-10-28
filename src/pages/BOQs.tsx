@@ -242,6 +242,15 @@ export default function BOQs() {
           </div>
         </div>
       )}
+
+      <ConfirmationDialog
+        open={deleteDialog.open}
+        title="Delete BOQ"
+        description={`Are you sure you want to delete BOQ ${deleteDialog.boqNumber}? This action cannot be undone.`}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDialog({ open: false })}
+        confirmText="Delete"
+      />
     </div>
   );
 }
