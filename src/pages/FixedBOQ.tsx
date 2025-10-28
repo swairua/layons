@@ -575,7 +575,7 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
                         );
                       })}
                       <TableRow>
-                        <TableCell className="text-right font-semibold" colSpan={5}>SECTION TOTAL</TableCell>
+                        <TableCell className="text-right font-semibold" colSpan={6}>SECTION TOTAL</TableCell>
                         <TableCell className="text-right font-semibold">
                           {new Intl.NumberFormat('en-KE', { style: 'currency', currency: currentCompany?.currency || 'KES' }).format(sectionTotal || 0)}
                         </TableCell>
