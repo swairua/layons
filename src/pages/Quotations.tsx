@@ -91,12 +91,17 @@ export default function Quotations() {
   const { data: quotations, isLoading, error, refetch } = useQuotations(currentCompany?.id);
   const deleteQuotation = useDeleteQuotation();
 
-  const handleDeleteQuotation = async (quotation: Quotation) => {
-    if (!confirm(`Delete quotation ${quotation.quotation_number}? This action cannot be undone.`)) return;
+  const handleDeleteClick = (quotation: Quotation) => {
+    setDeleteDialog({ open: true, quotation });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.quotation) return;
     try {
-      await deleteQuotation.mutateAsync(quotation.id);
+      await deleteQuotation.mutateAsync(deleteDialog.quotation.id);
       toast.success('Quotation deleted successfully');
       refetch();
+      setDeleteDialog({ open: false });
     } catch (err) {
       console.error('Delete failed', err);
       toast.error('Failed to delete quotation');
