@@ -81,6 +81,30 @@ export function ViewQuotationModal({
     }
   };
 
+  // Group quotation items by section
+  const groupedSections = quotation.quotation_items ?
+    quotation.quotation_items.reduce((acc: any, item: any) => {
+      const sectionName = item.section_name || 'General Items';
+      if (!acc[sectionName]) {
+        acc[sectionName] = [];
+      }
+      acc[sectionName].push(item);
+      return acc;
+    }, {} as Record<string, any[]>)
+    : {};
+
+  const sectionNames = Object.keys(groupedSections).sort();
+
+  const calculateSectionMaterials = (items: any[]) => {
+    return items.reduce((sum, item) => sum + item.line_total, 0);
+  };
+
+  const calculateSectionTotal = (items: any[]) => {
+    const materialsTotal = calculateSectionMaterials(items);
+    const laborCost = items[0]?.section_labor_cost || 0;
+    return materialsTotal + laborCost;
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
