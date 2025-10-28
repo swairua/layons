@@ -19,7 +19,7 @@ BEGIN
     INTO next_number
     FROM quotations
     WHERE company_id = company_uuid
-    AND quotation_number LIKE current_pattern;
+    AND quotation_number LIKE '%' || current_pattern;
 
     RETURN LPAD(next_number::VARCHAR, 4, '0') || current_pattern;
 END;
@@ -43,7 +43,7 @@ BEGIN
     INTO next_number
     FROM invoices
     WHERE company_id = company_uuid
-    AND invoice_number LIKE current_pattern;
+    AND invoice_number LIKE '%' || current_pattern;
 
     RETURN LPAD(next_number::VARCHAR, 4, '0') || current_pattern;
 END;
