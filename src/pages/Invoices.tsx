@@ -572,8 +572,8 @@ Website:`;
                           <Eye className="h-4 w-4" />
                         </Button>
                         {invoice.status === 'draft' && (
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="icon"
                             onClick={() => handleEditInvoice(invoice)}
                             title="Edit invoice"
@@ -600,11 +600,20 @@ Website:`;
                             <Truck className="h-4 w-4" />
                           </Button>
                         )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteInvoice(invoice)}
+                          title="Delete invoice"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                         {invoice.status !== 'paid' && (
                           <>
                             {invoice.status === 'draft' && (
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 size="sm"
                                 onClick={() => handleSendInvoice(invoice.id)}
                                 className="bg-primary-light text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground"
