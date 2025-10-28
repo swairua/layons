@@ -217,7 +217,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(quantity, item.unit_price, item.vat_percentage, item.vat_inclusive);
+            const lineTotal = calculateItemTotal(quantity, item.unit_price, item.discount_percentage, item.vat_percentage, item.vat_inclusive);
             return { ...item, quantity, line_total: lineTotal };
           }
           return item;
@@ -234,8 +234,25 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(item.quantity, unitPrice, item.vat_percentage, item.vat_inclusive);
+            const lineTotal = calculateItemTotal(item.quantity, unitPrice, item.discount_percentage, item.vat_percentage, item.vat_inclusive);
             return { ...item, unit_price: unitPrice, line_total: lineTotal };
+          }
+          return item;
+        })
+      };
+    }));
+  };
+
+  const updateItemDiscount = (sectionId: string, itemId: string, discountPercentage: number) => {
+    setSections(sections.map(section => {
+      if (section.id !== sectionId) return section;
+
+      return {
+        ...section,
+        items: section.items.map(item => {
+          if (item.id === itemId) {
+            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, discountPercentage, item.vat_percentage, item.vat_inclusive);
+            return { ...item, discount_percentage: discountPercentage, line_total: lineTotal };
           }
           return item;
         })
@@ -251,7 +268,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, vatPercentage, item.vat_inclusive);
+            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, item.discount_percentage, vatPercentage, item.vat_inclusive);
             return { ...item, vat_percentage: vatPercentage, line_total: lineTotal };
           }
           return item;
@@ -276,7 +293,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
               newVatPercentage = 0;
             }
 
-            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, newVatPercentage, vatInclusive);
+            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, item.discount_percentage, newVatPercentage, vatInclusive);
             return { ...item, vat_inclusive: vatInclusive, vat_percentage: newVatPercentage, line_total: lineTotal };
           }
           return item;
