@@ -461,12 +461,12 @@ Website: www.biolegendscientific.co.ke`;
                               variant="outline"
                               size="sm"
                               onClick={() => handleConvertToInvoice(quotation)}
-                              disabled={convertQuotationMutation.isPending || !quotation.quotation_items?.length}
+                              disabled={convertingQuotationId === quotation.id || !quotation.quotation_items?.length}
                               title={!quotation.quotation_items?.length ? 'Quotation must have items to convert' : 'Convert to invoice'}
                               className="bg-success-light text-success border-success/20 hover:bg-success hover:text-success-foreground"
                             >
                               <FileText className="h-4 w-4 mr-1" />
-                              <span className="hidden sm:inline">{convertQuotationMutation.isPending ? 'Converting...' : 'Convert'}</span>
+                              <span className="hidden sm:inline">{convertingQuotationId === quotation.id ? 'Converting...' : 'Convert'}</span>
                             </Button>
                           )}
                         </div>
