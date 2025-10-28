@@ -560,6 +560,17 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
                             <TableCell className="text-right font-medium">
                               {new Intl.NumberFormat('en-KE', { style: 'currency', currency: currentCompany?.currency || 'KES' }).format(line || 0)}
                             </TableCell>
+                            <TableCell className="text-center">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeleteItem(it.id, it.description)}
+                                title="Delete item"
+                                className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
                           </TableRow>
                         );
                       })}
