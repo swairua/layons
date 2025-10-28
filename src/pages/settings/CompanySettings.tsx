@@ -28,6 +28,7 @@ export default function CompanySettings() {
   const [fixingCurrency, setFixingCurrency] = useState(false);
   const [testingStorage, setTestingStorage] = useState(false);
   const [storageStatus, setStorageStatus] = useState<'unknown' | 'available' | 'unavailable'>('unknown');
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; taxId?: string; taxName?: string }>({ open: false });
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [companyData, setCompanyData] = useState({
     name: 'Layons Construction Limited',
