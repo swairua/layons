@@ -532,6 +532,15 @@ Website: www.biolegendscientific.co.ke`;
         quotation={selectedQuotation}
         onSuccess={handleEditSuccess}
       />
+
+      <ConfirmationDialog
+        open={deleteDialog.open}
+        title="Delete Quotation"
+        description={deleteDialog.quotation ? `Are you sure you want to delete quotation ${deleteDialog.quotation.quotation_number}? This action cannot be undone.` : ''}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDialog({ open: false })}
+        confirmText="Delete"
+      />
     </div>
   );
 }
