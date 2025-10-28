@@ -518,12 +518,13 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead style={{ width: '50%' }}>Description</TableHead>
-                        <TableHead style={{ width: '10%' }}>Code</TableHead>
-                        <TableHead style={{ width: '10%', textAlign: 'right' }}>Qty</TableHead>
-                        <TableHead style={{ width: '15%', textAlign: 'right' }}>Unit</TableHead>
-                        <TableHead style={{ width: '15%', textAlign: 'right' }}>Unit Cost</TableHead>
-                        <TableHead style={{ width: '15%', textAlign: 'right' }}>Line Total</TableHead>
+                        <TableHead style={{ width: '40%' }}>Description</TableHead>
+                        <TableHead style={{ width: '8%' }}>Code</TableHead>
+                        <TableHead style={{ width: '8%', textAlign: 'right' }}>Qty</TableHead>
+                        <TableHead style={{ width: '12%', textAlign: 'right' }}>Unit</TableHead>
+                        <TableHead style={{ width: '13%', textAlign: 'right' }}>Unit Cost</TableHead>
+                        <TableHead style={{ width: '13%', textAlign: 'right' }}>Line Total</TableHead>
+                        <TableHead style={{ width: '6%', textAlign: 'center' }}>Action</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
