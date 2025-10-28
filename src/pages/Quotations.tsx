@@ -24,7 +24,7 @@ import {
   Send,
   Trash2
 } from 'lucide-react';
-import { useQuotations, useCompanies } from '@/hooks/useDatabase';
+import { useQuotations, useCompanies, useDeleteQuotation } from '@/hooks/useDatabase';
 import { useConvertQuotationToInvoice } from '@/hooks/useQuotationItems';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
