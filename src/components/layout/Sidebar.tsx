@@ -16,6 +16,7 @@ import {
   Receipt,
   FileText,
   Truck,
+  LogBook,
 } from 'lucide-react';
 import { BiolegendLogo } from '@/components/ui/biolegend-logo';
 
@@ -64,17 +65,20 @@ const sidebarItems: SidebarItem[] = [
     title: 'Payments',
     icon: DollarSign,
     children: [
-      { title: 'Payments', icon: DollarSign, href: '/payments' },
-      { title: 'Remittance Advice', icon: CreditCard, href: '/remittance' }
+      { title: 'Payments', icon: DollarSign, href: '/payments' }
     ]
+  },
+  {
+    title: 'Audit Logs',
+    icon: LogBook,
+    href: '/audit-logs'
   },
   {
     title: 'Settings',
     icon: Settings,
     children: [
       { title: 'Company Settings', icon: Building2, href: '/settings/company' },
-      { title: 'User Management', icon: Users, href: '/settings/users' },
-      { title: 'Database Setup', icon: Package, href: '/database-setup' }
+      { title: 'User Management', icon: Users, href: '/settings/users' }
     ]
   }
 ];
