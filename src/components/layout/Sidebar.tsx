@@ -38,6 +38,11 @@ const sidebarItems: SidebarItem[] = [
     href: '/customers'
   },
   {
+    title: 'Products',
+    icon: Package,
+    href: '/inventory'
+  },
+  {
     title: 'Sales',
     icon: ShoppingCart,
     children: [
