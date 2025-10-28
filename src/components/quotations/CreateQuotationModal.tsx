@@ -755,6 +755,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                   <TableHead>Product</TableHead>
                                   <TableHead className="w-16">Qty</TableHead>
                                   <TableHead className="w-24">Unit Price</TableHead>
+                                  <TableHead className="w-20">Disc. %</TableHead>
                                   <TableHead className="w-20">VAT %</TableHead>
                                   <TableHead className="w-20">VAT Incl.</TableHead>
                                   <TableHead className="w-24">Line Total</TableHead>
@@ -786,6 +787,17 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                         onChange={(e) => updateItemPrice(section.id, item.id, parseFloat(e.target.value) || 0)}
                                         className="w-24 h-8"
                                         step="0.01"
+                                      />
+                                    </TableCell>
+                                    <TableCell>
+                                      <Input
+                                        type="number"
+                                        value={item.discount_percentage || 0}
+                                        onChange={(e) => updateItemDiscount(section.id, item.id, parseFloat(e.target.value) || 0)}
+                                        className="w-20 h-8"
+                                        min="0"
+                                        max="100"
+                                        step="0.1"
                                       />
                                     </TableCell>
                                     <TableCell>
