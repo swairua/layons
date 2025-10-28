@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useCompany } from '@/contexts/CompanyContext';
+import { useCurrentCompany } from '@/contexts/CompanyContext';
 import {
   Table,
   TableBody,
@@ -48,7 +48,7 @@ interface AuditLog {
 }
 
 export function DeleteAuditLog() {
-  const { currentCompany } = useCompany();
+  const { currentCompany } = useCurrentCompany();
   const [searchTerm, setSearchTerm] = useState('');
   const [entityTypeFilter, setEntityTypeFilter] = useState<string | undefined>();
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);

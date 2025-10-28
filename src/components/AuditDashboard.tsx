@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useCompany } from '@/contexts/CompanyContext';
+import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -39,7 +39,7 @@ const COLORS = {
 };
 
 export function AuditDashboard() {
-  const { currentCompany } = useCompany();
+  const { currentCompany } = useCurrentCompany();
   const [timeRange, setTimeRange] = useState<'7' | '30' | '90'>('30');
 
   const { data: auditLogs } = useQuery({

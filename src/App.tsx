@@ -38,6 +38,7 @@ const CustomerPerformanceOptimizerPage = lazy(() => import("./pages/CustomerPerf
 const SetupAndTest = lazy(() => import("./components/SetupAndTest"));
 const AuthTest = lazy(() => import("./components/AuthTest"));
 const AdminRecreate = lazy(() => import("./pages/AdminRecreate"));
+const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 
 const App = () => {
 
@@ -297,6 +298,16 @@ const App = () => {
 
           {/* Admin recreate (one-time utility) - No protection needed */}
           <Route path="/admin-recreate" element={<AdminRecreate />} />
+
+          {/* Audit Logs */}
+          <Route
+            path="/audit-logs"
+            element={
+              <ProtectedRoute>
+                <AuditLogs />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Payment Synchronization - No protection needed for setup */}
           <Route path="/payment-sync" element={<PaymentSynchronizationPage />} />

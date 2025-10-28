@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useCompany } from '@/contexts/CompanyContext';
+import { useCurrentCompany } from '@/contexts/CompanyContext';
 import {
   Table,
   TableBody,
@@ -63,7 +63,7 @@ const ACTION_LABELS: Record<string, string> = {
 };
 
 export function AuditTrailViewer() {
-  const { currentCompany } = useCompany();
+  const { currentCompany } = useCurrentCompany();
   const [searchTerm, setSearchTerm] = useState('');
   const [actionFilter, setActionFilter] = useState<string | undefined>();
   const [entityTypeFilter, setEntityTypeFilter] = useState<string | undefined>();
