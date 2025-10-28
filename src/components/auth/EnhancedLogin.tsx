@@ -64,14 +64,23 @@ export function EnhancedLogin() {
       }
     } catch (unexpectedError) {
       // Catch any unexpected errors and format them properly
-      const errorMessage = unexpectedError instanceof Error
-        ? unexpectedError.message
-        : typeof unexpectedError === 'string'
-        ? unexpectedError
-        : 'An unexpected error occurred. Please try again.';
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+
+      if (unexpectedError instanceof Error) {
+        errorMessage = unexpectedError.message;
+      } else if (typeof unexpectedError === 'string') {
+        errorMessage = unexpectedError;
+      } else if (unexpectedError && typeof unexpectedError === 'object') {
+        const errObj = unexpectedError as any;
+        if (errObj.message) {
+          errorMessage = errObj.message;
+        } else if (errObj.error_description) {
+          errorMessage = errObj.error_description;
+        }
+      }
 
       console.error('Unexpected sign in error:', unexpectedError);
-      toast.error(errorMessage);
+      toast.error(errorMessage || 'An unexpected error occurred. Please try again.');
     } finally {
       setSubmitting(false);
     }
