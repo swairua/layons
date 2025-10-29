@@ -1096,11 +1096,24 @@ export const generatePDF = (data: DocumentData) => {
 
         .header {
           display: flex;
+          flex-direction: column;
+          margin-bottom: 20px;
+          padding-bottom: 0;
+          border-bottom: none;
+        }
+
+        .header-image {
+          width: 100%;
+          height: auto;
+          margin-bottom: 20px;
+          display: block;
+        }
+
+        .header-content {
+          display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          margin-bottom: 30px;
-          padding-bottom: 20px;
-          border-bottom: 2px solid hsl(var(--primary));
+          gap: 40px;
         }
 
         .company-info {
@@ -1108,40 +1121,33 @@ export const generatePDF = (data: DocumentData) => {
         }
 
         .logo {
-          width: 320px;
-          height: 160px;
-          margin-bottom: 15px;
-          border-radius: 8px;
-          overflow: hidden;
+          display: none;
         }
-        
+
         .logo img {
           width: 100%;
           height: 100%;
           object-fit: contain;
         }
-        
+
         .company-name {
-          font-size: 24px;
+          font-size: 16px;
           font-weight: bold;
-          margin-bottom: 5px;
-          color: hsl(var(--primary));
-          font-weight: bold;
-          margin-bottom: 5px;
+          margin-bottom: 8px;
           color: hsl(var(--primary));
         }
-        
+
         .company-details {
-          font-size: 11px;
+          font-size: 10px;
           line-height: 1.6;
           color: #666;
           margin-bottom: 0;
         }
-        
+
         .document-info {
-          text-align: right;
+          text-align: left;
           flex: 1;
-          max-width: 300px;
+          max-width: 100%;
         }
         
         .document-title {
