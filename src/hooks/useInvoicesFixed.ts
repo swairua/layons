@@ -73,6 +73,17 @@ export const useInvoicesFixed = (companyId?: string) => {
           customerMap.set(customer.id, customer);
         });
 
+        // Step 4a: Get company details
+        const { data: company, error: companyError } = await supabase
+          .from('companies')
+          .select('id, name, address, city, country, phone, email, tax_number')
+          .eq('id', companyId)
+          .single();
+
+        if (companyError) {
+          console.error('Error fetching company (non-fatal):', companyError);
+        }
+
         // Step 5: Get invoice items for each invoice
         const invoiceIds = invoices.map(inv => inv.id);
         const { data: invoiceItems, error: itemsError } = invoiceIds.length > 0 ? await supabase
@@ -117,6 +128,7 @@ export const useInvoicesFixed = (companyId?: string) => {
             email: null,
             phone: null
           },
+          company: company || null,
           invoice_items: itemsMap.get(invoice.id) || []
         }));
 
@@ -198,6 +210,22 @@ export const useCustomerInvoicesFixed = (customerId?: string, companyId?: string
           console.error('Error fetching customer:', customerError);
         }
 
+        // Get company details
+        let company = null;
+        if (invoices && invoices.length > 0) {
+          const { data: companyData, error: companyError } = await supabase
+            .from('companies')
+            .select('id, name, address, city, country, phone, email, tax_number')
+            .eq('id', invoices[0].company_id)
+            .single();
+
+          if (companyError) {
+            console.error('Error fetching company (non-fatal):', companyError);
+          } else {
+            company = companyData;
+          }
+        }
+
         // Get invoice items
         const invoiceIds = invoices.map(inv => inv.id);
         const { data: invoiceItems, error: itemsError } = invoiceIds.length > 0 ? await supabase
@@ -241,6 +269,7 @@ export const useCustomerInvoicesFixed = (customerId?: string, companyId?: string
             email: null,
             phone: null
           },
+          company: company || null,
           invoice_items: itemsMap.get(invoice.id) || []
         }));
 
