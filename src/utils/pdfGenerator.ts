@@ -89,6 +89,7 @@ interface CompanyDetails {
   phone?: string;
   email?: string;
   tax_number?: string;
+  company_services?: string;
   logo_url?: string;
 }
 

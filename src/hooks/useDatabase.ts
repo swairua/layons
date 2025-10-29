@@ -18,6 +18,7 @@ export interface Company {
   logo_url?: string;
   fiscal_year_start?: number;
   tax_settings?: TaxSetting[];
+  company_services?: string;
   created_at?: string;
   updated_at?: string;
 }

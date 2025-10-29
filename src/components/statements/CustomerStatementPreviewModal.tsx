@@ -102,7 +102,8 @@ export default function CustomerStatementPreviewModal({
         phone: companies[0].phone,
         email: companies[0].email,
         tax_number: companies[0].tax_number,
-        logo_url: companies[0].logo_url
+        logo_url: companies[0].logo_url,
+        company_services: companies[0].company_services
       } : undefined;
 
       await generateCustomerStatementPDF(customerData, customerInvoices, customerPayments, {

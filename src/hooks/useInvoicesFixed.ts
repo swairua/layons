@@ -86,29 +86,59 @@ export const useInvoicesFixed = (companyId?: string) => {
 
         // Step 5: Get invoice items for each invoice
         const invoiceIds = invoices.map(inv => inv.id);
-        const { data: invoiceItems, error: itemsError } = invoiceIds.length > 0 ? await supabase
-          .from('invoice_items')
-          .select(`
-            id,
-            invoice_id,
-            product_id,
-            description,
-            quantity,
-            unit_price,
-            discount_percentage,
-            discount_before_vat,
-            tax_percentage,
-            tax_amount,
-            tax_inclusive,
-            line_total,
-            sort_order,
-            products(id, name, product_code, unit_of_measure)
-          `)
-          .in('invoice_id', invoiceIds) : { data: [], error: null };
 
-        if (itemsError) {
-          console.error('Error fetching invoice items (non-fatal):', (itemsError as any)?.message || itemsError);
-          // Don't throw here, invoices can exist without items
+        // Helper to retry a Supabase query in case of transient network errors
+        async function queryInvoiceItemsWithRetry(attempts = 3, delayMs = 500) {
+          for (let attempt = 1; attempt <= attempts; attempt++) {
+            try {
+              const res = await supabase
+                .from('invoice_items')
+                .select(`
+                  id,
+                  invoice_id,
+                  product_id,
+                  description,
+                  quantity,
+                  unit_price,
+                  discount_percentage,
+                  discount_before_vat,
+                  tax_percentage,
+                  tax_amount,
+                  tax_inclusive,
+                  line_total,
+                  sort_order,
+                  products(id, name, product_code, unit_of_measure)
+                `)
+                .in('invoice_id', invoiceIds);
+
+              return res;
+            } catch (err) {
+              console.warn(`Attempt ${attempt} to fetch invoice_items failed:`, err);
+              if (attempt < attempts) {
+                // small backoff before retrying
+                await new Promise(r => setTimeout(r, delayMs * attempt));
+                continue;
+              }
+              // rethrow the last error
+              throw err;
+            }
+          }
+          return { data: [], error: null };
+        }
+
+        let invoiceItems = [] as any[];
+        try {
+          if (invoiceIds.length > 0) {
+            const { data, error } = await queryInvoiceItemsWithRetry(3, 500);
+            if (error) {
+              console.error('Error fetching invoice items (non-fatal):', (error as any)?.message || error);
+            } else if (data) {
+              invoiceItems = data;
+            }
+          }
+        } catch (err) {
+          console.error('Network error fetching invoice items after retries (non-fatal):', err);
+          // Leave invoiceItems as empty array so invoices still load
         }
 
         // Step 6: Group invoice items by invoice_id
@@ -228,28 +258,55 @@ export const useCustomerInvoicesFixed = (customerId?: string, companyId?: string
 
         // Get invoice items
         const invoiceIds = invoices.map(inv => inv.id);
-        const { data: invoiceItems, error: itemsError } = invoiceIds.length > 0 ? await supabase
-          .from('invoice_items')
-          .select(`
-            id,
-            invoice_id,
-            product_id,
-            description,
-            quantity,
-            unit_price,
-            discount_percentage,
-            discount_before_vat,
-            tax_percentage,
-            tax_amount,
-            tax_inclusive,
-            line_total,
-            sort_order,
-            products(id, name, product_code, unit_of_measure)
-          `)
-          .in('invoice_id', invoiceIds) : { data: [], error: null };
 
-        if (itemsError) {
-          console.error('Error fetching invoice items:', (itemsError as any)?.message || itemsError);
+        async function queryInvoiceItemsWithRetry(attempts = 3, delayMs = 500) {
+          for (let attempt = 1; attempt <= attempts; attempt++) {
+            try {
+              const res = await supabase
+                .from('invoice_items')
+                .select(`
+                  id,
+                  invoice_id,
+                  product_id,
+                  description,
+                  quantity,
+                  unit_price,
+                  discount_percentage,
+                  discount_before_vat,
+                  tax_percentage,
+                  tax_amount,
+                  tax_inclusive,
+                  line_total,
+                  sort_order,
+                  products(id, name, product_code, unit_of_measure)
+                `)
+                .in('invoice_id', invoiceIds);
+
+              return res;
+            } catch (err) {
+              console.warn(`Attempt ${attempt} to fetch invoice_items failed:`, err);
+              if (attempt < attempts) {
+                await new Promise(r => setTimeout(r, delayMs * attempt));
+                continue;
+              }
+              throw err;
+            }
+          }
+          return { data: [], error: null };
+        }
+
+        let invoiceItems = [] as any[];
+        try {
+          if (invoiceIds.length > 0) {
+            const { data, error } = await queryInvoiceItemsWithRetry(3, 500);
+            if (error) {
+              console.error('Error fetching invoice items:', (error as any)?.message || error);
+            } else if (data) {
+              invoiceItems = data;
+            }
+          }
+        } catch (err) {
+          console.error('Network error fetching invoice items after retries:', err);
         }
 
         // Group items by invoice
