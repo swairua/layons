@@ -118,7 +118,8 @@ export default function LPOs() {
         city: currentCompany.city,
         country: currentCompany.country,
         tax_number: currentCompany.tax_number,
-        logo_url: currentCompany.logo_url
+        logo_url: currentCompany.logo_url,
+        company_services: currentCompany.company_services
       });
 
       toast.success(`LPO ${lpo.lpo_number} PDF generated successfully!`);

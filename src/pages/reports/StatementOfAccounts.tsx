@@ -150,7 +150,8 @@ const StatementOfAccounts = () => {
         phone: currentCompany.phone,
         email: currentCompany.email,
         tax_number: currentCompany.tax_number,
-        logo_url: currentCompany.logo_url
+        logo_url: currentCompany.logo_url,
+        company_services: currentCompany.company_services
       } : undefined;
 
       // Generate PDF with real data
