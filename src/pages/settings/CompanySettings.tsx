@@ -94,7 +94,8 @@ export default function CompanySettings() {
         country: currentCompany.country || 'Kenya',
         currency: currentCompany.currency || 'KES',
         fiscal_year_start: currentCompany.fiscal_year_start || 1,
-        logo_url: currentCompany.logo_url || ''
+        logo_url: currentCompany.logo_url || '',
+        company_services: currentCompany.company_services || ''
       });
     }
   }, [currentCompany]);
