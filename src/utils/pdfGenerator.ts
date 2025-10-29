@@ -1477,19 +1477,15 @@ export const generatePDF = (data: DocumentData) => {
 
           <!-- Header content below image -->
           <div class="header-content">
-            <!-- Left side: Company and Client info -->
+            <!-- Left side: Services and Client info (formatted like attachment) -->
             <div class="company-info">
-              <div class="company-name">${company.name}</div>
-              <div class="company-details">
-                ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
-                ${company.address ? `${company.address}<br>` : ''}
-                ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
-                ${company.phone ? `Tel: ${company.phone}<br>` : ''}
-                ${company.email ? `Email: ${company.email}` : ''}
+              ${company.company_services ? `
+              <div style="font-size: 10px; font-weight: bold; color: #333; margin-bottom: 8px; line-height: 1.4; text-transform: uppercase;">
+                ${company.company_services.split('\\n').filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
               </div>
+              ` : ''}
 
-              <!-- Client Details Section (formatted like attachment) -->
-              <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #e9ecef; font-size: 10px; line-height:1.6;">
+              <div style="margin-top: 6px; font-size: 10px; line-height:1.6;">
                 <div style="margin-bottom:6px; font-weight:600;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
                 <div style="margin-bottom:4px;">${data.customer?.name || ''}</div>
                 ${data.project_title ? `<div style="margin-bottom:4px;"><strong>Project:</strong> ${data.project_title}</div>` : ''}
