@@ -296,6 +296,20 @@ export const generateLPOPDF = (lpo: LPOPDFData, company: CompanyData) => {
     yPosition += termsLines.length * 5 + 10;
   }
 
+  // Stamp Section
+  yPosition += 15;
+  doc.setFontSize(10);
+  doc.setTextColor(0, 0, 0);
+  doc.text('COMPANY STAMP:', 20, yPosition);
+  yPosition += 30;
+
+  // Note: For base64 image embedding, you would need to convert the image URL to base64
+  // For now, we'll add a note about the stamp placement
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(128, 128, 128);
+  doc.text('[Stamp Image - Requires image conversion to base64 for embedding]', 20, yPosition);
+
   // Footer
   const pageHeight = doc.internal.pageSize.height;
   doc.setFontSize(8);

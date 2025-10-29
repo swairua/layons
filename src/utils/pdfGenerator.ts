@@ -459,7 +459,7 @@ export const generatePDF = (data: DocumentData) => {
         </div>
 
         <div class="stamp-section" style="display:flex; justify-content:center; margin:20px 0 24px 0;">
-          <img src="https://cdn.builder.io/api/v1/image/assets%2F32f8b73c050745f09df62736e6b3e01e%2F1da8a7c2f43549e98a49342b5bd7e97e?format=webp&width=800" alt="Company Stamp" style="height:140px; width:auto; object-fit:contain;" />
+          <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="height:140px; width:auto; object-fit:contain;" />
         </div>
 
         <div class="footer">
@@ -764,7 +764,10 @@ export const generatePDF = (data: DocumentData) => {
           </table>
         </div>
 
-        <!-- Bank Details removed -->
+        <!-- Stamp Section -->
+        <div class="stamp-section" style="display:flex; justify-content:center; margin:30px 0 24px 0;">
+          <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="height:140px; width:auto; object-fit:contain;" />
+        </div>
 
       </div>
     `;
@@ -1742,7 +1745,13 @@ export const generatePDF = (data: DocumentData) => {
         </div>
         ` : ''}
 
-        
+        <!-- Stamp Section (not for invoice/quotation as they have their own stamp area) -->
+        ${(data.type !== 'invoice' && data.type !== 'quotation') ? `
+        <div class="stamp-section" style="display:flex; justify-content:center; margin:30px 0 24px 0;">
+          <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="height:140px; width:auto; object-fit:contain;" />
+        </div>
+        ` : ''}
+
         <!-- Bank Details (only for invoices and quotations) -->
         ${(data.type === 'invoice' || data.type === 'quotation') ? `
         <div class="bank-details">
@@ -1794,14 +1803,14 @@ export const generatePDF = (data: DocumentData) => {
             <div style="flex: 1;">
               <div style="font-size: 11px; line-height: 1.8; color: #333;">
                 <div><strong>Contractor;</strong> ${company.name}</div>
-                <div><strong>Tel No;</strong> ${company.phone || '____________'}</div>
-                <div><strong>Signed;</strong> ________________________</div>
+                <div><strong>Tel No;</strong> 254720717463</div>
+                <div><strong>Signed;</strong> KELVIN MURIITHI</div>
               </div>
             </div>
 
             <!-- Stamp Area -->
-            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 120px; border: 2px dashed #999; border-radius: 8px; background: #f9f9f9;">
-              <div style="font-size: 14px; color: #999; font-weight: bold;">STAMP</div>
+            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 120px;">
+              <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="height:140px; width:auto; object-fit:contain;" />
             </div>
           </div>
 
