@@ -128,6 +128,7 @@ export const useInvoicesFixed = (companyId?: string) => {
             email: null,
             phone: null
           },
+          company: company || null,
           invoice_items: itemsMap.get(invoice.id) || []
         }));
 
