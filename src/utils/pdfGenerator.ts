@@ -1058,6 +1058,24 @@ export const generatePDF = (data: DocumentData) => {
             color: hsl(var(--primary));
           }
 
+          /* Force each section summary to appear on its own printed page */
+          .section-summary {
+            page-break-after: always;
+            break-after: page;
+            -webkit-column-break-after: always;
+            -moz-page-break-after: always;
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+
+          .section-summary table,
+          .section-summary .subsection,
+          .section-summary .items-table,
+          .section-summary .totals-table {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+
           @media print {
             body {
               background: white;
