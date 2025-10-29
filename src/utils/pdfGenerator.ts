@@ -519,56 +519,57 @@ export const generatePDF = (data: DocumentData) => {
           ${showHeader ? `
           <!-- Header Section (only on first page) -->
           <div class="header">
-            <div class="company-info">
-              <div class="logo">
-                ${company.logo_url ?
-                  `<img src="${company.logo_url}" alt="${company.name} Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-                   <div style="display:none; width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">Logo not available</div>` :
-                  `<div style="width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">No logo configured</div>`
-                }
-              </div>
-              <div class="company-name">${company.name}</div>
-              <div class="company-details">
-                ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
-                ${company.address ? `${company.address}<br>` : ''}
-                ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
-                ${company.phone ? `Tel: ${company.phone}<br>` : ''}
-                ${company.email ? `Email: ${company.email}` : ''}
-              </div>
+            <!-- Full-width header image -->
+            <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F7ffe0d14d6254105b76217427a79070c?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
-              <!-- Client Details Section -->
-              <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e9ecef;">
-                <div class="section-title" style="font-size: 12px; font-weight: bold; color: hsl(var(--primary)); margin-bottom: 8px; text-transform: uppercase;">Client</div>
-                <div class="customer-name" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #212529;">${data.customer.name}</div>
-                <div class="customer-details" style="font-size: 10px; color: #666; line-height: 1.4;">
-                  ${data.customer.email ? `${data.customer.email}<br>` : ''}
-                  ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
-                  ${data.customer.address ? `${data.customer.address}<br>` : ''}
-                  ${data.customer.city ? `${data.customer.city}` : ''}
-                  ${data.customer.country ? `, ${data.customer.country}` : ''}
+            <!-- Header content below image -->
+            <div class="header-content">
+              <!-- Left side: Company and Client info -->
+              <div class="company-info">
+                <div class="company-name">${company.name}</div>
+                <div class="company-details">
+                  ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
+                  ${company.address ? `${company.address}<br>` : ''}
+                  ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
+                  ${company.phone ? `Tel: ${company.phone}<br>` : ''}
+                  ${company.email ? `Email: ${company.email}` : ''}
+                </div>
+
+                <!-- Client Details Section -->
+                <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid #e9ecef;">
+                  <div class="section-title" style="font-size: 11px; font-weight: bold; color: hsl(var(--primary)); margin-bottom: 6px; text-transform: uppercase;">Client</div>
+                  <div class="customer-name" style="font-size: 12px; font-weight: bold; margin-bottom: 3px; color: #212529;">${data.customer.name}</div>
+                  <div class="customer-details" style="font-size: 9px; color: #666; line-height: 1.4;">
+                    ${data.customer.email ? `${data.customer.email}<br>` : ''}
+                    ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
+                    ${data.customer.address ? `${data.customer.address}<br>` : ''}
+                    ${data.customer.city ? `${data.customer.city}` : ''}
+                    ${data.customer.country ? `, ${data.customer.country}` : ''}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div class="document-info">
-              <div class="document-title">${data.type === 'invoice' ? 'Invoice' : data.type === 'proforma' ? 'Proforma Invoice' : 'Quotation'}</div>
-              <div class="document-details">
-                <table>
-                  <tr>
-                    <td class="label">Quotation #:</td>
-                    <td class="value">${data.number}</td>
-                  </tr>
-                  <tr>
-                    <td class="label">Date:</td>
-                    <td class="value">${formatDate(data.date)}</td>
-                  </tr>
-                  ${data.valid_until ? `
-                  <tr>
-                    <td class="label">Valid Until:</td>
-                    <td class="value">${formatDate(data.valid_until)}</td>
-                  </tr>
-                  ` : ''}
-                </table>
+              <!-- Right side: Document info -->
+              <div class="document-info">
+                <div class="document-title">${data.type === 'invoice' ? 'Invoice' : data.type === 'proforma' ? 'Proforma Invoice' : 'Quotation'}</div>
+                <div class="document-details">
+                  <table>
+                    <tr>
+                      <td class="label">Quotation #:</td>
+                      <td class="value">${data.number}</td>
+                    </tr>
+                    <tr>
+                      <td class="label">Date:</td>
+                      <td class="value">${formatDate(data.date)}</td>
+                    </tr>
+                    ${data.valid_until ? `
+                    <tr>
+                      <td class="label">Valid Until:</td>
+                      <td class="value">${formatDate(data.valid_until)}</td>
+                    </tr>
+                    ` : ''}
+                  </table>
+                </div>
               </div>
             </div>
           </div>
