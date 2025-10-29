@@ -1803,8 +1803,8 @@ export const generatePDF = (data: DocumentData) => {
             <div style="flex: 1;">
               <div style="font-size: 11px; line-height: 1.8; color: #333;">
                 <div><strong>Contractor;</strong> ${company.name}</div>
-                <div><strong>Tel No;</strong> ${company.phone || '____________'}</div>
-                <div><strong>Signed;</strong> ________________________</div>
+                <div><strong>Tel No;</strong> 254720717463</div>
+                <div><strong>Signed;</strong> KELVIN MURIITHI</div>
               </div>
             </div>
 
