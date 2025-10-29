@@ -43,7 +43,8 @@ export default function CompanySettings() {
     country: 'Kenya',
     currency: 'KES',
     fiscal_year_start: 1,
-    logo_url: ''
+    logo_url: '',
+    company_services: ''
   });
 
   const { data: companies, isLoading: companiesLoading, error: companiesError } = useCompanies();
@@ -93,7 +94,8 @@ export default function CompanySettings() {
         country: currentCompany.country || 'Kenya',
         currency: currentCompany.currency || 'KES',
         fiscal_year_start: currentCompany.fiscal_year_start || 1,
-        logo_url: currentCompany.logo_url || ''
+        logo_url: currentCompany.logo_url || '',
+        company_services: currentCompany.company_services || ''
       });
     }
   }, [currentCompany]);
@@ -406,7 +408,8 @@ export default function CompanySettings() {
         state: companyData.state?.trim() || null,
         postal_code: companyData.postal_code?.trim() || null,
         country: companyData.country?.trim() || 'Kenya',
-        logo_url: companyData.logo_url?.trim() || null
+        logo_url: companyData.logo_url?.trim() || null,
+        company_services: companyData.company_services?.trim() || null
       };
 
       // Only include optional columns if they might exist in the database
@@ -429,6 +432,11 @@ export default function CompanySettings() {
           }
         }
       });
+
+      // Ensure company_services is null if empty
+      if (!sanitizedData.company_services) {
+        sanitizedData.company_services = null;
+      }
 
 
       if (!currentCompany) {
@@ -681,6 +689,18 @@ export default function CompanySettings() {
                 onChange={(e) => setCompanyData(prev => ({ ...prev, address: e.target.value }))}
                 rows={3}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="company-services">Services/Description (appears in PDFs)</Label>
+              <Textarea
+                id="company-services"
+                value={companyData.company_services || ''}
+                onChange={(e) => setCompanyData(prev => ({ ...prev, company_services: e.target.value }))}
+                rows={3}
+                placeholder="e.g., BUILDING WORKS, RENOVATIONS, ROAD WORKS, LANDSCAPING, ELECTRICAL WORKS, WATER WORKS,"
+              />
+              <p className="text-xs text-muted-foreground">This text will appear at the top of all quotation and invoice PDFs.</p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">

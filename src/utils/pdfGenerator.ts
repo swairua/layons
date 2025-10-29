@@ -519,57 +519,44 @@ export const generatePDF = (data: DocumentData) => {
           ${showHeader ? `
           <!-- Header Section (only on first page) -->
           <div class="header">
+            <!-- Services/Description Text at top -->
+            ${data.company?.company_services ? `
+            <div style="font-size: 10px; font-weight: bold; color: #333; margin-bottom: 12px; line-height: 1.6; text-transform: uppercase;">
+              ${data.company.company_services.split('\n').filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
+            </div>
+            ` : ''}
+
             <!-- Full-width header image -->
             <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
             <!-- Header content below image -->
-            <div class="header-content">
-              <!-- Left side: Company and Client info -->
-              <div class="company-info">
-                <div class="company-name">${company.name}</div>
-                <div class="company-details">
-                  ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
-                  ${company.address ? `${company.address}<br>` : ''}
-                  ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
-                  ${company.phone ? `Tel: ${company.phone}<br>` : ''}
-                  ${company.email ? `Email: ${company.email}` : ''}
+            <div class="header-content" style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-top: 20px;">
+              <!-- Left side: Client and Quote Details -->
+              <div style="display: flex; flex-direction: column; gap: 20px;">
+                <!-- Client Details Section -->
+                <div style="font-size: 10px; line-height: 1.8;">
+                  <div style="margin-bottom: 8px;"><strong>Client:</strong> ${data.customer.name}</div>
+                  ${data.customer.email ? `<div style="margin-bottom: 8px;"><strong>Email:</strong> ${data.customer.email}</div>` : ''}
+                  ${data.customer.phone ? `<div style="margin-bottom: 8px;"><strong>Phone:</strong> ${data.customer.phone}</div>` : ''}
+                  ${data.customer.address ? `<div style="margin-bottom: 8px;"><strong>Address:</strong> ${data.customer.address}${data.customer.city ? ', ' + data.customer.city : ''}${data.customer.country ? ', ' + data.customer.country : ''}</div>` : ''}
                 </div>
 
-                <!-- Client Details Section -->
-                <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid #e9ecef;">
-                  <div class="section-title" style="font-size: 11px; font-weight: bold; color: hsl(var(--primary)); margin-bottom: 6px; text-transform: uppercase;">Client</div>
-                  <div class="customer-name" style="font-size: 12px; font-weight: bold; margin-bottom: 3px; color: #212529;">${data.customer.name}</div>
-                  <div class="customer-details" style="font-size: 9px; color: #666; line-height: 1.4;">
-                    ${data.customer.email ? `${data.customer.email}<br>` : ''}
-                    ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
-                    ${data.customer.address ? `${data.customer.address}<br>` : ''}
-                    ${data.customer.city ? `${data.customer.city}` : ''}
-                    ${data.customer.country ? `, ${data.customer.country}` : ''}
-                  </div>
+                <!-- Quotation Details Section -->
+                <div style="font-size: 10px; line-height: 1.8;">
+                  <div style="margin-bottom: 8px;"><strong>Quotation #:</strong> ${data.number}</div>
+                  <div style="margin-bottom: 8px;"><strong>Date:</strong> ${formatDate(data.date)}</div>
+                  ${data.valid_until ? `<div style="margin-bottom: 8px;"><strong>Valid Until:</strong> ${formatDate(data.valid_until)}</div>` : ''}
                 </div>
               </div>
 
-              <!-- Right side: Document info -->
-              <div class="document-info">
-                <div class="document-title">${data.type === 'invoice' ? 'Invoice' : data.type === 'proforma' ? 'Proforma Invoice' : 'Quotation'}</div>
-                <div class="document-details">
-                  <table>
-                    <tr>
-                      <td class="label">Quotation #:</td>
-                      <td class="value">${data.number}</td>
-                    </tr>
-                    <tr>
-                      <td class="label">Date:</td>
-                      <td class="value">${formatDate(data.date)}</td>
-                    </tr>
-                    ${data.valid_until ? `
-                    <tr>
-                      <td class="label">Valid Until:</td>
-                      <td class="value">${formatDate(data.valid_until)}</td>
-                    </tr>
-                    ` : ''}
-                  </table>
-                </div>
+              <!-- Right side: Company details (right-aligned) -->
+              <div style="text-align: right; font-size: 10px; line-height: 1.8;">
+                <div style="font-weight: bold; margin-bottom: 8px; font-size: 11px;">${company.name}</div>
+                ${company.address ? `<div>${company.address}</div>` : ''}
+                ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+                ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
+                ${company.email ? `<div>${company.email}</div>` : ''}
+                ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
               </div>
             </div>
           </div>
