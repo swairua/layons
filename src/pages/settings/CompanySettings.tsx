@@ -691,6 +691,18 @@ export default function CompanySettings() {
               />
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="company-services">Services/Description (appears in PDFs)</Label>
+              <Textarea
+                id="company-services"
+                value={companyData.company_services || ''}
+                onChange={(e) => setCompanyData(prev => ({ ...prev, company_services: e.target.value }))}
+                rows={3}
+                placeholder="e.g., BUILDING WORKS, RENOVATIONS, ROAD WORKS, LANDSCAPING, ELECTRICAL WORKS, WATER WORKS,"
+              />
+              <p className="text-xs text-muted-foreground">This text will appear at the top of all quotation and invoice PDFs.</p>
+            </div>
+
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone</Label>
