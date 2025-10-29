@@ -433,6 +433,11 @@ export default function CompanySettings() {
         }
       });
 
+      // Ensure company_services is null if empty
+      if (!sanitizedData.company_services) {
+        sanitizedData.company_services = null;
+      }
+
 
       if (!currentCompany) {
         // Create a new company if none exists
