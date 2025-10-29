@@ -408,7 +408,8 @@ export default function CompanySettings() {
         state: companyData.state?.trim() || null,
         postal_code: companyData.postal_code?.trim() || null,
         country: companyData.country?.trim() || 'Kenya',
-        logo_url: companyData.logo_url?.trim() || null
+        logo_url: companyData.logo_url?.trim() || null,
+        company_services: companyData.company_services?.trim() || null
       };
 
       // Only include optional columns if they might exist in the database
