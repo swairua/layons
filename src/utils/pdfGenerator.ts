@@ -840,6 +840,9 @@ export const generatePDF = (data: DocumentData) => {
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             padding: 0 20mm 20mm 20mm;
             position: relative;
+            /* Ensure each .page begins on a new printed page */
+            page-break-after: always;
+            break-after: page;
           }
 
           .header {
