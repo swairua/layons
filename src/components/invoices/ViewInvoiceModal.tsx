@@ -179,100 +179,95 @@ export function ViewInvoiceModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Customer Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center space-x-2">
-                <User className="h-4 w-4" />
-                <span>Customer Information</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <div className="font-medium text-lg">{invoice.customers?.name || 'Unknown Customer'}</div>
-                <div className="text-sm text-muted-foreground">{invoice.customers?.customer_code || 'N/A'}</div>
-              </div>
-
-              {invoice.customers?.email && (
-                <div className="flex items-center space-x-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{invoice.customers.email}</span>
-                </div>
-              )}
-
-              {invoice.customers?.phone && (
-                <div className="flex items-center space-x-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{invoice.customers.phone}</span>
-                </div>
-              )}
-
-              {invoice.customers?.address && (
-                <div className="flex items-start space-x-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                  <div className="text-sm">
-                    <div>{invoice.customers.address}</div>
-                    {invoice.customers.city && (
-                      <div className="text-muted-foreground">
-                        {invoice.customers.city}, {invoice.customers.country || 'Kenya'}
-                      </div>
-                    )}
+        {/* Traditional Invoice Layout */}
+        <Card className="border-0 shadow-none">
+          <CardContent className="p-0">
+            <div className="grid grid-cols-3 gap-8 py-6">
+              {/* Left Column: Client Details and Invoice Details */}
+              <div className="col-span-2 space-y-6">
+                {/* Client Details Section */}
+                <div className="space-y-3 text-sm">
+                  <div className="flex">
+                    <span className="font-semibold w-24">Client:</span>
+                    <span className="flex-1">{invoice.customers?.name || 'Unknown Customer'}</span>
                   </div>
+                  {invoice.customers?.customer_code && (
+                    <div className="flex">
+                      <span className="font-semibold w-24">Code:</span>
+                      <span className="flex-1">{invoice.customers.customer_code}</span>
+                    </div>
+                  )}
+                  {invoice.customers?.address && (
+                    <div className="flex">
+                      <span className="font-semibold w-24">Address:</span>
+                      <span className="flex-1">
+                        {invoice.customers.address}
+                        {invoice.customers.city && `, ${invoice.customers.city}`}
+                        {invoice.customers.country && `, ${invoice.customers.country}`}
+                      </span>
+                    </div>
+                  )}
+                  {invoice.customers?.email && (
+                    <div className="flex">
+                      <span className="font-semibold w-24">Email:</span>
+                      <span className="flex-1">{invoice.customers.email}</span>
+                    </div>
+                  )}
+                  {invoice.customers?.phone && (
+                    <div className="flex">
+                      <span className="font-semibold w-24">Phone:</span>
+                      <span className="flex-1">{invoice.customers.phone}</span>
+                    </div>
+                  )}
                 </div>
-              )}
-            </CardContent>
-          </Card>
 
-          {/* Invoice Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center space-x-2">
-                <FileText className="h-4 w-4" />
-                <span>Invoice Details</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Invoice Date:</span>
-                  <div className="font-medium flex items-center space-x-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>{formatDate(invoice.invoice_date)}</span>
+                {/* Invoice Details Section */}
+                <div className="space-y-3 text-sm">
+                  <div className="flex">
+                    <span className="font-semibold w-24">Invoice No:</span>
+                    <span className="flex-1">{invoice.invoice_number}</span>
                   </div>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Due Date:</span>
-                  <div className="font-medium flex items-center space-x-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>{formatDate(invoice.due_date)}</span>
+                  <div className="flex">
+                    <span className="font-semibold w-24">Date:</span>
+                    <span className="flex-1">{formatDate(invoice.invoice_date)}</span>
                   </div>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Total Amount:</span>
-                  <div className="font-bold text-lg text-primary">
-                    {formatCurrency(invoice.total_amount || 0)}
+                  <div className="flex">
+                    <span className="font-semibold w-24">Due Date:</span>
+                    <span className="flex-1">{formatDate(invoice.due_date)}</span>
                   </div>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Balance Due:</span>
-                  <div className={`font-bold text-lg ${(invoice.balance_due || 0) > 0 ? 'text-destructive' : 'text-success'}`}>
-                    {formatCurrency(invoice.balance_due || 0)}
+                  <div className="flex">
+                    <span className="font-semibold w-24">Status:</span>
+                    <span className="flex-1">
+                      <Badge variant="outline" className={getStatusColor(invoice.status)}>
+                        {invoice.status?.charAt(0).toUpperCase() + invoice.status?.slice(1)}
+                      </Badge>
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {invoice.notes && (
-                <div>
-                  <span className="text-muted-foreground text-sm">Notes:</span>
-                  <div className="text-sm mt-1 p-2 bg-muted/50 rounded">
-                    {invoice.notes}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+              {/* Right Column: Company Details */}
+              <div className="space-y-3 text-sm text-right">
+                <div className="font-bold text-base mb-4">{invoice.company?.name || 'Layons Construction Limited'}</div>
+                {invoice.company?.address && (
+                  <div>{invoice.company.address}</div>
+                )}
+                {invoice.company?.city && (
+                  <div>{invoice.company.city}{invoice.company.country && `, ${invoice.company.country}`}</div>
+                )}
+                {invoice.company?.phone && (
+                  <div>Telephone: {invoice.company.phone}</div>
+                )}
+                {invoice.company?.email && (
+                  <div>{invoice.company.email}</div>
+                )}
+                {invoice.company?.tax_number && (
+                  <div>Tax ID: {invoice.company.tax_number}</div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Invoice Items */}
         <Card>
