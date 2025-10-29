@@ -672,31 +672,7 @@ export const generatePDF = (data: DocumentData) => {
             </div>
           </div>
 
-          <div class="document-info">
-            <div class="document-title">${data.type === 'invoice' ? 'Invoice Summary' : data.type === 'proforma' ? 'Proforma Invoice Summary' : 'Quotation Summary'}</div>
-            <div class="document-details">
-              <table>
-                <tr>
-                  <td class="label">Quotation #:</td>
-                  <td class="value">${data.number}</td>
-                </tr>
-                <tr>
-                  <td class="label">Date:</td>
-                  <td class="value">${formatDate(data.date)}</td>
-                </tr>
-                ${data.valid_until ? `
-                <tr>
-                  <td class="label">Valid Until:</td>
-                  <td class="value">${formatDate(data.valid_until)}</td>
-                </tr>
-                ` : ''}
-                <tr>
-                  <td class="label">Grand Total:</td>
-                  <td class="value" style="font-weight: bold; color: hsl(var(--primary));">${formatCurrency(grandTotal)}</td>
-                </tr>
-              </table>
-            </div>
-          </div>
+          <!-- Document metadata box removed as requested -->
         </div>
 
         <!-- Summary Table -->
@@ -1506,41 +1482,7 @@ export const generatePDF = (data: DocumentData) => {
                 ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
               </div>
 
-              <div class="document-title">${documentTitle}</div>
-              <div class="document-details">
-                <table>
-                  <tr>
-                    <td class="label">${data.type === 'receipt' ? 'Receipt #' : data.type === 'remittance' ? 'Advice #' : data.type === 'lpo' ? 'LPO #' : documentTitle + ' #'}:</td>
-                    <td class="value">${data.number}</td>
-                  </tr>
-                  <tr>
-                    <td class="label">${data.type === 'lpo' ? 'Order Date' : 'Date'}:</td>
-                    <td class="value">${formatDate(data.date)}</td>
-                  </tr>
-                  ${data.due_date ? `
-                  <tr>
-                    <td class="label">${data.type === 'lpo' ? 'Expected Delivery' : 'Due Date'}:</td>
-                    <td class="value">${formatDate(data.due_date)}</td>
-                  </tr>
-                  ` : ''}
-                  ${data.valid_until ? `
-                  <tr>
-                    <td class="label">Valid Until:</td>
-                    <td class="value">${formatDate(data.valid_until)}</td>
-                  </tr>
-                  ` : ''}
-                  ${data.lpo_number && data.type !== 'lpo' ? `
-                  <tr>
-                    <td class="label">LPO Number:</td>
-                    <td class="value">${data.lpo_number}</td>
-                  </tr>
-                  ` : ''}
-                  <tr>
-                    <td class="label">${data.type === 'receipt' ? 'Amount Paid' : data.type === 'remittance' ? 'Total Payment' : data.type === 'lpo' ? 'Order Total' : 'Amount'}:</td>
-                    <td class="value" style="font-weight: bold; color: hsl(var(--primary));">${formatCurrency(data.total_amount)}</td>
-                  </tr>
-                </table>
-              </div>
+              <!-- Document title and metadata removed as requested -->
             </div>
           </div>
         </div>
