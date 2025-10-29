@@ -1489,17 +1489,14 @@ export const generatePDF = (data: DocumentData) => {
                 ${company.email ? `Email: ${company.email}` : ''}
               </div>
 
-              <!-- Client Details Section -->
-              <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid #e9ecef;">
-                <div class="section-title" style="font-size: 11px; font-weight: bold; color: hsl(var(--primary)); margin-bottom: 6px; text-transform: uppercase;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
-                <div class="customer-name" style="font-size: 12px; font-weight: bold; margin-bottom: 3px; color: #212529;">${data.customer.name}</div>
-                <div class="customer-details" style="font-size: 9px; color: #666; line-height: 1.4;">
-                  ${data.customer.email ? `${data.customer.email}<br>` : ''}
-                  ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
-                  ${data.customer.address ? `${data.customer.address}<br>` : ''}
-                  ${data.customer.city ? `${data.customer.city}` : ''}
-                  ${data.customer.country ? `, ${data.customer.country}` : ''}
-                </div>
+              <!-- Client Details Section (formatted like attachment) -->
+              <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #e9ecef; font-size: 10px; line-height:1.6;">
+                <div style="margin-bottom:6px; font-weight:600;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
+                <div style="margin-bottom:4px;">${data.customer?.name || ''}</div>
+                ${data.project_title ? `<div style="margin-bottom:4px;"><strong>Project:</strong> ${data.project_title}</div>` : ''}
+                <div style="margin-bottom:4px;"><strong>Subject:</strong> ${data.type === 'boq' ? 'Bill of Quantities' : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
+                <div style="margin-bottom:4px;"><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
+                <div style="margin-bottom:4px;"><strong>Qtn No:</strong> ${data.number || ''}</div>
               </div>
             </div>
 
