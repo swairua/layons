@@ -806,7 +806,7 @@ export const generatePDF = (data: DocumentData) => {
             margin: 0 auto;
             background: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            padding: 20mm;
+            padding: 0 20mm 20mm 20mm;
             position: relative;
           }
 
@@ -817,6 +817,10 @@ export const generatePDF = (data: DocumentData) => {
             margin-bottom: 30px;
             padding-bottom: 20px;
             border-bottom: 2px solid hsl(var(--primary));
+            margin-left: -20mm;
+            margin-right: -20mm;
+            padding-left: 20mm;
+            padding-right: 20mm;
           }
 
           .company-info {
