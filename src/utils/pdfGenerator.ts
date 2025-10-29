@@ -519,56 +519,57 @@ export const generatePDF = (data: DocumentData) => {
           ${showHeader ? `
           <!-- Header Section (only on first page) -->
           <div class="header">
-            <div class="company-info">
-              <div class="logo">
-                ${company.logo_url ?
-                  `<img src="${company.logo_url}" alt="${company.name} Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-                   <div style="display:none; width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">Logo not available</div>` :
-                  `<div style="width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">No logo configured</div>`
-                }
-              </div>
-              <div class="company-name">${company.name}</div>
-              <div class="company-details">
-                ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
-                ${company.address ? `${company.address}<br>` : ''}
-                ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
-                ${company.phone ? `Tel: ${company.phone}<br>` : ''}
-                ${company.email ? `Email: ${company.email}` : ''}
-              </div>
+            <!-- Full-width header image -->
+            <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F7ffe0d14d6254105b76217427a79070c?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
-              <!-- Client Details Section -->
-              <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e9ecef;">
-                <div class="section-title" style="font-size: 12px; font-weight: bold; color: hsl(var(--primary)); margin-bottom: 8px; text-transform: uppercase;">Client</div>
-                <div class="customer-name" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #212529;">${data.customer.name}</div>
-                <div class="customer-details" style="font-size: 10px; color: #666; line-height: 1.4;">
-                  ${data.customer.email ? `${data.customer.email}<br>` : ''}
-                  ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
-                  ${data.customer.address ? `${data.customer.address}<br>` : ''}
-                  ${data.customer.city ? `${data.customer.city}` : ''}
-                  ${data.customer.country ? `, ${data.customer.country}` : ''}
+            <!-- Header content below image -->
+            <div class="header-content">
+              <!-- Left side: Company and Client info -->
+              <div class="company-info">
+                <div class="company-name">${company.name}</div>
+                <div class="company-details">
+                  ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
+                  ${company.address ? `${company.address}<br>` : ''}
+                  ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
+                  ${company.phone ? `Tel: ${company.phone}<br>` : ''}
+                  ${company.email ? `Email: ${company.email}` : ''}
+                </div>
+
+                <!-- Client Details Section -->
+                <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid #e9ecef;">
+                  <div class="section-title" style="font-size: 11px; font-weight: bold; color: hsl(var(--primary)); margin-bottom: 6px; text-transform: uppercase;">Client</div>
+                  <div class="customer-name" style="font-size: 12px; font-weight: bold; margin-bottom: 3px; color: #212529;">${data.customer.name}</div>
+                  <div class="customer-details" style="font-size: 9px; color: #666; line-height: 1.4;">
+                    ${data.customer.email ? `${data.customer.email}<br>` : ''}
+                    ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
+                    ${data.customer.address ? `${data.customer.address}<br>` : ''}
+                    ${data.customer.city ? `${data.customer.city}` : ''}
+                    ${data.customer.country ? `, ${data.customer.country}` : ''}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div class="document-info">
-              <div class="document-title">${data.type === 'invoice' ? 'Invoice' : data.type === 'proforma' ? 'Proforma Invoice' : 'Quotation'}</div>
-              <div class="document-details">
-                <table>
-                  <tr>
-                    <td class="label">Quotation #:</td>
-                    <td class="value">${data.number}</td>
-                  </tr>
-                  <tr>
-                    <td class="label">Date:</td>
-                    <td class="value">${formatDate(data.date)}</td>
-                  </tr>
-                  ${data.valid_until ? `
-                  <tr>
-                    <td class="label">Valid Until:</td>
-                    <td class="value">${formatDate(data.valid_until)}</td>
-                  </tr>
-                  ` : ''}
-                </table>
+              <!-- Right side: Document info -->
+              <div class="document-info">
+                <div class="document-title">${data.type === 'invoice' ? 'Invoice' : data.type === 'proforma' ? 'Proforma Invoice' : 'Quotation'}</div>
+                <div class="document-details">
+                  <table>
+                    <tr>
+                      <td class="label">Quotation #:</td>
+                      <td class="value">${data.number}</td>
+                    </tr>
+                    <tr>
+                      <td class="label">Date:</td>
+                      <td class="value">${formatDate(data.date)}</td>
+                    </tr>
+                    ${data.valid_until ? `
+                    <tr>
+                      <td class="label">Valid Until:</td>
+                      <td class="value">${formatDate(data.valid_until)}</td>
+                    </tr>
+                    ` : ''}
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -805,7 +806,7 @@ export const generatePDF = (data: DocumentData) => {
             margin: 0 auto;
             background: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            padding: 20mm;
+            padding: 0 20mm 20mm 20mm;
             position: relative;
           }
 
@@ -816,6 +817,10 @@ export const generatePDF = (data: DocumentData) => {
             margin-bottom: 30px;
             padding-bottom: 20px;
             border-bottom: 2px solid hsl(var(--primary));
+            margin-left: -20mm;
+            margin-right: -20mm;
+            padding-left: 20mm;
+            padding-right: 20mm;
           }
 
           .company-info {
@@ -1090,17 +1095,38 @@ export const generatePDF = (data: DocumentData) => {
           margin: 0 auto;
           background: white;
           box-shadow: 0 0 10px rgba(0,0,0,0.1);
-          padding: 20mm;
+          padding: 0 20mm 20mm 20mm;
           position: relative;
         }
 
         .header {
           display: flex;
+          flex-direction: column;
+          margin-bottom: 20px;
+          padding-bottom: 0;
+          border-bottom: none;
+          margin-left: -20mm;
+          margin-right: -20mm;
+          padding-left: 20mm;
+          padding-right: 20mm;
+        }
+
+        .header-image {
+          width: calc(100% + 40mm);
+          height: auto;
+          margin: 0 -20mm 15px -20mm;
+          padding: 0;
+          display: block;
+          border: none;
+        }
+
+        .header-content {
+          display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          margin-bottom: 30px;
-          padding-bottom: 20px;
-          border-bottom: 2px solid hsl(var(--primary));
+          gap: 40px;
+          padding: 0;
+          margin: 0;
         }
 
         .company-info {
@@ -1108,80 +1134,70 @@ export const generatePDF = (data: DocumentData) => {
         }
 
         .logo {
-          width: 320px;
-          height: 160px;
-          margin-bottom: 15px;
-          border-radius: 8px;
-          overflow: hidden;
+          display: none;
         }
-        
+
         .logo img {
           width: 100%;
           height: 100%;
           object-fit: contain;
         }
-        
+
         .company-name {
-          font-size: 24px;
+          font-size: 16px;
           font-weight: bold;
-          margin-bottom: 5px;
-          color: hsl(var(--primary));
-          font-weight: bold;
-          margin-bottom: 5px;
+          margin-bottom: 8px;
           color: hsl(var(--primary));
         }
-        
+
         .company-details {
-          font-size: 11px;
+          font-size: 10px;
           line-height: 1.6;
           color: #666;
           margin-bottom: 0;
         }
-        
+
         .document-info {
-          text-align: right;
+          text-align: left;
           flex: 1;
-          max-width: 300px;
+          max-width: 100%;
         }
         
         .document-title {
-          font-size: 28px;
+          font-size: 16px;
           font-weight: bold;
-          margin: 0 0 15px 0;
+          margin: 0 0 12px 0;
           color: hsl(var(--primary));
           text-transform: uppercase;
-          font-weight: bold;
-          margin: 0 0 15px 0;
-          color: hsl(var(--primary));
-          text-transform: uppercase;
-          letter-spacing: 1px;
+          letter-spacing: 0.5px;
         }
-        
+
         .document-details {
-          background: #f8f9fa;
-          padding: 15px;
-          border-radius: 8px;
-          border: 1px solid #e9ecef;
+          background: transparent;
+          padding: 0;
+          border-radius: 0;
+          border: none;
         }
-        
+
         .document-details table {
           width: 100%;
           border-collapse: collapse;
         }
-        
+
         .document-details td {
-          padding: 5px 0;
+          padding: 4px 0;
           border: none;
+          font-size: 10px;
         }
-        
+
         .document-details .label {
           font-weight: bold;
           color: #495057;
-          width: 40%;
+          width: 50%;
         }
-        
+
         .document-details .value {
-          text-align: right;
+          text-align: left;
           color: #212529;
         }
         
@@ -1468,72 +1484,73 @@ export const generatePDF = (data: DocumentData) => {
         
         <!-- Header Section -->
         <div class="header">
-          <div class="company-info">
-            <div class="logo">
-              ${company.logo_url ?
-                `<img src="${company.logo_url}" alt="${company.name} Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-                 <div style="display:none; width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">Logo not available</div>` :
-                `<div style="width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">No logo configured</div>`
-              }
-            </div>
-            <div class="company-name">${company.name}</div>
-            <div class="company-details">
-              ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
-              ${company.address ? `${company.address}<br>` : ''}
-              ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
-              ${company.phone ? `Tel: ${company.phone}<br>` : ''}
-              ${company.email ? `Email: ${company.email}` : ''}
-            </div>
+          <!-- Full-width header image -->
+          <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F7ffe0d14d6254105b76217427a79070c?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
-            <!-- Client Details Section -->
-            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e9ecef;">
-              <div class="section-title" style="font-size: 12px; font-weight: bold; color: hsl(var(--primary)); margin-bottom: 8px; text-transform: uppercase;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
-              <div class="customer-name" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #212529;">${data.customer.name}</div>
-              <div class="customer-details" style="font-size: 10px; color: #666; line-height: 1.4;">
-                ${data.customer.email ? `${data.customer.email}<br>` : ''}
-                ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
-                ${data.customer.address ? `${data.customer.address}<br>` : ''}
-                ${data.customer.city ? `${data.customer.city}` : ''}
-                ${data.customer.country ? `, ${data.customer.country}` : ''}
+          <!-- Header content below image -->
+          <div class="header-content">
+            <!-- Left side: Company and Client info -->
+            <div class="company-info">
+              <div class="company-name">${company.name}</div>
+              <div class="company-details">
+                ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
+                ${company.address ? `${company.address}<br>` : ''}
+                ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
+                ${company.phone ? `Tel: ${company.phone}<br>` : ''}
+                ${company.email ? `Email: ${company.email}` : ''}
+              </div>
+
+              <!-- Client Details Section -->
+              <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid #e9ecef;">
+                <div class="section-title" style="font-size: 11px; font-weight: bold; color: hsl(var(--primary)); margin-bottom: 6px; text-transform: uppercase;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
+                <div class="customer-name" style="font-size: 12px; font-weight: bold; margin-bottom: 3px; color: #212529;">${data.customer.name}</div>
+                <div class="customer-details" style="font-size: 9px; color: #666; line-height: 1.4;">
+                  ${data.customer.email ? `${data.customer.email}<br>` : ''}
+                  ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
+                  ${data.customer.address ? `${data.customer.address}<br>` : ''}
+                  ${data.customer.city ? `${data.customer.city}` : ''}
+                  ${data.customer.country ? `, ${data.customer.country}` : ''}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="document-info">
-            <div class="document-title">${documentTitle}</div>
-            <div class="document-details">
-              <table>
-                <tr>
-                  <td class="label">${data.type === 'receipt' ? 'Receipt #' : data.type === 'remittance' ? 'Advice #' : data.type === 'lpo' ? 'LPO #' : documentTitle + ' #'}:</td>
-                  <td class="value">${data.number}</td>
-                </tr>
-                <tr>
-                  <td class="label">${data.type === 'lpo' ? 'Order Date' : 'Date'}:</td>
-                  <td class="value">${formatDate(data.date)}</td>
-                </tr>
-                ${data.due_date ? `
-                <tr>
-                  <td class="label">${data.type === 'lpo' ? 'Expected Delivery' : 'Due Date'}:</td>
-                  <td class="value">${formatDate(data.due_date)}</td>
-                </tr>
-                ` : ''}
-                ${data.valid_until ? `
-                <tr>
-                  <td class="label">Valid Until:</td>
-                  <td class="value">${formatDate(data.valid_until)}</td>
-                </tr>
-                ` : ''}
-                ${data.lpo_number && data.type !== 'lpo' ? `
-                <tr>
-                  <td class="label">LPO Number:</td>
-                  <td class="value">${data.lpo_number}</td>
-                </tr>
-                ` : ''}
-                <tr>
-                  <td class="label">${data.type === 'receipt' ? 'Amount Paid' : data.type === 'remittance' ? 'Total Payment' : data.type === 'lpo' ? 'Order Total' : 'Amount'}:</td>
-                  <td class="value" style="font-weight: bold; color: ${data.type === 'receipt' ? 'hsl(var(--primary))' : 'hsl(var(--primary))'};">${formatCurrency(data.total_amount)}</td>
-                </tr>
-              </table>
+            <!-- Right side: Document info -->
+            <div class="document-info">
+              <div class="document-title">${documentTitle}</div>
+              <div class="document-details">
+                <table>
+                  <tr>
+                    <td class="label">${data.type === 'receipt' ? 'Receipt #' : data.type === 'remittance' ? 'Advice #' : data.type === 'lpo' ? 'LPO #' : documentTitle + ' #'}:</td>
+                    <td class="value">${data.number}</td>
+                  </tr>
+                  <tr>
+                    <td class="label">${data.type === 'lpo' ? 'Order Date' : 'Date'}:</td>
+                    <td class="value">${formatDate(data.date)}</td>
+                  </tr>
+                  ${data.due_date ? `
+                  <tr>
+                    <td class="label">${data.type === 'lpo' ? 'Expected Delivery' : 'Due Date'}:</td>
+                    <td class="value">${formatDate(data.due_date)}</td>
+                  </tr>
+                  ` : ''}
+                  ${data.valid_until ? `
+                  <tr>
+                    <td class="label">Valid Until:</td>
+                    <td class="value">${formatDate(data.valid_until)}</td>
+                  </tr>
+                  ` : ''}
+                  ${data.lpo_number && data.type !== 'lpo' ? `
+                  <tr>
+                    <td class="label">LPO Number:</td>
+                    <td class="value">${data.lpo_number}</td>
+                  </tr>
+                  ` : ''}
+                  <tr>
+                    <td class="label">${data.type === 'receipt' ? 'Amount Paid' : data.type === 'remittance' ? 'Total Payment' : data.type === 'lpo' ? 'Order Total' : 'Amount'}:</td>
+                    <td class="value" style="font-weight: bold; color: hsl(var(--primary));">${formatCurrency(data.total_amount)}</td>
+                  </tr>
+                </table>
+              </div>
             </div>
           </div>
         </div>
