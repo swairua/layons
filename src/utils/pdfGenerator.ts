@@ -913,7 +913,7 @@ export const generatePDF = (data: DocumentData) => {
           }
 
           .items-section {
-            margin: 30px 0;
+            margin: 12px 0 30px 0;
           }
 
           .items-table {
@@ -1224,9 +1224,9 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .items-section {
-          margin: 30px 0;
+          margin: 12px 0 30px 0;
         }
-        
+
         .items-table {
           width: 100%;
           border-collapse: collapse;
