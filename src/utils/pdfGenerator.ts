@@ -1112,11 +1112,10 @@ export const generatePDF = (data: DocumentData) => {
         }
 
         .header-image {
-          width: 100%;
+          width: calc(100% + 40mm);
           height: auto;
-          margin: 0;
+          margin: 0 -20mm 15px -20mm;
           padding: 0;
-          margin-bottom: 15px;
           display: block;
           border: none;
         }
