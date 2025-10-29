@@ -170,6 +170,17 @@ export const generatePDF = (data: DocumentData) => {
     });
   };
 
+  // Longer, human-friendly date (e.g. 23 July 2025)
+  const formatDateLong = (date: string) => {
+    try {
+      if (!date) return '';
+      const d = new Date(date);
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    } catch (e) {
+      return String(date || '');
+    }
+  };
+
   // Create a new window with the document content
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
