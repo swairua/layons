@@ -170,6 +170,17 @@ export const generatePDF = (data: DocumentData) => {
     });
   };
 
+  // Longer, human-friendly date (e.g. 23 July 2025)
+  const formatDateLong = (date: string) => {
+    try {
+      if (!date) return '';
+      const d = new Date(date);
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    } catch (e) {
+      return String(date || '');
+    }
+  };
+
   // Create a new window with the document content
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
@@ -519,39 +530,29 @@ export const generatePDF = (data: DocumentData) => {
           ${showHeader ? `
           <!-- Header Section (only on first page) -->
           <div class="header">
-            <!-- Services/Description Text at top -->
-            ${data.company?.company_services ? `
-            <div style="font-size: 10px; font-weight: bold; color: #333; margin-bottom: 12px; line-height: 1.6; text-transform: uppercase;">
-              ${data.company.company_services.split('\n').filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
-            </div>
-            ` : ''}
-
             <!-- Full-width header image -->
             <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
             <!-- Header content below image -->
             <div class="header-content" style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-top: 20px;">
-              <!-- Left side: Client and Quote Details -->
-              <div style="display: flex; flex-direction: column; gap: 20px;">
-                <!-- Client Details Section -->
-                <div style="font-size: 10px; line-height: 1.8;">
-                  <div style="margin-bottom: 8px;"><strong>Client:</strong> ${data.customer.name}</div>
-                  ${data.customer.email ? `<div style="margin-bottom: 8px;"><strong>Email:</strong> ${data.customer.email}</div>` : ''}
-                  ${data.customer.phone ? `<div style="margin-bottom: 8px;"><strong>Phone:</strong> ${data.customer.phone}</div>` : ''}
-                  ${data.customer.address ? `<div style="margin-bottom: 8px;"><strong>Address:</strong> ${data.customer.address}${data.customer.city ? ', ' + data.customer.city : ''}${data.customer.country ? ', ' + data.customer.country : ''}</div>` : ''}
+              <!-- Left side: Client and Document Details (matches supplied attachment) -->
+              <div style="display: flex; flex-direction: column; gap: 8px; font-size: 10px; line-height: 1.6; text-align:left;">
+                ${company.company_services ? `
+                <div style="font-size: 10px; font-weight: bold; color: #333; margin-bottom: 6px; line-height: 1.4; text-transform: uppercase;">
+                  ${company.company_services.split('\n').filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
                 </div>
+                ` : ''}
 
-                <!-- Quotation Details Section -->
-                <div style="font-size: 10px; line-height: 1.8;">
-                  <div style="margin-bottom: 8px;"><strong>Quotation #:</strong> ${data.number}</div>
-                  <div style="margin-bottom: 8px;"><strong>Date:</strong> ${formatDate(data.date)}</div>
-                  ${data.valid_until ? `<div style="margin-bottom: 8px;"><strong>Valid Until:</strong> ${formatDate(data.valid_until)}</div>` : ''}
-                </div>
+                <div style="margin-bottom: 4px;"><strong>Client:</strong> ${data.customer?.name || ''}</div>
+                ${data.project_title ? `<div style="margin-bottom: 4px;"><strong>Project:</strong> ${data.project_title}</div>` : ''}
+                <div style="margin-bottom: 4px;"><strong>Subject:</strong> ${data.type === 'boq' ? 'Bill of Quantities' : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
+                <div style="margin-bottom: 4px;"><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
+                <div style="margin-bottom: 4px;"><strong>Qtn No:</strong> ${data.number || ''}</div>
               </div>
 
               <!-- Right side: Company details (right-aligned) -->
-              <div style="text-align: right; font-size: 10px; line-height: 1.8;">
-                <div style="font-weight: bold; margin-bottom: 8px; font-size: 11px;">${company.name}</div>
+              <div style="text-align: right; font-size: 10px; line-height: 1.6;">
+                <div style="font-weight: bold; margin-bottom: 6px; font-size: 12px;">${company.name}</div>
                 ${company.address ? `<div>${company.address}</div>` : ''}
                 ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
                 ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
@@ -1476,33 +1477,35 @@ export const generatePDF = (data: DocumentData) => {
 
           <!-- Header content below image -->
           <div class="header-content">
-            <!-- Left side: Company and Client info -->
+            <!-- Left side: Services and Client info (formatted like attachment) -->
             <div class="company-info">
-              <div class="company-name">${company.name}</div>
-              <div class="company-details">
-                ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
-                ${company.address ? `${company.address}<br>` : ''}
-                ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
-                ${company.phone ? `Tel: ${company.phone}<br>` : ''}
-                ${company.email ? `Email: ${company.email}` : ''}
+              ${company.company_services ? `
+              <div style="font-size: 10px; font-weight: bold; color: #333; margin-bottom: 8px; line-height: 1.4; text-transform: uppercase;">
+                ${company.company_services.split('\\n').filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
               </div>
+              ` : ''}
 
-              <!-- Client Details Section -->
-              <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid #e9ecef;">
-                <div class="section-title" style="font-size: 11px; font-weight: bold; color: hsl(var(--primary)); margin-bottom: 6px; text-transform: uppercase;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
-                <div class="customer-name" style="font-size: 12px; font-weight: bold; margin-bottom: 3px; color: #212529;">${data.customer.name}</div>
-                <div class="customer-details" style="font-size: 9px; color: #666; line-height: 1.4;">
-                  ${data.customer.email ? `${data.customer.email}<br>` : ''}
-                  ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
-                  ${data.customer.address ? `${data.customer.address}<br>` : ''}
-                  ${data.customer.city ? `${data.customer.city}` : ''}
-                  ${data.customer.country ? `, ${data.customer.country}` : ''}
-                </div>
+              <div style="margin-top: 6px; font-size: 10px; line-height:1.6;">
+                <div style="margin-bottom:6px; font-weight:600;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
+                <div style="margin-bottom:4px;">${data.customer?.name || ''}</div>
+                ${data.project_title ? `<div style="margin-bottom:4px;"><strong>Project:</strong> ${data.project_title}</div>` : ''}
+                <div style="margin-bottom:4px;"><strong>Subject:</strong> ${data.type === 'boq' ? 'Bill of Quantities' : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
+                <div style="margin-bottom:4px;"><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
+                <div style="margin-bottom:4px;"><strong>Qtn No:</strong> ${data.number || ''}</div>
               </div>
             </div>
 
             <!-- Right side: Document info -->
             <div class="document-info">
+              <div style="text-align: right; font-size: 10px; line-height: 1.6; margin-bottom: 8px;">
+                <div style="font-weight: bold; margin-bottom: 6px; font-size: 12px;">${company.name}</div>
+                ${company.address ? `<div>${company.address}</div>` : ''}
+                ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+                ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
+                ${company.email ? `<div>${company.email}</div>` : ''}
+                ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
+              </div>
+
               <div class="document-title">${documentTitle}</div>
               <div class="document-details">
                 <table>
