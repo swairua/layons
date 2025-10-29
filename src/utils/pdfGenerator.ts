@@ -764,7 +764,10 @@ export const generatePDF = (data: DocumentData) => {
           </table>
         </div>
 
-        <!-- Bank Details removed -->
+        <!-- Stamp Section -->
+        <div class="stamp-section" style="display:flex; justify-content:center; margin:30px 0 24px 0;">
+          <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="height:140px; width:auto; object-fit:contain;" />
+        </div>
 
       </div>
     `;
