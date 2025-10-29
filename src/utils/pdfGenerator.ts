@@ -672,31 +672,7 @@ export const generatePDF = (data: DocumentData) => {
             </div>
           </div>
 
-          <div class="document-info">
-            <div class="document-title">${data.type === 'invoice' ? 'Invoice Summary' : data.type === 'proforma' ? 'Proforma Invoice Summary' : 'Quotation Summary'}</div>
-            <div class="document-details">
-              <table>
-                <tr>
-                  <td class="label">Quotation #:</td>
-                  <td class="value">${data.number}</td>
-                </tr>
-                <tr>
-                  <td class="label">Date:</td>
-                  <td class="value">${formatDate(data.date)}</td>
-                </tr>
-                ${data.valid_until ? `
-                <tr>
-                  <td class="label">Valid Until:</td>
-                  <td class="value">${formatDate(data.valid_until)}</td>
-                </tr>
-                ` : ''}
-                <tr>
-                  <td class="label">Grand Total:</td>
-                  <td class="value" style="font-weight: bold; color: hsl(var(--primary));">${formatCurrency(grandTotal)}</td>
-                </tr>
-              </table>
-            </div>
-          </div>
+          <!-- Document metadata box removed as requested -->
         </div>
 
         <!-- Summary Table -->
