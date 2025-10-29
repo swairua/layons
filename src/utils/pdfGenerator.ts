@@ -519,6 +519,13 @@ export const generatePDF = (data: DocumentData) => {
           ${showHeader ? `
           <!-- Header Section (only on first page) -->
           <div class="header">
+            <!-- Services/Description Text at top -->
+            ${data.company?.company_services ? `
+            <div style="font-size: 10px; font-weight: bold; color: #333; margin-bottom: 12px; line-height: 1.6; text-transform: uppercase;">
+              ${data.company.company_services.split('\n').filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
+            </div>
+            ` : ''}
+
             <!-- Full-width header image -->
             <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
