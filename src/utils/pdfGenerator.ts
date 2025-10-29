@@ -542,27 +542,18 @@ export const generatePDF = (data: DocumentData) => {
 
             <!-- Header content below image -->
             <div class="header-content" style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-top: 20px;">
-              <!-- Left side: Client and Quote Details -->
-              <div style="display: flex; flex-direction: column; gap: 20px;">
-                <!-- Client Details Section -->
-                <div style="font-size: 10px; line-height: 1.8;">
-                  <div style="margin-bottom: 8px;"><strong>Client:</strong> ${data.customer.name}</div>
-                  ${data.customer.email ? `<div style="margin-bottom: 8px;"><strong>Email:</strong> ${data.customer.email}</div>` : ''}
-                  ${data.customer.phone ? `<div style="margin-bottom: 8px;"><strong>Phone:</strong> ${data.customer.phone}</div>` : ''}
-                  ${data.customer.address ? `<div style="margin-bottom: 8px;"><strong>Address:</strong> ${data.customer.address}${data.customer.city ? ', ' + data.customer.city : ''}${data.customer.country ? ', ' + data.customer.country : ''}</div>` : ''}
-                </div>
-
-                <!-- Quotation Details Section -->
-                <div style="font-size: 10px; line-height: 1.8;">
-                  <div style="margin-bottom: 8px;"><strong>Quotation #:</strong> ${data.number}</div>
-                  <div style="margin-bottom: 8px;"><strong>Date:</strong> ${formatDate(data.date)}</div>
-                  ${data.valid_until ? `<div style="margin-bottom: 8px;"><strong>Valid Until:</strong> ${formatDate(data.valid_until)}</div>` : ''}
-                </div>
+              <!-- Left side: Client and Document Details (matches supplied attachment) -->
+              <div style="display: flex; flex-direction: column; gap: 8px; font-size: 10px; line-height: 1.6;">
+                <div style="margin-bottom: 4px;"><strong>Client:</strong> ${data.customer?.name || ''}</div>
+                ${data.project_title ? `<div style="margin-bottom: 4px;"><strong>Project:</strong> ${data.project_title}</div>` : ''}
+                <div style="margin-bottom: 4px;"><strong>Subject:</strong> ${data.type === 'boq' ? 'Bill of Quantities' : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
+                <div style="margin-bottom: 4px;"><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
+                <div style="margin-bottom: 4px;"><strong>Qtn No:</strong> ${data.number || ''}</div>
               </div>
 
               <!-- Right side: Company details (right-aligned) -->
-              <div style="text-align: right; font-size: 10px; line-height: 1.8;">
-                <div style="font-weight: bold; margin-bottom: 8px; font-size: 11px;">${company.name}</div>
+              <div style="text-align: right; font-size: 10px; line-height: 1.6;">
+                <div style="font-weight: bold; margin-bottom: 6px; font-size: 12px;">${company.name}</div>
                 ${company.address ? `<div>${company.address}</div>` : ''}
                 ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
                 ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
