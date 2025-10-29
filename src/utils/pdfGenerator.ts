@@ -1125,6 +1125,8 @@ export const generatePDF = (data: DocumentData) => {
           justify-content: space-between;
           align-items: flex-start;
           gap: 40px;
+          padding: 0;
+          margin: 0;
         }
 
         .company-info {
