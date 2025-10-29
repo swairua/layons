@@ -1102,7 +1102,7 @@ export const generatePDF = (data: DocumentData) => {
         .header {
           display: flex;
           flex-direction: column;
-          margin-bottom: 20px;
+          margin-bottom: 8px;
           padding-bottom: 0;
           border-bottom: none;
           margin-left: -20mm;
@@ -1114,7 +1114,7 @@ export const generatePDF = (data: DocumentData) => {
         .header-image {
           width: calc(100% + 40mm);
           height: auto;
-          margin: 0 -20mm 15px -20mm;
+          margin: 0 -20mm 5px -20mm;
           padding: 0;
           display: block;
           border: none;
