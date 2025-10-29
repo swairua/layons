@@ -1497,6 +1497,15 @@ export const generatePDF = (data: DocumentData) => {
 
             <!-- Right side: Document info -->
             <div class="document-info">
+              <div style="text-align: right; font-size: 10px; line-height: 1.6; margin-bottom: 8px;">
+                <div style="font-weight: bold; margin-bottom: 6px; font-size: 12px;">${company.name}</div>
+                ${company.address ? `<div>${company.address}</div>` : ''}
+                ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+                ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
+                ${company.email ? `<div>${company.email}</div>` : ''}
+                ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
+              </div>
+
               <div class="document-title">${documentTitle}</div>
               <div class="document-details">
                 <table>
