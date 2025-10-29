@@ -459,7 +459,7 @@ export const generatePDF = (data: DocumentData) => {
         </div>
 
         <div class="stamp-section" style="display:flex; justify-content:center; margin:20px 0 24px 0;">
-          <img src="https://cdn.builder.io/api/v1/image/assets%2F32f8b73c050745f09df62736e6b3e01e%2F1da8a7c2f43549e98a49342b5bd7e97e?format=webp&width=800" alt="Company Stamp" style="height:140px; width:auto; object-fit:contain;" />
+          <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="height:140px; width:auto; object-fit:contain;" />
         </div>
 
         <div class="footer">
