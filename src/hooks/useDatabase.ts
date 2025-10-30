@@ -716,6 +716,8 @@ export const useInvoices = (companyId?: string) => {
             tax_inclusive,
             line_total,
             sort_order,
+            section_name,
+            section_labor_cost,
             products(id, name, product_code, unit_of_measure)
           `)
           .in('invoice_id', invoiceIds) : { data: [], error: null };
@@ -814,7 +816,9 @@ export const useCustomerInvoices = (customerId?: string, companyId?: string) => 
             tax_amount,
             tax_inclusive,
             line_total,
-            sort_order
+            sort_order,
+            section_name,
+            section_labor_cost
           `)
           .in('invoice_id', invoiceIds2) : { data: [], error: null };
 
@@ -1381,7 +1385,9 @@ export const useQuotations = (companyId?: string) => {
             tax_amount,
             tax_inclusive,
             line_total,
-            sort_order
+            sort_order,
+            section_name,
+            section_labor_cost
           `)
           .in('quotation_id', quotations.map(quot => quot.id));
 
