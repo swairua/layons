@@ -201,7 +201,8 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
         tax_percentage: defaultTaxRate,
         tax_amount: 0,
         tax_inclusive: true,
-        line_total: calculateItemTotal(1, price, defaultTaxRate, true)
+        line_total: calculateItemTotal(1, price, defaultTaxRate, true),
+        unit_of_measure: product.unit_of_measure || 'pcs'
       };
 
       newItem.tax_amount = calculateTaxAmount(newItem);
