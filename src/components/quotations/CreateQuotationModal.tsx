@@ -187,7 +187,8 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
         unit_price: product.selling_price,
         vat_percentage: 0,
         vat_inclusive: false,
-        line_total: calculateItemTotal(1, product.selling_price, 0, false)
+        line_total: calculateItemTotal(1, product.selling_price, 0, false),
+        unit_of_measure: product.unit_of_measure || 'Each'
       };
 
       return {
