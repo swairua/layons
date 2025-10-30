@@ -271,7 +271,7 @@ export const useConvertQuotationToInvoice = () => {
       
       if (invoiceError) throw invoiceError;
       
-      // Create invoice items from quotation items
+      // Create invoice items from quotation items (preserve section metadata)
       if (quotation.quotation_items && quotation.quotation_items.length > 0) {
         const invoiceItems = quotation.quotation_items.map((item: any) => ({
           invoice_id: invoice.id,
@@ -283,15 +283,26 @@ export const useConvertQuotationToInvoice = () => {
           tax_amount: item.tax_amount,
           tax_inclusive: item.tax_inclusive,
           line_total: item.line_total,
-          sort_order: item.sort_order
+          sort_order: item.sort_order,
+          section_name: item.section_name,
+          section_labor_cost: item.section_labor_cost
         }));
-        
+
         let itemsError: any = null;
+        // Try inserting with section fields; if DB rejects unknown columns, retry without them
         {
           const res = await supabase
             .from('invoice_items')
             .insert(invoiceItems);
           itemsError = res.error as any;
+        }
+
+        if (itemsError && (itemsError.code === 'PGRST204' || String(itemsError.message || '').toLowerCase().includes('section'))) {
+          const minimalItems = invoiceItems.map(({ section_name, section_labor_cost, ...rest }) => rest);
+          const retry = await supabase
+            .from('invoice_items')
+            .insert(minimalItems);
+          itemsError = retry.error as any;
         }
 
         if (itemsError) throw itemsError;
