@@ -104,9 +104,10 @@ export default function Quotations() {
       toast.success('Quotation deleted successfully');
       refetch();
       setDeleteDialog({ open: false });
-    } catch (err) {
+    } catch (err: any) {
       console.error('Delete failed', err);
-      toast.error('Failed to delete quotation');
+      const message = err?.message || err?.original?.message || JSON.stringify(err);
+      toast.error(`Failed to delete quotation: ${message}`);
     }
   };
 
