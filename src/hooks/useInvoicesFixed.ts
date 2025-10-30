@@ -109,6 +109,7 @@ export const useInvoicesFixed = (companyId?: string) => {
                   sort_order,
                   section_name,
                   section_labor_cost,
+                  unit_of_measure,
                   products(id, name, product_code, unit_of_measure)
                 `)
                 .in('invoice_id', invoiceIds);
@@ -282,6 +283,7 @@ export const useCustomerInvoicesFixed = (customerId?: string, companyId?: string
                   sort_order,
                   section_name,
                   section_labor_cost,
+                  unit_of_measure,
                   products(id, name, product_code, unit_of_measure)
                 `)
                 .in('invoice_id', invoiceIds);
