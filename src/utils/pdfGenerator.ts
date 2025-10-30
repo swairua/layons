@@ -376,7 +376,7 @@ export const generatePDF = (data: DocumentData) => {
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
-        .items thead th { background:hsl(var(--primary)); color:#fff; font-weight:700; }
+        .items thead th { background:#000; color:#fff; font-weight:700; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding:8px; }
         .item-row td.num { text-align:center; }
         .item-row td.desc { width:55%; }
@@ -565,7 +565,7 @@ export const generatePDF = (data: DocumentData) => {
           ` : ''}
 
           <!-- Section Title with alphabetical letter -->
-          <div class="section-title" style="margin: ${showHeader ? '25px 0 15px 0' : '20px 0 15px 0'}; padding: 12px; background: #f8f9fa; border-left: 4px solid hsl(var(--primary)); font-size: 14px; font-weight: bold; text-transform: uppercase;">${sectionTitleWithLetter}</div>
+          <div class="section-title" style="margin: ${showHeader ? '25px 0 15px 0' : '20px 0 15px 0'}; padding: 12px; background: #fff; border-left: 4px solid #000; font-size: 14px; font-weight: bold; text-transform: uppercase;">${sectionTitleWithLetter}</div>
 
           <!-- Materials Subsection -->
           <div class="subsection" style="margin-bottom:12px;">
@@ -592,11 +592,17 @@ export const generatePDF = (data: DocumentData) => {
                     <td class="amount-cell">${item.tax_amount ? formatCurrency(item.tax_amount) : '-'}</td>
                   </tr>
                 `).join('')}
+                <tr style="background: #fff; font-weight: 600; border-top: 2px solid #000;">
+                  <td colspan="4" style="text-align: right; padding: 8px 8px;">Materials Subtotal:</td>
+                  <td style="text-align: right; padding: 8px 8px;">${formatCurrency(sectionMaterialsTotal)}</td>
+                  <td style="text-align: right; padding: 8px 8px;">${sectionTaxAmount > 0 ? formatCurrency(sectionTaxAmount) : '-'}</td>
+                </tr>
               </tbody>
             </table>
           </div>
 
-          <!-- Labour Subsection -->
+          <!-- Labour Subsection (only display if labor cost > 0) -->
+          ${sectionLaborCost > 0 ? `
           <div class="subsection" style="margin-bottom:12px;">
             <div style="font-weight:600; margin-bottom:6px;">Labour</div>
             <table class="items-table">
@@ -608,44 +614,25 @@ export const generatePDF = (data: DocumentData) => {
                 </tr>
               </thead>
               <tbody>
-                ${sectionLaborCost > 0 ? `
-                  <tr>
-                    <td style="text-align:center;">1</td>
-                    <td class="description-cell">Labour for ${section.name}</td>
-                    <td class="amount-cell">${formatCurrency(sectionLaborCost)}</td>
-                  </tr>
-                ` : `
-                  <tr>
-                    <td style="text-align:center;">-</td>
-                    <td class="description-cell">No labour cost</td>
-                    <td class="amount-cell">-</td>
-                  </tr>
-                `}
+                <tr>
+                  <td style="text-align:center;">1</td>
+                  <td class="description-cell">Labour for ${section.name}</td>
+                  <td class="amount-cell">${formatCurrency(sectionLaborCost)}</td>
+                </tr>
+                <tr style="background: #fff; font-weight: 600; border-top: 2px solid #000;">
+                  <td colspan="2" style="text-align: right; padding: 8px 8px;">Labour Subtotal:</td>
+                  <td style="text-align: right; padding: 8px 8px;">${formatCurrency(sectionLaborCost)}</td>
+                </tr>
               </tbody>
             </table>
           </div>
+          ` : ''}
 
           <!-- Section Totals -->
           <div class="totals-section">
             <table class="totals-table">
-              <tr>
-                <td class="label">TOTAL ${sectionLetter} MATERIALS:</td>
-                <td class="amount">${formatCurrency(sectionMaterialsTotal)}</td>
-              </tr>
-              ${sectionLaborCost > 0 ? `
-              <tr>
-                <td class="label">${sectionLetter} LABOR:</td>
-                <td class="amount">${formatCurrency(sectionLaborCost)}</td>
-              </tr>
-              ` : ''}
-              ${sectionTaxAmount > 0 ? `
-              <tr>
-                <td class="label">TAX AMOUNT:</td>
-                <td class="amount">${formatCurrency(sectionTaxAmount)}</td>
-              </tr>
-              ` : ''}
               <tr class="total-row">
-                <td class="label">TOTAL ${sectionLetter} COST:</td>
+                <td class="label">SECTION ${sectionLetter} TOTAL:</td>
                 <td class="amount">${formatCurrency(sectionTotal)}</td>
               </tr>
             </table>
@@ -663,19 +650,13 @@ export const generatePDF = (data: DocumentData) => {
 
     pagesHtml += `
       <div class="page" style="position: relative; page-break-before: always;">
-        <!-- Summary Page Header -->
-        <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid hsl(var(--primary));">
-          <h2 style="font-size: 16px; font-weight: bold; margin: 0 0 10px 0; color: hsl(var(--primary)); text-transform: uppercase;">Quotation Summary</h2>
-          <p style="font-size: 11px; margin: 0; color: #666;">Section Totals</p>
-        </div>
-
         <!-- Section Totals Table Only -->
         <div style="margin: 20px 0;">
           <table class="totals-table" style="width: 400px;">
             <thead>
-              <tr style="border-bottom: 2px solid hsl(var(--primary));">
-                <th style="text-align: left; padding: 10px 15px; font-weight: bold; color: hsl(var(--primary)); font-size: 12px;">SECTION</th>
-                <th style="text-align: right; padding: 10px 15px; font-weight: bold; color: hsl(var(--primary)); font-size: 12px;">TOTAL</th>
+              <tr style="border-bottom: 2px solid #000;">
+                <th style="text-align: left; padding: 10px 15px; font-weight: bold; color: #000; font-size: 12px;">SECTION</th>
+                <th style="text-align: right; padding: 10px 15px; font-weight: bold; color: #000; font-size: 12px;">TOTAL</th>
               </tr>
             </thead>
             <tbody>
@@ -699,9 +680,9 @@ export const generatePDF = (data: DocumentData) => {
         <!-- Grand Total -->
         <div style="display: flex; justify-content: flex-start; margin-top: 20px;">
           <table class="totals-table" style="width: 400px;">
-            <tr class="total-row" style="border-top: 2px solid hsl(var(--primary)); background: #f8f9fa;">
-              <td class="label" style="padding: 12px 15px; text-align: left; font-weight: bold; color: hsl(var(--primary)); font-size: 14px;">GRAND TOTAL:</td>
-              <td class="amount" style="padding: 12px 15px; text-align: right; font-weight: bold; color: hsl(var(--primary)); font-size: 16px;">${formatCurrency(grandTotal)}</td>
+            <tr class="total-row" style="border-top: 2px solid #000; background: #fff;">
+              <td class="label" style="padding: 12px 15px; text-align: left; font-weight: bold; color: #000; font-size: 14px;">GRAND TOTAL:</td>
+              <td class="amount" style="padding: 12px 15px; text-align: right; font-weight: bold; color: #000; font-size: 14px;">${formatCurrency(grandTotal)}</td>
             </tr>
           </table>
         </div>
@@ -855,15 +836,33 @@ export const generatePDF = (data: DocumentData) => {
 
           .header {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+            flex-direction: column;
             margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid hsl(var(--primary));
+            padding-bottom: 0;
+            border-bottom: none;
             margin-left: -20mm;
             margin-right: -20mm;
-            padding-left: 20mm;
-            padding-right: 20mm;
+            padding-left: 0;
+            padding-right: 0;
+          }
+
+          .header-image {
+            width: 100%;
+            height: auto;
+            margin: 0 0 20px 0;
+            padding: 0;
+            display: block;
+            border: none;
+          }
+
+          .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 30px;
+            padding: 20px 20px 20px 20px;
+            margin: 0;
+            border-bottom: 2px solid #000;
           }
 
           .company-info {
@@ -910,7 +909,7 @@ export const generatePDF = (data: DocumentData) => {
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 15px;
-            color: hsl(var(--primary));
+            color: #000;
             text-transform: uppercase;
           }
 
@@ -937,7 +936,7 @@ export const generatePDF = (data: DocumentData) => {
           .section-title {
             font-size: 14px;
             font-weight: bold;
-            color: hsl(var(--primary));
+            color: #000;
             margin: 0 0 15px 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -962,20 +961,20 @@ export const generatePDF = (data: DocumentData) => {
           .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin: 12px 0;
             font-size: 11px;
-            border: 2px solid hsl(var(--primary));
-            border-radius: 8px;
+            border: 2px solid #000;
+            border-radius: 0;
             overflow: hidden;
           }
 
           .items-table thead {
-            background: hsl(var(--primary));
+            background: #000;
             color: white;
           }
 
           .items-table th {
-            padding: 12px 8px;
+            padding: 8px 8px;
             text-align: center;
             font-weight: bold;
             font-size: 10px;
@@ -989,7 +988,7 @@ export const generatePDF = (data: DocumentData) => {
           }
 
           .items-table td {
-            padding: 10px 8px;
+            padding: 8px 8px;
             border-bottom: 1px solid #e9ecef;
             border-right: 1px solid #e9ecef;
             text-align: center;
@@ -1053,30 +1052,32 @@ export const generatePDF = (data: DocumentData) => {
           }
 
           .totals-table .total-row {
-            border-top: 2px solid hsl(var(--primary));
-            background: #f8f9fa;
+            border-top: 2px solid #000;
+            background: #fff;
           }
 
           .totals-table .total-row .label {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
-            color: hsl(var(--primary));
+            color: #000;
           }
 
           .totals-table .total-row .amount {
-            font-size: 16px;
+            font-size: 13px;
             font-weight: bold;
-            color: hsl(var(--primary));
+            color: #000;
           }
 
-          /* Force each section summary to appear on its own printed page */
+          /* Allow sections to break naturally but start new sections on new page if needed */
           .section-summary {
-            page-break-after: always;
-            break-after: page;
-            -webkit-column-break-after: always;
-            -moz-page-break-after: always;
             break-inside: avoid;
             page-break-inside: avoid;
+            margin-bottom: 15px;
+          }
+
+          .section-summary:not(:last-of-type) {
+            page-break-after: always;
+            break-after: page;
           }
 
           .section-summary table,
@@ -1208,7 +1209,7 @@ export const generatePDF = (data: DocumentData) => {
           font-size: 16px;
           font-weight: bold;
           margin-bottom: 8px;
-          color: hsl(var(--primary));
+          color: #000;
         }
 
         .company-details {
@@ -1228,7 +1229,7 @@ export const generatePDF = (data: DocumentData) => {
           font-size: 16px;
           font-weight: bold;
           margin: 0 0 12px 0;
-          color: hsl(var(--primary));
+          color: #000;
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
@@ -1266,24 +1267,24 @@ export const generatePDF = (data: DocumentData) => {
         .section-title {
           font-size: 14px;
           font-weight: bold;
-          color: hsl(var(--primary));
+          color: #000;
           margin: 0 0 15px 0;
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
-        
+
         .customer-name {
           font-size: 16px;
           font-weight: bold;
           margin-bottom: 8px;
           color: #212529;
         }
-        
+
         .customer-details {
           color: #666;
           line-height: 1.6;
         }
-        
+
         .items-section {
           margin: 12px 0 30px 0;
         }
@@ -1293,16 +1294,16 @@ export const generatePDF = (data: DocumentData) => {
           border-collapse: collapse;
           margin: 20px 0;
           font-size: 11px;
-          border: 2px solid hsl(var(--primary));
+          border: 2px solid #000;
           border-radius: 8px;
           overflow: hidden;
         }
-        
+
         .items-table thead {
-          background: hsl(var(--primary));
+          background: #000;
           color: white;
         }
-        
+
         .items-table th {
           padding: 12px 8px;
           text-align: center;
@@ -1390,20 +1391,20 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .totals-table .total-row {
-          border-top: 2px solid hsl(var(--primary));
-          background: #f8f9fa;
+          border-top: 2px solid #000;
+          background: #fff;
         }
-        
+
         .totals-table .total-row .label {
           font-size: 14px;
           font-weight: bold;
-          color: hsl(var(--primary));
+          color: #000;
         }
-        
+
         .totals-table .total-row .amount {
-          font-size: 16px;
+          font-size: 14px;
           font-weight: bold;
-          color: hsl(var(--primary));
+          color: #000;
         }
         
         
@@ -1449,7 +1450,7 @@ export const generatePDF = (data: DocumentData) => {
         .field-label {
           font-size: 10px;
           font-weight: bold;
-          color: hsl(var(--primary));
+          color: #000;
           margin-bottom: 4px;
           text-transform: uppercase;
         }
@@ -1480,7 +1481,7 @@ export const generatePDF = (data: DocumentData) => {
         .signature-label {
           font-size: 11px;
           font-weight: bold;
-          color: hsl(var(--primary));
+          color: #000;
           margin-bottom: 20px;
           text-transform: uppercase;
         }
