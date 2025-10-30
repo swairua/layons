@@ -421,7 +421,8 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
             line_total: item.line_total,
             section_name: section.name,
             section_labor_cost: section.labor_cost,
-            sort_order: sectionIndex
+            sort_order: sectionIndex,
+            unit_of_measure: item.unit_of_measure || 'Each'
           };
         })
       );
