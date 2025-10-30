@@ -686,9 +686,9 @@ export const generatePDF = (data: DocumentData) => {
         <!-- Grand Total -->
         <div style="display: flex; justify-content: flex-start; margin-top: 20px;">
           <table class="totals-table" style="width: 400px;">
-            <tr class="total-row" style="border-top: 2px solid hsl(var(--primary)); background: #f8f9fa;">
-              <td class="label" style="padding: 12px 15px; text-align: left; font-weight: bold; color: hsl(var(--primary)); font-size: 14px;">GRAND TOTAL:</td>
-              <td class="amount" style="padding: 12px 15px; text-align: right; font-weight: bold; color: hsl(var(--primary)); font-size: 16px;">${formatCurrency(grandTotal)}</td>
+            <tr class="total-row" style="border-top: 2px solid #000; background: #fff;">
+              <td class="label" style="padding: 12px 15px; text-align: left; font-weight: bold; color: #000; font-size: 14px;">GRAND TOTAL:</td>
+              <td class="amount" style="padding: 12px 15px; text-align: right; font-weight: bold; color: #000; font-size: 14px;">${formatCurrency(grandTotal)}</td>
             </tr>
           </table>
         </div>
