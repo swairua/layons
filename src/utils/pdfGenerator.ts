@@ -592,10 +592,10 @@ export const generatePDF = (data: DocumentData) => {
                     <td class="amount-cell">${item.tax_amount ? formatCurrency(item.tax_amount) : '-'}</td>
                   </tr>
                 `).join('')}
-                <tr style="background: #f8f9fa; font-weight: 600; border-top: 2px solid #e9ecef;">
-                  <td colspan="4" style="text-align: right; padding: 10px 8px;">Materials Subtotal:</td>
-                  <td style="text-align: right; padding: 10px 8px;">${formatCurrency(sectionMaterialsTotal)}</td>
-                  <td style="text-align: right; padding: 10px 8px;">${sectionTaxAmount > 0 ? formatCurrency(sectionTaxAmount) : '-'}</td>
+                <tr style="background: #fff; font-weight: 600; border-top: 2px solid #000;">
+                  <td colspan="4" style="text-align: right; padding: 8px 8px;">Materials Subtotal:</td>
+                  <td style="text-align: right; padding: 8px 8px;">${formatCurrency(sectionMaterialsTotal)}</td>
+                  <td style="text-align: right; padding: 8px 8px;">${sectionTaxAmount > 0 ? formatCurrency(sectionTaxAmount) : '-'}</td>
                 </tr>
               </tbody>
             </table>
