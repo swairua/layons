@@ -186,7 +186,8 @@ CREATE TABLE invoice_items (
     unit_price DECIMAL(15,2) NOT NULL,
     discount_percentage DECIMAL(5,2) DEFAULT 0,
     line_total DECIMAL(15,2) NOT NULL,
-    sort_order INTEGER DEFAULT 0
+    sort_order INTEGER DEFAULT 0,
+    unit_of_measure VARCHAR(50)
 );
 
 -- Proforma invoices table
