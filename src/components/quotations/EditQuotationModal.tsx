@@ -669,9 +669,21 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
             <CardTitle className="text-lg">Quotation Sections</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Section name (e.g., Roofing)"
+                value={newSectionName}
+                onChange={(e) => setNewSectionName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addSection()}
+              />
+              <Button onClick={addSection} className="whitespace-nowrap">
+                <Plus className="h-4 w-4 mr-2" /> Add Section
+              </Button>
+            </div>
+
             {sections.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                No sections in this quotation. Items are organized by section.
+                No sections in this quotation. Create one to start adding items.
               </div>
             ) : (
               <div className="space-y-4">
