@@ -47,6 +47,7 @@ interface InvoiceItem {
   tax_amount: number;
   tax_inclusive: boolean;
   line_total: number;
+  unit_of_measure?: string;
 }
 
 interface InvoiceSection {
@@ -126,6 +127,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
             tax_amount: item.tax_amount || 0,
             tax_inclusive: item.tax_inclusive || false,
             line_total: item.line_total || 0,
+            unit_of_measure: item.unit_of_measure || item.products?.unit_of_measure || 'pcs',
           }))
         };
       });
@@ -233,7 +235,8 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
         tax_percentage: defaultTaxRate,
         tax_amount: 0,
         tax_inclusive: true,
-        line_total: calculateItemTotal(1, price, defaultTaxRate, true)
+        line_total: calculateItemTotal(1, price, defaultTaxRate, true),
+        unit_of_measure: product.unit_of_measure || 'pcs'
       };
 
       newItem.tax_amount = calculateTaxAmount(newItem);
@@ -423,7 +426,8 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
           line_total: item.line_total,
           section_name: section.name,
           section_labor_cost: section.labor_cost,
-          sort_order: sectionIndex
+          sort_order: sectionIndex,
+          unit_of_measure: item.unit_of_measure || 'pcs'
         }))
       );
 

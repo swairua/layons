@@ -285,7 +285,8 @@ export const useConvertQuotationToInvoice = () => {
           line_total: item.line_total,
           sort_order: item.sort_order,
           section_name: item.section_name,
-          section_labor_cost: item.section_labor_cost
+          section_labor_cost: item.section_labor_cost,
+          unit_of_measure: item.unit_of_measure || 'Each'
         }));
 
         let itemsError: any = null;

@@ -1387,7 +1387,8 @@ export const useQuotations = (companyId?: string) => {
             line_total,
             sort_order,
             section_name,
-            section_labor_cost
+            section_labor_cost,
+            unit_of_measure
           `)
           .in('quotation_id', quotations.map(quot => quot.id));
 

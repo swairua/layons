@@ -45,6 +45,7 @@ interface QuotationItem {
   vat_percentage: number;
   vat_inclusive: boolean;
   line_total: number;
+  unit_of_measure?: string;
 }
 
 interface QuotationSection {
@@ -186,7 +187,8 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
         unit_price: product.selling_price,
         vat_percentage: 0,
         vat_inclusive: false,
-        line_total: calculateItemTotal(1, product.selling_price, 0, false)
+        line_total: calculateItemTotal(1, product.selling_price, 0, false),
+        unit_of_measure: product.unit_of_measure || 'Each'
       };
 
       return {
@@ -419,7 +421,8 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
             line_total: item.line_total,
             section_name: section.name,
             section_labor_cost: section.labor_cost,
-            sort_order: sectionIndex
+            sort_order: sectionIndex,
+            unit_of_measure: item.unit_of_measure || 'Each'
           };
         })
       );

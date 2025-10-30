@@ -308,7 +308,7 @@ export function ViewQuotationModal({
                                 </div>
                               </TableCell>
                               <TableCell className="text-center">{item.quantity}</TableCell>
-                              <TableCell className="text-center">{item.products?.unit_of_measure || 'Each'}</TableCell>
+                              <TableCell className="text-center">{item.unit_of_measure || item.products?.unit_of_measure || 'Each'}</TableCell>
                               <TableCell className="text-right">{formatCurrency(item.unit_price)}</TableCell>
                               <TableCell className="text-right font-semibold">{formatCurrency(item.line_total)}</TableCell>
                             </TableRow>
