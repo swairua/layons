@@ -1511,12 +1511,8 @@ export const useDeleteQuotation = () => {
         .eq('id', id);
 
       if (error) {
-        // Provide clearer error object
-        const message = error.message || JSON.stringify(error);
-        const err = new Error(`Failed to delete quotation: ${message}`);
-        // Attach original error for debugging
-        (err as any).original = error;
-        throw err;
+        // Re-throw the original supabase error (preserve structure) so callers can inspect it
+        throw error;
       }
     },
     onSuccess: () => {
