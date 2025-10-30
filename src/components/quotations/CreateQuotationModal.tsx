@@ -45,6 +45,7 @@ interface QuotationItem {
   vat_percentage: number;
   vat_inclusive: boolean;
   line_total: number;
+  unit_of_measure?: string;
 }
 
 interface QuotationSection {
