@@ -1965,7 +1965,7 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
       tax_amount: taxAmount,
       tax_inclusive: item.tax_inclusive || false,
       line_total: Number(item.line_total ?? computedLineTotal),
-      unit_of_measure: item.products?.unit_of_measure || item.unit_of_measure || 'pcs',
+      unit_of_measure: item.unit_of_measure || item.products?.unit_of_measure || 'pcs',
       section_name: item.section_name,
       section_labor_cost: Number(item.section_labor_cost || 0),
     };
