@@ -49,6 +49,7 @@ interface QuotationItem {
   line_total: number;
   section_name?: string;
   section_labor_cost?: number;
+  unit_of_measure?: string;
 }
 
 interface QuotationSection {
