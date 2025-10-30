@@ -48,6 +48,7 @@ interface InvoiceItem {
   tax_amount: number;
   tax_inclusive: boolean;
   line_total: number;
+  unit_of_measure?: string;
 }
 
 interface InvoiceSection {
