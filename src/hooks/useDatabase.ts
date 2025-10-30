@@ -816,7 +816,9 @@ export const useCustomerInvoices = (customerId?: string, companyId?: string) => 
             tax_amount,
             tax_inclusive,
             line_total,
-            sort_order
+            sort_order,
+            section_name,
+            section_labor_cost
           `)
           .in('invoice_id', invoiceIds2) : { data: [], error: null };
 
