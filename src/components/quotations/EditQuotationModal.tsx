@@ -76,6 +76,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
   const [sections, setSections] = useState<QuotationSection[]>([]);
   const [searchProduct, setSearchProduct] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newSectionName, setNewSectionName] = useState('');
 
   const { data: companies } = useCompanies();
   const currentCompany = companies?.[0];
