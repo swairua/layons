@@ -656,12 +656,6 @@ export const generatePDF = (data: DocumentData) => {
 
     pagesHtml += `
       <div class="page" style="position: relative; page-break-before: always;">
-        <!-- Summary Page Header -->
-        <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid hsl(var(--primary));">
-          <h2 style="font-size: 16px; font-weight: bold; margin: 0 0 10px 0; color: hsl(var(--primary)); text-transform: uppercase;">Quotation Summary</h2>
-          <p style="font-size: 11px; margin: 0; color: #666;">Section Totals</p>
-        </div>
-
         <!-- Section Totals Table Only -->
         <div style="margin: 20px 0;">
           <table class="totals-table" style="width: 400px;">
