@@ -1215,7 +1215,7 @@ export const generatePDF = (data: DocumentData) => {
           font-size: 16px;
           font-weight: bold;
           margin-bottom: 8px;
-          color: hsl(var(--primary));
+          color: #000;
         }
 
         .company-details {
