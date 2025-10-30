@@ -567,8 +567,9 @@ export const generatePDF = (data: DocumentData) => {
           <!-- Section Title with alphabetical letter -->
           <div class="section-title" style="margin: ${showHeader ? '25px 0 15px 0' : '20px 0 15px 0'}; padding: 12px; background: #f8f9fa; border-left: 4px solid hsl(var(--primary)); font-size: 14px; font-weight: bold; text-transform: uppercase;">${sectionTitleWithLetter}</div>
 
-          <!-- Items Table -->
-          <div class="items-section">
+          <!-- Materials Subsection -->
+          <div class="subsection" style="margin-bottom:12px;">
+            <div style="font-weight:600; margin-bottom:6px;">Materials</div>
             <table class="items-table">
               <thead>
                 <tr>
@@ -591,6 +592,35 @@ export const generatePDF = (data: DocumentData) => {
                     <td class="amount-cell">${item.tax_amount ? formatCurrency(item.tax_amount) : '-'}</td>
                   </tr>
                 `).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Labour Subsection -->
+          <div class="subsection" style="margin-bottom:12px;">
+            <div style="font-weight:600; margin-bottom:6px;">Labour</div>
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th style="width: 6%;">#</th>
+                  <th style="width: 74%; text-align:left;">Description</th>
+                  <th style="width: 20%;">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${sectionLaborCost > 0 ? `
+                  <tr>
+                    <td style="text-align:center;">1</td>
+                    <td class="description-cell">Labour for ${section.name}</td>
+                    <td class="amount-cell">${formatCurrency(sectionLaborCost)}</td>
+                  </tr>
+                ` : `
+                  <tr>
+                    <td style="text-align:center;">-</td>
+                    <td class="description-cell">No labour cost</td>
+                    <td class="amount-cell">-</td>
+                  </tr>
+                `}
               </tbody>
             </table>
           </div>

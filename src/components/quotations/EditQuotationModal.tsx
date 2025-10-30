@@ -76,6 +76,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
   const [sections, setSections] = useState<QuotationSection[]>([]);
   const [searchProduct, setSearchProduct] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newSectionName, setNewSectionName] = useState('');
 
   const { data: companies } = useCompanies();
   const currentCompany = companies?.[0];
@@ -264,6 +265,59 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
 
   const removeSection = (sectionId: string) => {
     setSections(sections.filter(s => s.id !== sectionId));
+  };
+
+  const addSection = () => {
+    if (!newSectionName.trim()) return;
+    const newSection: QuotationSection = {
+      id: `section-${Date.now()}-${Math.random()}`,
+      name: newSectionName.trim(),
+      items: [],
+      labor_cost: 0,
+      expanded: true,
+    };
+    setSections([...sections, newSection]);
+    setNewSectionName('');
+  };
+
+  const moveItemBetweenSections = (fromSectionId: string, toSectionId: string, itemId: string) => {
+    if (fromSectionId === toSectionId) return;
+    let movedItem: QuotationItem | null = null;
+    const next = sections.map(sec => {
+      if (sec.id === fromSectionId) {
+        const remaining = sec.items.filter(it => {
+          if (it.id === itemId) { movedItem = it; return false; }
+          return true;
+        });
+        return { ...sec, items: remaining };
+      }
+      return sec;
+    });
+    if (movedItem) {
+      setSections(next.map(sec => sec.id === toSectionId ? { ...sec, items: [...sec.items, { ...movedItem!, section_name: sec.name, section_labor_cost: sec.labor_cost }] } : sec));
+    } else {
+      setSections(next);
+    }
+  };
+
+  const handleRowDragStart = (sectionId: string, itemId: string, ev: React.DragEvent) => {
+    ev.dataTransfer.setData('application/json', JSON.stringify({ sectionId, itemId }));
+    ev.dataTransfer.effectAllowed = 'move';
+  };
+
+  const allowDrop = (ev: React.DragEvent) => {
+    ev.preventDefault();
+    ev.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDropOnSection = (targetSectionId: string, ev: React.DragEvent) => {
+    ev.preventDefault();
+    try {
+      const data = JSON.parse(ev.dataTransfer.getData('application/json'));
+      if (data && data.sectionId && data.itemId) {
+        moveItemBetweenSections(data.sectionId, targetSectionId, data.itemId);
+      }
+    } catch {}
   };
 
   const addItemToSection = (sectionId: string, product: any) => {
@@ -615,9 +669,21 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
             <CardTitle className="text-lg">Quotation Sections</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Section name (e.g., Roofing)"
+                value={newSectionName}
+                onChange={(e) => setNewSectionName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addSection()}
+              />
+              <Button onClick={addSection} className="whitespace-nowrap">
+                <Plus className="h-4 w-4 mr-2" /> Add Section
+              </Button>
+            </div>
+
             {sections.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                No sections in this quotation. Items are organized by section.
+                No sections in this quotation. Create one to start adding items.
               </div>
             ) : (
               <div className="space-y-4">
@@ -667,7 +733,9 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                               No items in this section. Search and add products above.
                             </div>
                           ) : (
-                            <Table className="text-sm">
+                            <Table className="text-sm"
+                                   onDragOver={allowDrop}
+                                   onDrop={(e) => handleDropOnSection(section.id, e)}>
                               <TableHeader>
                                 <TableRow>
                                   <TableHead>Product</TableHead>
@@ -681,7 +749,10 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                               </TableHeader>
                               <TableBody>
                                 {section.items.map((item) => (
-                                  <TableRow key={item.id} className="text-xs">
+                                  <TableRow key={item.id}
+                                            className="text-xs cursor-move"
+                                            draggable
+                                            onDragStart={(e) => handleRowDragStart(section.id, item.id, e)}>
                                     <TableCell>
                                       <div>
                                         <div className="font-medium">{item.product_name}</div>
