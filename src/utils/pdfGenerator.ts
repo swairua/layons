@@ -1487,7 +1487,7 @@ export const generatePDF = (data: DocumentData) => {
         .signature-label {
           font-size: 11px;
           font-weight: bold;
-          color: hsl(var(--primary));
+          color: #000;
           margin-bottom: 20px;
           text-transform: uppercase;
         }
