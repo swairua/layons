@@ -1074,14 +1074,16 @@ export const generatePDF = (data: DocumentData) => {
             color: #000;
           }
 
-          /* Force each section summary to appear on its own printed page */
+          /* Allow sections to break naturally but start new sections on new page if needed */
           .section-summary {
-            page-break-after: always;
-            break-after: page;
-            -webkit-column-break-after: always;
-            -moz-page-break-after: always;
             break-inside: avoid;
             page-break-inside: avoid;
+            margin-bottom: 15px;
+          }
+
+          .section-summary:not(:last-of-type) {
+            page-break-after: always;
+            break-after: page;
           }
 
           .section-summary table,
