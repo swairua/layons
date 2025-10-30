@@ -31,6 +31,8 @@ import {
 } from 'lucide-react';
 import { useCustomers, useProducts, useTaxSettings, useCompanies } from '@/hooks/useDatabase';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface QuotationItem {
   id: string;
@@ -82,7 +84,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
       setNotes(quotation.notes || '');
       setTermsAndConditions(quotation.terms_and_conditions || '');
       
-      // Convert quotation items to local format
+        // Convert quotation items to local format (preserve section metadata)
       const quotationItems = (quotation.quotation_items || []).map((item: any, index: number) => ({
         id: item.id || `existing-${index}`,
         product_id: item.product_id || '',
@@ -94,8 +96,11 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
         tax_amount: item.tax_amount || 0,
         tax_inclusive: item.tax_inclusive || false,
         line_total: item.line_total || 0,
+        // Preserve section fields so editing doesn't drop them
+        section_name: item.section_name || 'General Items',
+        section_labor_cost: item.section_labor_cost || 0,
       }));
-      
+
       setItems(quotationItems);
     }
   }, [quotation, open]);
@@ -201,6 +206,8 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
   const taxAmount = items.reduce((sum, item) => sum + (item.tax_amount || 0), 0);
   const totalAmount = items.reduce((sum, item) => sum + item.line_total, 0);
 
+  const queryClient = useQueryClient();
+
   const handleSubmit = async () => {
     if (!selectedCustomerId) {
       toast.error('Please select a customer');
@@ -214,10 +221,69 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
 
     setIsSubmitting(true);
     try {
-      // TODO: Implement actual update API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      // Prepare updated quotation payload
+      const updatedQuotation: any = {
+        customer_id: selectedCustomerId,
+        quotation_date: quotationDate,
+        valid_until: validUntil || null,
+        notes,
+        terms_and_conditions: termsAndConditions,
+        subtotal,
+        tax_amount: taxAmount,
+        total_amount: totalAmount
+      };
+
+      // Update quotation
+      const { data: updatedData, error: updateError } = await supabase
+        .from('quotations')
+        .update(updatedQuotation)
+        .eq('id', quotation.id)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      // Remove existing items and insert new ones (simpler and deterministic)
+      const { error: deleteError } = await supabase
+        .from('quotation_items')
+        .delete()
+        .eq('quotation_id', quotation.id);
+
+      if (deleteError) throw deleteError;
+
+      const itemsToInsert = items.map((item, idx) => ({
+        quotation_id: quotation.id,
+        product_id: item.product_id || null,
+        description: item.description || '',
+        quantity: item.quantity || 0,
+        unit_price: item.unit_price || 0,
+        tax_percentage: item.tax_percentage || 0,
+        tax_amount: item.tax_amount || 0,
+        tax_inclusive: item.tax_inclusive || false,
+        line_total: item.line_total || 0,
+        section_name: item.section_name || 'General Items',
+        section_labor_cost: item.section_labor_cost || 0,
+        sort_order: idx + 1
+      }));
+
+      let { error: insertError } = await supabase
+        .from('quotation_items')
+        .insert(itemsToInsert);
+
+      // Fallback for DBs that don't accept section fields
+      if (insertError && (insertError.code === 'PGRST204' || String(insertError.message || '').toLowerCase().includes('section'))) {
+        const minimalItems = itemsToInsert.map(({ section_name, section_labor_cost, ...rest }) => rest);
+        const retry = await supabase
+          .from('quotation_items')
+          .insert(minimalItems);
+        insertError = retry.error as any;
+      }
+
+      if (insertError) throw insertError;
+
       toast.success(`Quotation ${quotation.quotation_number} updated successfully!`);
+      queryClient.invalidateQueries({ queryKey: ['quotations'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
       onSuccess();
       onOpenChange(false);
     } catch (error) {
