@@ -1235,7 +1235,7 @@ export const generatePDF = (data: DocumentData) => {
           font-size: 16px;
           font-weight: bold;
           margin: 0 0 12px 0;
-          color: hsl(var(--primary));
+          color: #000;
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
