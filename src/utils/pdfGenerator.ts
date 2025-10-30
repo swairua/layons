@@ -601,7 +601,8 @@ export const generatePDF = (data: DocumentData) => {
             </table>
           </div>
 
-          <!-- Labour Subsection -->
+          <!-- Labour Subsection (only display if labor cost > 0) -->
+          ${sectionLaborCost > 0 ? `
           <div class="subsection" style="margin-bottom:12px;">
             <div style="font-weight:600; margin-bottom:6px;">Labour</div>
             <table class="items-table">
@@ -613,19 +614,11 @@ export const generatePDF = (data: DocumentData) => {
                 </tr>
               </thead>
               <tbody>
-                ${sectionLaborCost > 0 ? `
-                  <tr>
-                    <td style="text-align:center;">1</td>
-                    <td class="description-cell">Labour for ${section.name}</td>
-                    <td class="amount-cell">${formatCurrency(sectionLaborCost)}</td>
-                  </tr>
-                ` : `
-                  <tr>
-                    <td style="text-align:center;">-</td>
-                    <td class="description-cell">No labour cost</td>
-                    <td class="amount-cell">-</td>
-                  </tr>
-                `}
+                <tr>
+                  <td style="text-align:center;">1</td>
+                  <td class="description-cell">Labour for ${section.name}</td>
+                  <td class="amount-cell">${formatCurrency(sectionLaborCost)}</td>
+                </tr>
                 <tr style="background: #fff; font-weight: 600; border-top: 2px solid #000;">
                   <td colspan="2" style="text-align: right; padding: 8px 8px;">Labour Subtotal:</td>
                   <td style="text-align: right; padding: 8px 8px;">${formatCurrency(sectionLaborCost)}</td>
@@ -633,6 +626,7 @@ export const generatePDF = (data: DocumentData) => {
               </tbody>
             </table>
           </div>
+          ` : ''}
 
           <!-- Section Totals -->
           <div class="totals-section">
