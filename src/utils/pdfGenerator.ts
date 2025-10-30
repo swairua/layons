@@ -565,7 +565,7 @@ export const generatePDF = (data: DocumentData) => {
           ` : ''}
 
           <!-- Section Title with alphabetical letter -->
-          <div class="section-title" style="margin: ${showHeader ? '25px 0 15px 0' : '20px 0 15px 0'}; padding: 12px; background: #f8f9fa; border-left: 4px solid hsl(var(--primary)); font-size: 14px; font-weight: bold; text-transform: uppercase;">${sectionTitleWithLetter}</div>
+          <div class="section-title" style="margin: ${showHeader ? '25px 0 15px 0' : '20px 0 15px 0'}; padding: 12px; background: #fff; border-left: 4px solid #000; font-size: 14px; font-weight: bold; text-transform: uppercase;">${sectionTitleWithLetter}</div>
 
           <!-- Materials Subsection -->
           <div class="subsection" style="margin-bottom:12px;">
