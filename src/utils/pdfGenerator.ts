@@ -626,9 +626,9 @@ export const generatePDF = (data: DocumentData) => {
                     <td class="amount-cell">-</td>
                   </tr>
                 `}
-                <tr style="background: #f8f9fa; font-weight: 600; border-top: 2px solid #e9ecef;">
-                  <td colspan="2" style="text-align: right; padding: 10px 8px;">Labour Subtotal:</td>
-                  <td style="text-align: right; padding: 10px 8px;">${formatCurrency(sectionLaborCost)}</td>
+                <tr style="background: #fff; font-weight: 600; border-top: 2px solid #000;">
+                  <td colspan="2" style="text-align: right; padding: 8px 8px;">Labour Subtotal:</td>
+                  <td style="text-align: right; padding: 8px 8px;">${formatCurrency(sectionLaborCost)}</td>
                 </tr>
               </tbody>
             </table>
