@@ -660,9 +660,9 @@ export const generatePDF = (data: DocumentData) => {
         <div style="margin: 20px 0;">
           <table class="totals-table" style="width: 400px;">
             <thead>
-              <tr style="border-bottom: 2px solid hsl(var(--primary));">
-                <th style="text-align: left; padding: 10px 15px; font-weight: bold; color: hsl(var(--primary)); font-size: 12px;">SECTION</th>
-                <th style="text-align: right; padding: 10px 15px; font-weight: bold; color: hsl(var(--primary)); font-size: 12px;">TOTAL</th>
+              <tr style="border-bottom: 2px solid #000;">
+                <th style="text-align: left; padding: 10px 15px; font-weight: bold; color: #000; font-size: 12px;">SECTION</th>
+                <th style="text-align: right; padding: 10px 15px; font-weight: bold; color: #000; font-size: 12px;">TOTAL</th>
               </tr>
             </thead>
             <tbody>
