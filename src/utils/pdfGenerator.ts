@@ -655,183 +655,161 @@ export const generatePDF = (data: DocumentData) => {
       `;
     });
 
-    // Add Summary Page
+    // Add Summary Page with section totals only
     const grandTotal = data.sections.reduce((sum, sec) => {
       const secTotal = sec.items.reduce((s, item) => s + (item.line_total || 0), 0) + (sec.labor_cost || 0);
       return sum + secTotal;
     }, 0);
 
-    const totalMaterials = data.sections.reduce((sum, sec) => {
-      return sum + sec.items.reduce((s, item) => s + (item.line_total || 0), 0);
-    }, 0);
-
-    const totalLabor = data.sections.reduce((sum, sec) => sum + (sec.labor_cost || 0), 0);
-    const totalTax = data.sections.reduce((sum, sec) => sum + sec.items.reduce((s, item) => s + (item.tax_amount || 0), 0), 0);
-
     pagesHtml += `
       <div class="page" style="position: relative; page-break-before: always;">
-        <!-- Header Section -->
-        <div class="header">
-          <div class="company-info">
-            <div class="logo">
-              ${company.logo_url ?
-                `<img src="${company.logo_url}" alt="${company.name} Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-                 <div style="display:none; width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">Logo not available</div>` :
-                `<div style="width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">No logo configured</div>`
-              }
-            </div>
-            <div class="company-name">${company.name}</div>
-            <div class="company-details">
-              ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
-              ${company.address ? `${company.address}<br>` : ''}
-              ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
-              ${company.phone ? `Tel: ${company.phone}<br>` : ''}
-              ${company.email ? `Email: ${company.email}` : ''}
-            </div>
-
-            <!-- Client Details Section -->
-            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e9ecef;">
-              <div class="section-title" style="font-size: 12px; font-weight: bold; color: hsl(var(--primary)); margin-bottom: 8px; text-transform: uppercase;">Client</div>
-              <div class="customer-name" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #212529;">${data.customer.name}</div>
-              <div class="customer-details" style="font-size: 10px; color: #666; line-height: 1.4;">
-                ${data.customer.email ? `${data.customer.email}<br>` : ''}
-                ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
-                ${data.customer.address ? `${data.customer.address}<br>` : ''}
-                ${data.customer.city ? `${data.customer.city}` : ''}
-                ${data.customer.country ? `, ${data.customer.country}` : ''}
-              </div>
-            </div>
-          </div>
-
-          <!-- Document metadata box removed as requested -->
+        <!-- Summary Page Header -->
+        <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid hsl(var(--primary));">
+          <h2 style="font-size: 16px; font-weight: bold; margin: 0 0 10px 0; color: hsl(var(--primary)); text-transform: uppercase;">Quotation Summary</h2>
+          <p style="font-size: 11px; margin: 0; color: #666;">Section Totals</p>
         </div>
 
-        <!-- Summary Table -->
-        <div class="items-section">
-          <h3 style="margin-top: 25px; margin-bottom: 15px; font-size: 14px; color: hsl(var(--primary));">Quotation Summary by Section</h3>
+        <!-- Section Totals Table Only -->
+        <div style="margin: 20px 0;">
+          <table class="totals-table" style="width: 400px;">
+            <thead>
+              <tr style="border-bottom: 2px solid hsl(var(--primary));">
+                <th style="text-align: left; padding: 10px 15px; font-weight: bold; color: hsl(var(--primary)); font-size: 12px;">SECTION</th>
+                <th style="text-align: right; padding: 10px 15px; font-weight: bold; color: hsl(var(--primary)); font-size: 12px;">TOTAL</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.sections.map((section, idx) => {
+                const sectionLetter = String.fromCharCode(65 + idx);
+                const matTotal = section.items.reduce((sum, item) => sum + (item.line_total || 0), 0);
+                const labour = section.labor_cost || 0;
+                const secTotal = matTotal + labour;
 
-          ${data.sections.map((section, idx) => {
-            const sectionLetter = String.fromCharCode(65 + idx);
-            const matItems = section.items || [];
-            const matTotal = matItems.reduce((sum, item) => sum + (item.line_total || 0), 0);
-            const labour = section.labor_cost || 0;
-            const secTotal = matTotal + labour;
-
-            return `
-              <div class="section-summary" style="margin-bottom:18px;">
-                <div class="section-heading" style="font-weight:700; color:hsl(var(--primary)); margin-bottom:8px;">${sectionLetter}. ${section.name}</div>
-
-                <!-- Subsection A: Materials -->
-                <div class="subsection" style="margin-bottom:8px;">
-                  <div style="font-weight:600; margin-bottom:6px;">A. Materials</div>
-                  <table class="items-table" style="margin-bottom:6px;">
-                    <thead>
-                      <tr>
-                        <th style="width:6%;">#</th>
-                        <th style="width:54%; text-align:left;">Description</th>
-                        <th style="width:10%;">Qty</th>
-                        <th style="width:15%;">Unit Price</th>
-                        <th style="width:15%;">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${matItems.length > 0 ? matItems.map((item, i) => `
-                        <tr>
-                          <td style="text-align:center;">${i + 1}</td>
-                          <td class="description-cell">${item.description || ''}</td>
-                          <td class="center">${item.quantity || ''}</td>
-                          <td class="amount-cell">${formatCurrency(item.unit_price || 0)}</td>
-                          <td class="amount-cell">${formatCurrency(item.line_total || 0)}</td>
-                        </tr>
-                      `).join('') : `
-                        <tr>
-                          <td style="text-align:center;">-</td>
-                          <td class="description-cell">No materials listed</td>
-                          <td class="center">-</td>
-                          <td class="amount-cell">-</td>
-                          <td class="amount-cell">-</td>
-                        </tr>
-                      `}
-                    </tbody>
-                  </table>
-                </div>
-
-                <!-- Subsection B: Labour -->
-                <div class="subsection" style="margin-bottom:12px;">
-                  <div style="font-weight:600; margin-bottom:6px;">B. Labour</div>
-                  <table class="items-table">
-                    <thead>
-                      <tr>
-                        <th style="width:6%;">#</th>
-                        <th style="width:74%; text-align:left;">Description</th>
-                        <th style="width:20%;">Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${labour > 0 ? `
-                        <tr>
-                          <td style="text-align:center;">1</td>
-                          <td class="description-cell">Labour for ${section.name}</td>
-                          <td class="amount-cell">${formatCurrency(labour)}</td>
-                        </tr>
-                      ` : `
-                        <tr>
-                          <td style="text-align:center;">-</td>
-                          <td class="description-cell">No labour cost</td>
-                          <td class="amount-cell">-</td>
-                        </tr>
-                      `}
-                    </tbody>
-                  </table>
-                </div>
-
-                <!-- Section subtotal -->
-                <div style="display:flex; justify-content:flex-end; margin-top:6px;">
-                  <div style="width:300px;">
-                    <table class="totals-table">
-                      <tr class="total-row">
-                        <td class="label">TOTAL ${sectionLetter}:</td>
-                        <td class="amount">${formatCurrency(secTotal)}</td>
-                      </tr>
-                    </table>
-                  </div>
-                </div>
-
-              </div>
-            `;
-          }).join('')}
-
+                return `
+                  <tr style="border-bottom: 1px solid #e9ecef;">
+                    <td style="padding: 10px 15px; text-align: left; font-weight: 500;">${sectionLetter}. ${section.name}</td>
+                    <td style="padding: 10px 15px; text-align: right; font-weight: 600;">${formatCurrency(secTotal)}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
         </div>
 
-        <!-- Grand Totals -->
-        <div class="totals-section">
-          <table class="totals-table">
-            <tr>
-              <td class="label">Total Materials:</td>
-              <td class="amount">${formatCurrency(totalMaterials)}</td>
-            </tr>
-            <tr>
-              <td class="label">Total Labor:</td>
-              <td class="amount">${formatCurrency(totalLabor)}</td>
-            </tr>
-            ${totalTax > 0 ? `
-            <tr>
-              <td class="label">Total Tax:</td>
-              <td class="amount">${formatCurrency(totalTax)}</td>
-            </tr>
-            ` : ''}
-            <tr class="total-row">
-              <td class="label">GRAND TOTAL:</td>
-              <td class="amount">${formatCurrency(grandTotal)}</td>
+        <!-- Grand Total -->
+        <div style="display: flex; justify-content: flex-start; margin-top: 20px;">
+          <table class="totals-table" style="width: 400px;">
+            <tr class="total-row" style="border-top: 2px solid hsl(var(--primary)); background: #f8f9fa;">
+              <td class="label" style="padding: 12px 15px; text-align: left; font-weight: bold; color: hsl(var(--primary)); font-size: 14px;">GRAND TOTAL:</td>
+              <td class="amount" style="padding: 12px 15px; text-align: right; font-weight: bold; color: hsl(var(--primary)); font-size: 16px;">${formatCurrency(grandTotal)}</td>
             </tr>
           </table>
         </div>
 
         <!-- Stamp Section -->
-        <div class="stamp-section" style="display:flex; justify-content:center; margin:30px 0 24px 0;">
+        <div class="stamp-section" style="display:flex; justify-content:center; margin:40px 0 24px 0;">
           <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="height:140px; width:auto; object-fit:contain;" />
         </div>
+      </div>
+    `;
 
+    // Add Terms and Conditions Page (Final Page)
+    pagesHtml += `
+      <div class="page" style="position: relative; page-break-before: always;">
+        <div style="padding: 0;">
+
+          <!-- Terms Section -->
+          <div style="margin-bottom: 25px;">
+            <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Terms;</h3>
+            <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
+              <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows; a. 50% Upon Order (${formatCurrency(grandTotal * 0.5)}) b. 40% As Progressive (${formatCurrency(grandTotal * 0.4)}) c. 10% Upon Completion (${formatCurrency(grandTotal * 0.1)})</li>
+              <li style="margin-bottom: 6px;">All work will be executed based on the drawings and samples approved by the client</li>
+              <li style="margin-bottom: 6px;">Any Changes/alterations to the scope of work outlined will affect the final quantity will be measured, and charges will be applied on a pro-rata basis at the agreed rate</li>
+              <li style="margin-bottom: 6px;">We are not responsible for any damages caused by negligence from other Sub Contractors Hired by the Client.</li>
+              <li style="margin-bottom: 6px;">The quotation does not include statutory fees.</li>
+              <li style="margin-bottom: 6px;">The work shall be completed within weeks from the day of Order.</li>
+            </ol>
+          </div>
+
+          <!-- Acceptance of Quote Section -->
+          <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
+            <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Acceptance of Quote;</h3>
+            <p style="font-size: 11px; margin: 0; color: #333;">The above prices specifications and terms are satisfactory.</p>
+          </div>
+
+          <!-- Contractor and Client Section -->
+          <div style="display: flex; gap: 40px; margin-bottom: 25px; margin-top: 30px;">
+            <!-- Contractor Section -->
+            <div style="flex: 1;">
+              <div style="font-size: 11px; line-height: 1.8; color: #333;">
+                <div><strong>Contractor;</strong> ${company.name}</div>
+                <div><strong>Tel No;</strong> 254720717463</div>
+                <div><strong>Signed;</strong> KELVIN MURIITHI</div>
+              </div>
+            </div>
+
+            <!-- Stamp Area -->
+            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 120px;">
+              <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="height:140px; width:auto; object-fit:contain;" />
+            </div>
+          </div>
+
+          <!-- Client Section -->
+          <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
+            <div style="font-size: 11px; line-height: 1.8; color: #333;">
+              <div><strong>Client;</strong> ________________________</div>
+              <div><strong>Tel No;</strong> ________________________</div>
+            </div>
+          </div>
+
+          <!-- Prepaired By Section -->
+          <div style="margin-bottom: 20px; padding-top: 15px; border-top: 1px solid #ddd;">
+            <div style="font-size: 11px; color: #333;"><strong>PREPAIRED BY;</strong> ${company.name}</div>
+          </div>
+
+          <!-- Account Details Section -->
+          <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd;">
+            <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase;">Account Details;</h3>
+            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
+              <tr>
+                <td style="width: 30%;"><strong>BANK;</strong></td>
+                <td style="width: 70%;">CO-OPERATIVE BANK OF KENYA</td>
+              </tr>
+              <tr>
+                <td><strong>ACCOUNT NAME;</strong></td>
+                <td>LAYONS CONSTRUCTION LIMITED</td>
+              </tr>
+              <tr>
+                <td><strong>ACCOUNT NUMBER;</strong></td>
+                <td>01192659527000</td>
+              </tr>
+              <tr>
+                <td><strong>BRANCH;</strong></td>
+                <td>JUJA</td>
+              </tr>
+              <tr>
+                <td><strong>SWIFT CODE;</strong></td>
+                <td>KCOOKENA</td>
+              </tr>
+              <tr>
+                <td><strong>BANK CODE;</strong></td>
+                <td>11000</td>
+              </tr>
+              <tr>
+                <td><strong>BRANCH CODE;</strong></td>
+                <td>11124</td>
+              </tr>
+              <tr>
+                <td><strong>PAYBILL;</strong></td>
+                <td>400200</td>
+              </tr>
+              <tr>
+                <td><strong>ACCOUNT;</strong></td>
+                <td>01192659527000</td>
+              </tr>
+            </table>
+          </div>
+        </div>
       </div>
     `;
 
