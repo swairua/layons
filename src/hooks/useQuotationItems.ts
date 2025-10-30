@@ -175,15 +175,16 @@ export const useCreateQuotationWithItems = () => {
             tax_amount: item.tax_amount || 0,
             tax_inclusive: item.tax_inclusive || false,
             line_total: item.line_total,
-            sort_order: index + 1
+            sort_order: index + 1,
+            unit_of_measure: (item as any).unit_of_measure || 'Each'
           } as any;
 
           // Add section metadata if available
-          if (item.section_name) {
-            baseItem.section_name = item.section_name;
+          if ((item as any).section_name) {
+            baseItem.section_name = (item as any).section_name;
           }
-          if (item.section_labor_cost !== undefined) {
-            baseItem.section_labor_cost = item.section_labor_cost;
+          if ((item as any).section_labor_cost !== undefined) {
+            baseItem.section_labor_cost = (item as any).section_labor_cost;
           }
 
           return baseItem;

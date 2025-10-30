@@ -219,6 +219,7 @@ export default function Invoices() {
             tax_inclusive,
             line_total,
             sort_order,
+            unit_of_measure,
             products(id, name, product_code, unit_of_measure)
           `)
           .eq('invoice_id', invoice.id);
