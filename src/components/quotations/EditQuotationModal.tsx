@@ -62,6 +62,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
   const [termsAndConditions, setTermsAndConditions] = useState('');
   
   const [items, setItems] = useState<QuotationItem[]>([]);
+  const [sectionsState, setSectionsState] = useState<{ name: string; labor_cost: number }[]>([]);
   const [searchProduct, setSearchProduct] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -83,8 +84,8 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
       setValidUntil(quotation.valid_until || '');
       setNotes(quotation.notes || '');
       setTermsAndConditions(quotation.terms_and_conditions || '');
-      
-        // Convert quotation items to local format (preserve section metadata)
+
+      // Convert quotation items to local format (preserve section metadata)
       const quotationItems = (quotation.quotation_items || []).map((item: any, index: number) => ({
         id: item.id || `existing-${index}`,
         product_id: item.product_id || '',
@@ -102,6 +103,15 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
       }));
 
       setItems(quotationItems);
+
+      // Initialize sections state from items (preserve order)
+      const sectionMap = new Map<string, number>();
+      quotationItems.forEach(it => {
+        const name = (it as any).section_name || 'General Items';
+        if (!sectionMap.has(name)) sectionMap.set(name, Number((it as any).section_labor_cost || 0));
+      });
+      const initialSections = Array.from(sectionMap.entries()).map(([name, labor_cost]) => ({ name, labor_cost }));
+      setSectionsState(initialSections);
     }
   }, [quotation, open]);
 
@@ -190,39 +200,45 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
     setItems(items.filter(item => item.id !== itemId));
   };
 
+  // Build sections view from sectionsState and items
   const sections = useMemo(() => {
-    const map = new Map<string, { name: string; items: QuotationItem[]; labor_cost: number }>();
-    items.forEach((item) => {
-      const name = (item as any).section_name || 'General Items';
-      if (!map.has(name)) {
-        map.set(name, { name, items: [], labor_cost: (item as any).section_labor_cost || 0 });
-      }
-      map.get(name)!.items.push(item);
-    });
-    return Array.from(map.values());
-  }, [items]);
+    return sectionsState.map(s => ({
+      name: s.name,
+      labor_cost: s.labor_cost,
+      items: items.filter(it => ((it as any).section_name || 'General Items') === s.name)
+    }));
+  }, [sectionsState, items]);
 
   const updateSectionName = (oldName: string, newName: string) => {
     if (!newName || oldName === newName) return;
-    setItems(items.map(it => ((it as any).section_name === oldName ? { ...it, section_name: newName } : it)));
+    setSectionsState(prev => prev.map(s => s.name === oldName ? { ...s, name: newName } : s));
+    setItems(prev => prev.map(it => ((it as any).section_name === oldName ? { ...it, section_name: newName } : it)));
   };
 
   const updateSectionLaborCost = (sectionName: string, value: number) => {
-    setItems(items.map(it => ((it as any).section_name === sectionName ? { ...it, section_labor_cost: Number(value || 0) } : it)));
+    setSectionsState(prev => prev.map(s => s.name === sectionName ? { ...s, labor_cost: Number(value || 0) } : s));
+    setItems(prev => prev.map(it => ((it as any).section_name === sectionName ? { ...it, section_labor_cost: Number(value || 0) } : it)));
+  };
+
+  const addSection = (name = `Section ${sectionsState.length + 1}`, labor_cost = 0) => {
+    // Ensure name is unique
+    let newName = name;
+    const existing = new Set(sectionsState.map(s => s.name));
+    let i = 1;
+    while (existing.has(newName)) {
+      newName = `${name} ${i}`;
+      i++;
+    }
+    setSectionsState(prev => [...prev, { name: newName, labor_cost }]);
+  };
+
+  const moveItemToSection = (itemId: string, targetSection: string) => {
+    setItems(prev => prev.map(it => it.id === itemId ? { ...it, section_name: targetSection, section_labor_cost: sectionsState.find(s => s.name === targetSection)?.labor_cost || 0 } : it));
   };
 
   const totalLabor = useMemo(() => {
-    const seen = new Set<string>();
-    let sum = 0;
-    items.forEach(i => {
-      const s = (i as any).section_name || 'General Items';
-      if (!seen.has(s)) {
-        seen.add(s);
-        sum += Number((i as any).section_labor_cost || 0);
-      }
-    });
-    return sum;
-  }, [items]);
+    return sectionsState.reduce((sum, s) => sum + Number(s.labor_cost || 0), 0);
+  }, [sectionsState]);
 
   const totalWithLabor = (totalAmount || 0) + totalLabor;
 
@@ -486,6 +502,16 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
               <div className="text-center py-8 text-muted-foreground">No items in this quotation.</div>
             ) : (
               <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div />
+                  <div className="flex items-center space-x-2">
+                    <Button variant="outline" size="sm" onClick={() => addSection()}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Section
+                    </Button>
+                  </div>
+                </div>
+
                 {sections.map((section) => (
                   <div key={section.name} className="border rounded-lg">
                     <div className="p-3 bg-slate-50 flex items-center justify-between">
@@ -512,16 +538,17 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                     <div className="p-4">
                       <Table>
                         <TableHeader>
-                          <TableRow>
-                            <TableHead>Product</TableHead>
-                            <TableHead>Qty</TableHead>
-                            <TableHead>Unit Price</TableHead>
-                            <TableHead>Tax %</TableHead>
-                            <TableHead>Tax Incl.</TableHead>
-                            <TableHead>Line Total</TableHead>
-                            <TableHead></TableHead>
-                          </TableRow>
-                        </TableHeader>
+                  <TableRow>
+                    <TableHead>Product</TableHead>
+                    <TableHead>Section</TableHead>
+                    <TableHead>Qty</TableHead>
+                    <TableHead>Unit Price</TableHead>
+                    <TableHead>Tax %</TableHead>
+                    <TableHead>Tax Incl.</TableHead>
+                    <TableHead>Line Total</TableHead>
+                    <TableHead></TableHead>
+                  </TableRow>
+                </TableHeader>
                         <TableBody>
                           {section.items.map((item) => (
                             <TableRow key={item.id}>
@@ -531,6 +558,20 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                                   <div className="text-sm text-muted-foreground">{item.description}</div>
                                 </div>
                               </TableCell>
+
+                              <TableCell>
+                                <Select value={(item as any).section_name || 'General Items'} onValueChange={(val) => moveItemToSection(item.id, val)}>
+                                  <SelectTrigger className="w-40">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {sectionsState.map(s => (
+                                      <SelectItem key={s.name} value={s.name}>{s.name}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </TableCell>
+
                               <TableCell>
                                 <Input
                                   type="number"
