@@ -679,31 +679,98 @@ export const generatePDF = (data: DocumentData) => {
         <!-- Summary Table -->
         <div class="items-section">
           <h3 style="margin-top: 25px; margin-bottom: 15px; font-size: 14px; color: hsl(var(--primary));">Quotation Summary by Section</h3>
-          <table class="items-table">
-            <thead>
-              <tr>
-                <th style="width: 40%;">Section</th>
-                <th style="width: 20%;">Materials</th>
-                <th style="width: 20%;">Labor</th>
-                <th style="width: 20%;">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${data.sections.map((section, idx) => {
-                const sectionLetter = String.fromCharCode(65 + idx);
-                const matTotal = section.items.reduce((sum, item) => sum + (item.line_total || 0), 0);
-                const secTotal = matTotal + (section.labor_cost || 0);
-                return `
-                  <tr>
-                    <td class="description-cell">${sectionLetter}. ${section.name}</td>
-                    <td class="amount-cell">${formatCurrency(matTotal)}</td>
-                    <td class="amount-cell">${formatCurrency(section.labor_cost || 0)}</td>
-                    <td class="amount-cell" style="font-weight: bold;">${formatCurrency(secTotal)}</td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
+
+          ${data.sections.map((section, idx) => {
+            const sectionLetter = String.fromCharCode(65 + idx);
+            const matItems = section.items || [];
+            const matTotal = matItems.reduce((sum, item) => sum + (item.line_total || 0), 0);
+            const labour = section.labor_cost || 0;
+            const secTotal = matTotal + labour;
+
+            return `
+              <div class="section-summary" style="margin-bottom:18px;">
+                <div class="section-heading" style="font-weight:700; color:hsl(var(--primary)); margin-bottom:8px;">${sectionLetter}. ${section.name}</div>
+
+                <!-- Subsection A: Materials -->
+                <div class="subsection" style="margin-bottom:8px;">
+                  <div style="font-weight:600; margin-bottom:6px;">A. Materials</div>
+                  <table class="items-table" style="margin-bottom:6px;">
+                    <thead>
+                      <tr>
+                        <th style="width:6%;">#</th>
+                        <th style="width:54%; text-align:left;">Description</th>
+                        <th style="width:10%;">Qty</th>
+                        <th style="width:15%;">Unit Price</th>
+                        <th style="width:15%;">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${matItems.length > 0 ? matItems.map((item, i) => `
+                        <tr>
+                          <td style="text-align:center;">${i + 1}</td>
+                          <td class="description-cell">${item.description || ''}</td>
+                          <td class="center">${item.quantity || ''}</td>
+                          <td class="amount-cell">${formatCurrency(item.unit_price || 0)}</td>
+                          <td class="amount-cell">${formatCurrency(item.line_total || 0)}</td>
+                        </tr>
+                      `).join('') : `
+                        <tr>
+                          <td style="text-align:center;">-</td>
+                          <td class="description-cell">No materials listed</td>
+                          <td class="center">-</td>
+                          <td class="amount-cell">-</td>
+                          <td class="amount-cell">-</td>
+                        </tr>
+                      `}
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Subsection B: Labour -->
+                <div class="subsection" style="margin-bottom:12px;">
+                  <div style="font-weight:600; margin-bottom:6px;">B. Labour</div>
+                  <table class="items-table">
+                    <thead>
+                      <tr>
+                        <th style="width:6%;">#</th>
+                        <th style="width:74%; text-align:left;">Description</th>
+                        <th style="width:20%;">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${labour > 0 ? `
+                        <tr>
+                          <td style="text-align:center;">1</td>
+                          <td class="description-cell">Labour for ${section.name}</td>
+                          <td class="amount-cell">${formatCurrency(labour)}</td>
+                        </tr>
+                      ` : `
+                        <tr>
+                          <td style="text-align:center;">-</td>
+                          <td class="description-cell">No labour cost</td>
+                          <td class="amount-cell">-</td>
+                        </tr>
+                      `}
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Section subtotal -->
+                <div style="display:flex; justify-content:flex-end; margin-top:6px;">
+                  <div style="width:300px;">
+                    <table class="totals-table">
+                      <tr class="total-row">
+                        <td class="label">TOTAL ${sectionLetter}:</td>
+                        <td class="amount">${formatCurrency(secTotal)}</td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+
+              </div>
+            `;
+          }).join('')}
+
         </div>
 
         <!-- Grand Totals -->
@@ -773,6 +840,9 @@ export const generatePDF = (data: DocumentData) => {
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             padding: 0 20mm 20mm 20mm;
             position: relative;
+            /* Ensure each .page begins on a new printed page */
+            page-break-after: always;
+            break-after: page;
           }
 
           .header {
@@ -989,6 +1059,24 @@ export const generatePDF = (data: DocumentData) => {
             font-size: 16px;
             font-weight: bold;
             color: hsl(var(--primary));
+          }
+
+          /* Force each section summary to appear on its own printed page */
+          .section-summary {
+            page-break-after: always;
+            break-after: page;
+            -webkit-column-break-after: always;
+            -moz-page-break-after: always;
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+
+          .section-summary table,
+          .section-summary .subsection,
+          .section-summary .items-table,
+          .section-summary .totals-table {
+            break-inside: avoid;
+            page-break-inside: avoid;
           }
 
           @media print {
