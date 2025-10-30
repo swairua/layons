@@ -1456,7 +1456,7 @@ export const generatePDF = (data: DocumentData) => {
         .field-label {
           font-size: 10px;
           font-weight: bold;
-          color: hsl(var(--primary));
+          color: #000;
           margin-bottom: 4px;
           text-transform: uppercase;
         }
