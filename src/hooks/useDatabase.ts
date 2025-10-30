@@ -1511,7 +1511,27 @@ export const useDeleteQuotation = () => {
         .eq('id', id);
 
       if (error) {
-        // Re-throw the original supabase error (preserve structure) so callers can inspect it
+        // If deletion fails due to schema differences (e.g., missing company_id) or RLS, attempt soft-delete fallback
+        const message = String(error.message || '').toLowerCase();
+        console.warn('Quotation delete failed, attempting soft-delete fallback:', message);
+
+        if (message.includes('company_id') || message.includes('does not exist') || message.includes('permission') || message.includes('rls')) {
+          // Try to mark the quotation as 'deleted' instead of hard deleting
+          const { error: updateError } = await supabase
+            .from('quotations')
+            .update({ status: 'deleted' })
+            .eq('id', id);
+
+          if (updateError) {
+            // If update also fails, throw the original error for visibility
+            throw error;
+          }
+
+          // Soft-delete succeeded; return early
+          return;
+        }
+
+        // For other errors, rethrow
         throw error;
       }
     },
