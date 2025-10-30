@@ -84,6 +84,7 @@ export default function Quotations() {
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
   const [convertingQuotationId, setConvertingQuotationId] = useState<string | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; quotation?: Quotation }>({ open: false });
+  const [autoDownloadTriggered, setAutoDownloadTriggered] = useState(false);
 
   // Get current user and company from context
   const { profile, loading: authLoading } = useAuth();
