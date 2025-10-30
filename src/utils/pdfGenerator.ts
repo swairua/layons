@@ -855,15 +855,33 @@ export const generatePDF = (data: DocumentData) => {
 
           .header {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+            flex-direction: column;
             margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid hsl(var(--primary));
+            padding-bottom: 0;
+            border-bottom: none;
             margin-left: -20mm;
             margin-right: -20mm;
-            padding-left: 20mm;
-            padding-right: 20mm;
+            padding-left: 0;
+            padding-right: 0;
+          }
+
+          .header-image {
+            width: calc(100% + 40mm);
+            height: auto;
+            margin: 0 -20mm 20px -20mm;
+            padding: 0;
+            display: block;
+            border: none;
+          }
+
+          .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 30px;
+            padding: 20px 20mm 20px 20mm;
+            margin: 0 -20mm 0 -20mm;
+            border-bottom: 2px solid hsl(var(--primary));
           }
 
           .company-info {
