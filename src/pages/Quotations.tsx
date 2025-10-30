@@ -168,6 +168,36 @@ export default function Quotations() {
     }
   };
 
+  // Auto-trigger download when URL contains ?download_quotation=QT-2025-005 or by id
+  useEffect(() => {
+    try {
+      if (autoDownloadTriggered) return;
+      const params = new URLSearchParams(window.location.search || '');
+      const downloadParam = params.get('download_quotation') || params.get('download');
+      if (!downloadParam) return;
+      if (!quotations || quotations.length === 0) return; // wait until quotations loaded
+
+      const found = quotations.find((q: any) => q.quotation_number === downloadParam || q.id === downloadParam);
+      if (found) {
+        handleDownloadQuotation(found as Quotation);
+        setAutoDownloadTriggered(true);
+
+        // Remove the query param to avoid repeated downloads
+        try {
+          const url = new URL(window.location.href);
+          url.searchParams.delete('download_quotation');
+          url.searchParams.delete('download');
+          window.history.replaceState({}, document.title, url.toString());
+        } catch (e) {
+          // ignore
+        }
+      }
+    } catch (e) {
+      // ignore errors in auto-download flow
+      console.error('Auto-download check failed', e);
+    }
+  }, [quotations, currentCompany, autoDownloadTriggered]);
+
   const handleSendQuotation = async (quotation: Quotation) => {
     if (!quotation.customers?.email) {
       toast.error('Customer email not available');
