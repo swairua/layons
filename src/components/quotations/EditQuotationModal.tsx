@@ -733,7 +733,9 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                               No items in this section. Search and add products above.
                             </div>
                           ) : (
-                            <Table className="text-sm">
+                            <Table className="text-sm"
+                                   onDragOver={allowDrop}
+                                   onDrop={(e) => handleDropOnSection(section.id, e)}>
                               <TableHeader>
                                 <TableRow>
                                   <TableHead>Product</TableHead>
@@ -747,7 +749,10 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                               </TableHeader>
                               <TableBody>
                                 {section.items.map((item) => (
-                                  <TableRow key={item.id} className="text-xs">
+                                  <TableRow key={item.id}
+                                            className="text-xs cursor-move"
+                                            draggable
+                                            onDragStart={(e) => handleRowDragStart(section.id, item.id, e)}>
                                     <TableCell>
                                       <div>
                                         <div className="font-medium">{item.product_name}</div>
