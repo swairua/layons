@@ -574,11 +574,11 @@ export const generatePDF = (data: DocumentData) => {
               <thead>
                 <tr>
                   <th style="width: 5%;">Item #</th>
-                  <th style="width: 35%;">Description</th>
+                  <th style="width: 30%;">Description</th>
+                  <th style="width: 10%;">Unit</th>
                   <th style="width: 10%;">Qty</th>
                   <th style="width: 18%;">Unit Price</th>
-                  <th style="width: 20%;">Total</th>
-                  <th style="width: 12%;">Tax</th>
+                  <th style="width: 27%;">Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -586,16 +586,15 @@ export const generatePDF = (data: DocumentData) => {
                   <tr>
                     <td>${itemIndex + 1}</td>
                     <td class="description-cell">${item.description}</td>
+                    <td class="center">${item.unit_of_measure || '-'}</td>
                     <td class="center">${item.quantity}</td>
                     <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
                     <td class="amount-cell">${formatCurrency(item.line_total)}</td>
-                    <td class="amount-cell">${item.tax_amount ? formatCurrency(item.tax_amount) : '-'}</td>
                   </tr>
                 `).join('')}
                 <tr style="background: #fff; font-weight: 600; border-top: 2px solid #000;">
-                  <td colspan="4" style="text-align: right; padding: 8px 8px;">Materials Subtotal:</td>
+                  <td colspan="5" style="text-align: right; padding: 8px 8px;">Materials Subtotal:</td>
                   <td style="text-align: right; padding: 8px 8px;">${formatCurrency(sectionMaterialsTotal)}</td>
-                  <td style="text-align: right; padding: 8px 8px;">${sectionTaxAmount > 0 ? formatCurrency(sectionTaxAmount) : '-'}</td>
                 </tr>
               </tbody>
             </table>
