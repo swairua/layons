@@ -866,9 +866,9 @@ export const generatePDF = (data: DocumentData) => {
           }
 
           .header-image {
-            width: calc(100% + 40mm);
+            width: 100%;
             height: auto;
-            margin: 0 -20mm 20px -20mm;
+            margin: 0 0 20px 0;
             padding: 0;
             display: block;
             border: none;
@@ -879,8 +879,8 @@ export const generatePDF = (data: DocumentData) => {
             justify-content: space-between;
             align-items: flex-start;
             gap: 30px;
-            padding: 20px 20mm 20px 20mm;
-            margin: 0 -20mm 0 -20mm;
+            padding: 0 0 20px 0;
+            margin: 0;
             border-bottom: 2px solid hsl(var(--primary));
           }
 
