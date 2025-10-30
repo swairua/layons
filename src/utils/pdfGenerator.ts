@@ -1273,24 +1273,24 @@ export const generatePDF = (data: DocumentData) => {
         .section-title {
           font-size: 14px;
           font-weight: bold;
-          color: hsl(var(--primary));
+          color: #000;
           margin: 0 0 15px 0;
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
-        
+
         .customer-name {
           font-size: 16px;
           font-weight: bold;
           margin-bottom: 8px;
           color: #212529;
         }
-        
+
         .customer-details {
           color: #666;
           line-height: 1.6;
         }
-        
+
         .items-section {
           margin: 12px 0 30px 0;
         }
@@ -1300,16 +1300,16 @@ export const generatePDF = (data: DocumentData) => {
           border-collapse: collapse;
           margin: 20px 0;
           font-size: 11px;
-          border: 2px solid hsl(var(--primary));
+          border: 2px solid #000;
           border-radius: 8px;
           overflow: hidden;
         }
-        
+
         .items-table thead {
-          background: hsl(var(--primary));
+          background: #000;
           color: white;
         }
-        
+
         .items-table th {
           padding: 12px 8px;
           text-align: center;
