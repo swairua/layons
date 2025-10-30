@@ -267,6 +267,59 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
     setSections(sections.filter(s => s.id !== sectionId));
   };
 
+  const addSection = () => {
+    if (!newSectionName.trim()) return;
+    const newSection: QuotationSection = {
+      id: `section-${Date.now()}-${Math.random()}`,
+      name: newSectionName.trim(),
+      items: [],
+      labor_cost: 0,
+      expanded: true,
+    };
+    setSections([...sections, newSection]);
+    setNewSectionName('');
+  };
+
+  const moveItemBetweenSections = (fromSectionId: string, toSectionId: string, itemId: string) => {
+    if (fromSectionId === toSectionId) return;
+    let movedItem: QuotationItem | null = null;
+    const next = sections.map(sec => {
+      if (sec.id === fromSectionId) {
+        const remaining = sec.items.filter(it => {
+          if (it.id === itemId) { movedItem = it; return false; }
+          return true;
+        });
+        return { ...sec, items: remaining };
+      }
+      return sec;
+    });
+    if (movedItem) {
+      setSections(next.map(sec => sec.id === toSectionId ? { ...sec, items: [...sec.items, { ...movedItem!, section_name: sec.name, section_labor_cost: sec.labor_cost }] } : sec));
+    } else {
+      setSections(next);
+    }
+  };
+
+  const handleRowDragStart = (sectionId: string, itemId: string, ev: React.DragEvent) => {
+    ev.dataTransfer.setData('application/json', JSON.stringify({ sectionId, itemId }));
+    ev.dataTransfer.effectAllowed = 'move';
+  };
+
+  const allowDrop = (ev: React.DragEvent) => {
+    ev.preventDefault();
+    ev.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDropOnSection = (targetSectionId: string, ev: React.DragEvent) => {
+    ev.preventDefault();
+    try {
+      const data = JSON.parse(ev.dataTransfer.getData('application/json'));
+      if (data && data.sectionId && data.itemId) {
+        moveItemBetweenSections(data.sectionId, targetSectionId, data.itemId);
+      }
+    } catch {}
+  };
+
   const addItemToSection = (sectionId: string, product: any) => {
     setSections(sections.map(section => {
       if (section.id !== sectionId) return section;
