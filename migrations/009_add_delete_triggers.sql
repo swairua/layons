@@ -93,6 +93,7 @@ GRANT EXECUTE ON FUNCTION log_delete_trigger() TO authenticated;
 -- Trigger for customers
 DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'customers') THEN
+    DROP TRIGGER IF EXISTS customers_audit_delete ON customers;
     CREATE TRIGGER customers_audit_delete
     BEFORE DELETE ON customers
     FOR EACH ROW
@@ -103,6 +104,7 @@ END $$;
 -- Trigger for invoices
 DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'invoices') THEN
+    DROP TRIGGER IF EXISTS invoices_audit_delete ON invoices;
     CREATE TRIGGER invoices_audit_delete
     BEFORE DELETE ON invoices
     FOR EACH ROW
@@ -113,6 +115,7 @@ END $$;
 -- Trigger for quotations
 DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'quotations') THEN
+    DROP TRIGGER IF EXISTS quotations_audit_delete ON quotations;
     CREATE TRIGGER quotations_audit_delete
     BEFORE DELETE ON quotations
     FOR EACH ROW
@@ -123,6 +126,7 @@ END $$;
 -- Trigger for credit_notes
 DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'credit_notes') THEN
+    DROP TRIGGER IF EXISTS credit_notes_audit_delete ON credit_notes;
     CREATE TRIGGER credit_notes_audit_delete
     BEFORE DELETE ON credit_notes
     FOR EACH ROW
@@ -133,6 +137,7 @@ END $$;
 -- Trigger for proforma_invoices
 DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'proforma_invoices') THEN
+    DROP TRIGGER IF EXISTS proforma_invoices_audit_delete ON proforma_invoices;
     CREATE TRIGGER proforma_invoices_audit_delete
     BEFORE DELETE ON proforma_invoices
     FOR EACH ROW
@@ -143,6 +148,7 @@ END $$;
 -- Trigger for lpos
 DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'lpos') THEN
+    DROP TRIGGER IF EXISTS lpos_audit_delete ON lpos;
     CREATE TRIGGER lpos_audit_delete
     BEFORE DELETE ON lpos
     FOR EACH ROW
@@ -153,6 +159,7 @@ END $$;
 -- Trigger for boqs
 DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'boqs') THEN
+    DROP TRIGGER IF EXISTS boqs_audit_delete ON boqs;
     CREATE TRIGGER boqs_audit_delete
     BEFORE DELETE ON boqs
     FOR EACH ROW
@@ -163,6 +170,7 @@ END $$;
 -- Trigger for tax_settings
 DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'tax_settings') THEN
+    DROP TRIGGER IF EXISTS tax_settings_audit_delete ON tax_settings;
     CREATE TRIGGER tax_settings_audit_delete
     BEFORE DELETE ON tax_settings
     FOR EACH ROW
@@ -173,6 +181,7 @@ END $$;
 -- Trigger for credit_note_items
 DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'credit_note_items') THEN
+    DROP TRIGGER IF EXISTS credit_note_items_audit_delete ON credit_note_items;
     CREATE TRIGGER credit_note_items_audit_delete
     BEFORE DELETE ON credit_note_items
     FOR EACH ROW
@@ -183,6 +192,7 @@ END $$;
 -- Trigger for lpo_items
 DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'lpo_items') THEN
+    DROP TRIGGER IF EXISTS lpo_items_audit_delete ON lpo_items;
     CREATE TRIGGER lpo_items_audit_delete
     BEFORE DELETE ON lpo_items
     FOR EACH ROW
@@ -193,6 +203,7 @@ END $$;
 -- Trigger for proforma_items
 DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'proforma_items') THEN
+    DROP TRIGGER IF EXISTS proforma_items_audit_delete ON proforma_items;
     CREATE TRIGGER proforma_items_audit_delete
     BEFORE DELETE ON proforma_items
     FOR EACH ROW
