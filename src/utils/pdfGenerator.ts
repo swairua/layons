@@ -967,20 +967,20 @@ export const generatePDF = (data: DocumentData) => {
           .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin: 12px 0;
             font-size: 11px;
-            border: 2px solid hsl(var(--primary));
-            border-radius: 8px;
+            border: 2px solid #000;
+            border-radius: 0;
             overflow: hidden;
           }
 
           .items-table thead {
-            background: hsl(var(--primary));
+            background: #000;
             color: white;
           }
 
           .items-table th {
-            padding: 12px 8px;
+            padding: 8px 8px;
             text-align: center;
             font-weight: bold;
             font-size: 10px;
@@ -994,7 +994,7 @@ export const generatePDF = (data: DocumentData) => {
           }
 
           .items-table td {
-            padding: 10px 8px;
+            padding: 8px 8px;
             border-bottom: 1px solid #e9ecef;
             border-right: 1px solid #e9ecef;
             text-align: center;
