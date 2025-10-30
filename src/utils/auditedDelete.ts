@@ -170,13 +170,33 @@ export async function performAuditedDeleteMultiple(
     }));
 
     if (auditEntries.length > 0) {
-      const { error: auditError } = await supabase
-        .from('audit_logs')
-        .insert(auditEntries);
+      try {
+        const { error: auditError } = await supabase
+          .from('audit_logs')
+          .insert(auditEntries);
 
-      if (auditError) {
-        console.error('Failed to log deletion to audit_logs:', auditError);
-        // Don't fail the delete if audit logging fails - the deletion already succeeded
+        if (auditError) {
+          console.error('Failed to log deletion to audit_logs (first attempt):', auditError);
+          const message = String(auditError.message || '').toLowerCase();
+          if (message.includes('column "company_id"') || message.includes('column') && message.includes('does not exist')) {
+            // Retry with minimal entries
+            const minimalEntries = auditEntries.map(e => ({
+              user_id: e.user_id,
+              action: e.action,
+              entity_type: e.entity_type,
+              entity_id: e.entity_id,
+              details: e.details,
+            }));
+            const { error: auditError2 } = await supabase
+              .from('audit_logs')
+              .insert(minimalEntries);
+            if (auditError2) {
+              console.error('Failed to log deletion to audit_logs (minimal attempt):', auditError2);
+            }
+          }
+        }
+      } catch (auditInsertErr) {
+        console.error('Unexpected error while logging audit deletions:', auditInsertErr);
       }
     }
 
