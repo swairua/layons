@@ -310,6 +310,8 @@ export function ViewInvoiceModal({
 
                     {expandedSections.has(section.name) && (
                       <div className="p-4 space-y-4">
+                        {/* Subsection A: Materials */}
+                        <div className="mb-1 font-semibold">A. Materials</div>
                         <Table>
                           <TableHeader>
                             <TableRow>
@@ -344,26 +346,48 @@ export function ViewInvoiceModal({
                           </TableBody>
                         </Table>
 
+                        {/* Subsection B: Labour */}
                         {section.labor_cost > 0 && (
-                          <div className="border-t pt-4">
-                            <div className="flex justify-end">
-                              <div className="w-80 space-y-1 text-sm">
+                          <div className="mt-4">
+                            <div className="mb-2 font-semibold">B. Labour</div>
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Description</TableHead>
+                                  <TableHead className="text-right">Amount</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                <TableRow>
+                                  <TableCell>Labour for {section.name}</TableCell>
+                                  <TableCell className="text-right font-semibold">{formatCurrency(section.labor_cost)}</TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
+                          </div>
+                        )}
+
+                        {/* Section Totals */}
+                        <div className="border-t pt-4">
+                          <div className="flex justify-end">
+                            <div className="w-80 space-y-1 text-sm">
+                              <div className="flex justify-between">
+                                <span>Total {section.name} Materials:</span>
+                                <span className="font-semibold">{formatCurrency(calculateSectionMaterials(section))}</span>
+                              </div>
+                              {section.labor_cost > 0 && (
                                 <div className="flex justify-between">
-                                  <span>Materials:</span>
-                                  <span className="font-semibold">{formatCurrency(calculateSectionMaterials(section))}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>Labor Cost:</span>
+                                  <span>{section.name} Labour:</span>
                                   <span className="font-semibold">{formatCurrency(section.labor_cost)}</span>
                                 </div>
-                                <div className="flex justify-between border-t pt-1 font-semibold">
-                                  <span>Section Total:</span>
-                                  <span>{formatCurrency(calculateSectionTotal(section))}</span>
-                                </div>
+                              )}
+                              <div className="flex justify-between border-t pt-1 font-semibold">
+                                <span>Section Total:</span>
+                                <span>{formatCurrency(calculateSectionTotal(section))}</span>
                               </div>
                             </div>
                           </div>
-                        )}
+                        </div>
                       </div>
                     )}
                   </div>
