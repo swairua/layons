@@ -637,24 +637,8 @@ export const generatePDF = (data: DocumentData) => {
           <!-- Section Totals -->
           <div class="totals-section">
             <table class="totals-table">
-              <tr>
-                <td class="label">TOTAL ${sectionLetter} MATERIALS:</td>
-                <td class="amount">${formatCurrency(sectionMaterialsTotal)}</td>
-              </tr>
-              ${sectionLaborCost > 0 ? `
-              <tr>
-                <td class="label">${sectionLetter} LABOR:</td>
-                <td class="amount">${formatCurrency(sectionLaborCost)}</td>
-              </tr>
-              ` : ''}
-              ${sectionTaxAmount > 0 ? `
-              <tr>
-                <td class="label">TAX AMOUNT:</td>
-                <td class="amount">${formatCurrency(sectionTaxAmount)}</td>
-              </tr>
-              ` : ''}
               <tr class="total-row">
-                <td class="label">TOTAL ${sectionLetter} COST:</td>
+                <td class="label">SECTION ${sectionLetter} TOTAL:</td>
                 <td class="amount">${formatCurrency(sectionTotal)}</td>
               </tr>
             </table>
