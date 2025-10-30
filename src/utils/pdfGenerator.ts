@@ -376,7 +376,7 @@ export const generatePDF = (data: DocumentData) => {
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
-        .items thead th { background:hsl(var(--primary)); color:#fff; font-weight:700; }
+        .items thead th { background:#000; color:#fff; font-weight:700; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding:8px; }
         .item-row td.num { text-align:center; }
         .item-row td.desc { width:55%; }
