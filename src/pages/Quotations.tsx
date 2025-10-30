@@ -106,8 +106,9 @@ export default function Quotations() {
       setDeleteDialog({ open: false });
     } catch (err: any) {
       console.error('Delete failed', err);
-      const message = err?.message || err?.original?.message || JSON.stringify(err);
-      toast.error(`Failed to delete quotation: ${message}`);
+      // Prefer the original Supabase error message if available
+      const supabaseMessage = err?.message || err?.original?.message || (err?.details || null) || JSON.stringify(err);
+      toast.error(`Failed to delete quotation: ${supabaseMessage}`);
     }
   };
 
