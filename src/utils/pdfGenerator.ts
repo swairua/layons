@@ -1999,6 +1999,8 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
           tax_percentage: item.tax_percentage,
           tax_amount: item.tax_amount,
           line_total: item.line_total,
+          unit_of_measure: item.unit_of_measure,
+          products: item.products,
         })),
         labor_cost: laborCost,
       };
@@ -2112,6 +2114,8 @@ export const downloadQuotationPDF = async (quotation: any, company?: CompanyDeta
           tax_percentage: item.tax_percentage,
           tax_amount: item.tax_amount,
           line_total: item.line_total,
+          unit_of_measure: item.unit_of_measure,
+          products: item.products,
         })),
         labor_cost: laborCost,
       };
