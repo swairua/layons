@@ -879,7 +879,7 @@ export const generatePDF = (data: DocumentData) => {
             justify-content: space-between;
             align-items: flex-start;
             gap: 30px;
-            padding: 0 0 20px 0;
+            padding: 20px 20px 20px 20px;
             margin: 0;
             border-bottom: 2px solid hsl(var(--primary));
           }
