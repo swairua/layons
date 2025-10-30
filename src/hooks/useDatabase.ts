@@ -1351,6 +1351,7 @@ export const useQuotations = (companyId?: string) => {
             updated_at
           `)
           .eq('company_id', companyId)
+          .neq('status', 'deleted')
           .order('created_at', { ascending: false });
 
         const { data: quotations, error: quotationsError } = await query;
