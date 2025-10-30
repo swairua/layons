@@ -284,6 +284,8 @@ export function ViewQuotationModal({
                       <CardTitle className="text-lg">{sectionName}</CardTitle>
                     </CardHeader>
                     <CardContent className="pt-6">
+                      {/* Subsection A: Materials */}
+                      <div className="mb-3 font-semibold">A. Materials</div>
                       <Table>
                         <TableHeader>
                           <TableRow>
@@ -314,17 +316,38 @@ export function ViewQuotationModal({
                         </TableBody>
                       </Table>
 
+                      {/* Subsection B: Labour */}
+                      {laborCost > 0 && (
+                        <div className="mt-6">
+                          <div className="mb-2 font-semibold">B. Labour</div>
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Description</TableHead>
+                                <TableHead className="text-right">Amount</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              <TableRow>
+                                <TableCell>Labour for {sectionName}</TableCell>
+                                <TableCell className="text-right font-semibold">{formatCurrency(laborCost)}</TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                        </div>
+                      )}
+
                       {/* Section Totals */}
                       <div className="mt-6 border-t pt-4">
                         <div className="flex justify-end">
                           <div className="w-80 space-y-2">
                             <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">Total {sectionName}:</span>
+                              <span className="text-muted-foreground">Total {sectionName} Materials:</span>
                               <span className="font-semibold">{formatCurrency(materialsCost)}</span>
                             </div>
                             {laborCost > 0 && (
                               <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">{sectionName} Labor:</span>
+                                <span className="text-muted-foreground">{sectionName} Labour:</span>
                                 <span className="font-semibold">{formatCurrency(laborCost)}</span>
                               </div>
                             )}

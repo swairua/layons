@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,6 +31,8 @@ import {
 } from 'lucide-react';
 import { useCustomers, useProducts, useTaxSettings, useCompanies } from '@/hooks/useDatabase';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface QuotationItem {
   id: string;
@@ -60,6 +62,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
   const [termsAndConditions, setTermsAndConditions] = useState('');
   
   const [items, setItems] = useState<QuotationItem[]>([]);
+  const [sectionsState, setSectionsState] = useState<{ name: string; labor_cost: number }[]>([]);
   const [searchProduct, setSearchProduct] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -81,8 +84,8 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
       setValidUntil(quotation.valid_until || '');
       setNotes(quotation.notes || '');
       setTermsAndConditions(quotation.terms_and_conditions || '');
-      
-      // Convert quotation items to local format
+
+      // Convert quotation items to local format (preserve section metadata)
       const quotationItems = (quotation.quotation_items || []).map((item: any, index: number) => ({
         id: item.id || `existing-${index}`,
         product_id: item.product_id || '',
@@ -94,9 +97,21 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
         tax_amount: item.tax_amount || 0,
         tax_inclusive: item.tax_inclusive || false,
         line_total: item.line_total || 0,
+        // Preserve section fields so editing doesn't drop them
+        section_name: item.section_name || 'General Items',
+        section_labor_cost: item.section_labor_cost || 0,
       }));
-      
+
       setItems(quotationItems);
+
+      // Initialize sections state from items (preserve order)
+      const sectionMap = new Map<string, number>();
+      quotationItems.forEach(it => {
+        const name = (it as any).section_name || 'General Items';
+        if (!sectionMap.has(name)) sectionMap.set(name, Number((it as any).section_labor_cost || 0));
+      });
+      const initialSections = Array.from(sectionMap.entries()).map(([name, labor_cost]) => ({ name, labor_cost }));
+      setSectionsState(initialSections);
     }
   }, [quotation, open]);
 
@@ -185,6 +200,48 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
     setItems(items.filter(item => item.id !== itemId));
   };
 
+  // Build sections view from sectionsState and items
+  const sections = useMemo(() => {
+    return sectionsState.map(s => ({
+      name: s.name,
+      labor_cost: s.labor_cost,
+      items: items.filter(it => ((it as any).section_name || 'General Items') === s.name)
+    }));
+  }, [sectionsState, items]);
+
+  const updateSectionName = (oldName: string, newName: string) => {
+    if (!newName || oldName === newName) return;
+    setSectionsState(prev => prev.map(s => s.name === oldName ? { ...s, name: newName } : s));
+    setItems(prev => prev.map(it => ((it as any).section_name === oldName ? { ...it, section_name: newName } : it)));
+  };
+
+  const updateSectionLaborCost = (sectionName: string, value: number) => {
+    setSectionsState(prev => prev.map(s => s.name === sectionName ? { ...s, labor_cost: Number(value || 0) } : s));
+    setItems(prev => prev.map(it => ((it as any).section_name === sectionName ? { ...it, section_labor_cost: Number(value || 0) } : it)));
+  };
+
+  const addSection = (name = `Section ${sectionsState.length + 1}`, labor_cost = 0) => {
+    // Ensure name is unique
+    let newName = name;
+    const existing = new Set(sectionsState.map(s => s.name));
+    let i = 1;
+    while (existing.has(newName)) {
+      newName = `${name} ${i}`;
+      i++;
+    }
+    setSectionsState(prev => [...prev, { name: newName, labor_cost }]);
+  };
+
+  const moveItemToSection = (itemId: string, targetSection: string) => {
+    setItems(prev => prev.map(it => it.id === itemId ? { ...it, section_name: targetSection, section_labor_cost: sectionsState.find(s => s.name === targetSection)?.labor_cost || 0 } : it));
+  };
+
+  const totalLabor = useMemo(() => {
+    return sectionsState.reduce((sum, s) => sum + Number(s.labor_cost || 0), 0);
+  }, [sectionsState]);
+
+  const totalWithLabor = (totalAmount || 0) + totalLabor;
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
       style: 'currency',
@@ -201,6 +258,8 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
   const taxAmount = items.reduce((sum, item) => sum + (item.tax_amount || 0), 0);
   const totalAmount = items.reduce((sum, item) => sum + item.line_total, 0);
 
+  const queryClient = useQueryClient();
+
   const handleSubmit = async () => {
     if (!selectedCustomerId) {
       toast.error('Please select a customer');
@@ -214,10 +273,69 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
 
     setIsSubmitting(true);
     try {
-      // TODO: Implement actual update API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      // Prepare updated quotation payload
+      const updatedQuotation: any = {
+        customer_id: selectedCustomerId,
+        quotation_date: quotationDate,
+        valid_until: validUntil || null,
+        notes,
+        terms_and_conditions: termsAndConditions,
+        subtotal,
+        tax_amount: taxAmount,
+        total_amount: totalAmount
+      };
+
+      // Update quotation
+      const { data: updatedData, error: updateError } = await supabase
+        .from('quotations')
+        .update(updatedQuotation)
+        .eq('id', quotation.id)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      // Remove existing items and insert new ones (simpler and deterministic)
+      const { error: deleteError } = await supabase
+        .from('quotation_items')
+        .delete()
+        .eq('quotation_id', quotation.id);
+
+      if (deleteError) throw deleteError;
+
+      const itemsToInsert = items.map((item, idx) => ({
+        quotation_id: quotation.id,
+        product_id: item.product_id || null,
+        description: item.description || '',
+        quantity: item.quantity || 0,
+        unit_price: item.unit_price || 0,
+        tax_percentage: item.tax_percentage || 0,
+        tax_amount: item.tax_amount || 0,
+        tax_inclusive: item.tax_inclusive || false,
+        line_total: item.line_total || 0,
+        section_name: item.section_name || 'General Items',
+        section_labor_cost: item.section_labor_cost || 0,
+        sort_order: idx + 1
+      }));
+
+      let { error: insertError } = await supabase
+        .from('quotation_items')
+        .insert(itemsToInsert);
+
+      // Fallback for DBs that don't accept section fields
+      if (insertError && (insertError.code === 'PGRST204' || String(insertError.message || '').toLowerCase().includes('section'))) {
+        const minimalItems = itemsToInsert.map(({ section_name, section_labor_cost, ...rest }) => rest);
+        const retry = await supabase
+          .from('quotation_items')
+          .insert(minimalItems);
+        insertError = retry.error as any;
+      }
+
+      if (insertError) throw insertError;
+
       toast.success(`Quotation ${quotation.quotation_number} updated successfully!`);
+      queryClient.invalidateQueries({ queryKey: ['quotations'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
       onSuccess();
       onOpenChange(false);
     } catch (error) {
@@ -381,14 +499,48 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
           </CardHeader>
           <CardContent>
             {items.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No items in this quotation.
-              </div>
+              <div className="text-center py-8 text-muted-foreground">No items in this quotation.</div>
             ) : (
-              <Table>
-                <TableHeader>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div />
+                  <div className="flex items-center space-x-2">
+                    <Button variant="outline" size="sm" onClick={() => addSection()}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Section
+                    </Button>
+                  </div>
+                </div>
+
+                {sections.map((section) => (
+                  <div key={section.name} className="border rounded-lg">
+                    <div className="p-3 bg-slate-50 flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <Input
+                          value={section.name}
+                          onChange={(e) => updateSectionName(section.name, e.target.value)}
+                          className="font-semibold"
+                        />
+                        <div className="text-sm text-muted-foreground">{section.items.length} items</div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-sm text-muted-foreground">Labour:</div>
+                        <Input
+                          type="number"
+                          value={section.labor_cost}
+                          onChange={(e) => updateSectionLaborCost(section.name, parseFloat(e.target.value) || 0)}
+                          className="w-28"
+                          step="0.01"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="p-4">
+                      <Table>
+                        <TableHeader>
                   <TableRow>
                     <TableHead>Product</TableHead>
+                    <TableHead>Section</TableHead>
                     <TableHead>Qty</TableHead>
                     <TableHead>Unit Price</TableHead>
                     <TableHead>Tax %</TableHead>
@@ -397,69 +549,109 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {items.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{item.product_name}</div>
-                          <div className="text-sm text-muted-foreground">{item.description}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={item.quantity}
-                          onChange={(e) => updateItemQuantity(item.id, parseInt(e.target.value) || 0)}
-                          className="w-20"
-                          min="1"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={item.unit_price}
-                          onChange={(e) => updateItemPrice(item.id, parseFloat(e.target.value) || 0)}
-                          className="w-24"
-                          step="0.01"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={item.tax_percentage}
-                          onChange={(e) => updateItemVAT(item.id, parseFloat(e.target.value) || 0)}
-                          className="w-20"
-                          min="0"
-                          max="100"
-                          step="0.1"
-                          placeholder="0"
-                          disabled={item.tax_inclusive}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Checkbox
-                          checked={item.tax_inclusive}
-                          onCheckedChange={(checked) => updateItemVATInclusive(item.id, !!checked)}
-                        />
-                      </TableCell>
-                      <TableCell className="font-semibold">
-                        {formatCurrency(item.line_total)}
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeItem(item.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                        <TableBody>
+                          {section.items.map((item) => (
+                            <TableRow key={item.id}>
+                              <TableCell>
+                                <div>
+                                  <div className="font-medium">{item.product_name}</div>
+                                  <div className="text-sm text-muted-foreground">{item.description}</div>
+                                </div>
+                              </TableCell>
+
+                              <TableCell>
+                                <Select value={(item as any).section_name || 'General Items'} onValueChange={(val) => moveItemToSection(item.id, val)}>
+                                  <SelectTrigger className="w-40">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {sectionsState.map(s => (
+                                      <SelectItem key={s.name} value={s.name}>{s.name}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </TableCell>
+
+                              <TableCell>
+                                <Input
+                                  type="number"
+                                  value={item.quantity}
+                                  onChange={(e) => updateItemQuantity(item.id, parseInt(e.target.value) || 0)}
+                                  className="w-20"
+                                  min="1"
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <Input
+                                  type="number"
+                                  value={item.unit_price}
+                                  onChange={(e) => updateItemPrice(item.id, parseFloat(e.target.value) || 0)}
+                                  className="w-24"
+                                  step="0.01"
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <Input
+                                  type="number"
+                                  value={item.tax_percentage}
+                                  onChange={(e) => updateItemVAT(item.id, parseFloat(e.target.value) || 0)}
+                                  className="w-20"
+                                  min="0"
+                                  max="100"
+                                  step="0.1"
+                                  placeholder="0"
+                                  disabled={item.tax_inclusive}
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <Checkbox
+                                  checked={item.tax_inclusive}
+                                  onCheckedChange={(checked) => updateItemVATInclusive(item.id, !!checked)}
+                                />
+                              </TableCell>
+                              <TableCell className="font-semibold">{formatCurrency(item.line_total)}</TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => removeItem(item.id)}
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Summary Totals with labour included */}
+                <div className="mt-2">
+                  <div className="flex justify-end">
+                    <div className="w-80 space-y-2">
+                      <div className="flex justify-between">
+                        <span>Subtotal:</span>
+                        <span className="font-semibold">{formatCurrency(subtotal)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Total Labour:</span>
+                        <span className="font-semibold">{formatCurrency(totalLabor)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Tax:</span>
+                        <span className="font-semibold">{formatCurrency(taxAmount)}</span>
+                      </div>
+                      <div className="flex justify-between text-lg border-t pt-2">
+                        <span className="font-bold">Total:</span>
+                        <span className="font-bold text-primary">{formatCurrency(totalWithLabor)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* Totals */}
