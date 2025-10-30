@@ -27,7 +27,9 @@ import {
   Trash2, 
   Search,
   Calculator,
-  FileText
+  FileText,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useCustomers, useProducts, useTaxSettings, useCompanies } from '@/hooks/useDatabase';
 import { toast } from 'sonner';
@@ -45,6 +47,16 @@ interface QuotationItem {
   tax_amount: number;
   tax_inclusive: boolean;
   line_total: number;
+  section_name?: string;
+  section_labor_cost?: number;
+}
+
+interface QuotationSection {
+  id: string;
+  name: string;
+  items: QuotationItem[];
+  labor_cost: number;
+  expanded: boolean;
 }
 
 interface EditQuotationModalProps {
@@ -61,8 +73,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
   const [notes, setNotes] = useState('');
   const [termsAndConditions, setTermsAndConditions] = useState('');
   
-  const [items, setItems] = useState<QuotationItem[]>([]);
-  const [sectionsState, setSectionsState] = useState<{ name: string; labor_cost: number }[]>([]);
+  const [sections, setSections] = useState<QuotationSection[]>([]);
   const [searchProduct, setSearchProduct] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -72,9 +83,8 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
   const { data: products, isLoading: loadingProducts } = useProducts(currentCompany?.id);
   const { data: taxSettings } = useTaxSettings(currentCompany?.id);
 
-  // Get default tax rate
   const defaultTax = taxSettings?.find(tax => tax.is_default && tax.is_active);
-  const defaultTaxRate = defaultTax?.rate || 16; // Fallback to 16% if no default is set
+  const defaultTaxRate = defaultTax?.rate || 16;
 
   // Load quotation data when modal opens
   useEffect(() => {
@@ -85,33 +95,40 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
       setNotes(quotation.notes || '');
       setTermsAndConditions(quotation.terms_and_conditions || '');
 
-      // Convert quotation items to local format (preserve section metadata)
+      // Group items into sections
       const quotationItems = (quotation.quotation_items || []).map((item: any, index: number) => ({
         id: item.id || `existing-${index}`,
         product_id: item.product_id || '',
-        product_name: item.products?.name || 'Unknown Product',
+        product_name: item.products?.name || item.product_name || 'Unknown Product',
         description: item.description || '',
         quantity: item.quantity || 0,
         unit_price: item.unit_price || 0,
-        tax_percentage: item.tax_percentage || 16,
+        tax_percentage: item.tax_percentage || 0,
         tax_amount: item.tax_amount || 0,
         tax_inclusive: item.tax_inclusive || false,
         line_total: item.line_total || 0,
-        // Preserve section fields so editing doesn't drop them
         section_name: item.section_name || 'General Items',
         section_labor_cost: item.section_labor_cost || 0,
       }));
 
-      setItems(quotationItems);
-
-      // Initialize sections state from items (preserve order)
-      const sectionMap = new Map<string, number>();
-      quotationItems.forEach(it => {
-        const name = (it as any).section_name || 'General Items';
-        if (!sectionMap.has(name)) sectionMap.set(name, Number((it as any).section_labor_cost || 0));
+      // Group by section
+      const sectionMap = new Map<string, any>();
+      quotationItems.forEach((item: any) => {
+        const sectionName = item.section_name || 'General Items';
+        if (!sectionMap.has(sectionName)) {
+          sectionMap.set(sectionName, {
+            id: `section-${Date.now()}-${Math.random()}`,
+            name: sectionName,
+            items: [],
+            labor_cost: item.section_labor_cost || 0,
+            expanded: true
+          });
+        }
+        sectionMap.get(sectionName)!.items.push(item);
       });
-      const initialSections = Array.from(sectionMap.entries()).map(([name, labor_cost]) => ({ name, labor_cost }));
-      setSectionsState(initialSections);
+
+      const initialSections = Array.from(sectionMap.values());
+      setSections(initialSections.length > 0 ? initialSections : []);
     }
   }, [quotation, open]);
 
@@ -126,7 +143,6 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
     const tax = taxPercentage ?? item.tax_percentage;
 
     const subtotal = qty * price;
-
     let taxAmount = 0;
     let lineTotal = 0;
 
@@ -141,106 +157,162 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
     return { lineTotal, taxAmount };
   };
 
-  const updateItemQuantity = (itemId: string, quantity: number) => {
+  const updateItemQuantity = (sectionId: string, itemId: string, quantity: number) => {
     if (quantity <= 0) {
-      removeItem(itemId);
+      removeItem(sectionId, itemId);
       return;
     }
 
-    setItems(items.map(item => {
-      if (item.id === itemId) {
-        const { lineTotal, taxAmount } = calculateLineTotal(item, quantity);
-        return { ...item, quantity, line_total: lineTotal, tax_amount: taxAmount };
+    setSections(sections.map(section => {
+      if (section.id !== sectionId) return section;
+      return {
+        ...section,
+        items: section.items.map(item => {
+          if (item.id === itemId) {
+            const { lineTotal, taxAmount } = calculateLineTotal(item, quantity);
+            return { ...item, quantity, line_total: lineTotal, tax_amount: taxAmount };
+          }
+          return item;
+        })
+      };
+    }));
+  };
+
+  const updateItemPrice = (sectionId: string, itemId: string, unitPrice: number) => {
+    setSections(sections.map(section => {
+      if (section.id !== sectionId) return section;
+      return {
+        ...section,
+        items: section.items.map(item => {
+          if (item.id === itemId) {
+            const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, unitPrice);
+            return { ...item, unit_price: unitPrice, line_total: lineTotal, tax_amount: taxAmount };
+          }
+          return item;
+        })
+      };
+    }));
+  };
+
+  const updateItemVAT = (sectionId: string, itemId: string, vatPercentage: number) => {
+    setSections(sections.map(section => {
+      if (section.id !== sectionId) return section;
+      return {
+        ...section,
+        items: section.items.map(item => {
+          if (item.id === itemId) {
+            const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, undefined, vatPercentage);
+            return { ...item, tax_percentage: vatPercentage, line_total: lineTotal, tax_amount: taxAmount };
+          }
+          return item;
+        })
+      };
+    }));
+  };
+
+  const updateItemVATInclusive = (sectionId: string, itemId: string, vatInclusive: boolean) => {
+    setSections(sections.map(section => {
+      if (section.id !== sectionId) return section;
+      return {
+        ...section,
+        items: section.items.map(item => {
+          if (item.id === itemId) {
+            let newVatPercentage = item.tax_percentage;
+            if (vatInclusive && item.tax_percentage === 0) {
+              newVatPercentage = defaultTaxRate;
+            }
+            if (!vatInclusive) {
+              newVatPercentage = 0;
+            }
+            const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, undefined, newVatPercentage);
+            return { ...item, tax_inclusive: vatInclusive, tax_percentage: newVatPercentage, line_total: lineTotal, tax_amount: taxAmount };
+          }
+          return item;
+        })
+      };
+    }));
+  };
+
+  const removeItem = (sectionId: string, itemId: string) => {
+    setSections(sections.map(section => {
+      if (section.id !== sectionId) return section;
+      return {
+        ...section,
+        items: section.items.filter(item => item.id !== itemId)
+      };
+    }).filter(s => s.items.length > 0)); // Remove empty sections
+  };
+
+  const toggleSectionExpanded = (sectionId: string) => {
+    setSections(sections.map(s =>
+      s.id === sectionId ? { ...s, expanded: !s.expanded } : s
+    ));
+  };
+
+  const updateSectionName = (sectionId: string, name: string) => {
+    if (!name || name.trim() === '') return;
+    setSections(sections.map(s =>
+      s.id === sectionId ? { ...s, name } : s
+    ));
+  };
+
+  const updateSectionLaborCost = (sectionId: string, laborCost: number) => {
+    setSections(sections.map(s =>
+      s.id === sectionId ? { ...s, labor_cost: laborCost } : s
+    ));
+  };
+
+  const removeSection = (sectionId: string) => {
+    setSections(sections.filter(s => s.id !== sectionId));
+  };
+
+  const addItemToSection = (sectionId: string, product: any) => {
+    setSections(sections.map(section => {
+      if (section.id !== sectionId) return section;
+
+      const existingItem = section.items.find(item => item.product_id === product.id);
+
+      if (existingItem) {
+        return {
+          ...section,
+          items: section.items.map(item =>
+            item.id === existingItem.id
+              ? { ...item, quantity: item.quantity + 1, line_total: item.quantity + 1 * item.unit_price }
+              : item
+          )
+        };
       }
-      return item;
+
+      const { lineTotal, taxAmount } = calculateLineTotal({
+        quantity: 1,
+        unit_price: product.selling_price,
+        tax_percentage: 0,
+        tax_inclusive: false
+      } as any);
+
+      const newItem: QuotationItem = {
+        id: `temp-${Date.now()}`,
+        product_id: product.id,
+        product_name: product.name,
+        description: product.description || product.name,
+        quantity: 1,
+        unit_price: product.selling_price,
+        tax_percentage: 0,
+        tax_amount: 0,
+        tax_inclusive: false,
+        line_total: lineTotal,
+        section_name: section.name,
+        section_labor_cost: section.labor_cost,
+      };
+
+      return {
+        ...section,
+        items: [...section.items, newItem]
+      };
     }));
+
+    setSearchProduct('');
   };
-
-  const updateItemPrice = (itemId: string, unitPrice: number) => {
-    setItems(items.map(item => {
-      if (item.id === itemId) {
-        const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, unitPrice);
-        return { ...item, unit_price: unitPrice, line_total: lineTotal, tax_amount: taxAmount };
-      }
-      return item;
-    }));
-  };
-
-  const updateItemVAT = (itemId: string, vatPercentage: number) => {
-    setItems(items.map(item => {
-      if (item.id === itemId) {
-        const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, undefined, undefined, vatPercentage);
-        return { ...item, tax_percentage: vatPercentage, line_total: lineTotal, tax_amount: taxAmount };
-      }
-      return item;
-    }));
-  };
-
-  const updateItemVATInclusive = (itemId: string, vatInclusive: boolean) => {
-    setItems(items.map(item => {
-      if (item.id === itemId) {
-        // When checking VAT Inclusive, auto-apply default tax rate if no VAT is set
-        let newVatPercentage = item.tax_percentage;
-        if (vatInclusive && item.tax_percentage === 0) {
-          newVatPercentage = defaultTaxRate;
-        }
-        // When unchecking VAT Inclusive, reset VAT to 0
-        if (!vatInclusive) {
-          newVatPercentage = 0;
-        }
-
-        const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, undefined, undefined, newVatPercentage, vatInclusive);
-        return { ...item, tax_inclusive: vatInclusive, tax_percentage: newVatPercentage, line_total: lineTotal, tax_amount: taxAmount };
-      }
-      return item;
-    }));
-  };
-
-  const removeItem = (itemId: string) => {
-    setItems(items.filter(item => item.id !== itemId));
-  };
-
-  // Build sections view from sectionsState and items
-  const sections = useMemo(() => {
-    return sectionsState.map(s => ({
-      name: s.name,
-      labor_cost: s.labor_cost,
-      items: items.filter(it => ((it as any).section_name || 'General Items') === s.name)
-    }));
-  }, [sectionsState, items]);
-
-  const updateSectionName = (oldName: string, newName: string) => {
-    if (!newName || oldName === newName) return;
-    setSectionsState(prev => prev.map(s => s.name === oldName ? { ...s, name: newName } : s));
-    setItems(prev => prev.map(it => ((it as any).section_name === oldName ? { ...it, section_name: newName } : it)));
-  };
-
-  const updateSectionLaborCost = (sectionName: string, value: number) => {
-    setSectionsState(prev => prev.map(s => s.name === sectionName ? { ...s, labor_cost: Number(value || 0) } : s));
-    setItems(prev => prev.map(it => ((it as any).section_name === sectionName ? { ...it, section_labor_cost: Number(value || 0) } : it)));
-  };
-
-  const addSection = (name = `Section ${sectionsState.length + 1}`, labor_cost = 0) => {
-    // Ensure name is unique
-    let newName = name;
-    const existing = new Set(sectionsState.map(s => s.name));
-    let i = 1;
-    while (existing.has(newName)) {
-      newName = `${name} ${i}`;
-      i++;
-    }
-    setSectionsState(prev => [...prev, { name: newName, labor_cost }]);
-  };
-
-  const moveItemToSection = (itemId: string, targetSection: string) => {
-    setItems(prev => prev.map(it => it.id === itemId ? { ...it, section_name: targetSection, section_labor_cost: sectionsState.find(s => s.name === targetSection)?.labor_cost || 0 } : it));
-  };
-
-  const totalLabor = useMemo(() => {
-    return sectionsState.reduce((sum, s) => sum + Number(s.labor_cost || 0), 0);
-  }, [sectionsState]);
-
-  const totalWithLabor = (totalAmount || 0) + totalLabor;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
@@ -251,12 +323,32 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
     }).format(amount);
   };
 
-  const subtotal = items.reduce((sum, item) => {
-    const itemSubtotal = item.quantity * item.unit_price;
-    return sum + itemSubtotal;
-  }, 0);
-  const taxAmount = items.reduce((sum, item) => sum + (item.tax_amount || 0), 0);
-  const totalAmount = items.reduce((sum, item) => sum + item.line_total, 0);
+  const calculateSectionMaterialsTotal = (section: QuotationSection) => {
+    return section.items.reduce((sum, item) => sum + item.line_total, 0);
+  };
+
+  const calculateSectionTotalWithLabor = (section: QuotationSection) => {
+    return calculateSectionMaterialsTotal(section) + section.labor_cost;
+  };
+
+  const calculateGrandTotal = () => {
+    return sections.reduce((sum, section) => sum + calculateSectionTotalWithLabor(section), 0);
+  };
+
+  const calculateTotalMaterials = () => {
+    return sections.reduce((sum, section) => sum + calculateSectionMaterialsTotal(section), 0);
+  };
+
+  const calculateTotalLabor = () => {
+    return sections.reduce((sum, section) => sum + section.labor_cost, 0);
+  };
+
+  const getTotalTax = () => {
+    return sections.reduce((sum, section) => {
+      const sectionTax = section.items.reduce((itemSum, item) => itemSum + item.tax_amount, 0);
+      return sum + sectionTax;
+    }, 0);
+  };
 
   const queryClient = useQueryClient();
 
@@ -266,26 +358,29 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
       return;
     }
 
-    if (items.length === 0) {
-      toast.error('Please add at least one item');
+    if (sections.length === 0 || sections.every(s => s.items.length === 0)) {
+      toast.error('Please add at least one item to a section');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // Prepare updated quotation payload
+      const totalMaterials = calculateTotalMaterials();
+      const totalLabor = calculateTotalLabor();
+      const totalTax = getTotalTax();
+      const grandTotal = calculateGrandTotal();
+
       const updatedQuotation: any = {
         customer_id: selectedCustomerId,
         quotation_date: quotationDate,
         valid_until: validUntil || null,
         notes,
         terms_and_conditions: termsAndConditions,
-        subtotal,
-        tax_amount: taxAmount,
-        total_amount: totalAmount
+        subtotal: totalMaterials,
+        tax_amount: totalTax,
+        total_amount: grandTotal
       };
 
-      // Update quotation
       const { data: updatedData, error: updateError } = await supabase
         .from('quotations')
         .update(updatedQuotation)
@@ -295,7 +390,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
 
       if (updateError) throw updateError;
 
-      // Remove existing items and insert new ones (simpler and deterministic)
+      // Delete existing items
       const { error: deleteError } = await supabase
         .from('quotation_items')
         .delete()
@@ -303,20 +398,23 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
 
       if (deleteError) throw deleteError;
 
-      const itemsToInsert = items.map((item, idx) => ({
-        quotation_id: quotation.id,
-        product_id: item.product_id || null,
-        description: item.description || '',
-        quantity: item.quantity || 0,
-        unit_price: item.unit_price || 0,
-        tax_percentage: item.tax_percentage || 0,
-        tax_amount: item.tax_amount || 0,
-        tax_inclusive: item.tax_inclusive || false,
-        line_total: item.line_total || 0,
-        section_name: item.section_name || 'General Items',
-        section_labor_cost: item.section_labor_cost || 0,
-        sort_order: idx + 1
-      }));
+      // Insert new items with section information
+      const itemsToInsert = sections.flatMap((section, sectionIndex) =>
+        section.items.map((item, itemIndex) => ({
+          quotation_id: quotation.id,
+          product_id: item.product_id || null,
+          description: item.description || '',
+          quantity: item.quantity || 0,
+          unit_price: item.unit_price || 0,
+          tax_percentage: item.tax_percentage || 0,
+          tax_amount: item.tax_amount || 0,
+          tax_inclusive: item.tax_inclusive || false,
+          line_total: item.line_total || 0,
+          section_name: section.name,
+          section_labor_cost: section.labor_cost,
+          sort_order: sectionIndex * 100 + itemIndex
+        }))
+      );
 
       let { error: insertError } = await supabase
         .from('quotation_items')
@@ -335,7 +433,6 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
 
       toast.success(`Quotation ${quotation.quotation_number} updated successfully!`);
       queryClient.invalidateQueries({ queryKey: ['quotations'] });
-      queryClient.invalidateQueries({ queryKey: ['products'] });
       onSuccess();
       onOpenChange(false);
     } catch (error) {
@@ -346,7 +443,6 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
       if (error instanceof Error) {
         errorMessage = error.message;
       } else if (error && typeof error === 'object') {
-        // Handle Supabase error objects
         const supabaseError = error as any;
         if (supabaseError.message) {
           errorMessage = supabaseError.message;
@@ -374,19 +470,17 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
             <span>Edit Quotation {quotation?.quotation_number}</span>
           </DialogTitle>
           <DialogDescription>
-            Update quotation details and items
+            Update quotation details with sections, items, and labor costs
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Quotation Details */}
           <div className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Quotation Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Customer Selection */}
                 <div className="space-y-2">
                   <Label htmlFor="customer">Customer *</Label>
                   <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
@@ -407,7 +501,6 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                   </Select>
                 </div>
 
-                {/* Dates */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="quotation_date">Quotation Date *</Label>
@@ -429,7 +522,6 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                   </div>
                 </div>
 
-                {/* Notes */}
                 <div className="space-y-2">
                   <Label htmlFor="notes">Notes</Label>
                   <Textarea
@@ -441,7 +533,6 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                   />
                 </div>
 
-                {/* Terms and Conditions */}
                 <div className="space-y-2">
                   <Label htmlFor="terms">Terms and Conditions</Label>
                   <Textarea
@@ -455,234 +546,270 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
             </Card>
           </div>
 
-          {/* Right Column - Summary */}
           <div className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Quotation Summary</CardTitle>
+                <CardTitle className="text-lg">Add Products</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Customer:</span>
-                      <div className="font-medium">{quotation?.customers?.name || 'Not selected'}</div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Items:</span>
-                      <div className="font-medium">{items.length} items</div>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Status:</span>
-                      <Badge variant="outline" className="ml-2">
-                        {quotation?.status || 'Draft'}
-                      </Badge>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Total:</span>
-                      <div className="font-bold text-primary">{formatCurrency(totalAmount)}</div>
-                    </div>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Search products by name or code..."
+                      value={searchProduct}
+                      onChange={(e) => setSearchProduct(e.target.value)}
+                      className="pl-10"
+                    />
                   </div>
+
+                  {searchProduct && (
+                    <div className="max-h-64 overflow-y-auto border rounded-lg">
+                      {loadingProducts ? (
+                        <div className="p-4 text-center text-muted-foreground">Loading products...</div>
+                      ) : filteredProducts.length === 0 ? (
+                        <div className="p-4 text-center text-muted-foreground">No products found</div>
+                      ) : (
+                        filteredProducts.map((product) => (
+                          <div
+                            key={product.id}
+                            className="p-3 hover:bg-muted/50 cursor-pointer border-b last:border-b-0"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <div className="font-medium">{product.name}</div>
+                                <div className="text-sm text-muted-foreground">{product.product_code}</div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-semibold">{formatCurrency(product.selling_price)}</div>
+                              </div>
+                            </div>
+                            {sections.length > 0 && (
+                              <div className="mt-2 flex gap-2 flex-wrap">
+                                {sections.map(section => (
+                                  <Button
+                                    key={section.id}
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => addItemToSection(section.id, product)}
+                                    className="text-xs"
+                                  >
+                                    Add to {section.name}
+                                  </Button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
 
-        {/* Items Display (Simplified for edit) */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Quotation Items</span>
-              <Badge variant="outline">{items.length} items</Badge>
-            </CardTitle>
+            <CardTitle className="text-lg">Quotation Sections</CardTitle>
           </CardHeader>
-          <CardContent>
-            {items.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">No items in this quotation.</div>
-            ) : (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div />
-                  <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => addSection()}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Section
-                    </Button>
-                  </div>
-                </div>
-
-                {sections.map((section) => (
-                  <div key={section.name} className="border rounded-lg">
-                    <div className="p-3 bg-slate-50 flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <Input
-                          value={section.name}
-                          onChange={(e) => updateSectionName(section.name, e.target.value)}
-                          className="font-semibold"
-                        />
-                        <div className="text-sm text-muted-foreground">{section.items.length} items</div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="text-sm text-muted-foreground">Labour:</div>
-                        <Input
-                          type="number"
-                          value={section.labor_cost}
-                          onChange={(e) => updateSectionLaborCost(section.name, parseFloat(e.target.value) || 0)}
-                          className="w-28"
-                          step="0.01"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="p-4">
-                      <Table>
-                        <TableHeader>
-                  <TableRow>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Section</TableHead>
-                    <TableHead>Qty</TableHead>
-                    <TableHead>Unit Price</TableHead>
-                    <TableHead>Tax %</TableHead>
-                    <TableHead>Tax Incl.</TableHead>
-                    <TableHead>Line Total</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                        <TableBody>
-                          {section.items.map((item) => (
-                            <TableRow key={item.id}>
-                              <TableCell>
-                                <div>
-                                  <div className="font-medium">{item.product_name}</div>
-                                  <div className="text-sm text-muted-foreground">{item.description}</div>
-                                </div>
-                              </TableCell>
-
-                              <TableCell>
-                                <Select value={(item as any).section_name || 'General Items'} onValueChange={(val) => moveItemToSection(item.id, val)}>
-                                  <SelectTrigger className="w-40">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {sectionsState.map(s => (
-                                      <SelectItem key={s.name} value={s.name}>{s.name}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </TableCell>
-
-                              <TableCell>
-                                <Input
-                                  type="number"
-                                  value={item.quantity}
-                                  onChange={(e) => updateItemQuantity(item.id, parseInt(e.target.value) || 0)}
-                                  className="w-20"
-                                  min="1"
-                                />
-                              </TableCell>
-                              <TableCell>
-                                <Input
-                                  type="number"
-                                  value={item.unit_price}
-                                  onChange={(e) => updateItemPrice(item.id, parseFloat(e.target.value) || 0)}
-                                  className="w-24"
-                                  step="0.01"
-                                />
-                              </TableCell>
-                              <TableCell>
-                                <Input
-                                  type="number"
-                                  value={item.tax_percentage}
-                                  onChange={(e) => updateItemVAT(item.id, parseFloat(e.target.value) || 0)}
-                                  className="w-20"
-                                  min="0"
-                                  max="100"
-                                  step="0.1"
-                                  placeholder="0"
-                                  disabled={item.tax_inclusive}
-                                />
-                              </TableCell>
-                              <TableCell>
-                                <Checkbox
-                                  checked={item.tax_inclusive}
-                                  onCheckedChange={(checked) => updateItemVATInclusive(item.id, !!checked)}
-                                />
-                              </TableCell>
-                              <TableCell className="font-semibold">{formatCurrency(item.line_total)}</TableCell>
-                              <TableCell>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => removeItem(item.id)}
-                                  className="text-destructive hover:text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </div>
-                ))}
-
-                {/* Summary Totals with labour included */}
-                <div className="mt-2">
-                  <div className="flex justify-end">
-                    <div className="w-80 space-y-2">
-                      <div className="flex justify-between">
-                        <span>Subtotal:</span>
-                        <span className="font-semibold">{formatCurrency(subtotal)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Total Labour:</span>
-                        <span className="font-semibold">{formatCurrency(totalLabor)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Tax:</span>
-                        <span className="font-semibold">{formatCurrency(taxAmount)}</span>
-                      </div>
-                      <div className="flex justify-between text-lg border-t pt-2">
-                        <span className="font-bold">Total:</span>
-                        <span className="font-bold text-primary">{formatCurrency(totalWithLabor)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          <CardContent className="space-y-4">
+            {sections.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No sections in this quotation. Items are organized by section.
               </div>
-            )}
+            ) : (
+              <div className="space-y-4">
+                {sections.map((section, sectionIndex) => {
+                  const sectionMaterialsTotal = calculateSectionMaterialsTotal(section);
+                  const sectionTotal = calculateSectionTotalWithLabor(section);
 
-            {/* Totals */}
-            {items.length > 0 && (
-              <div className="mt-6 border-t pt-4">
-                <div className="flex justify-end">
-                  <div className="w-80 space-y-2">
-                    <div className="flex justify-between">
-                      <span>Subtotal:</span>
-                      <span className="font-semibold">{formatCurrency(subtotal)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Tax:</span>
-                      <span className="font-semibold">{formatCurrency(taxAmount)}</span>
-                    </div>
-                    <div className="flex justify-between text-lg border-t pt-2">
-                      <span className="font-bold">Total:</span>
-                      <span className="font-bold text-primary">{formatCurrency(totalAmount)}</span>
-                    </div>
-                  </div>
-                </div>
+                  return (
+                    <Card key={section.id} className="border-2">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 flex-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => toggleSectionExpanded(section.id)}
+                              className="h-6 w-6"
+                            >
+                              {section.expanded ? (
+                                <ChevronUp className="h-4 w-4" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4" />
+                              )}
+                            </Button>
+                            <Input
+                              value={section.name}
+                              onChange={(e) => updateSectionName(section.id, e.target.value)}
+                              className="text-base font-semibold"
+                              placeholder="Section name"
+                            />
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeSection(section.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardHeader>
+
+                      {section.expanded && (
+                        <CardContent className="space-y-4">
+                          {section.items.length === 0 ? (
+                            <div className="text-center py-4 text-muted-foreground text-sm">
+                              No items in this section. Search and add products above.
+                            </div>
+                          ) : (
+                            <Table className="text-sm">
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Product</TableHead>
+                                  <TableHead className="w-16">Qty</TableHead>
+                                  <TableHead className="w-24">Unit Price</TableHead>
+                                  <TableHead className="w-20">VAT %</TableHead>
+                                  <TableHead className="w-20">VAT Incl.</TableHead>
+                                  <TableHead className="w-24">Line Total</TableHead>
+                                  <TableHead className="w-10"></TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {section.items.map((item) => (
+                                  <TableRow key={item.id} className="text-xs">
+                                    <TableCell>
+                                      <div>
+                                        <div className="font-medium">{item.product_name}</div>
+                                        <div className="text-xs text-muted-foreground">{item.description}</div>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      <Input
+                                        type="number"
+                                        value={item.quantity}
+                                        onChange={(e) => updateItemQuantity(section.id, item.id, parseInt(e.target.value) || 0)}
+                                        className="w-16 h-8"
+                                        min="1"
+                                      />
+                                    </TableCell>
+                                    <TableCell>
+                                      <Input
+                                        type="number"
+                                        value={item.unit_price}
+                                        onChange={(e) => updateItemPrice(section.id, item.id, parseFloat(e.target.value) || 0)}
+                                        className="w-24 h-8"
+                                        step="0.01"
+                                      />
+                                    </TableCell>
+                                    <TableCell>
+                                      <Input
+                                        type="number"
+                                        value={item.tax_percentage}
+                                        onChange={(e) => updateItemVAT(section.id, item.id, parseFloat(e.target.value) || 0)}
+                                        className="w-20 h-8"
+                                        min="0"
+                                        max="100"
+                                        step="0.1"
+                                        disabled={item.tax_inclusive}
+                                      />
+                                    </TableCell>
+                                    <TableCell>
+                                      <Checkbox
+                                        checked={item.tax_inclusive}
+                                        onCheckedChange={(checked) => updateItemVATInclusive(section.id, item.id, !!checked)}
+                                      />
+                                    </TableCell>
+                                    <TableCell className="font-semibold text-right">
+                                      {formatCurrency(item.line_total)}
+                                    </TableCell>
+                                    <TableCell>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => removeItem(section.id, item.id)}
+                                        className="h-6 w-6 text-destructive hover:text-destructive"
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </Button>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          )}
+
+                          <div className="space-y-2 border-t pt-4">
+                            <div className="flex justify-between">
+                              <span>Materials Subtotal:</span>
+                              <span className="font-semibold">{formatCurrency(sectionMaterialsTotal)}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <Label htmlFor={`labor-${section.id}`} className="font-medium">Labor Cost:</Label>
+                              <Input
+                                id={`labor-${section.id}`}
+                                type="number"
+                                value={section.labor_cost}
+                                onChange={(e) => updateSectionLaborCost(section.id, parseFloat(e.target.value) || 0)}
+                                className="w-32 h-8"
+                                step="0.01"
+                                min="0"
+                              />
+                            </div>
+                            <div className="flex justify-between border-t pt-2">
+                              <span className="font-bold">Section Total:</span>
+                              <span className="font-bold text-primary">{formatCurrency(sectionTotal)}</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      )}
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </CardContent>
         </Card>
 
+        {sections.length > 0 && sections.some(s => s.items.length > 0) && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Quotation Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-end">
+                <div className="w-80 space-y-2">
+                  <div className="flex justify-between">
+                    <span>Total Materials:</span>
+                    <span className="font-semibold">{formatCurrency(calculateTotalMaterials())}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Labor:</span>
+                    <span className="font-semibold">{formatCurrency(calculateTotalLabor())}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Tax:</span>
+                    <span className="font-semibold">{formatCurrency(getTotalTax())}</span>
+                  </div>
+                  <div className="flex justify-between text-lg border-t pt-2">
+                    <span className="font-bold">Grand Total:</span>
+                    <span className="font-bold text-primary">{formatCurrency(calculateGrandTotal())}</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting || !selectedCustomerId}>
+          <Button onClick={handleSubmit} disabled={isSubmitting || !selectedCustomerId || sections.length === 0 || sections.every(s => s.items.length === 0)}>
             <Calculator className="h-4 w-4 mr-2" />
             {isSubmitting ? 'Updating...' : 'Update Quotation'}
           </Button>
