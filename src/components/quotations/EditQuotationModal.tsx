@@ -236,12 +236,6 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
     setItems(prev => prev.map(it => it.id === itemId ? { ...it, section_name: targetSection, section_labor_cost: sectionsState.find(s => s.name === targetSection)?.labor_cost || 0 } : it));
   };
 
-  const totalLabor = useMemo(() => {
-    return sectionsState.reduce((sum, s) => sum + Number(s.labor_cost || 0), 0);
-  }, [sectionsState]);
-
-  const totalWithLabor = (totalAmount || 0) + totalLabor;
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
       style: 'currency',
@@ -257,6 +251,12 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
   }, 0);
   const taxAmount = items.reduce((sum, item) => sum + (item.tax_amount || 0), 0);
   const totalAmount = items.reduce((sum, item) => sum + item.line_total, 0);
+
+  const totalLabor = useMemo(() => {
+    return sectionsState.reduce((sum, s) => sum + Number(s.labor_cost || 0), 0);
+  }, [sectionsState]);
+
+  const totalWithLabor = (totalAmount || 0) + totalLabor;
 
   const queryClient = useQueryClient();
 
