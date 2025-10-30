@@ -819,7 +819,8 @@ export const useCustomerInvoices = (customerId?: string, companyId?: string) => 
             line_total,
             sort_order,
             section_name,
-            section_labor_cost
+            section_labor_cost,
+            unit_of_measure
           `)
           .in('invoice_id', invoiceIds2) : { data: [], error: null };
 
