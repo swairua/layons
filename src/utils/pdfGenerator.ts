@@ -915,7 +915,7 @@ export const generatePDF = (data: DocumentData) => {
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 15px;
-            color: hsl(var(--primary));
+            color: #000;
             text-transform: uppercase;
           }
 
@@ -942,7 +942,7 @@ export const generatePDF = (data: DocumentData) => {
           .section-title {
             font-size: 14px;
             font-weight: bold;
-            color: hsl(var(--primary));
+            color: #000;
             margin: 0 0 15px 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
