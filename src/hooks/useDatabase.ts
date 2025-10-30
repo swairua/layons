@@ -1485,16 +1485,39 @@ export const useCreateQuotation = () => {
   });
 };
 
-// Delete Quotation
+// Delete Quotation (attempt to delete related quotation_items first to avoid FK constraints)
 export const useDeleteQuotation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
+      // Delete quotation items first (if any)
+      try {
+        const { error: itemsError } = await supabase
+          .from('quotation_items')
+          .delete()
+          .eq('quotation_id', id);
+        if (itemsError) {
+          // Log but don't fail on item deletion if the error indicates no rows or unsupported column
+          console.warn('Warning deleting quotation_items for quotation', id, itemsError);
+        }
+      } catch (e) {
+        console.warn('Unexpected error deleting quotation_items for quotation', id, e);
+      }
+
+      // Now delete the quotation record
       const { error } = await supabase
         .from('quotations')
         .delete()
         .eq('id', id);
-      if (error) throw error;
+
+      if (error) {
+        // Provide clearer error object
+        const message = error.message || JSON.stringify(error);
+        const err = new Error(`Failed to delete quotation: ${message}`);
+        // Attach original error for debugging
+        (err as any).original = error;
+        throw err;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['quotations'] });
