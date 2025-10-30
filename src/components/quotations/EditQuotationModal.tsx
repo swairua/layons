@@ -190,6 +190,42 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
     setItems(items.filter(item => item.id !== itemId));
   };
 
+  const sections = useMemo(() => {
+    const map = new Map<string, { name: string; items: QuotationItem[]; labor_cost: number }>();
+    items.forEach((item) => {
+      const name = (item as any).section_name || 'General Items';
+      if (!map.has(name)) {
+        map.set(name, { name, items: [], labor_cost: (item as any).section_labor_cost || 0 });
+      }
+      map.get(name)!.items.push(item);
+    });
+    return Array.from(map.values());
+  }, [items]);
+
+  const updateSectionName = (oldName: string, newName: string) => {
+    if (!newName || oldName === newName) return;
+    setItems(items.map(it => ((it as any).section_name === oldName ? { ...it, section_name: newName } : it)));
+  };
+
+  const updateSectionLaborCost = (sectionName: string, value: number) => {
+    setItems(items.map(it => ((it as any).section_name === sectionName ? { ...it, section_labor_cost: Number(value || 0) } : it)));
+  };
+
+  const totalLabor = useMemo(() => {
+    const seen = new Set<string>();
+    let sum = 0;
+    items.forEach(i => {
+      const s = (i as any).section_name || 'General Items';
+      if (!seen.has(s)) {
+        seen.add(s);
+        sum += Number((i as any).section_labor_cost || 0);
+      }
+    });
+    return sum;
+  }, [items]);
+
+  const totalWithLabor = (totalAmount || 0) + totalLabor;
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
       style: 'currency',
@@ -447,85 +483,134 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
           </CardHeader>
           <CardContent>
             {items.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No items in this quotation.
-              </div>
+              <div className="text-center py-8 text-muted-foreground">No items in this quotation.</div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Qty</TableHead>
-                    <TableHead>Unit Price</TableHead>
-                    <TableHead>Tax %</TableHead>
-                    <TableHead>Tax Incl.</TableHead>
-                    <TableHead>Line Total</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {items.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{item.product_name}</div>
-                          <div className="text-sm text-muted-foreground">{item.description}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
+              <div className="space-y-6">
+                {sections.map((section) => (
+                  <div key={section.name} className="border rounded-lg">
+                    <div className="p-3 bg-slate-50 flex items-center justify-between">
+                      <div className="flex items-center gap-4">
                         <Input
-                          type="number"
-                          value={item.quantity}
-                          onChange={(e) => updateItemQuantity(item.id, parseInt(e.target.value) || 0)}
-                          className="w-20"
-                          min="1"
+                          value={section.name}
+                          onChange={(e) => updateSectionName(section.name, e.target.value)}
+                          className="font-semibold"
                         />
-                      </TableCell>
-                      <TableCell>
+                        <div className="text-sm text-muted-foreground">{section.items.length} items</div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-sm text-muted-foreground">Labour:</div>
                         <Input
                           type="number"
-                          value={item.unit_price}
-                          onChange={(e) => updateItemPrice(item.id, parseFloat(e.target.value) || 0)}
-                          className="w-24"
+                          value={section.labor_cost}
+                          onChange={(e) => updateSectionLaborCost(section.name, parseFloat(e.target.value) || 0)}
+                          className="w-28"
                           step="0.01"
                         />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          value={item.tax_percentage}
-                          onChange={(e) => updateItemVAT(item.id, parseFloat(e.target.value) || 0)}
-                          className="w-20"
-                          min="0"
-                          max="100"
-                          step="0.1"
-                          placeholder="0"
-                          disabled={item.tax_inclusive}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Checkbox
-                          checked={item.tax_inclusive}
-                          onCheckedChange={(checked) => updateItemVATInclusive(item.id, !!checked)}
-                        />
-                      </TableCell>
-                      <TableCell className="font-semibold">
-                        {formatCurrency(item.line_total)}
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeItem(item.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                      </div>
+                    </div>
+
+                    <div className="p-4">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Product</TableHead>
+                            <TableHead>Qty</TableHead>
+                            <TableHead>Unit Price</TableHead>
+                            <TableHead>Tax %</TableHead>
+                            <TableHead>Tax Incl.</TableHead>
+                            <TableHead>Line Total</TableHead>
+                            <TableHead></TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {section.items.map((item) => (
+                            <TableRow key={item.id}>
+                              <TableCell>
+                                <div>
+                                  <div className="font-medium">{item.product_name}</div>
+                                  <div className="text-sm text-muted-foreground">{item.description}</div>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Input
+                                  type="number"
+                                  value={item.quantity}
+                                  onChange={(e) => updateItemQuantity(item.id, parseInt(e.target.value) || 0)}
+                                  className="w-20"
+                                  min="1"
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <Input
+                                  type="number"
+                                  value={item.unit_price}
+                                  onChange={(e) => updateItemPrice(item.id, parseFloat(e.target.value) || 0)}
+                                  className="w-24"
+                                  step="0.01"
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <Input
+                                  type="number"
+                                  value={item.tax_percentage}
+                                  onChange={(e) => updateItemVAT(item.id, parseFloat(e.target.value) || 0)}
+                                  className="w-20"
+                                  min="0"
+                                  max="100"
+                                  step="0.1"
+                                  placeholder="0"
+                                  disabled={item.tax_inclusive}
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <Checkbox
+                                  checked={item.tax_inclusive}
+                                  onCheckedChange={(checked) => updateItemVATInclusive(item.id, !!checked)}
+                                />
+                              </TableCell>
+                              <TableCell className="font-semibold">{formatCurrency(item.line_total)}</TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => removeItem(item.id)}
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Summary Totals with labour included */}
+                <div className="mt-2">
+                  <div className="flex justify-end">
+                    <div className="w-80 space-y-2">
+                      <div className="flex justify-between">
+                        <span>Subtotal:</span>
+                        <span className="font-semibold">{formatCurrency(subtotal)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Total Labour:</span>
+                        <span className="font-semibold">{formatCurrency(totalLabor)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Tax:</span>
+                        <span className="font-semibold">{formatCurrency(taxAmount)}</span>
+                      </div>
+                      <div className="flex justify-between text-lg border-t pt-2">
+                        <span className="font-bold">Total:</span>
+                        <span className="font-bold text-primary">{formatCurrency(totalWithLabor)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* Totals */}
