@@ -127,6 +127,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
             tax_amount: item.tax_amount || 0,
             tax_inclusive: item.tax_inclusive || false,
             line_total: item.line_total || 0,
+            unit_of_measure: item.unit_of_measure || item.products?.unit_of_measure || 'pcs',
           }))
         };
       });
