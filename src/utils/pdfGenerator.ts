@@ -582,16 +582,19 @@ export const generatePDF = (data: DocumentData) => {
                 </tr>
               </thead>
               <tbody>
-                ${section.items.map((item, itemIndex) => `
+                ${section.items.map((item, itemIndex) => {
+                  const unit = item.products?.unit_of_measure || item.unit_of_measure || '-';
+                  return `
                   <tr>
                     <td>${itemIndex + 1}</td>
                     <td class="description-cell">${item.description}</td>
-                    <td class="center">${item.unit_of_measure || '-'}</td>
+                    <td class="center">${unit}</td>
                     <td class="center">${item.quantity}</td>
                     <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
                     <td class="amount-cell">${formatCurrency(item.line_total)}</td>
                   </tr>
-                `).join('')}
+                `;
+                }).join('')}
                 <tr style="background: #fff; font-weight: 600; border-top: 2px solid #000;">
                   <td colspan="5" style="text-align: right; padding: 8px 8px;">Materials Subtotal:</td>
                   <td style="text-align: right; padding: 8px 8px;">${formatCurrency(sectionMaterialsTotal)}</td>
