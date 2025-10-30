@@ -414,22 +414,26 @@ INSERT INTO products (company_id, category_id, product_code, name, description, 
 ('550e8400-e29b-41d4-a716-446655440000', (SELECT id FROM product_categories WHERE name = 'Laboratory Supplies' LIMIT 1), 'PRD002', 'Blood Test Kit Standard', 'Complete blood testing kit for laboratories', 'Kit', 1200.00, 1500.00, 15, 5),
 ('550e8400-e29b-41d4-a716-446655440000', (SELECT id FROM product_categories WHERE name = 'Protective Equipment' LIMIT 1), 'PRD003', 'N95 Respirator Mask', 'High-filtration respiratory protection', 'Box', 800.00, 1000.00, 50, 20);
 
--- Functions for auto-generating document numbers
+-- Functions for auto-generating document numbers (format: XXXXMMYYYY)
 CREATE OR REPLACE FUNCTION generate_quotation_number(company_uuid UUID)
 RETURNS VARCHAR AS $$
 DECLARE
     next_number INTEGER;
     year_part VARCHAR(4);
+    month_part VARCHAR(2);
 BEGIN
     year_part := EXTRACT(YEAR FROM CURRENT_DATE)::VARCHAR;
-    
-    SELECT COALESCE(MAX(CAST(SUBSTRING(quotation_number FROM '[0-9]+$') AS INTEGER)), 0) + 1
+    month_part := LPAD(EXTRACT(MONTH FROM CURRENT_DATE)::VARCHAR, 2, '0');
+
+    SELECT COALESCE(MAX(CAST(SUBSTRING(quotation_number FROM '^[0-9]{4}') AS INTEGER)), 0) + 1
     INTO next_number
-    FROM quotations 
-    WHERE company_id = company_uuid 
-    AND quotation_number LIKE 'QT-' || year_part || '-%';
-    
-    RETURN 'QT-' || year_part || '-' || LPAD(next_number::VARCHAR, 3, '0');
+    FROM (
+        SELECT quotation_number FROM quotations WHERE company_id = company_uuid
+        UNION ALL
+        SELECT invoice_number FROM invoices WHERE company_id = company_uuid
+    ) AS all_docs;
+
+    RETURN LPAD(next_number::VARCHAR, 4, '0') || month_part || year_part;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -438,16 +442,20 @@ RETURNS VARCHAR AS $$
 DECLARE
     next_number INTEGER;
     year_part VARCHAR(4);
+    month_part VARCHAR(2);
 BEGIN
     year_part := EXTRACT(YEAR FROM CURRENT_DATE)::VARCHAR;
-    
-    SELECT COALESCE(MAX(CAST(SUBSTRING(invoice_number FROM '[0-9]+$') AS INTEGER)), 0) + 1
+    month_part := LPAD(EXTRACT(MONTH FROM CURRENT_DATE)::VARCHAR, 2, '0');
+
+    SELECT COALESCE(MAX(CAST(SUBSTRING(invoice_number FROM '^[0-9]{4}') AS INTEGER)), 0) + 1
     INTO next_number
-    FROM invoices 
-    WHERE company_id = company_uuid 
-    AND invoice_number LIKE 'INV-' || year_part || '-%';
-    
-    RETURN 'INV-' || year_part || '-' || LPAD(next_number::VARCHAR, 4, '0');
+    FROM (
+        SELECT invoice_number FROM invoices WHERE company_id = company_uuid
+        UNION ALL
+        SELECT quotation_number FROM quotations WHERE company_id = company_uuid
+    ) AS all_docs;
+
+    RETURN LPAD(next_number::VARCHAR, 4, '0') || month_part || year_part;
 END;
 $$ LANGUAGE plpgsql;
 
