@@ -868,7 +868,7 @@ export const generatePDF = (data: DocumentData) => {
             gap: 30px;
             padding: 20px 20px 20px 20px;
             margin: 0;
-            border-bottom: 2px solid hsl(var(--primary));
+            border-bottom: 2px solid #000;
           }
 
           .company-info {
