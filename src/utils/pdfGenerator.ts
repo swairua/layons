@@ -1058,20 +1058,20 @@ export const generatePDF = (data: DocumentData) => {
           }
 
           .totals-table .total-row {
-            border-top: 2px solid hsl(var(--primary));
-            background: #f8f9fa;
+            border-top: 2px solid #000;
+            background: #fff;
           }
 
           .totals-table .total-row .label {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
-            color: hsl(var(--primary));
+            color: #000;
           }
 
           .totals-table .total-row .amount {
-            font-size: 16px;
+            font-size: 13px;
             font-weight: bold;
-            color: hsl(var(--primary));
+            color: #000;
           }
 
           /* Force each section summary to appear on its own printed page */
