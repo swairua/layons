@@ -62,7 +62,24 @@ class QueryBuilder<T = any> {
     return { data: data[0] as T, error: null };
   }
 
-  async single(): SingleResult<T> { return this.maybeSingle(); }
+  async single(): SingleResult<T> {
+    return this.maybeSingle();
+  }
+
+  insert(values: Record<string, any> | Record<string, any>[]): QueryBuilder<T> {
+    // Create a new builder that will insert on execute
+    const newBuilder = new QueryBuilder<T>(this.table);
+    newBuilder['_insertValues'] = values;
+    return newBuilder;
+  }
+
+  update(values: Record<string, any>): QueryBuilder<T> {
+    // Create a new builder that will update on execute
+    const newBuilder = new QueryBuilder<T>(this.table);
+    newBuilder['_updateValues'] = values;
+    newBuilder['_filters'] = this.filters;
+    return newBuilder;
+  }
 
   async execute(): SelectResult<T> {
     try {
