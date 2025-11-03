@@ -123,8 +123,8 @@ export const useCreateQuotationWithItems = () => {
       // Ensure created_by references the authenticated user to satisfy FK constraints
       let cleanQuotation = { ...quotation } as any;
       try {
-        const { data: userData } = await supabase.auth.getUser();
-        const authUserId = userData?.user?.id || null;
+        const user = getLocalUser();
+        const authUserId = user?.id || null;
         if (authUserId) {
           cleanQuotation.created_by = authUserId;
         } else if (typeof cleanQuotation.created_by === 'undefined') {
@@ -243,8 +243,8 @@ export const useConvertQuotationToInvoice = () => {
       // Determine creator
       let createdBy: string | null = null;
       try {
-        const { data: userData } = await supabase.auth.getUser();
-        createdBy = userData?.user?.id || null;
+        const user = getLocalUser();
+        createdBy = user?.id || null;
       } catch {
         createdBy = null;
       }
@@ -373,8 +373,8 @@ export const useCreateInvoiceWithItems = () => {
       // Ensure created_by references the authenticated user to satisfy FK constraints
       let cleanInvoice = { ...invoice } as any;
       try {
-        const { data: userData } = await supabase.auth.getUser();
-        const authUserId = userData?.user?.id || null;
+        const user = getLocalUser();
+        const authUserId = user?.id || null;
         if (authUserId) {
           cleanInvoice.created_by = authUserId;
         } else if (typeof cleanInvoice.created_by === 'undefined') {
@@ -650,8 +650,8 @@ export const useCreateProformaWithItems = () => {
       // Ensure created_by defaults to the authenticated user
       let cleanProforma = { ...proforma } as any;
       try {
-        const { data: userData } = await supabase.auth.getUser();
-        const authUserId = userData?.user?.id || null;
+        const user = getLocalUser();
+        const authUserId = user?.id || null;
         if (authUserId) {
           cleanProforma.created_by = authUserId;
         } else if (typeof cleanProforma.created_by === 'undefined' || cleanProforma.created_by === null) {
