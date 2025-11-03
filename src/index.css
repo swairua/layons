@@ -210,4 +210,38 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  /* ResizeObserver loop prevention */
+  /* Prevent layout thrashing in resizable panels */
+  [data-panel-group] {
+    contain: layout style paint;
+  }
+
+  [data-panel-resize-handle] {
+    will-change: auto;
+  }
+
+  /* Optimize sidebar resizing */
+  [data-sidebar] {
+    contain: layout style paint;
+  }
+
+  .group\/sidebar-wrapper {
+    contain: layout style paint;
+  }
+
+  /* Prevent ResizeObserver loops in carousels and similar components */
+  .carousel {
+    contain: layout style paint;
+  }
+
+  /* Optimize chart rendering to prevent resize loops */
+  .recharts-responsive-container {
+    contain: layout style paint;
+  }
+
+  /* Ensure transform properties don't trigger layout recalculations */
+  [data-panel-group-direction] {
+    will-change: unset;
+  }
 }
