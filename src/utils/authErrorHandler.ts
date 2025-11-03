@@ -53,7 +53,7 @@ const sanitizeAuthMessage = (error: Error | any): string => {
   return 'An unexpected authentication error occurred';
 };
 
-export function analyzeAuthError(error: AuthError | Error): AuthErrorInfo {
+export function analyzeAuthError(error: Error | any): AuthErrorInfo {
   const errorMessage = sanitizeAuthMessage(error);
   const message = errorMessage.toLowerCase();
 
