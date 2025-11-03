@@ -74,8 +74,7 @@ export async function createDefaultCompany() {
   
   try {
     // Get current user for email
-    const { data, error: userError } = await supabase.auth.getUser();
-    const user = data?.user;
+    const user = getLocalUser();
     const userEmail = user?.email || 'admin@company.com';
     
     const defaultCompanyData = {
