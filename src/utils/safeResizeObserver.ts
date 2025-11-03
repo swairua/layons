@@ -7,14 +7,18 @@ interface SafeResizeObserverCallback {
 export class SafeResizeObserver {
   private observer: ResizeObserver | null = null;
   private timeoutId: NodeJS.Timeout | null = null;
+  private animationFrameId: number | null = null;
   private isObserving = false;
   private debounceMs: number;
   private callback: SafeResizeObserverCallback;
+  private loopCounter = 0;
+  private loopResetTime = Date.now();
+  private lastEntries: ResizeObserverEntry[] = [];
 
   constructor(callback: SafeResizeObserverCallback, debounceMs = 250) {
     this.callback = callback;
     this.debounceMs = debounceMs;
-    
+
     try {
       this.observer = new ResizeObserver((entries) => {
         this.handleResize(entries);
@@ -26,21 +30,44 @@ export class SafeResizeObserver {
   }
 
   private handleResize = (entries: ResizeObserverEntry[]) => {
-    // Clear any pending callback
+    // Clear any pending callbacks
     if (this.timeoutId) {
       clearTimeout(this.timeoutId);
     }
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
+
+    // Track rapid resize events to detect and prevent loops
+    const now = Date.now();
+    if (now - this.loopResetTime > 1000) {
+      this.loopCounter = 0;
+      this.loopResetTime = now;
+    }
+    this.loopCounter++;
+
+    // If too many resize events in a short time, disconnect to prevent loop
+    if (this.loopCounter > 15) {
+      this.disconnect();
+      return;
+    }
+
+    // Store entries for comparison
+    this.lastEntries = entries;
 
     // Debounce the callback to prevent loops
     this.timeoutId = setTimeout(() => {
       try {
         // Use requestAnimationFrame to ensure we're not in a layout cycle
-        requestAnimationFrame(() => {
-          this.callback(entries);
+        this.animationFrameId = requestAnimationFrame(() => {
+          try {
+            this.callback(this.lastEntries);
+          } catch (error) {
+            console.debug('ResizeObserver callback error:', error);
+          }
         });
       } catch (error) {
-        // Silently handle errors to prevent console spam
-        console.debug('ResizeObserver callback error:', error);
+        console.debug('ResizeObserver animation frame error:', error);
       }
     }, this.debounceMs);
   };
@@ -49,6 +76,8 @@ export class SafeResizeObserver {
     if (!this.observer || this.isObserving) return;
 
     try {
+      this.loopCounter = 0;
+      this.loopResetTime = Date.now();
       this.observer.observe(target);
       this.isObserving = true;
     } catch (error) {
@@ -68,6 +97,14 @@ export class SafeResizeObserver {
   }
 
   disconnect(): void {
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
+    }
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
     if (this.observer) {
       try {
         this.observer.disconnect();
@@ -75,11 +112,6 @@ export class SafeResizeObserver {
       } catch (error) {
         console.debug('Failed to disconnect observer:', error);
       }
-    }
-
-    if (this.timeoutId) {
-      clearTimeout(this.timeoutId);
-      this.timeoutId = null;
     }
   }
 }
