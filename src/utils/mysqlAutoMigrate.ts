@@ -263,8 +263,13 @@ async function ensureTable(table: string, columns: Record<string, string>) {
   // Try to create table if missing
   try {
     await layonsApi.createTable(table, columns);
-  } catch {
-    // ignore
+  } catch (error) {
+    // Log network errors but continue with modifications
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.includes('timeout') || message.includes('Failed to fetch') || message.includes('fetch')) {
+      throw error; // Re-throw network errors to stop migration
+    }
+    // Ignore schema errors (table might already exist)
   }
 
   // Try to add/modify columns one by one to avoid bulk failure
@@ -274,14 +279,24 @@ async function ensureTable(table: string, columns: Record<string, string>) {
       const actions: AlterAction[] = [{ type: 'ADD', name, definition }];
       await layonsApi.alterTable(table, actions);
       continue;
-    } catch {}
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes('timeout') || message.includes('Failed to fetch')) {
+        throw error; // Re-throw network errors
+      }
+    }
 
     // Try MODIFY if exists
     try {
       const actions: AlterAction[] = [{ type: 'MODIFY', name, definition }];
       await layonsApi.alterTable(table, actions);
       continue;
-    } catch {}
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes('timeout') || message.includes('Failed to fetch')) {
+        throw error; // Re-throw network errors
+      }
+    }
   }
 }
 
