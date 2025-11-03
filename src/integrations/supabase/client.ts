@@ -98,6 +98,30 @@ class QueryBuilder<T = any> {
     }
   }
 
+  async upsert(values: Record<string, any> | Record<string, any>[]): MutateResult<T> {
+    try {
+      const arr = Array.isArray(values) ? values : [values];
+      const results: any[] = [];
+      for (const row of arr) {
+        const hasId = Object.prototype.hasOwnProperty.call(row, 'id') && row.id !== undefined && row.id !== null && row.id !== '';
+        if (hasId) {
+          const id = row.id as any;
+          const payload = { ...row } as any;
+          delete payload.id;
+          await layonsApi.update<T>(this.table, id, payload);
+          results.push({ ...row });
+        } else {
+          const payload = { ...row } as any;
+          const r = await layonsApi.insert<T>(this.table, payload);
+          results.push({ ...row, id: r.id });
+        }
+      }
+      return { data: results as any, error: null };
+    } catch (e: any) {
+      return { data: null, error: { message: e?.message || 'Upsert failed' } };
+    }
+  }
+
   async update(values: Record<string, any>): MutateResult<T> {
     try {
       const idFilter = this.filters.find(f => f.col === 'id');
