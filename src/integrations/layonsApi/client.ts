@@ -60,16 +60,16 @@ async function doRequest<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: stri
     clearTimeout(timeoutId);
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
-        console.error(`[Layons API] Request timeout (10s) for ${method} ${url}`);
+        console.error(`[Layons API] Request timeout (15s) for ${method} ${url}`);
 
         // Retry on timeout if we have retries left
         if (retries > 0) {
           console.warn(`[Layons API] Timeout, retrying... (${retries} attempts left)`);
-          await new Promise(r => setTimeout(r, 1000));
+          await new Promise(r => setTimeout(r, 2000)); // Wait 2s before retry after timeout
           return doRequest<T>(method, url, body, retries - 1);
         }
 
-        throw new Error('API request timeout - server may be unavailable');
+        throw new Error('API request timeout (15s) - server may be unavailable. Check if https://erp.layonsconstruction.com is online.');
       }
 
       // Retry on network errors
