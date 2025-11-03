@@ -110,6 +110,7 @@ export class SafeResizeObserver {
     try {
       this.loopCounter = 0;
       this.loopResetTime = Date.now();
+      this.lastObservedSizes.clear();
       this.observer.observe(target);
       this.isObserving = true;
     } catch (error) {
@@ -121,6 +122,7 @@ export class SafeResizeObserver {
     if (!this.observer) return;
 
     try {
+      this.lastObservedSizes.delete(target);
       this.observer.unobserve(target);
       this.isObserving = false;
     } catch (error) {
@@ -137,6 +139,7 @@ export class SafeResizeObserver {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
     }
+    this.lastObservedSizes.clear();
     if (this.observer) {
       try {
         this.observer.disconnect();
