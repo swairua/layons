@@ -22,10 +22,13 @@ function getLocalUser() {
 
 class QueryBuilder<T = any> {
   private table: string;
-  private filters: Array<{ col: string; val: any }>;
+  private filters: Array<{ col: string; val: any }>; 
   private _limit: number | null;
   private _select: string | null;
   private _orderBy: { column: string; ascending: boolean } | null;
+  private _insertValues: Record<string, any> | Record<string, any>[] | null;
+  private _updateValues: Record<string, any> | null;
+  private _deleteFlag: boolean;
 
   constructor(table: string) {
     this.table = table;
@@ -33,6 +36,9 @@ class QueryBuilder<T = any> {
     this._limit = null;
     this._select = null;
     this._orderBy = null;
+    this._insertValues = null;
+    this._updateValues = null;
+    this._deleteFlag = false;
   }
 
   select(columns?: string): this & { then?: undefined } {
@@ -55,6 +61,21 @@ class QueryBuilder<T = any> {
     return this as any;
   }
 
+  insert(values: Record<string, any> | Record<string, any>[]): this & { then?: undefined } {
+    this._insertValues = values;
+    return this as any;
+  }
+
+  update(values: Record<string, any>): this & { then?: undefined } {
+    this._updateValues = values;
+    return this as any;
+  }
+
+  delete(): this & { then?: undefined } {
+    this._deleteFlag = true;
+    return this as any;
+  }
+
   async maybeSingle(): SingleResult<T> {
     const { data, error } = await this.execute();
     if (error) return { data: null, error };
@@ -66,24 +87,22 @@ class QueryBuilder<T = any> {
     return this.maybeSingle();
   }
 
-  insert(values: Record<string, any> | Record<string, any>[]): QueryBuilder<T> {
-    // Create a new builder that will insert on execute
-    const newBuilder = new QueryBuilder<T>(this.table);
-    newBuilder['_insertValues'] = values;
-    return newBuilder;
-  }
-
-  update(values: Record<string, any>): QueryBuilder<T> {
-    // Create a new builder that will update on execute
-    const newBuilder = new QueryBuilder<T>(this.table);
-    newBuilder['_updateValues'] = values;
-    newBuilder['_filters'] = this.filters;
-    return newBuilder;
-  }
-
   async execute(): SelectResult<T> {
     try {
+      // Handle mutations
+      if (this._insertValues) {
+        return await this.executeInsert();
+      }
+      if (this._updateValues) {
+        return await this.executeUpdate();
+      }
+      if (this._deleteFlag) {
+        return await this.executeDelete();
+      }
+
+      // Handle queries
       let rows = await layonsApi.getAll<T>(this.table);
+      
       // Client-side filter
       for (const f of this.filters) {
         if (f.col === 'id') {
@@ -92,26 +111,28 @@ class QueryBuilder<T = any> {
           rows = rows.filter((r: any) => String(r[f.col]) === String(f.val));
         }
       }
+
       // Client-side ordering
       if (this._orderBy) {
         rows.sort((a: any, b: any) => {
           const aVal = a[this._orderBy!.column];
           const bVal = b[this._orderBy!.column];
-
+          
           if (aVal == null && bVal == null) return 0;
           if (aVal == null) return this._orderBy!.ascending ? -1 : 1;
           if (bVal == null) return this._orderBy!.ascending ? 1 : -1;
-
+          
           if (typeof aVal === 'string' && typeof bVal === 'string') {
-            return this._orderBy!.ascending
+            return this._orderBy!.ascending 
               ? aVal.localeCompare(bVal)
               : bVal.localeCompare(aVal);
           }
-
+          
           const result = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
           return this._orderBy!.ascending ? result : -result;
         });
       }
+
       if (this._limit != null) rows = rows.slice(0, this._limit);
       return { data: rows, error: null };
     } catch (e: any) {
@@ -119,17 +140,9 @@ class QueryBuilder<T = any> {
     }
   }
 
-  async then<TResult1 = any, TResult2 = never>(
-    onfulfilled?: ((value: { data: T[] | null; error: SbError }) => TResult1 | Promise<TResult1>) | undefined | null,
-    onrejected?: ((reason: any) => TResult2 | Promise<TResult2>) | undefined | null
-  ) {
-    const res = await this.execute();
-    return onfulfilled ? onfulfilled(res) : (res as any);
-  }
-
-  async insert(values: Record<string, any> | Record<string, any>[]): MutateResult<T> {
+  private async executeInsert(): Promise<SelectResult<T>> {
     try {
-      const arr = Array.isArray(values) ? values : [values];
+      const arr = Array.isArray(this._insertValues) ? this._insertValues : [this._insertValues];
       const results: any[] = [];
       for (const row of arr) {
         const payload: Record<string, any> = { ...row };
@@ -139,6 +152,32 @@ class QueryBuilder<T = any> {
       return { data: results as any, error: null };
     } catch (e: any) {
       return { data: null, error: { message: e?.message || 'Insert failed' } };
+    }
+  }
+
+  private async executeUpdate(): Promise<SelectResult<T>> {
+    try {
+      const idFilter = this.filters.find(f => f.col === 'id');
+      if (!idFilter) {
+        return { data: null, error: { message: 'Update requires eq("id", ...)' } };
+      }
+      await layonsApi.update<T>(this.table, idFilter.val, this._updateValues!);
+      return { data: [{ id: idFilter.val, ...this._updateValues } as any], error: null };
+    } catch (e: any) {
+      return { data: null, error: { message: e?.message || 'Update failed' } };
+    }
+  }
+
+  private async executeDelete(): Promise<SelectResult<T>> {
+    try {
+      const idFilter = this.filters.find(f => f.col === 'id');
+      if (!idFilter) {
+        return { data: null, error: { message: 'Delete requires eq("id", ...)' } };
+      }
+      await layonsApi.remove(this.table, idFilter.val);
+      return { data: [] as any, error: null };
+    } catch (e: any) {
+      return { data: null, error: { message: e?.message || 'Delete failed' } };
     }
   }
 
@@ -166,26 +205,12 @@ class QueryBuilder<T = any> {
     }
   }
 
-  async update(values: Record<string, any>): MutateResult<T> {
-    try {
-      const idFilter = this.filters.find(f => f.col === 'id');
-      if (!idFilter) return { data: null, error: { message: 'Update requires eq("id", ...)' } };
-      await layonsApi.update<T>(this.table, idFilter.val, values);
-      return { data: [ { id: idFilter.val, ...values } as any ], error: null };
-    } catch (e: any) {
-      return { data: null, error: { message: e?.message || 'Update failed' } };
-    }
-  }
-
-  async delete(): MutateResult<T> {
-    try {
-      const idFilter = this.filters.find(f => f.col === 'id');
-      if (!idFilter) return { data: null, error: { message: 'Delete requires eq("id", ...)' } };
-      await layonsApi.remove(this.table, idFilter.val);
-      return { data: [] as any, error: null };
-    } catch (e: any) {
-      return { data: null, error: { message: e?.message || 'Delete failed' } };
-    }
+  async then<TResult1 = any, TResult2 = never>(
+    onfulfilled?: ((value: { data: T[] | null; error: SbError }) => TResult1 | Promise<TResult1>) | undefined | null,
+    onrejected?: ((reason: any) => TResult2 | Promise<TResult2>) | undefined | null
+  ) {
+    const res = await this.execute();
+    return onfulfilled ? onfulfilled(res) : (res as any);
   }
 }
 
