@@ -75,6 +75,26 @@ class QueryBuilder<T = any> {
           rows = rows.filter((r: any) => String(r[f.col]) === String(f.val));
         }
       }
+      // Client-side ordering
+      if (this._orderBy) {
+        rows.sort((a: any, b: any) => {
+          const aVal = a[this._orderBy!.column];
+          const bVal = b[this._orderBy!.column];
+
+          if (aVal == null && bVal == null) return 0;
+          if (aVal == null) return this._orderBy!.ascending ? -1 : 1;
+          if (bVal == null) return this._orderBy!.ascending ? 1 : -1;
+
+          if (typeof aVal === 'string' && typeof bVal === 'string') {
+            return this._orderBy!.ascending
+              ? aVal.localeCompare(bVal)
+              : bVal.localeCompare(aVal);
+          }
+
+          const result = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+          return this._orderBy!.ascending ? result : -result;
+        });
+      }
       if (this._limit != null) rows = rows.slice(0, this._limit);
       return { data: rows, error: null };
     } catch (e: any) {
