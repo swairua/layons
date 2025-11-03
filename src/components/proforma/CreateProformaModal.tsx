@@ -32,6 +32,7 @@ import {
 import { useCustomers, useProducts, useGenerateDocumentNumber, useTaxSettings } from '@/hooks/useDatabase';
 import { useCreateProformaWithItems } from '@/hooks/useQuotationItems';
 import { toast } from 'sonner';
+import { toFixed } from '@/utils/formatCurrency';
 
 interface ProformaItem {
   id: string;
