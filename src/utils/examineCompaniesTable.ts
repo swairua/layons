@@ -1,6 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
-
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getLocalUser } from '@/integrations/supabase/client';
 
 /**
  * Examine the companies table to understand its current state
@@ -76,8 +74,7 @@ export async function createDefaultCompany() {
   
   try {
     // Get current user for email
-    const { data, error: userError } = await supabase.auth.getUser();
-    const user = data?.user;
+    const user = getLocalUser();
     const userEmail = user?.email || 'admin@company.com';
     
     const defaultCompanyData = {
@@ -132,10 +129,9 @@ export async function associateUserWithCompany() {
   
   try {
     // Get current user
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    const currentUser = userData?.user;
+    const currentUser = getLocalUser();
 
-    if (userError || !currentUser) {
+    if (!currentUser) {
       throw new Error('User not authenticated');
     }
 

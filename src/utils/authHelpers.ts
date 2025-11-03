@@ -181,26 +181,11 @@ export const initializeAuth = async () => {
         return { session: null, error: new Error('No connectivity') };
       }
 
-      // Get current session with abort signal
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       clearTimeout(timeoutId);
 
-      // Handle invalid token errors by clearing them
-      if (sessionError?.message?.includes('Invalid Refresh Token') ||
-          sessionError?.message?.includes('Refresh Token Not Found') ||
-          sessionError?.message?.includes('invalid_token')) {
-        console.warn('Invalid tokens detected, clearing...');
-        clearAuthTokens();
-        return { session: null, error: null };
-      }
-
-      if (sessionError) {
-        console.warn('Session error:', sessionError.message);
-        return { session: null, error: sessionError };
-      }
-
-      console.log('✅ Ultra-fast auth completed successfully');
-      return { session: sessionData.session, error: null };
+      // Auth is now handled via MySQL API, not Supabase
+      console.log('✅ Using MySQL API for authentication');
+      return { session: null, error: null };
 
     } catch (fetchError: any) {
       clearTimeout(timeoutId);

@@ -9,7 +9,7 @@ import {
   Database,
   Loader2
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getLocalUser } from '@/integrations/supabase/client';
 
 interface StatusCheck {
   name: string;
@@ -83,22 +83,19 @@ export function PaymentAllocationStatus() {
 
       // Check 3: User Profile
       try {
-        const { data, error: userError } = await supabase.auth.getUser();
-        const user = data?.user;
+        const user = getLocalUser();
         if (user) {
           const { data: profile } = await supabase
             .from('profiles')
             .select('company_id')
             .eq('id', user.id)
             .single();
-          
+
           if (profile?.company_id) {
             updateCheck(2, { status: 'working', details: 'Profile linked' });
           } else {
             updateCheck(2, { status: 'error', details: 'No company link' });
           }
-        } else if (userError) {
-          updateCheck(2, { status: 'error', details: userError.message || 'Authentication error' });
         } else {
           updateCheck(2, { status: 'error', details: 'Not authenticated' });
         }

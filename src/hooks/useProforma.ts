@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getLocalUser } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { calculateDocumentTotals, type TaxableItem } from '@/utils/taxCalculation';
 import { parseErrorMessage } from '@/utils/errorHelpers';
@@ -196,8 +196,8 @@ export const useCreateProforma = () => {
       // Ensure created_by defaults to authenticated user
       let cleanProforma = { ...proformaWithTotals } as any;
       try {
-        const { data: userData } = await supabase.auth.getUser();
-        const authUserId = userData?.user?.id || null;
+        const user = getLocalUser();
+        const authUserId = user?.id || null;
         if (authUserId) {
           cleanProforma.created_by = authUserId;
         } else if (typeof cleanProforma.created_by === 'undefined' || cleanProforma.created_by === null) {

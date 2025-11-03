@@ -11,7 +11,7 @@ type SingleResult<T> = Promise<{ data: T | null; error: SbError }>;
 
 type MutateResult<T> = Promise<{ data: T[] | null; error: SbError }>; // keep array-like for compatibility
 
-function getLocalUser() {
+export function getLocalUser() {
   try {
     const raw = localStorage.getItem('local_auth_user');
     return raw ? JSON.parse(raw) : null;

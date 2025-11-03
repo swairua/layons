@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getLocalUser } from '@/integrations/supabase/client';
 
 // Types
 export interface Company {
@@ -859,8 +859,8 @@ export const useCreateInvoice = () => {
       // Ensure created_by defaults to authenticated user
       const payload: any = { ...invoice };
       try {
-        const { data: userData } = await supabase.auth.getUser();
-        const authUserId = userData?.user?.id || null;
+        const user = getLocalUser();
+        const authUserId = user?.id || null;
         if (authUserId) {
           payload.created_by = authUserId;
         } else if (typeof payload.created_by === 'undefined') {
@@ -1456,8 +1456,8 @@ export const useCreateQuotation = () => {
       // Ensure created_by defaults to authenticated user
       const payload: any = { ...quotation };
       try {
-        const { data: userData } = await supabase.auth.getUser();
-        const authUserId = userData?.user?.id || null;
+        const user = getLocalUser();
+        const authUserId = user?.id || null;
         if (authUserId) {
           payload.created_by = authUserId;
         } else if (typeof payload.created_by === 'undefined') {
@@ -1816,8 +1816,8 @@ export const useCreateLPO = () => {
       // Create LPO (default created_by to authenticated user if column exists)
       const lpoPayload: any = { ...lpo };
       try {
-        const { data: userData } = await supabase.auth.getUser();
-        const authUserId = userData?.user?.id || null;
+        const user = getLocalUser();
+        const authUserId = user?.id || null;
         if (authUserId) {
           lpoPayload.created_by = authUserId;
         } else if (typeof lpoPayload.created_by === 'undefined') {

@@ -192,52 +192,8 @@ export default function CompanySettings() {
     const ext = fileNameParts.length > 1 ? fileNameParts.pop() : 'png';
     const filePath = `company-${companyId}/logo-${Date.now()}.${ext}`;
 
-    // Check if storage is available by listing buckets first
-    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-
-    if (bucketsError) {
-      // Handle RLS permission errors specifically
-      if (bucketsError.message.includes('row-level security') ||
-          bucketsError.message.includes('permission') ||
-          bucketsError.message.includes('policy')) {
-        throw new Error('Cloud storage requires admin permissions. Please use local storage or contact your administrator.');
-      }
-      throw new Error(`Storage not available: ${bucketsError.message}`);
-    }
-
-    const bucketName = import.meta.env.VITE_COMPANY_LOGO_BUCKET || 'company-logos';
-
-    // Upload the file directly to configured bucket
-    const { data: uploadData, error: uploadError } = await supabase
-      .storage
-      .from(bucketName)
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: true,
-        contentType: file.type
-      });
-
-    if (uploadError) {
-      // Handle RLS permission errors during upload
-      if (uploadError.message.includes('row-level security') ||
-          uploadError.message.includes('permission') ||
-          uploadError.message.includes('policy')) {
-        throw new Error('You don\'t have permission to upload to cloud storage. Please use local storage or contact your administrator.');
-      }
-      throw new Error(`Upload failed: ${uploadError.message}`);
-    }
-
-    // Get public URL
-    const { data: publicUrlData } = supabase
-      .storage
-      .from(import.meta.env.VITE_COMPANY_LOGO_BUCKET || 'company-logos')
-      .getPublicUrl(filePath);
-
-    if (!publicUrlData.publicUrl) {
-      throw new Error('Failed to get public URL for uploaded file');
-    }
-
-    return publicUrlData.publicUrl;
+    // Storage is now disabled - using MySQL API backend
+    throw new Error('Cloud file storage is not available. Please use the MySQL API for file management.');
   };
 
   // Helper function to convert file to base64

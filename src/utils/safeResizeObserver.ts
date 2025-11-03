@@ -14,6 +14,10 @@ export class SafeResizeObserver {
   private loopCounter = 0;
   private loopResetTime = Date.now();
   private lastEntries: ResizeObserverEntry[] = [];
+  private lastObservedSizes: Map<Element, { width: number; height: number }> = new Map();
+  private sizeChangeThreshold = 1; // Only respond to size changes > 1px
+  private maxLoopCount = 20; // Max resize events per second before disconnecting
+  private loopDetectionWindowMs = 1000; // Time window for loop detection
 
   constructor(callback: SafeResizeObserverCallback, debounceMs = 250) {
     this.callback = callback;
@@ -40,20 +44,48 @@ export class SafeResizeObserver {
 
     // Track rapid resize events to detect and prevent loops
     const now = Date.now();
-    if (now - this.loopResetTime > 1000) {
+    if (now - this.loopResetTime > this.loopDetectionWindowMs) {
       this.loopCounter = 0;
       this.loopResetTime = now;
     }
     this.loopCounter++;
 
     // If too many resize events in a short time, disconnect to prevent loop
-    if (this.loopCounter > 15) {
+    if (this.loopCounter > this.maxLoopCount) {
+      console.debug(`ResizeObserver loop detected: ${this.loopCounter} events in ${this.loopDetectionWindowMs}ms. Disconnecting.`);
       this.disconnect();
       return;
     }
 
+    // Filter entries to only those with significant size changes
+    const significantChanges = entries.filter((entry) => {
+      const target = entry.target as Element;
+      const lastSize = this.lastObservedSizes.get(target);
+      const { width, height } = entry.contentRect;
+
+      if (!lastSize) {
+        this.lastObservedSizes.set(target, { width, height });
+        return true;
+      }
+
+      const widthChanged = Math.abs(width - lastSize.width) > this.sizeChangeThreshold;
+      const heightChanged = Math.abs(height - lastSize.height) > this.sizeChangeThreshold;
+
+      if (widthChanged || heightChanged) {
+        this.lastObservedSizes.set(target, { width, height });
+        return true;
+      }
+
+      return false;
+    });
+
+    // If no significant changes, skip the callback
+    if (significantChanges.length === 0) {
+      return;
+    }
+
     // Store entries for comparison
-    this.lastEntries = entries;
+    this.lastEntries = significantChanges;
 
     // Debounce the callback to prevent loops
     this.timeoutId = setTimeout(() => {
@@ -78,6 +110,7 @@ export class SafeResizeObserver {
     try {
       this.loopCounter = 0;
       this.loopResetTime = Date.now();
+      this.lastObservedSizes.clear();
       this.observer.observe(target);
       this.isObserving = true;
     } catch (error) {
@@ -89,6 +122,7 @@ export class SafeResizeObserver {
     if (!this.observer) return;
 
     try {
+      this.lastObservedSizes.delete(target);
       this.observer.unobserve(target);
       this.isObserving = false;
     } catch (error) {
@@ -105,6 +139,7 @@ export class SafeResizeObserver {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
     }
+    this.lastObservedSizes.clear();
     if (this.observer) {
       try {
         this.observer.disconnect();

@@ -1,5 +1,4 @@
 import { supabase } from '@/integrations/supabase/client';
-import { parseErrorMessage } from './errorHelpers';
 
 interface HealthCheckResult {
   isHealthy: boolean;
@@ -9,17 +8,17 @@ interface HealthCheckResult {
 }
 
 /**
- * Check Supabase health and configuration
+ * Check system health (now uses MySQL API instead of Supabase)
  */
 export const checkSupabaseHealth = async (): Promise<HealthCheckResult> => {
   const issues: string[] = [];
   let isHealthy = true;
-  let canCreateUsers = false;
+  let canCreateUsers = true;
   let rateLimited = false;
 
   try {
-    // Test basic connection
-    const { data: testData, error: testError } = await supabase
+    // Test basic database connection
+    const { error: testError } = await supabase
       .from('profiles')
       .select('id')
       .limit(1);
@@ -27,37 +26,13 @@ export const checkSupabaseHealth = async (): Promise<HealthCheckResult> => {
     if (testError) {
       issues.push(`Database connection failed: ${testError.message}`);
       isHealthy = false;
-    }
-
-    // Test auth service with a non-destructive call
-    try {
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        issues.push(`Auth service issue: ${sessionError.message}`);
-        isHealthy = false;
-      } else {
-        canCreateUsers = true;
-      }
-    } catch (authError) {
-      issues.push(`Auth service unavailable: ${parseErrorMessage(authError)}`);
-      isHealthy = false;
-    }
-
-    // Check if we're rate limited by trying a light auth operation
-    try {
-      const { error: userError } = await supabase.auth.getUser();
-      if (userError && userError.message.includes('seconds')) {
-        rateLimited = true;
-        issues.push('Rate limited by Supabase auth service');
-      }
-    } catch (rateLimitError) {
-      // Ignore - might not be rate limiting
+      canCreateUsers = false;
     }
 
   } catch (error) {
-    issues.push(`General connection error: ${parseErrorMessage(error)}`);
+    issues.push(`General connection error`);
     isHealthy = false;
+    canCreateUsers = false;
   }
 
   return {
@@ -81,11 +56,11 @@ export const waitForRateLimit = async (maxWaitTime: number = 30000): Promise<boo
       return true;
     }
     
-    console.log('Still rate limited, waiting...');
-    await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+    console.log('Still checking system health...');
+    await new Promise(resolve => setTimeout(resolve, 5000));
   }
   
-  return false; // Timeout reached
+  return false;
 };
 
 /**
@@ -101,17 +76,16 @@ export const retryWithRateLimit = async <T>(
       const result = await operation();
       return result;
     } catch (error: any) {
-      const isRateLimit = error?.message?.includes('seconds');
       const isLastAttempt = attempt === maxRetries;
       
-      if (isRateLimit && !isLastAttempt) {
-        const delay = baseDelay * Math.pow(2, attempt - 1); // Exponential backoff
-        console.log(`Rate limited, waiting ${delay}ms before retry ${attempt + 1}/${maxRetries}`);
+      if (!isLastAttempt) {
+        const delay = baseDelay * Math.pow(2, attempt - 1);
+        console.log(`Retrying operation (attempt ${attempt + 1}/${maxRetries}) after ${delay}ms`);
         await new Promise(resolve => setTimeout(resolve, delay));
         continue;
       }
       
-      throw error; // Re-throw if not rate limit or last attempt
+      throw error;
     }
   }
   
