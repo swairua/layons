@@ -46,9 +46,18 @@ const App = () => {
     (async () => {
       try {
         const { runAutoMigrate } = await import('@/utils/mysqlAutoMigrate');
-        await runAutoMigrate();
+
+        // Create a timeout wrapper to prevent hanging
+        const migrationPromise = runAutoMigrate();
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Auto-migration timeout (30s)')), 30000)
+        );
+
+        await Promise.race([migrationPromise, timeoutPromise]);
       } catch (e) {
-        console.warn('Auto-migration skipped:', e);
+        // Log the error but don't block app startup
+        const message = e instanceof Error ? e.message : String(e);
+        console.debug('Auto-migration skipped:', message);
       }
     })();
   }, []);
