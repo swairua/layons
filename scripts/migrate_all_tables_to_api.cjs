@@ -6,7 +6,7 @@
  * - Inserts all rows via API
  */
 
-import { Client } from 'pg';
+const { Client } = require('pg');
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const API_URL = process.env.VITE_LAYONS_API_URL || 'https://erp.layonsconstruction.com/api.php';
