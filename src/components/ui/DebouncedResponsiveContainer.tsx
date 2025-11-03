@@ -68,7 +68,6 @@ export const DebouncedResponsiveContainer: React.FC<DebouncedResponsiveContainer
 
   return (
     <div
-      key={containerKey}
       ref={containerRef}
       style={{ width, height, minHeight: 0, minWidth: 0 }}
       className="relative overflow-hidden"
