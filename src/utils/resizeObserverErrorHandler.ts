@@ -10,12 +10,17 @@ let originalOnError: ((this: GlobalEventHandlers, ev: ErrorEvent) => any) | null
 
 // Detect ResizeObserver errors in any message format
 const isResizeObserverError = (message: any): boolean => {
+  if (!message) return false;
+
   const messageStr = String(message || '').toLowerCase();
   return (
     messageStr.includes('resizeobserver loop completed with undelivered notifications') ||
     messageStr.includes('resizeobserver loop limit exceeded') ||
-    (messageStr.includes('resizeobserver') && messageStr.includes('undelivered')) ||
-    (messageStr.includes('resizeobserver') && messageStr.includes('loop'))
+    messageStr.includes('resizeobserver') && (
+      messageStr.includes('undelivered') ||
+      messageStr.includes('loop') ||
+      messageStr.includes('error')
+    )
   );
 };
 
