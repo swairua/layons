@@ -218,7 +218,7 @@ class QueryBuilder<T = any> {
 
   private async executeUpdate(): Promise<SelectResult<T>> {
     try {
-      const idFilter = this.filters.find(f => f.col === 'id');
+      const idFilter = this.filters.find(f => f.col === 'id' && f.operator === 'eq');
       if (!idFilter) {
         return { data: null, error: { message: 'Update requires eq("id", ...)' } };
       }
@@ -231,7 +231,7 @@ class QueryBuilder<T = any> {
 
   private async executeDelete(): Promise<SelectResult<T>> {
     try {
-      const idFilter = this.filters.find(f => f.col === 'id');
+      const idFilter = this.filters.find(f => f.col === 'id' && f.operator === 'eq');
       if (!idFilter) {
         return { data: null, error: { message: 'Delete requires eq("id", ...)' } };
       }
