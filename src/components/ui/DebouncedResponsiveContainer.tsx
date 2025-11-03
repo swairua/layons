@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { ResponsiveContainer } from 'recharts';
-import { SafeResizeObserver } from '@/utils/safeResizeObserver';
 
 interface DebouncedResponsiveContainerProps {
   width?: string | number;
