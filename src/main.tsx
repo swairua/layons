@@ -1,6 +1,6 @@
 // Must be imported first to suppress ResizeObserver errors before anything renders
 import { enableResizeObserverErrorSuppression } from '@/utils/resizeObserverErrorHandler';
-enabledResizeObserverErrorSuppression();
+enableResizeObserverErrorSuppression();
 
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom';
