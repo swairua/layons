@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getLocalUser } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { CreditNote, CreditNoteItem } from './useCreditNotes';
 
@@ -27,8 +27,8 @@ export function useCreateCreditNoteWithItems() {
         // Ensure created_by defaults to the authenticated user
         let cleanCreditNote = { ...creditNote } as any;
         try {
-          const { data: userData } = await supabase.auth.getUser();
-          const authUserId = userData?.user?.id || null;
+          const user = getLocalUser();
+          const authUserId = user?.id || null;
           if (authUserId) {
             cleanCreditNote.created_by = authUserId;
           } else if (typeof cleanCreditNote.created_by === 'undefined' || cleanCreditNote.created_by === null) {
@@ -417,8 +417,8 @@ export function useConvertInvoiceToCreditNote() {
       let createdBy: string | null = invoice.created_by || null;
       if (!createdBy) {
         try {
-          const { data: userData } = await supabase.auth.getUser();
-          createdBy = userData?.user?.id || null;
+          const user = getLocalUser();
+          createdBy = user?.id || null;
         } catch {
           createdBy = null;
         }
