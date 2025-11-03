@@ -90,7 +90,7 @@ export default function AdminRecreate() {
           )}
 
           <p className="text-xs text-muted-foreground">
-            Note: Email provider must be enabled in Supabase. If confirmations are on, confirm the email in the Dashboard.
+            Note: In open-auth mode, no email confirmations are required.
           </p>
         </CardContent>
       </Card>

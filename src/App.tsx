@@ -43,8 +43,14 @@ const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const App = () => {
 
   useEffect(() => {
-    // Initialize on app startup
-    // Non-blocking async initialization
+    (async () => {
+      try {
+        const { runAutoMigrate } = await import('@/utils/mysqlAutoMigrate');
+        await runAutoMigrate();
+      } catch (e) {
+        console.warn('Auto-migration skipped:', e);
+      }
+    })();
   }, []);
 
   return (

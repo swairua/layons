@@ -123,7 +123,7 @@ export function CustomerPerformanceOptimizer() {
         <CardContent className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <h4 className="font-semibold text-red-700">🐌 Current Issues:</h4>
+              <h4 className="font-semibold text-red-700">��� Current Issues:</h4>
               <ul className="text-sm text-muted-foreground space-y-1">
                 <li>• Loading all customers at once (no pagination)</li>
                 <li>• Database queries without proper indexes</li>
@@ -294,7 +294,7 @@ export function CustomerPerformanceOptimizer() {
               Manual Customer Optimization Script
             </CardTitle>
             <CardDescription>
-              Copy this SQL and run it in Supabase SQL Editor to create customer performance indexes
+              Copy this SQL and run it in your MySQL client (e.g., phpMyAdmin) to create customer performance indexes
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -303,7 +303,7 @@ export function CustomerPerformanceOptimizer() {
               <AlertDescription>
                 <strong>Instructions:</strong>
                 <ol className="list-decimal list-inside mt-2 space-y-1 text-sm">
-                  <li>Go to your Supabase Dashboard → SQL Editor</li>
+                  <li>Open your MySQL client (e.g., phpMyAdmin)</li>
                   <li>Create a new query</li>
                   <li>Paste the SQL script below</li>
                   <li>Click "Run" to execute</li>
