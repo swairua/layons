@@ -122,6 +122,7 @@ export class SafeResizeObserver {
     try {
       this.loopCounter = 0;
       this.loopResetTime = Date.now();
+      this.lastCallbackTime = Date.now();
       this.lastObservedSizes.clear();
       this.observer.observe(target);
       this.isObserving = true;
