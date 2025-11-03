@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { ResponsiveContainer } from 'recharts';
 
 interface DebouncedResponsiveContainerProps {
@@ -16,11 +16,8 @@ export const DebouncedResponsiveContainer: React.FC<DebouncedResponsiveContainer
   children,
   ...props
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
   return (
     <div
-      ref={containerRef}
       style={{ width, height, minHeight: 0, minWidth: 0 }}
       className="relative overflow-hidden"
     >
