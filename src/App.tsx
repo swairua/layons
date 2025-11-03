@@ -42,24 +42,10 @@ const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 
 const App = () => {
 
+  // Auto-migration disabled: app uses Supabase for database management
+  // MySQL auto-migrations via external API are no longer needed
   useEffect(() => {
-    (async () => {
-      try {
-        const { runAutoMigrate } = await import('@/utils/mysqlAutoMigrate');
-
-        // Create a timeout wrapper to prevent hanging
-        const migrationPromise = runAutoMigrate();
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Auto-migration timeout (30s)')), 30000)
-        );
-
-        await Promise.race([migrationPromise, timeoutPromise]);
-      } catch (e) {
-        // Log the error but don't block app startup
-        const message = e instanceof Error ? e.message : String(e);
-        console.debug('Auto-migration skipped:', message);
-      }
-    })();
+    // Placeholder for future setup needs
   }, []);
 
   return (
