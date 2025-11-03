@@ -1456,8 +1456,8 @@ export const useCreateQuotation = () => {
       // Ensure created_by defaults to authenticated user
       const payload: any = { ...quotation };
       try {
-        const { data: userData } = await supabase.auth.getUser();
-        const authUserId = userData?.user?.id || null;
+        const user = getLocalUser();
+        const authUserId = user?.id || null;
         if (authUserId) {
           payload.created_by = authUserId;
         } else if (typeof payload.created_by === 'undefined') {
