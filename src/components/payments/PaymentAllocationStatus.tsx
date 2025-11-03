@@ -9,7 +9,7 @@ import {
   Database,
   Loader2
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getLocalUser } from '@/integrations/supabase/client';
 
 interface StatusCheck {
   name: string;
