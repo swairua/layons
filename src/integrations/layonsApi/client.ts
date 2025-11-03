@@ -34,11 +34,34 @@ async function doRequest<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: stri
     });
     clearTimeout(timeoutId);
 
-    const text = await res.text();
+    // Read response body safely - only once
+    let text = '';
     let json: any = null;
-    try { json = text ? JSON.parse(text) : null; } catch { json = { raw: text }; }
 
-    // Log errors for debugging
+    try {
+      text = await res.text();
+    } catch (readError: any) {
+      // Body stream error - likely already read or connection issue
+      console.error(`[Layons API] Failed to read response body: ${readError?.message}`);
+
+      // Retry on body read errors
+      if (retries > 0) {
+        console.warn(`[Layons API] Body read error, retrying... (${retries} attempts left)`);
+        await new Promise(r => setTimeout(r, 1000));
+        return doRequest<T>(method, url, body, retries - 1);
+      }
+
+      throw new Error('Failed to read API response body');
+    }
+
+    // Parse JSON safely
+    try {
+      json = text ? JSON.parse(text) : null;
+    } catch {
+      json = { raw: text };
+    }
+
+    // Check if response is OK
     if (!res.ok) {
       const errorMsg = typeof json === 'object' && json.error
         ? json.error
