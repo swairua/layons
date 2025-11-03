@@ -16,11 +16,14 @@ function getBaseUrl() {
 }
 
 async function doRequest<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, body?: any, retries = 3): Promise<T> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  };
 
-  // Add timeout to prevent hanging requests
+  // Add timeout to prevent hanging requests (increased to 15s for slow networks)
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
   try {
     const res = await fetch(url, {
