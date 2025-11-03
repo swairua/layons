@@ -36,7 +36,7 @@ const initializeErrorSuppression = () => {
   originalConsoleDebug = window.console.debug;
   originalOnError = window.onerror;
 
-  // Override console.error
+  // Override console.error - catches errors logged as errors
   window.console.error = function(...args) {
     if (args.length > 0 && isResizeObserverError(args[0])) {
       return;
@@ -44,7 +44,7 @@ const initializeErrorSuppression = () => {
     originalConsoleError.apply(console, args as any);
   };
 
-  // Override console.warn
+  // Override console.warn - catches ResizeObserver warnings
   window.console.warn = function(...args) {
     if (args.length > 0 && isResizeObserverError(args[0])) {
       return;
@@ -52,12 +52,22 @@ const initializeErrorSuppression = () => {
     originalConsoleWarn.apply(console, args as any);
   };
 
-  // Also suppress ResizeObserver warnings that might use console.debug
+  // Override console.debug - some browsers log as debug
   window.console.debug = function(...args) {
     if (args.length > 0 && isResizeObserverError(args[0])) {
       return;
     }
     originalConsoleDebug.apply(console, args as any);
+  };
+
+  // Intercept all console outputs to catch warnings that bypass normal methods
+  // This is a catch-all for any console method or browser-internal logging
+  const consoleLog = window.console.log;
+  window.console.log = function(...args) {
+    if (args.length > 0 && isResizeObserverError(args[0])) {
+      return;
+    }
+    consoleLog.apply(console, args as any);
   };
 
   // Override window.onerror
@@ -75,7 +85,7 @@ const initializeErrorSuppression = () => {
     return false;
   };
 
-  // Handle error events (capture phase)
+  // Handle error events (capture phase) - most effective for browser warnings
   window.addEventListener('error', (event: ErrorEvent) => {
     if (isResizeObserverError(event.message) || isResizeObserverError(event.error?.message)) {
       event.preventDefault();
@@ -93,7 +103,7 @@ const initializeErrorSuppression = () => {
     }
   }, false);
 
-  // Handle unhandled rejections
+  // Handle unhandled rejections (less likely but comprehensive)
   window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
     if (isResizeObserverError(event.reason) || isResizeObserverError(event.reason?.message)) {
       event.preventDefault();
