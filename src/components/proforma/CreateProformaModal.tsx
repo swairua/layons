@@ -32,6 +32,7 @@ import {
 import { useCustomers, useProducts, useGenerateDocumentNumber, useTaxSettings } from '@/hooks/useDatabase';
 import { useCreateProformaWithItems } from '@/hooks/useQuotationItems';
 import { toast } from 'sonner';
+import { toFixed } from '@/utils/formatCurrency';
 
 interface ProformaItem {
   id: string;
@@ -527,7 +528,7 @@ export const CreateProformaModal = ({
                             onCheckedChange={(checked) => updateItem(item.id, 'tax_inclusive', checked)}
                           />
                         </TableCell>
-                        <TableCell>${item.line_total.toFixed(2)}</TableCell>
+                        <TableCell>${toFixed(item.line_total)}</TableCell>
                         <TableCell>
                           <Button
                             type="button"
@@ -549,15 +550,15 @@ export const CreateProformaModal = ({
                 <div className="mt-6 space-y-2 max-w-sm ml-auto">
                   <div className="flex justify-between">
                     <span>Subtotal:</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>${toFixed(subtotal)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Tax:</span>
-                    <span>${totalTax.toFixed(2)}</span>
+                    <span>${toFixed(totalTax)}</span>
                   </div>
                   <div className="flex justify-between font-semibold text-lg border-t pt-2">
                     <span>Total:</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>${toFixed(total)}</span>
                   </div>
                 </div>
               )}

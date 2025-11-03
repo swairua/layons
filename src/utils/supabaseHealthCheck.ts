@@ -1,4 +1,7 @@
-import { supabase } from '@/integrations/supabase/client';
+// Health check for PHP API backend
+// Verifies connection to the PHP API and database availability
+
+import { layonsApi } from '@/integrations/layonsApi/client';
 
 interface HealthCheckResult {
   isHealthy: boolean;
@@ -8,7 +11,7 @@ interface HealthCheckResult {
 }
 
 /**
- * Check system health (now uses MySQL API instead of Supabase)
+ * Check system health - PHP API backend
  */
 export const checkSupabaseHealth = async (): Promise<HealthCheckResult> => {
   const issues: string[] = [];
@@ -17,20 +20,15 @@ export const checkSupabaseHealth = async (): Promise<HealthCheckResult> => {
   let rateLimited = false;
 
   try {
-    // Test basic database connection
-    const { error: testError } = await supabase
-      .from('profiles')
-      .select('id')
-      .limit(1);
-
-    if (testError) {
-      issues.push(`Database connection failed: ${testError.message}`);
+    // Test basic database connection by trying to fetch a table
+    const data = await layonsApi.getAll('users');
+    if (!Array.isArray(data)) {
+      issues.push('Database connection returned unexpected format');
       isHealthy = false;
       canCreateUsers = false;
     }
-
-  } catch (error) {
-    issues.push(`General connection error`);
+  } catch (error: any) {
+    issues.push(`Database connection failed: ${error.message}`);
     isHealthy = false;
     canCreateUsers = false;
   }
@@ -44,7 +42,7 @@ export const checkSupabaseHealth = async (): Promise<HealthCheckResult> => {
 };
 
 /**
- * Wait for rate limiting to clear
+ * Wait for system to be healthy
  */
 export const waitForRateLimit = async (maxWaitTime: number = 30000): Promise<boolean> => {
   const startTime = Date.now();
@@ -52,24 +50,24 @@ export const waitForRateLimit = async (maxWaitTime: number = 30000): Promise<boo
   while (Date.now() - startTime < maxWaitTime) {
     const health = await checkSupabaseHealth();
     
-    if (!health.rateLimited) {
+    if (health.isHealthy) {
       return true;
     }
     
-    console.log('Still checking system health...');
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    console.log('Waiting for system to be ready...');
+    await new Promise(resolve => setTimeout(resolve, 2000));
   }
   
   return false;
 };
 
 /**
- * Smart retry with rate limit handling
+ * Smart retry with error handling
  */
 export const retryWithRateLimit = async <T>(
   operation: () => Promise<T>,
   maxRetries: number = 3,
-  baseDelay: number = 5000
+  baseDelay: number = 1000
 ): Promise<T> => {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {

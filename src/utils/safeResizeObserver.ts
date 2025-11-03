@@ -16,8 +16,10 @@ export class SafeResizeObserver {
   private lastEntries: ResizeObserverEntry[] = [];
   private lastObservedSizes: Map<Element, { width: number; height: number }> = new Map();
   private sizeChangeThreshold = 1; // Only respond to size changes > 1px
-  private maxLoopCount = 20; // Max resize events per second before disconnecting
-  private loopDetectionWindowMs = 1000; // Time window for loop detection
+  private maxLoopCount = 15; // Max resize events per detection window before disconnecting
+  private loopDetectionWindowMs = 2000; // Time window for loop detection
+  private lastCallbackTime = 0; // Track when we last executed the callback
+  private minCallbackIntervalMs = 500; // Minimum time between callbacks to prevent tight loops
 
   constructor(callback: SafeResizeObserverCallback, debounceMs = 250) {
     this.callback = callback;
@@ -37,9 +39,11 @@ export class SafeResizeObserver {
     // Clear any pending callbacks
     if (this.timeoutId) {
       clearTimeout(this.timeoutId);
+      this.timeoutId = null;
     }
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
     }
 
     // Track rapid resize events to detect and prevent loops
@@ -52,7 +56,7 @@ export class SafeResizeObserver {
 
     // If too many resize events in a short time, disconnect to prevent loop
     if (this.loopCounter > this.maxLoopCount) {
-      console.debug(`ResizeObserver loop detected: ${this.loopCounter} events in ${this.loopDetectionWindowMs}ms. Disconnecting.`);
+      console.debug(`ResizeObserver loop detected: ${this.loopCounter} events in ${this.loopDetectionWindowMs}ms. Disconnecting to prevent cascade.`);
       this.disconnect();
       return;
     }
@@ -84,6 +88,13 @@ export class SafeResizeObserver {
       return;
     }
 
+    // Check if enough time has passed since the last callback
+    const timeSinceLastCallback = now - this.lastCallbackTime;
+    const debounceDelay = Math.max(
+      this.debounceMs,
+      Math.max(0, this.minCallbackIntervalMs - timeSinceLastCallback)
+    );
+
     // Store entries for comparison
     this.lastEntries = significantChanges;
 
@@ -93,6 +104,7 @@ export class SafeResizeObserver {
         // Use requestAnimationFrame to ensure we're not in a layout cycle
         this.animationFrameId = requestAnimationFrame(() => {
           try {
+            this.lastCallbackTime = Date.now();
             this.callback(this.lastEntries);
           } catch (error) {
             console.debug('ResizeObserver callback error:', error);
@@ -101,7 +113,7 @@ export class SafeResizeObserver {
       } catch (error) {
         console.debug('ResizeObserver animation frame error:', error);
       }
-    }, this.debounceMs);
+    }, debounceDelay);
   };
 
   observe(target: Element): void {
@@ -110,6 +122,7 @@ export class SafeResizeObserver {
     try {
       this.loopCounter = 0;
       this.loopResetTime = Date.now();
+      this.lastCallbackTime = Date.now();
       this.lastObservedSizes.clear();
       this.observer.observe(target);
       this.isObserving = true;

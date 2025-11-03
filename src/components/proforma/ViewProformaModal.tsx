@@ -11,15 +11,16 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
-import { 
-  FileText, 
-  Download, 
-  Send, 
+import {
+  FileText,
+  Download,
+  Send,
   Calendar,
   User,
   Receipt,
   DollarSign
 } from 'lucide-react';
+import { toFixed } from '@/utils/formatCurrency';
 
 interface ProformaItem {
   id: string;
@@ -153,7 +154,7 @@ export const ViewProformaModal = ({
                   <p className="text-sm font-medium text-muted-foreground">Amount</p>
                   <p className="text-sm flex items-center gap-1">
                     <DollarSign className="h-3 w-3" />
-                    ${proforma.total_amount?.toFixed(2)}
+                    ${toFixed(proforma.total_amount)}
                   </p>
                 </div>
               </div>
@@ -211,10 +212,10 @@ export const ViewProformaModal = ({
                         <TableCell className="font-medium">{item.product_name}</TableCell>
                         <TableCell>{item.description}</TableCell>
                         <TableCell>{item.quantity}</TableCell>
-                        <TableCell>${item.unit_price.toFixed(2)}</TableCell>
+                        <TableCell>${toFixed(item.unit_price)}</TableCell>
                         <TableCell>{item.tax_percentage}%</TableCell>
-                        <TableCell>${item.tax_amount.toFixed(2)}</TableCell>
-                        <TableCell className="text-right">${item.line_total.toFixed(2)}</TableCell>
+                        <TableCell>${toFixed(item.tax_amount)}</TableCell>
+                        <TableCell className="text-right">${toFixed(item.line_total)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -226,16 +227,16 @@ export const ViewProformaModal = ({
                 <div className="space-y-2 max-w-sm ml-auto">
                   <div className="flex justify-between">
                     <span className="text-sm">Subtotal:</span>
-                    <span className="text-sm">${proforma.subtotal?.toFixed(2)}</span>
+                    <span className="text-sm">${toFixed(proforma.subtotal)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm">Tax:</span>
-                    <span className="text-sm">${proforma.tax_amount?.toFixed(2)}</span>
+                    <span className="text-sm">${toFixed(proforma.tax_amount)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-semibold">
                     <span>Total:</span>
-                    <span>${proforma.total_amount?.toFixed(2)}</span>
+                    <span>${toFixed(proforma.total_amount)}</span>
                   </div>
                 </div>
               </CardContent>
