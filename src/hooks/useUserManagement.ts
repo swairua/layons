@@ -132,24 +132,11 @@ export const useUserManagement = () => {
         return { success: false, error: 'User with this email already exists' };
       }
 
-      // Create auth user
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: userData.email,
-        password: generateTemporaryPassword(),
-        email_confirm: true,
-        user_metadata: {
-          full_name: userData.full_name,
-        },
-      });
-
-      if (authError) {
-        throw authError;
-      }
-
-      // Update profile with additional data
+      // Create user profile in database only (authentication is handled via MySQL API)
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({
+        .insert({
+          email: userData.email,
           full_name: userData.full_name,
           role: userData.role,
           phone: userData.phone,
@@ -157,8 +144,9 @@ export const useUserManagement = () => {
           department: userData.department,
           position: userData.position,
           status: 'active',
-        })
-        .eq('id', authData.user.id);
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
 
       if (profileError) {
         throw profileError;
