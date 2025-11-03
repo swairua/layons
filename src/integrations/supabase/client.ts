@@ -279,54 +279,8 @@ export const supabase = {
   from<T = any>(table: string) {
     return new QueryBuilder<T>(table);
   },
-  // Minimal storage shim: just returns the path as a public URL
-  storage: {
-    from(_bucket: string) {
-      return {
-        getPublicUrl(path: string) {
-          return { data: { publicUrl: path }, error: null } as const;
-        },
-      };
-    },
-  },
-  // Minimal auth shim backed by localStorage, aligns with replaced AuthContext
-  auth: {
-    async getUser() {
-      const u = getLocalUser();
-      return { data: { user: u }, error: null } as any;
-    },
-    async getSession() {
-      const u = getLocalUser();
-      return { data: { session: u ? { user: u } : null }, error: null } as any;
-    },
-    async signInWithPassword({ email }: { email: string; password: string }) {
-      const u = { id: email, email };
-      localStorage.setItem('local_auth_user', JSON.stringify(u));
-      return { data: { user: u, session: { user: u } }, error: null } as any;
-    },
-    async signUp({ email }: { email: string; password: string }) {
-      const u = { id: email, email };
-      localStorage.setItem('local_auth_user', JSON.stringify(u));
-      return { data: { user: u }, error: null } as any;
-    },
-    async signOut() {
-      localStorage.removeItem('local_auth_user');
-      return { error: null } as any;
-    },
-    async resetPasswordForEmail(_email: string) {
-      return { data: {}, error: null } as any;
-    },
-    admin: {
-      async createUser({ email }: { email: string; password?: string; email_confirm?: boolean }) {
-        const u = { id: email, email };
-        return { data: { user: u }, error: null } as any;
-      },
-      async deleteUser(_userId: string) {
-        return { data: {}, error: null } as any;
-      },
-    },
-    onAuthStateChange(_cb: any) {
-      return { data: { subscription: { unsubscribe: () => {} } }, error: null } as any;
-    },
+  // RPC is not supported with mysqli backend - use direct API calls instead
+  rpc: async () => {
+    throw new Error('RPC calls are not supported. Use supabase.from().select() for direct database queries.');
   },
 };
