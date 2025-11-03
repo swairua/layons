@@ -101,7 +101,7 @@ export function RecentActivity() {
         customer: invoice.customers?.name || 'Unknown Customer',
         amount: formatCurrency(invoice.total_amount || 0),
         status: invoice.status as Activity['status'],
-        timestamp: new Date(invoice.created_at || '')
+        timestamp: safeParseDate(invoice.created_at)
       });
     });
   }
@@ -116,7 +116,7 @@ export function RecentActivity() {
         customer: payment.customers?.name || 'Unknown Customer',
         amount: formatCurrency(payment.amount || 0),
         status: 'completed',
-        timestamp: new Date(payment.created_at || '')
+        timestamp: safeParseDate(payment.created_at)
       });
     });
   }
