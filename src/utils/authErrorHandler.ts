@@ -1,4 +1,3 @@
-import { AuthError } from '@supabase/supabase-js';
 import { toast } from '@/utils/safeToast';
 import { logError } from '@/utils/errorLogger';
 import { parseErrorMessage } from '@/utils/errorHelpers';
@@ -12,7 +11,7 @@ export interface AuthErrorInfo {
 
 const NON_MEANINGFUL_MESSAGES = new Set(['', '[object object]', 'null', 'undefined']);
 
-const sanitizeAuthMessage = (error: AuthError | Error): string => {
+const sanitizeAuthMessage = (error: Error | any): string => {
   const candidates: string[] = [];
 
   if (error && typeof error === 'object') {
