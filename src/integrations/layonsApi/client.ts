@@ -15,7 +15,7 @@ function getBaseUrl() {
   return String(url);
 }
 
-async function doRequest<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, body?: any): Promise<T> {
+async function doRequest<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, body?: any, retries = 3): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
 
   // Add timeout to prevent hanging requests
@@ -41,6 +41,14 @@ async function doRequest<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: stri
         ? json.error
         : (typeof json === 'object' ? JSON.stringify(json) : text);
       console.error(`[Layons API] ${method} ${url} - ${res.status}: ${errorMsg}`);
+
+      // Retry on 5xx errors if we have retries left
+      if (res.status >= 500 && retries > 0) {
+        console.warn(`[Layons API] Server error, retrying... (${retries} attempts left)`);
+        await new Promise(r => setTimeout(r, 1000)); // Wait 1s before retry
+        return doRequest<T>(method, url, body, retries - 1);
+      }
+
       throw new Error(`API error ${res.status}: ${errorMsg}`);
     }
 
@@ -50,8 +58,24 @@ async function doRequest<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: stri
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
         console.error(`[Layons API] Request timeout (10s) for ${method} ${url}`);
-        throw new Error('API request timeout (10s)');
+
+        // Retry on timeout if we have retries left
+        if (retries > 0) {
+          console.warn(`[Layons API] Timeout, retrying... (${retries} attempts left)`);
+          await new Promise(r => setTimeout(r, 1000));
+          return doRequest<T>(method, url, body, retries - 1);
+        }
+
+        throw new Error('API request timeout - server may be unavailable');
       }
+
+      // Retry on network errors
+      if (retries > 0 && error.message.includes('Failed to fetch')) {
+        console.warn(`[Layons API] Network error, retrying... (${retries} attempts left)`);
+        await new Promise(r => setTimeout(r, 1000));
+        return doRequest<T>(method, url, body, retries - 1);
+      }
+
       throw error;
     }
     console.error(`[Layons API] Unexpected error: ${error}`);
