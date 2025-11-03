@@ -129,10 +129,9 @@ export async function associateUserWithCompany() {
   
   try {
     // Get current user
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    const currentUser = userData?.user;
+    const currentUser = getLocalUser();
 
-    if (userError || !currentUser) {
+    if (!currentUser) {
       throw new Error('User not authenticated');
     }
 
