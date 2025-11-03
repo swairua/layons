@@ -22,7 +22,7 @@ function getLocalUser() {
 
 class QueryBuilder<T = any> {
   private table: string;
-  private filters: Array<{ col: string; val: any }>; 
+  private filters: Array<{ col: string; operator: string; val: any }>;
   private _limit: number | null;
   private _select: string | null;
   private _orderBy: { column: string; ascending: boolean } | null;
@@ -47,7 +47,47 @@ class QueryBuilder<T = any> {
   }
 
   eq(column: string, value: any): this & { then?: undefined } {
-    this.filters.push({ col: column, val: value });
+    this.filters.push({ col: column, operator: 'eq', val: value });
+    return this as any;
+  }
+
+  neq(column: string, value: any): this & { then?: undefined } {
+    this.filters.push({ col: column, operator: 'neq', val: value });
+    return this as any;
+  }
+
+  in(column: string, values: any[]): this & { then?: undefined } {
+    this.filters.push({ col: column, operator: 'in', val: values });
+    return this as any;
+  }
+
+  gt(column: string, value: any): this & { then?: undefined } {
+    this.filters.push({ col: column, operator: 'gt', val: value });
+    return this as any;
+  }
+
+  lt(column: string, value: any): this & { then?: undefined } {
+    this.filters.push({ col: column, operator: 'lt', val: value });
+    return this as any;
+  }
+
+  gte(column: string, value: any): this & { then?: undefined } {
+    this.filters.push({ col: column, operator: 'gte', val: value });
+    return this as any;
+  }
+
+  lte(column: string, value: any): this & { then?: undefined } {
+    this.filters.push({ col: column, operator: 'lte', val: value });
+    return this as any;
+  }
+
+  contains(column: string, value: any): this & { then?: undefined } {
+    this.filters.push({ col: column, operator: 'contains', val: value });
+    return this as any;
+  }
+
+  ilike(column: string, value: any): this & { then?: undefined } {
+    this.filters.push({ col: column, operator: 'ilike', val: value });
     return this as any;
   }
 
