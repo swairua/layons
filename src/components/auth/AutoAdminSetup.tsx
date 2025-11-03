@@ -1,17 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, CheckCircle, AlertCircle, UserPlus, Timer } from 'lucide-react';
-import { toast } from 'sonner';
-import { safeAuthOperation, isRateLimited, getRateLimitTimeRemaining, clearAuthTokens } from '@/utils/authHelpers';
+import { AlertCircle } from 'lucide-react';
 
-const ADMIN_CREDENTIALS = {
-  email: 'info@construction.com',
-  password: 'Password123',
-  fullName: 'System Administrator'
-};
+// Note: Authentication is now handled through the MySQL API at api.php
+// Supabase auth has been removed. Use the login page for authentication.
 
 interface SetupStatus {
   checking: boolean;
