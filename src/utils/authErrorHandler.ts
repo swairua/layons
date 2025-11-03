@@ -1,4 +1,3 @@
-import { AuthError } from '@supabase/supabase-js';
 import { toast } from '@/utils/safeToast';
 import { logError } from '@/utils/errorLogger';
 import { parseErrorMessage } from '@/utils/errorHelpers';
@@ -12,7 +11,7 @@ export interface AuthErrorInfo {
 
 const NON_MEANINGFUL_MESSAGES = new Set(['', '[object object]', 'null', 'undefined']);
 
-const sanitizeAuthMessage = (error: AuthError | Error): string => {
+const sanitizeAuthMessage = (error: Error | any): string => {
   const candidates: string[] = [];
 
   if (error && typeof error === 'object') {
@@ -54,7 +53,7 @@ const sanitizeAuthMessage = (error: AuthError | Error): string => {
   return 'An unexpected authentication error occurred';
 };
 
-export function analyzeAuthError(error: AuthError | Error): AuthErrorInfo {
+export function analyzeAuthError(error: Error | any): AuthErrorInfo {
   const errorMessage = sanitizeAuthMessage(error);
   const message = errorMessage.toLowerCase();
 
@@ -118,7 +117,7 @@ export function analyzeAuthError(error: AuthError | Error): AuthErrorInfo {
   };
 }
 
-export function handleAuthError(error: AuthError | Error): AuthErrorInfo {
+export function handleAuthError(error: Error | any): AuthErrorInfo {
   const errorInfo = analyzeAuthError(error);
 
   // Log for debugging using structured logger

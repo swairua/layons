@@ -42,15 +42,10 @@ const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 
 const App = () => {
 
+  // Auto-migration disabled: app uses Supabase for database management
+  // MySQL auto-migrations via external API are no longer needed
   useEffect(() => {
-    (async () => {
-      try {
-        const { runAutoMigrate } = await import('@/utils/mysqlAutoMigrate');
-        await runAutoMigrate();
-      } catch (e) {
-        console.warn('Auto-migration skipped:', e);
-      }
-    })();
+    // Placeholder for future setup needs
   }, []);
 
   return (
