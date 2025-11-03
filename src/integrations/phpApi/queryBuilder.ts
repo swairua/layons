@@ -185,7 +185,9 @@ export class QueryBuilder<T = any> {
 
       return { data: rows, error: null };
     } catch (e: any) {
-      return { data: null, error: { message: e?.message || 'Query failed' } };
+      const errorMsg = e?.message || 'Query failed';
+      console.error(`[QueryBuilder] SELECT from ${this.table} failed:`, errorMsg, e);
+      return { data: null, error: { message: errorMsg } };
     }
   }
 
