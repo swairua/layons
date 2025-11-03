@@ -16,6 +16,29 @@ interface Activity {
   timestamp: Date;
 }
 
+// Safe date formatter that handles invalid dates
+function safeFormatDistanceToNow(date: Date): string {
+  try {
+    // Check if the date is valid
+    if (!date || isNaN(date.getTime())) {
+      return 'Recently';
+    }
+    return formatDistanceToNow(date, { addSuffix: true });
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'Recently';
+  }
+}
+
+// Safe date parser that returns a valid Date or current date
+function safeParseDate(dateStr: string | null | undefined): Date {
+  if (!dateStr) {
+    return new Date();
+  }
+  const parsed = new Date(dateStr);
+  return isNaN(parsed.getTime()) ? new Date() : parsed;
+}
+
 function getStatusColor(status: Activity['status']) {
   switch (status) {
     case 'completed':
