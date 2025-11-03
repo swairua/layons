@@ -34,18 +34,27 @@ async function doRequest<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: stri
     const text = await res.text();
     let json: any = null;
     try { json = text ? JSON.parse(text) : null; } catch { json = { raw: text }; }
+
+    // Log errors for debugging
     if (!res.ok) {
-      throw new Error(`API error ${res.status}: ${typeof json === 'object' ? JSON.stringify(json) : text}`);
+      const errorMsg = typeof json === 'object' && json.error
+        ? json.error
+        : (typeof json === 'object' ? JSON.stringify(json) : text);
+      console.error(`[Layons API] ${method} ${url} - ${res.status}: ${errorMsg}`);
+      throw new Error(`API error ${res.status}: ${errorMsg}`);
     }
+
     return json as T;
   } catch (error) {
     clearTimeout(timeoutId);
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
+        console.error(`[Layons API] Request timeout (10s) for ${method} ${url}`);
         throw new Error('API request timeout (10s)');
       }
       throw error;
     }
+    console.error(`[Layons API] Unexpected error: ${error}`);
     throw new Error('Failed to fetch from API');
   }
 }
