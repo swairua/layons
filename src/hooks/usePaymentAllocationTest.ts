@@ -29,8 +29,7 @@ export const usePaymentAllocationTest = () => {
       }
 
       // 2. Check if user profile is linked to company
-    const { data, error: userError } = await supabase.auth.getUser();
-    const user = data?.user;
+    const user = getLocalUser();
     if (!user) {
         return {
           success: false,
