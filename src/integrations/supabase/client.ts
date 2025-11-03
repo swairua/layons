@@ -22,15 +22,17 @@ function getLocalUser() {
 
 class QueryBuilder<T = any> {
   private table: string;
-  private filters: Array<{ col: string; val: any }>; 
+  private filters: Array<{ col: string; val: any }>;
   private _limit: number | null;
   private _select: string | null;
+  private _orderBy: { column: string; ascending: boolean } | null;
 
   constructor(table: string) {
     this.table = table;
     this.filters = [];
     this._limit = null;
     this._select = null;
+    this._orderBy = null;
   }
 
   select(columns?: string): this & { then?: undefined } {
@@ -40,6 +42,11 @@ class QueryBuilder<T = any> {
 
   eq(column: string, value: any): this & { then?: undefined } {
     this.filters.push({ col: column, val: value });
+    return this as any;
+  }
+
+  order(column: string, options?: { ascending?: boolean }): this & { then?: undefined } {
+    this._orderBy = { column, ascending: options?.ascending !== false };
     return this as any;
   }
 
