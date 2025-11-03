@@ -1165,8 +1165,11 @@ export const useCreatePayment = () => {
       // Invalidate multiple cache keys to refresh UI
       queryClient.invalidateQueries({ queryKey: ['payments'] });
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      // Also invalidate invoices_fixed to refresh the Invoices page
+      queryClient.invalidateQueries({ queryKey: ['invoices_fixed'] });
       queryClient.invalidateQueries({ queryKey: ['invoice', result.invoice_id] });
       queryClient.invalidateQueries({ queryKey: ['customer_invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['customer_invoices_fixed'] });
     },
   });
 };
