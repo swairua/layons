@@ -205,11 +205,14 @@ export const useUserManagement = () => {
     setLoading(true);
 
     try {
-      // Delete from auth (this will cascade to profiles due to foreign key)
-      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+      // Delete from database (authentication is managed via MySQL API)
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
 
-      if (authError) {
-        throw authError;
+      if (profileError) {
+        throw profileError;
       }
 
       toast.success('User deleted successfully');
