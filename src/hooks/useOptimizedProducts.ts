@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getLocalUser } from '@/integrations/supabase/client';
 import { useState, useEffect, useMemo } from 'react';
 import { logError } from '@/utils/errorLogger';
 
@@ -130,8 +130,7 @@ export const usePopularProducts = (companyId?: string, limit: number = 20) => {
         console.log('Fetching popular products for company:', companyId);
 
         // Check authentication first
-        const { data, error: authError } = await supabase.auth.getUser();
-        const user = data?.user;
+        const user = getLocalUser();
         if (authError) {
           logError('Authentication error detected in useOptimizedProducts:', authError, { context: 'useOptimizedProducts' });
           throw new Error(`Authentication failed: ${authError && (authError as any).message ? (authError as any).message : JSON.stringify(authError)}`);
