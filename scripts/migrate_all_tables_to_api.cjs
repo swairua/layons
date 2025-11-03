@@ -115,7 +115,8 @@ async function run() {
       console.warn('Create table error:', e.message);
     }
 
-    const dataRes = await client.query(`SELECT * FROM ${JSON.stringify(table).replace(/"/g, '')}`);
+    const safeTable = String(table).replace(/[^a-zA-Z0-9_]/g, '');
+    const dataRes = await client.query(`SELECT * FROM "${safeTable}"`);
     let inserted = 0;
     for (const row of dataRes.rows) {
       const payload = {};
