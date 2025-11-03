@@ -142,14 +142,35 @@ class QueryBuilder<T = any> {
 
       // Handle queries
       let rows = await layonsApi.getAll<T>(this.table);
-      
-      // Client-side filter
+
+      // Client-side filter with operator support
       for (const f of this.filters) {
-        if (f.col === 'id') {
-          rows = rows.filter((r: any) => String(r.id) === String(f.val));
-        } else {
-          rows = rows.filter((r: any) => String(r[f.col]) === String(f.val));
-        }
+        rows = rows.filter((r: any) => {
+          const rowVal = r[f.col];
+
+          switch (f.operator) {
+            case 'eq':
+              return String(rowVal) === String(f.val);
+            case 'neq':
+              return String(rowVal) !== String(f.val);
+            case 'in':
+              return Array.isArray(f.val) && f.val.some(v => String(rowVal) === String(v));
+            case 'gt':
+              return rowVal > f.val;
+            case 'lt':
+              return rowVal < f.val;
+            case 'gte':
+              return rowVal >= f.val;
+            case 'lte':
+              return rowVal <= f.val;
+            case 'contains':
+              return String(rowVal).includes(String(f.val));
+            case 'ilike':
+              return String(rowVal).toLowerCase().includes(String(f.val).toLowerCase());
+            default:
+              return String(rowVal) === String(f.val);
+          }
+        });
       }
 
       // Client-side ordering
@@ -157,17 +178,17 @@ class QueryBuilder<T = any> {
         rows.sort((a: any, b: any) => {
           const aVal = a[this._orderBy!.column];
           const bVal = b[this._orderBy!.column];
-          
+
           if (aVal == null && bVal == null) return 0;
           if (aVal == null) return this._orderBy!.ascending ? -1 : 1;
           if (bVal == null) return this._orderBy!.ascending ? 1 : -1;
-          
+
           if (typeof aVal === 'string' && typeof bVal === 'string') {
-            return this._orderBy!.ascending 
+            return this._orderBy!.ascending
               ? aVal.localeCompare(bVal)
               : bVal.localeCompare(aVal);
           }
-          
+
           const result = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
           return this._orderBy!.ascending ? result : -result;
         });
