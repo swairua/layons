@@ -15,12 +15,15 @@ function getBaseUrl() {
   return String(url);
 }
 
-async function doRequest<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, body?: any): Promise<T> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+async function doRequest<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, body?: any, retries = 3): Promise<T> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  };
 
-  // Add timeout to prevent hanging requests
+  // Add timeout to prevent hanging requests (increased to 15s for slow networks)
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
   try {
     const res = await fetch(url, {
@@ -31,16 +34,47 @@ async function doRequest<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: stri
     });
     clearTimeout(timeoutId);
 
-    const text = await res.text();
+    // Read response body safely - only once
+    let text = '';
     let json: any = null;
-    try { json = text ? JSON.parse(text) : null; } catch { json = { raw: text }; }
 
-    // Log errors for debugging
+    try {
+      text = await res.text();
+    } catch (readError: any) {
+      // Body stream error - likely already read or connection issue
+      console.error(`[Layons API] Failed to read response body: ${readError?.message}`);
+
+      // Retry on body read errors
+      if (retries > 0) {
+        console.warn(`[Layons API] Body read error, retrying... (${retries} attempts left)`);
+        await new Promise(r => setTimeout(r, 1000));
+        return doRequest<T>(method, url, body, retries - 1);
+      }
+
+      throw new Error('Failed to read API response body');
+    }
+
+    // Parse JSON safely
+    try {
+      json = text ? JSON.parse(text) : null;
+    } catch {
+      json = { raw: text };
+    }
+
+    // Check if response is OK
     if (!res.ok) {
       const errorMsg = typeof json === 'object' && json.error
         ? json.error
         : (typeof json === 'object' ? JSON.stringify(json) : text);
       console.error(`[Layons API] ${method} ${url} - ${res.status}: ${errorMsg}`);
+
+      // Retry on 5xx errors if we have retries left
+      if (res.status >= 500 && retries > 0) {
+        console.warn(`[Layons API] Server error, retrying... (${retries} attempts left)`);
+        await new Promise(r => setTimeout(r, 1000)); // Wait 1s before retry
+        return doRequest<T>(method, url, body, retries - 1);
+      }
+
       throw new Error(`API error ${res.status}: ${errorMsg}`);
     }
 
@@ -49,9 +83,25 @@ async function doRequest<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: stri
     clearTimeout(timeoutId);
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
-        console.error(`[Layons API] Request timeout (10s) for ${method} ${url}`);
-        throw new Error('API request timeout (10s)');
+        console.error(`[Layons API] Request timeout (15s) for ${method} ${url}`);
+
+        // Retry on timeout if we have retries left
+        if (retries > 0) {
+          console.warn(`[Layons API] Timeout, retrying... (${retries} attempts left)`);
+          await new Promise(r => setTimeout(r, 2000)); // Wait 2s before retry after timeout
+          return doRequest<T>(method, url, body, retries - 1);
+        }
+
+        throw new Error('API request timeout (15s) - server may be unavailable. Check if https://erp.layonsconstruction.com is online.');
       }
+
+      // Retry on network errors
+      if (retries > 0 && error.message.includes('Failed to fetch')) {
+        console.warn(`[Layons API] Network error, retrying... (${retries} attempts left)`);
+        await new Promise(r => setTimeout(r, 1000));
+        return doRequest<T>(method, url, body, retries - 1);
+      }
+
       throw error;
     }
     console.error(`[Layons API] Unexpected error: ${error}`);
