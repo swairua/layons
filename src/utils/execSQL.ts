@@ -2,7 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { parseErrorMessage } from '@/utils/errorHelpers';
 
 /**
- * Execute SQL statements in Supabase
+ * Execute SQL statements (manual execution in MySQL/phpMyAdmin if needed)
  * This handles the case where exec_sql RPC function may not be available
  */
 export async function executeSQL(sql: string): Promise<{ error?: any; data?: any }> {
@@ -83,7 +83,7 @@ export async function executeSQL(sql: string): Promise<{ error?: any; data?: any
         data: results,
         error: null,
         manual_execution_required: true,
-        message: 'Statements analyzed - manual execution required in Supabase SQL Editor'
+        message: 'Statements analyzed - manual execution required in your SQL editor (MySQL/phpMyAdmin)'
       };
       
     } catch (altError: any) {

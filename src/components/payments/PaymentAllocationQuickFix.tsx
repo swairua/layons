@@ -82,7 +82,7 @@ FOR ALL USING (
 );`;
 
     navigator.clipboard.writeText(sql);
-    toast.success('Setup SQL copied! Paste and run in Supabase SQL Editor.');
+    toast.success('Setup SQL copied! Paste and run in your MySQL client (e.g., phpMyAdmin).');
   };
 
   const openSupabaseSQL = () => {
@@ -148,15 +148,6 @@ FOR ALL USING (
                   <Copy className="h-4 w-4 mr-2" />
                   Copy Fix SQL
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={openSupabaseSQL}
-                  className="bg-background"
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Open SQL Editor
-                </Button>
               </>
             )}
 
@@ -170,7 +161,7 @@ FOR ALL USING (
 
           {status === 'needs-fix' && (
             <div className="text-xs text-warning">
-              <strong>Quick Fix:</strong> Copy the SQL → Open Supabase SQL Editor → Paste & Run → Try payment again
+              <strong>Quick Fix:</strong> Copy the SQL → Open your MySQL client (e.g., phpMyAdmin) → Paste & Run → Try payment again
             </div>
           )}
         </div>

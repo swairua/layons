@@ -144,7 +144,7 @@ export function StockMovementsSchemaFix() {
               <p><strong>Manual Steps:</strong></p>
               <ol className="list-decimal list-inside space-y-1 mt-1">
                 <li>Copy the SQL above</li>
-                <li>Open your Supabase SQL editor</li>
+                <li>Open your MySQL client (e.g., phpMyAdmin)</li>
                 <li>Paste and execute the SQL</li>
                 <li>Try creating an invoice again</li>
               </ol>

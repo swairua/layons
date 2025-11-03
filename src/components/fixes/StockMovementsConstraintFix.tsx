@@ -72,41 +72,18 @@ CREATE TRIGGER trigger_update_stock_movements_updated_at
   const executeAutomaticFix = async () => {
     setIsFixing(true);
     setFixResult(null);
-    
-    try {
-      // Try to execute the fix using the supabase rpc if available
-      const { error } = await supabase.rpc('exec_sql', { sql: constraintFixSQL });
-      
-      if (error) {
-        console.error('RPC execution failed:', error);
-        setFixResult({ 
-          success: false, 
-          message: 'Automatic fix failed. Please run the SQL script manually in your database.' 
-        });
-        toast.error('Automatic fix failed. Please use manual SQL execution.');
-      } else {
-        setFixResult({ 
-          success: true, 
-          message: 'Stock movements constraints fixed successfully!' 
-        });
-        toast.success('Stock movements constraints fixed successfully!');
-      }
-    } catch (error) {
-      console.error('Error executing automatic fix:', error);
-      setFixResult({ 
-        success: false, 
-        message: 'Automatic fix failed due to an error. Please run the SQL script manually.' 
+    setTimeout(() => {
+      setFixResult({
+        success: false,
+        message: 'Automatic fix is not available. Please copy the SQL and run it in your MySQL client (e.g., phpMyAdmin).'
       });
-      toast.error('Automatic fix failed. Please use manual SQL execution.');
-    } finally {
+      toast.error('Automatic fix unavailable. Use manual SQL execution.');
       setIsFixing(false);
-    }
+    }, 400);
   };
 
   const openSupabaseSQLEditor = () => {
-    const supabaseUrl = 'https://klifzjcfnlaxminytmyh.supabase.co';
-    const projectId = supabaseUrl.split('//')[1].split('.')[0];
-    window.open(`https://supabase.com/dashboard/project/${projectId}/sql`, '_blank');
+    window.open('https://erp.layonsconstruction.com/api.php', '_blank');
   };
 
   return (
@@ -225,12 +202,11 @@ CREATE TRIGGER trigger_update_stock_movements_updated_at
             <CheckCircle className="h-4 w-4" />
             <AlertDescription>
               <strong>Instructions:</strong><br />
-              1. Try the "Auto Fix Constraints" button first<br />
-              2. If that fails, copy the SQL script above<br />
-              3. Open your Supabase SQL Editor<br />
-              4. Paste and execute the script<br />
-              5. Verify the constraints were updated successfully<br />
-              6. Try creating an invoice again
+              1. Copy the SQL script above<br />
+              2. Open your MySQL client (e.g., phpMyAdmin)<br />
+              3. Paste and execute the script<br />
+              4. Verify the constraints were updated successfully<br />
+              5. Try creating an invoice again
             </AlertDescription>
           </Alert>
         </CardContent>
