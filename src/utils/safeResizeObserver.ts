@@ -16,8 +16,10 @@ export class SafeResizeObserver {
   private lastEntries: ResizeObserverEntry[] = [];
   private lastObservedSizes: Map<Element, { width: number; height: number }> = new Map();
   private sizeChangeThreshold = 1; // Only respond to size changes > 1px
-  private maxLoopCount = 20; // Max resize events per second before disconnecting
-  private loopDetectionWindowMs = 1000; // Time window for loop detection
+  private maxLoopCount = 15; // Max resize events per detection window before disconnecting
+  private loopDetectionWindowMs = 2000; // Time window for loop detection
+  private lastCallbackTime = 0; // Track when we last executed the callback
+  private minCallbackIntervalMs = 500; // Minimum time between callbacks to prevent tight loops
 
   constructor(callback: SafeResizeObserverCallback, debounceMs = 250) {
     this.callback = callback;
