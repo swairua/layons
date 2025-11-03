@@ -1816,8 +1816,8 @@ export const useCreateLPO = () => {
       // Create LPO (default created_by to authenticated user if column exists)
       const lpoPayload: any = { ...lpo };
       try {
-        const { data: userData } = await supabase.auth.getUser();
-        const authUserId = userData?.user?.id || null;
+        const user = getLocalUser();
+        const authUserId = user?.id || null;
         if (authUserId) {
           lpoPayload.created_by = authUserId;
         } else if (typeof lpoPayload.created_by === 'undefined') {
