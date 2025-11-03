@@ -1,6 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
-
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getLocalUser } from '@/integrations/supabase/client';
 
 /**
  * Examine the companies table to understand its current state
