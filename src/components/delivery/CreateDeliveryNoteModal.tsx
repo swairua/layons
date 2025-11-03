@@ -330,15 +330,21 @@ export const CreateDeliveryNoteModal = ({
                 </SelectTrigger>
                 <SelectContent>
                   {invoices?.filter(inv => !formData.customer_id || inv.customer_id === formData.customer_id)
-                    .map((invoice) => (
-                    <SelectItem key={invoice.id} value={invoice.id}>
-                      {invoice.invoice_number} - ${invoice.total_amount?.toFixed(2)}
-                      {invoice.invoice_items && invoice.invoice_items.length > 0 ?
-                        ` (${invoice.invoice_items.length} items)` :
-                        ' (no items)'
-                      }
-                    </SelectItem>
-                  ))}
+                    .map((invoice) => {
+                      const totalAmount = typeof invoice.total_amount === 'string'
+                        ? parseFloat(invoice.total_amount)
+                        : invoice.total_amount;
+                      const displayAmount = totalAmount ? totalAmount.toFixed(2) : '0.00';
+                      return (
+                        <SelectItem key={invoice.id} value={invoice.id}>
+                          {invoice.invoice_number} - ${displayAmount}
+                          {invoice.invoice_items && invoice.invoice_items.length > 0 ?
+                            ` (${invoice.invoice_items.length} items)` :
+                            ' (no items)'
+                          }
+                        </SelectItem>
+                      );
+                    })}
                 </SelectContent>
               </Select>
               {formData.invoice_id && (
