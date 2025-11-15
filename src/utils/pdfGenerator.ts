@@ -361,7 +361,7 @@ export const generatePDF = (data: DocumentData) => {
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
-        .items thead th { background:#000; color:#fff; font-weight:700; }
+        .items thead th { background:#000; color:#fff; font-weight:bold; text-transform: uppercase; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding:8px; }
         .item-row td.num { text-align:center; }
         .item-row td.desc { width:55%; }
@@ -406,11 +406,11 @@ export const generatePDF = (data: DocumentData) => {
               </div>
               ` : ''}
 
-              <div style="margin-bottom: 4px;"><strong>Client:</strong> ${data.customer.name}</div>
-              ${boqProject ? `<div style="margin-bottom: 4px;"><strong>Project:</strong> ${boqProject}</div>` : ''}
-              <div style="margin-bottom: 4px;"><strong>Subject:</strong> Bill of Quantities</div>
-              <div style="margin-bottom: 4px;"><strong>Date:</strong> ${formatDateLong(data.date)}</div>
-              <div style="margin-bottom: 4px;"><strong>BOQ No:</strong> ${data.number}</div>
+              <div style="margin-bottom: 4px; font-weight: bold;"><strong>Client:</strong> ${data.customer.name}</div>
+              ${boqProject ? `<div style="margin-bottom: 4px; font-weight: bold;"><strong>Project:</strong> ${boqProject}</div>` : ''}
+              <div style="margin-bottom: 4px; font-weight: bold;"><strong>Subject:</strong> Bill of Quantities</div>
+              <div style="margin-bottom: 4px; font-weight: bold;"><strong>Date:</strong> ${formatDateLong(data.date)}</div>
+              <div style="margin-bottom: 4px; font-weight: bold;"><strong>BOQ No:</strong> ${data.number}</div>
             </div>
 
             <!-- Right side: Company details (right-aligned) -->
@@ -430,12 +430,12 @@ export const generatePDF = (data: DocumentData) => {
         <table class="items">
           <thead>
             <tr>
-              <th style="width:5%">#</th>
-              <th style="width:55%; text-align:left">ITEM DESCRIPTION</th>
-              <th style="width:8%">QTY</th>
-              <th style="width:9%">UNIT</th>
-              <th style="width:11%">RATE</th>
-              <th style="width:12%">AMOUNT (KSHS)</th>
+              <th style="width:5%; font-weight: bold;">#</th>
+              <th style="width:55%; text-align:left; font-weight: bold;">ITEM DESCRIPTION</th>
+              <th style="width:8%; font-weight: bold;">QTY</th>
+              <th style="width:9%; font-weight: bold;">UNIT</th>
+              <th style="width:11%; font-weight: bold;">RATE</th>
+              <th style="width:12%; font-weight: bold;">AMOUNT (KSHS)</th>
             </tr>
           </thead>
           <tbody>
