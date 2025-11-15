@@ -398,7 +398,8 @@ export const generatePDF = (data: DocumentData) => {
 
           <!-- Services Section -->
           ${company.company_services ? (() => {
-            const services = company.company_services.split(',').map((s: string) => s.trim());
+            const services = company.company_services.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+            if (services.length === 0) return '';
             const midpoint = Math.ceil(services.length / 2);
             const firstRow = services.slice(0, midpoint).join(' • ');
             const secondRow = services.slice(midpoint).join(' • ');
