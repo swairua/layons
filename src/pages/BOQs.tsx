@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Layers, Plus, Eye, Download, Trash2 } from 'lucide-react';
 import { CreateBOQModal } from '@/components/boq/CreateBOQModal';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
@@ -72,19 +73,31 @@ export default function BOQs() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Bill of Quantities</h1>
-          <p className="text-muted-foreground">Create, store and download BOQs as branded PDFs.</p>
+          <h1 className="text-3xl font-bold text-foreground">BOQs</h1>
+          <p className="text-muted-foreground">
+            Create and manage bill of quantities
+          </p>
         </div>
-        <Button variant="default" size="lg" onClick={() => setOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" /> New BOQ
+        <Button
+          className="gradient-primary text-primary-foreground hover:opacity-90 shadow-card"
+          size="lg"
+          onClick={() => setOpen(true)}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          New BOQ
         </Button>
       </div>
 
-      <Card>
+      <Card className="shadow-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center space-x-2">
             <Layers className="h-5 w-5 text-primary" />
-            BOQ Records
+            <span>BOQs List</span>
+            {!isLoading && (
+              <Badge variant="outline" className="ml-auto">
+                {boqs.length} boqs
+              </Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">

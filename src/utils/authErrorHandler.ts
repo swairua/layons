@@ -32,6 +32,10 @@ const sanitizeAuthMessage = (error: AuthError | Error | any): string => {
           candidates.push(trimmed);
         }
       }
+      // Also try name + message if message alone is empty
+      if (error.name && typeof error.name === 'string' && (!error.message || !error.message.trim())) {
+        candidates.push(error.name);
+      }
     }
 
     // Handle objects (AuthError, plain objects, etc.)
@@ -54,6 +58,16 @@ const sanitizeAuthMessage = (error: AuthError | Error | any): string => {
           const trimmed = source.trim();
           if (trimmed && trimmed !== '[object Object]' && !candidates.includes(trimmed)) {
             candidates.push(trimmed);
+          }
+        } else if (source && typeof source === 'object') {
+          // If source is an object, try to stringify it safely
+          try {
+            const stringified = JSON.stringify(source);
+            if (stringified && stringified !== '{}' && stringified !== '[object Object]') {
+              candidates.push(stringified);
+            }
+          } catch {
+            // Skip if stringify fails
           }
         }
       }
