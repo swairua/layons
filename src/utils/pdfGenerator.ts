@@ -405,7 +405,7 @@ export const generatePDF = (data: DocumentData) => {
             <!-- Left side: Client and Document Details -->
             <div class="header-left">
               <!-- Services Section -->
-              <div style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #ddd;">
+              <div style="margin-bottom: 8px;">
                 <div style="font-size: 9px; font-weight: bold; color: #333; text-transform: uppercase; line-height: 1.4;">
                   ${(() => {
                     const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
@@ -417,6 +417,7 @@ export const generatePDF = (data: DocumentData) => {
                 </div>
               </div>
 
+              <!-- Client Details -->
               <div style="margin-bottom: 4px; font-weight: bold;"><strong>Client:</strong> ${data.customer.name}</div>
               ${boqProject ? `<div style="margin-bottom: 4px; font-weight: bold;"><strong>Project:</strong> ${boqProject}</div>` : ''}
               <div style="margin-bottom: 4px; font-weight: bold;"><strong>Subject:</strong> Bill of Quantities</div>
@@ -600,7 +601,7 @@ export const generatePDF = (data: DocumentData) => {
               <!-- Left side: Client and Document Details (matches supplied attachment) -->
               <div style="display: flex; flex-direction: column; gap: 8px; font-size: 10px; line-height: 1.6; text-align:left;">
                 <!-- Services Section -->
-                <div style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #ddd;">
+                <div style="margin-bottom: 8px;">
                   <div style="font-size: 9px; font-weight: bold; color: #333; text-transform: uppercase; line-height: 1.4;">
                     ${(() => {
                       const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
