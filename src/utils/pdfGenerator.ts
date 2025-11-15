@@ -355,10 +355,10 @@ export const generatePDF = (data: DocumentData) => {
         .container { padding: 12mm; }
 
         /* Brand header like the mock */
-        .brand-header { border:none; border-radius:0; padding:0 12mm; width:100%; margin:0; box-sizing:border-box; }
+        .brand-header { border:none; border-radius:0; padding:0; width:100vw; margin:0 -12mm 0 -12mm; box-sizing:border-box; }
         .brand-row { display:flex; align-items:center; justify-content:flex-start; margin:0; padding:0; }
-        .brand-logo { height:90px; display:flex; align-items:center; justify-content:flex-start; flex:1; margin:0; padding:0; }
-        .brand-logo img { height:90px; width:auto; object-fit:contain; margin:0; padding:0; }
+        .brand-logo { height:90px; display:flex; align-items:center; justify-content:flex-start; flex:1; margin:0; padding:0; width:100%; }
+        .brand-logo img { height:90px; width:100%; object-fit:cover; margin:0; padding:0; }
         .brand-accent { margin:0; display:flex; align-items:center; gap:0; height:14px; }
         .accent-yellow { flex:1; height:14px; background:#f4a300; position:relative; clip-path:polygon(0 0, calc(100% - 34px) 0, 100% 100%, 0 100%); }
         .accent-stripes { width:88px; height:14px; background: repeating-linear-gradient(135deg, #ffffff 0 12px, #f4a300 12px 22px); }
