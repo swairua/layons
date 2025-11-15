@@ -401,8 +401,8 @@ export const generatePDF = (data: DocumentData) => {
           <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
           <!-- Services Section -->
-          ${company.company_services ? (() => {
-            const services = company.company_services.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+          ${(() => {
+            const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
             if (services.length === 0) return '';
             const midpoint = Math.ceil(services.length / 2);
             const firstRow = services.slice(0, midpoint).join(' • ');
@@ -415,7 +415,7 @@ export const generatePDF = (data: DocumentData) => {
               </div>
             </div>
             `;
-          })() : ''}
+          })()}
 
           <!-- Header content below image -->
           <div class="header-content">
