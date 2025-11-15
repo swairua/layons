@@ -342,8 +342,38 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
 
                   {section.subsections.map((subsection) => (
                     <div key={subsection.id} className="space-y-3 bg-muted/30 rounded-lg p-3 border border-border/50">
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm font-semibold">Subsection {subsection.name}: {subsection.label}</div>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <div className="text-sm font-semibold">Subsection {subsection.name}:</div>
+                          {subsection.name === 'A' ? (
+                            <div className="flex gap-2">
+                              <Select value={subsection.label} onValueChange={(val) => {
+                                if (val === '__custom') {
+                                  // Would need custom text input - for now just show input
+                                } else {
+                                  updateSubsectionLabel(section.id, subsection.id, val);
+                                }
+                              }}>
+                                <SelectTrigger className="w-40">
+                                  <SelectValue placeholder="Select label" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Materials">Materials</SelectItem>
+                                  <SelectItem value="Services">Services</SelectItem>
+                                  <SelectItem value="__custom">Custom...</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <Input
+                                value={subsection.label}
+                                onChange={(e) => updateSubsectionLabel(section.id, subsection.id, e.target.value)}
+                                placeholder="Custom label"
+                                className="w-40"
+                              />
+                            </div>
+                          ) : (
+                            <div className="text-sm font-semibold">{subsection.label}</div>
+                          )}
+                        </div>
                         <div className="text-sm text-muted-foreground">Subtotal: {formatCurrency(calculateSubsectionTotal(subsection))}</div>
                       </div>
 
