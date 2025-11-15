@@ -13,57 +13,81 @@ export interface AuthErrorInfo {
 const NON_MEANINGFUL_MESSAGES = new Set(['', '[object object]', 'null', 'undefined']);
 
 const sanitizeAuthMessage = (error: AuthError | Error | any): string => {
-  const candidates: string[] = [];
+  try {
+    const candidates: string[] = [];
 
-  // Handle string errors directly
-  if (typeof error === 'string') {
-    candidates.push(error);
-  }
-
-  // Handle Error instances
-  if (error instanceof Error) {
-    if (error.message) {
-      candidates.push(error.message);
+    // Handle string errors directly
+    if (typeof error === 'string') {
+      const trimmed = error.trim();
+      if (trimmed) {
+        candidates.push(trimmed);
+      }
     }
-  }
 
-  // Handle objects (AuthError, plain objects, etc.)
-  if (error && typeof error === 'object') {
-    const authError = error as any;
-    if (typeof authError.message === 'string' && authError.message) {
-      candidates.push(authError.message);
+    // Handle Error instances
+    if (error instanceof Error) {
+      if (error.message && typeof error.message === 'string') {
+        const trimmed = error.message.trim();
+        if (trimmed) {
+          candidates.push(trimmed);
+        }
+      }
     }
-    if (typeof authError.error_description === 'string' && authError.error_description) {
-      candidates.push(authError.error_description);
+
+    // Handle objects (AuthError, plain objects, etc.)
+    if (error && typeof error === 'object') {
+      const authError = error as any;
+      if (typeof authError.message === 'string' && authError.message) {
+        const trimmed = authError.message.trim();
+        if (trimmed) {
+          candidates.push(trimmed);
+        }
+      }
+      if (typeof authError.error_description === 'string' && authError.error_description) {
+        const trimmed = authError.error_description.trim();
+        if (trimmed) {
+          candidates.push(trimmed);
+        }
+      }
+      if (typeof authError.details === 'string' && authError.details) {
+        const trimmed = authError.details.trim();
+        if (trimmed) {
+          candidates.push(trimmed);
+        }
+      }
+      if (typeof authError.hint === 'string' && authError.hint) {
+        const trimmed = authError.hint.trim();
+        if (trimmed) {
+          candidates.push(trimmed);
+        }
+      }
     }
-    if (typeof authError.details === 'string' && authError.details) {
-      candidates.push(authError.details);
+
+    // Filter out non-meaningful candidates
+    const meaningfulCandidate = candidates.find(candidate => {
+      if (!candidate) return false;
+      const normalized = String(candidate).trim().toLowerCase();
+      return normalized && !NON_MEANINGFUL_MESSAGES.has(normalized) && normalized !== '[object object]';
+    });
+
+    if (meaningfulCandidate) {
+      return meaningfulCandidate.trim();
     }
-    if (typeof authError.hint === 'string' && authError.hint) {
-      candidates.push(authError.hint);
+
+    // Fallback to parseErrorMessage which has additional safeguards
+    const parsed = parseErrorMessage(error);
+    const safeParsed = typeof parsed === 'string' ? parsed : String(parsed || '');
+    const normalizedParsed = safeParsed.trim().toLowerCase();
+
+    if (!NON_MEANINGFUL_MESSAGES.has(normalizedParsed) && normalizedParsed !== '[object object]') {
+      return safeParsed.trim();
     }
+
+    return 'An unexpected authentication error occurred';
+  } catch (sanitizeError) {
+    console.error('Error sanitizing auth message:', sanitizeError);
+    return 'An unexpected authentication error occurred';
   }
-
-  // Filter out non-meaningful candidates
-  const meaningfulCandidate = candidates.find(candidate => {
-    if (!candidate) return false;
-    const normalized = String(candidate).trim().toLowerCase();
-    return normalized && !NON_MEANINGFUL_MESSAGES.has(normalized);
-  });
-
-  if (meaningfulCandidate) {
-    return meaningfulCandidate.trim();
-  }
-
-  // Fallback to parseErrorMessage which has additional safeguards
-  const parsed = parseErrorMessage(error);
-  const normalizedParsed = String(parsed).trim().toLowerCase();
-
-  if (!NON_MEANINGFUL_MESSAGES.has(normalizedParsed)) {
-    return parsed.trim();
-  }
-
-  return 'An unexpected authentication error occurred';
 };
 
 export function analyzeAuthError(error: AuthError | Error): AuthErrorInfo {
