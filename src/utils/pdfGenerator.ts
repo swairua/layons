@@ -1888,7 +1888,10 @@ export const generatePDF = (data: DocumentData) => {
           <div style="margin-bottom: 25px;">
             <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Terms;</h3>
             <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
-              <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows; a. 50% Upon Order (${formatCurrency(data.total_amount * 0.5)}) b. 40% As Progressive (${formatCurrency(data.total_amount * 0.4)}) c. 10% Upon Completion (${formatCurrency(data.total_amount * 0.1)})</li>
+              <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;</li>
+              <li style="margin-bottom: 6px; margin-left: 20px;">a. 50% Upon Order (${formatCurrency(data.total_amount * 0.5)})</li>
+              <li style="margin-bottom: 6px; margin-left: 20px;">b. 40% As Progressive (${formatCurrency(data.total_amount * 0.4)})</li>
+              <li style="margin-bottom: 6px; margin-left: 20px;">c. 10% Upon Completion (${formatCurrency(data.total_amount * 0.1)})</li>
               <li style="margin-bottom: 6px;">All work will be executed based on the drawings and samples approved by the client</li>
               <li style="margin-bottom: 6px;">Any Changes/alterations to the scope of work outlined will affect the final quantity will be measured, and charges will be applied on a pro-rata basis at the agreed rate</li>
               <li style="margin-bottom: 6px;">We are not responsible for any damages caused by negligence from other Sub Contractors Hired by the Client.</li>
