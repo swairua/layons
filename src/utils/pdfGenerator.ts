@@ -404,36 +404,36 @@ export const generatePDF = (data: DocumentData) => {
 
           <!-- Header content below image -->
           <div class="header-content">
-            <!-- Left side: Client and Document Details -->
-            <div class="header-left">
+            <!-- Top row: Services (left) and Company details (right) -->
+            <div class="header-top">
               <!-- Services Section -->
-              <div style="margin-bottom: 8px;">
-                <div style="font-size: 10px; font-weight: bold; color: #333; text-transform: uppercase; line-height: 1.4;">
-                  ${(() => {
-                    const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-                    const midpoint = Math.ceil(services.length / 2);
-                    const firstRow = services.slice(0, midpoint).join(' • ');
-                    const secondRow = services.slice(midpoint).join(' • ');
-                    return `<div style="margin-bottom: 3px;">${firstRow}</div>${secondRow ? `<div>${secondRow}</div>` : ''}`;
-                  })()}
-                </div>
+              <div class="services-section">
+                ${(() => {
+                  const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+                  const midpoint = Math.ceil(services.length / 2);
+                  const firstRow = services.slice(0, midpoint).join(' • ');
+                  const secondRow = services.slice(midpoint).join(' • ');
+                  return `<div style="margin-bottom: 3px;">${firstRow}</div>${secondRow ? `<div>${secondRow}</div>` : ''}`;
+                })()}
               </div>
 
-              <!-- Client Details -->
+              <!-- Company details (right-aligned) -->
+              <div class="header-right" style="font-size: 12px;">
+                ${company.address ? `<div style="font-weight: bold;">${company.address}</div>` : ''}
+                ${company.city ? `<div style="font-weight: bold;">${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+                ${company.phone ? `<div style="font-weight: bold;">Telephone: ${company.phone}</div>` : ''}
+                ${company.email ? `<div style="font-weight: bold;">${company.email}</div>` : ''}
+                ${company.tax_number ? `<div style="font-weight: bold;">PIN: ${company.tax_number}</div>` : ''}
+              </div>
+            </div>
+
+            <!-- Bottom row: Client Details -->
+            <div class="header-left">
               <div style="margin-bottom: 4px; font-weight: bold;"><strong>Client:</strong> ${data.customer.name}</div>
               ${boqProject ? `<div style="margin-bottom: 4px; font-weight: bold;"><strong>Project:</strong> ${boqProject}</div>` : ''}
               <div style="margin-bottom: 4px; font-weight: bold;"><strong>Subject:</strong> Bill of Quantities</div>
               <div style="margin-bottom: 4px; font-weight: bold;"><strong>Date:</strong> ${formatDateLong(data.date)}</div>
               <div style="margin-bottom: 4px; font-weight: bold;"><strong>BOQ No:</strong> ${data.number}</div>
-            </div>
-
-            <!-- Right side: Company details (right-aligned) -->
-            <div class="header-right" style="font-size: 12px;">
-              ${company.address ? `<div style="font-weight: bold;">${company.address}</div>` : ''}
-              ${company.city ? `<div style="font-weight: bold;">${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-              ${company.phone ? `<div style="font-weight: bold;">Telephone: ${company.phone}</div>` : ''}
-              ${company.email ? `<div style="font-weight: bold;">${company.email}</div>` : ''}
-              ${company.tax_number ? `<div style="font-weight: bold;">PIN: ${company.tax_number}</div>` : ''}
             </div>
           </div>
         </div>
