@@ -261,6 +261,8 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
         country: currentCompany.country || undefined,
         phone: currentCompany.phone || undefined,
         email: currentCompany.email || undefined,
+        tax_number: currentCompany.tax_number || undefined,
+        company_services: currentCompany.company_services || undefined,
       } : undefined);
 
       toast.success(`BOQ ${boqNumber} generated and saved`);
