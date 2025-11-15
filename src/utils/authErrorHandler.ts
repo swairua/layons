@@ -68,7 +68,20 @@ const sanitizeAuthMessage = (error: AuthError | Error | any): string => {
 
 export function analyzeAuthError(error: AuthError | Error): AuthErrorInfo {
   const errorMessage = sanitizeAuthMessage(error);
-  const message = errorMessage.toLowerCase();
+
+  // Ensure errorMessage is a string
+  const safeMessage = typeof errorMessage === 'string' ? errorMessage : String(errorMessage || '');
+  const message = safeMessage.toLowerCase().trim();
+
+  // Prevent empty messages from proceeding
+  if (!message || message === '[object object]') {
+    return {
+      type: 'unknown',
+      message: 'An unexpected authentication error occurred',
+      action: 'Please try again or contact support if the problem persists',
+      retry: true
+    };
+  }
 
   if (message.includes('invalid login credentials')) {
     return {
@@ -113,18 +126,19 @@ export function analyzeAuthError(error: AuthError | Error): AuthErrorInfo {
     };
   }
 
-  const fallbackMessage = NON_MEANINGFUL_MESSAGES.has(message)
+  // Use the safe message directly if it's meaningful
+  const finalMessage = NON_MEANINGFUL_MESSAGES.has(message)
     ? 'An unexpected authentication error occurred'
-    : errorMessage;
+    : safeMessage.trim();
 
-  // Ensure message is always a string
-  const finalMessage = typeof fallbackMessage === 'string'
-    ? fallbackMessage
+  // Ensure it's a non-empty string
+  const displayMessage = (finalMessage && finalMessage !== '[object Object]')
+    ? finalMessage
     : 'An unexpected authentication error occurred';
 
   return {
     type: 'unknown',
-    message: finalMessage,
+    message: displayMessage,
     action: 'Please try again or contact support if the problem persists',
     retry: true
   };
