@@ -607,11 +607,11 @@ export const generatePDF = (data: DocumentData) => {
               <!-- Right side: Company details (right-aligned) -->
               <div style="text-align: right; font-size: 10px; line-height: 1.6;">
                 <div style="font-weight: bold; margin-bottom: 6px; font-size: 12px;">${company.name}</div>
-                ${company.address ? `<div>${company.address}</div>` : ''}
-                ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-                ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
-                ${company.email ? `<div>${company.email}</div>` : ''}
-                ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
+                ${company.address ? `<div style="font-weight: bold;">${company.address}</div>` : ''}
+                ${company.city ? `<div style="font-weight: bold;">${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+                ${company.phone ? `<div style="font-weight: bold;">Telephone: ${company.phone}</div>` : ''}
+                ${company.email ? `<div style="font-weight: bold;">${company.email}</div>` : ''}
+                ${company.tax_number ? `<div style="font-weight: bold;">PIN: ${company.tax_number}</div>` : ''}
               </div>
             </div>
           </div>
