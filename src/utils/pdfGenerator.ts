@@ -385,10 +385,12 @@ export const generatePDF = (data: DocumentData) => {
         .field-row .label { width:80px; font-weight:600; }
         .field-row .fill { flex:1; height:16px; border-bottom:1px dotted #999; }
         .pagefoot { position:fixed; bottom:12mm; left:12mm; right:12mm; text-align:center; font-size:10px; color:#666; }
+        .boq-main { page-break-after: always; }
+        .terms-page { page-break-before: always; }
       </style>
     </head>
     <body>
-      <div class="container">
+      <div class="container boq-main">
         <!-- Header Section -->
         <div class="header">
           <!-- Full-width header image (same as quotations) -->
