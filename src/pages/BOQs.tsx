@@ -72,11 +72,18 @@ export default function BOQs() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Bill of Quantities</h1>
-          <p className="text-muted-foreground">Create, store and download BOQs as branded PDFs.</p>
+          <h1 className="text-3xl font-bold text-foreground">BOQs</h1>
+          <p className="text-muted-foreground">
+            Create and manage bill of quantities
+          </p>
         </div>
-        <Button variant="default" size="lg" onClick={() => setOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" /> New BOQ
+        <Button
+          className="gradient-primary text-primary-foreground hover:opacity-90 shadow-card"
+          size="lg"
+          onClick={() => setOpen(true)}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          New BOQ
         </Button>
       </div>
 
