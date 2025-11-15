@@ -397,13 +397,20 @@ export const generatePDF = (data: DocumentData) => {
           <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
           <!-- Services Section -->
-          ${company.company_services ? `
-          <div style="margin: 15px 0; padding: 12px 0; border-bottom: 2px solid #000;">
-            <div style="font-size: 9px; font-weight: bold; color: #333; text-transform: uppercase; line-height: 1.8; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-              ${company.company_services.split(',').map((service: string, idx: number) => `<div style="${idx < 3 ? '' : 'grid-column: 1;'}">${service.trim()}</div>`).join('')}
+          ${company.company_services ? (() => {
+            const services = company.company_services.split(',').map((s: string) => s.trim());
+            const midpoint = Math.ceil(services.length / 2);
+            const firstRow = services.slice(0, midpoint).join(' • ');
+            const secondRow = services.slice(midpoint).join(' • ');
+            return `
+            <div style="margin: 12px 0 15px 0; padding: 10px 0; border-bottom: 2px solid #000;">
+              <div style="font-size: 9px; font-weight: bold; color: #333; text-transform: uppercase; line-height: 1.6;">
+                <div style="margin-bottom: 4px;">${firstRow}</div>
+                ${secondRow ? `<div>${secondRow}</div>` : ''}
+              </div>
             </div>
-          </div>
-          ` : ''}
+            `;
+          })() : ''}
 
           <!-- Header content below image -->
           <div class="header-content">
