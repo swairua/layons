@@ -396,15 +396,19 @@ export const generatePDF = (data: DocumentData) => {
           <!-- Full-width header image (same as quotations) -->
           <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
+          <!-- Services Section -->
+          ${company.company_services ? `
+          <div style="margin: 15px 0; padding: 12px 0; border-bottom: 2px solid #000;">
+            <div style="font-size: 9px; font-weight: bold; color: #333; text-transform: uppercase; line-height: 1.8; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              ${company.company_services.split(',').map((service: string, idx: number) => `<div style="${idx < 3 ? '' : 'grid-column: 1;'}">${service.trim()}</div>`).join('')}
+            </div>
+          </div>
+          ` : ''}
+
           <!-- Header content below image -->
           <div class="header-content">
             <!-- Left side: Client and Document Details -->
             <div class="header-left">
-              ${company.company_services ? `
-              <div style="font-size: 10px; font-weight: bold; color: #333; margin-bottom: 6px; line-height: 1.4; text-transform: uppercase;">
-                ${company.company_services.split('\n').filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
-              </div>
-              ` : ''}
 
               <div style="margin-bottom: 4px; font-weight: bold;"><strong>Client:</strong> ${data.customer.name}</div>
               ${boqProject ? `<div style="margin-bottom: 4px; font-weight: bold;"><strong>Project:</strong> ${boqProject}</div>` : ''}
