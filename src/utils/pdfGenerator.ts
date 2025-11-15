@@ -425,8 +425,7 @@ export const generatePDF = (data: DocumentData) => {
             </div>
 
             <!-- Right side: Company details (right-aligned) -->
-            <div class="header-right">
-              <div class="company-name">${company.name}</div>
+            <div class="header-right" style="font-size: 12px;">
               ${company.address ? `<div style="font-weight: bold;">${company.address}</div>` : ''}
               ${company.city ? `<div style="font-weight: bold;">${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
               ${company.phone ? `<div style="font-weight: bold;">Telephone: ${company.phone}</div>` : ''}
