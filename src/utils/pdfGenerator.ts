@@ -718,7 +718,7 @@ export const generatePDF = (data: DocumentData) => {
               ${data.sections.map((section, idx) => {
                 const sectionLetter = String.fromCharCode(65 + idx);
                 const matTotal = section.items.reduce((sum, item) => sum + (item.line_total || 0), 0);
-                const labour = section.labor_cost || 0;
+                const labour = Number(section.labor_cost || 0);
                 const secTotal = matTotal + labour;
 
                 return `
