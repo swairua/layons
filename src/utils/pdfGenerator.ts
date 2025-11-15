@@ -817,24 +817,44 @@ export const generatePDF = (data: DocumentData) => {
 
           <!-- Contractor Section -->
           <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
-            <div style="font-size: 11px; line-height: 1.8; color: #333;">
-              <div><strong>Contractor;</strong> ${company.name}</div>
-              <div><strong>Tel No;</strong> 254720717463</div>
-              <div><strong>Signed;</strong> KELVIN MURIITHI</div>
-            </div>
+            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
+              <tr>
+                <td style="width: 30%;"><strong>Contractor;</strong></td>
+                <td style="width: 70%;">${company.name}</td>
+              </tr>
+              <tr>
+                <td><strong>Tel No;</strong></td>
+                <td>254720717463</td>
+              </tr>
+              <tr>
+                <td><strong>Signed;</strong></td>
+                <td>KELVIN MURIITHI</td>
+              </tr>
+            </table>
           </div>
 
           <!-- Client Section -->
           <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
-            <div style="font-size: 11px; line-height: 1.8; color: #333;">
-              <div><strong>Client;</strong> ________________________</div>
-              <div><strong>Tel No;</strong> ________________________</div>
-            </div>
+            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
+              <tr>
+                <td style="width: 30%;"><strong>Client;</strong></td>
+                <td style="width: 70%;">________________________</td>
+              </tr>
+              <tr>
+                <td><strong>Tel No;</strong></td>
+                <td>________________________</td>
+              </tr>
+            </table>
           </div>
 
           <!-- Prepaired By Section -->
           <div style="margin-bottom: 20px; padding-top: 15px; border-top: 1px solid #ddd;">
-            <div style="font-size: 11px; color: #333;"><strong>PREPAIRED BY;</strong> ${company.name}</div>
+            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
+              <tr>
+                <td style="width: 30%;"><strong>PREPAIRED BY;</strong></td>
+                <td style="width: 70%;">${company.name}</td>
+              </tr>
+            </table>
           </div>
 
           <!-- Account Details Section -->
