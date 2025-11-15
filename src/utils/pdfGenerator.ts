@@ -699,7 +699,7 @@ export const generatePDF = (data: DocumentData) => {
 
     // Add Summary Page with section totals only
     const grandTotal = data.sections.reduce((sum, sec) => {
-      const secTotal = sec.items.reduce((s, item) => s + (item.line_total || 0), 0) + (sec.labor_cost || 0);
+      const secTotal = sec.items.reduce((s, item) => s + (item.line_total || 0), 0) + Number(sec.labor_cost || 0);
       return sum + secTotal;
     }, 0);
 
