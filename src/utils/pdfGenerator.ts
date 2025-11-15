@@ -602,7 +602,7 @@ export const generatePDF = (data: DocumentData) => {
               <div style="display: flex; flex-direction: column; gap: 8px; font-size: 10px; line-height: 1.6; text-align:left;">
                 <!-- Services Section -->
                 <div style="margin-bottom: 8px;">
-                  <div style="font-size: 9px; font-weight: bold; color: #333; text-transform: uppercase; line-height: 1.4;">
+                  <div style="font-size: 10px; font-weight: bold; color: #333; text-transform: uppercase; line-height: 1.4;">
                     ${(() => {
                       const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                       const midpoint = Math.ceil(services.length / 2);
