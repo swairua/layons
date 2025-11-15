@@ -19,7 +19,7 @@ const sanitizeAuthMessage = (error: AuthError | Error | any): string => {
     // Handle string errors directly
     if (typeof error === 'string') {
       const trimmed = error.trim();
-      if (trimmed) {
+      if (trimmed && trimmed !== '[object Object]') {
         candidates.push(trimmed);
       }
     }
@@ -28,7 +28,7 @@ const sanitizeAuthMessage = (error: AuthError | Error | any): string => {
     if (error instanceof Error) {
       if (error.message && typeof error.message === 'string') {
         const trimmed = error.message.trim();
-        if (trimmed) {
+        if (trimmed && trimmed !== '[object Object]') {
           candidates.push(trimmed);
         }
       }
@@ -37,28 +37,24 @@ const sanitizeAuthMessage = (error: AuthError | Error | any): string => {
     // Handle objects (AuthError, plain objects, etc.)
     if (error && typeof error === 'object') {
       const authError = error as any;
-      if (typeof authError.message === 'string' && authError.message) {
-        const trimmed = authError.message.trim();
-        if (trimmed) {
-          candidates.push(trimmed);
-        }
-      }
-      if (typeof authError.error_description === 'string' && authError.error_description) {
-        const trimmed = authError.error_description.trim();
-        if (trimmed) {
-          candidates.push(trimmed);
-        }
-      }
-      if (typeof authError.details === 'string' && authError.details) {
-        const trimmed = authError.details.trim();
-        if (trimmed) {
-          candidates.push(trimmed);
-        }
-      }
-      if (typeof authError.hint === 'string' && authError.hint) {
-        const trimmed = authError.hint.trim();
-        if (trimmed) {
-          candidates.push(trimmed);
+
+      // Try multiple property names that Supabase might use
+      const messageSources = [
+        authError.message,
+        authError.error_description,
+        authError.error_message,
+        authError.details,
+        authError.hint,
+        authError.msg,
+        authError.error,
+      ];
+
+      for (const source of messageSources) {
+        if (typeof source === 'string') {
+          const trimmed = source.trim();
+          if (trimmed && trimmed !== '[object Object]' && !candidates.includes(trimmed)) {
+            candidates.push(trimmed);
+          }
         }
       }
     }
@@ -80,7 +76,10 @@ const sanitizeAuthMessage = (error: AuthError | Error | any): string => {
     const normalizedParsed = safeParsed.trim().toLowerCase();
 
     if (!NON_MEANINGFUL_MESSAGES.has(normalizedParsed) && normalizedParsed !== '[object object]') {
-      return safeParsed.trim();
+      const trimmedParsed = safeParsed.trim();
+      if (trimmedParsed && trimmedParsed !== '[object Object]') {
+        return trimmedParsed;
+      }
     }
 
     return 'An unexpected authentication error occurred';
