@@ -136,14 +136,38 @@ export function handleAuthError(error: AuthError | Error): AuthErrorInfo {
   // Log for debugging using structured logger
   logError('Authentication error', error, { parsed: errorInfo });
 
-  // Ensure the message is a string and not an object
-  const messageToShow = typeof errorInfo.message === 'string'
-    ? errorInfo.message
-    : 'An unexpected authentication error occurred';
+  // Triple-check that message is definitely a string
+  let messageToShow = 'An unexpected authentication error occurred';
+  if (errorInfo.message) {
+    if (typeof errorInfo.message === 'string') {
+      messageToShow = errorInfo.message.trim();
+      // Prevent "[object Object]" from being displayed
+      if (messageToShow === '[object Object]' || !messageToShow) {
+        messageToShow = 'An unexpected authentication error occurred';
+      }
+    } else {
+      // If message is somehow not a string, convert it
+      const stringified = String(errorInfo.message);
+      if (stringified && stringified !== '[object Object]') {
+        messageToShow = stringified;
+      }
+    }
+  }
 
-  const descriptionToShow = typeof errorInfo.action === 'string'
-    ? errorInfo.action
-    : undefined;
+  let descriptionToShow: string | undefined;
+  if (errorInfo.action) {
+    if (typeof errorInfo.action === 'string') {
+      descriptionToShow = errorInfo.action.trim();
+      if (descriptionToShow === '[object Object]' || !descriptionToShow) {
+        descriptionToShow = undefined;
+      }
+    } else {
+      const stringified = String(errorInfo.action);
+      if (stringified && stringified !== '[object Object]') {
+        descriptionToShow = stringified;
+      }
+    }
+  }
 
   // Show appropriate toast with guaranteed string values
   if (errorInfo.retry) {
