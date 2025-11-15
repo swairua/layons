@@ -220,9 +220,9 @@ export const generatePDF = (data: DocumentData) => {
           <table class="items">
             <thead>
               <tr>
-                <th style="width:10%">ITEM</th>
-                <th style="width:70%; text-align:left">DESCRIPTION</th>
-                <th style="width:20%">AMOUNT (KSHS)</th>
+                <th style="width:10%; font-weight: bold;">ITEM</th>
+                <th style="width:70%; text-align:left; font-weight: bold;">DESCRIPTION</th>
+                <th style="width:20%; font-weight: bold;">AMOUNT (KSHS)</th>
               </tr>
             </thead>
             <tbody>
