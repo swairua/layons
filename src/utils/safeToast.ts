@@ -2,46 +2,78 @@ import { toast as sonnerToast, ToastT } from 'sonner';
 
 // Helper to safely format any value as a string for toast messages
 const formatToastMessage = (message: unknown): string => {
+  // Handle string first
   if (typeof message === 'string') {
-    return message;
+    const trimmed = message.trim();
+    if (trimmed && trimmed !== '[object Object]') {
+      return trimmed;
+    }
+    return 'An error occurred';
   }
-  
+
+  // Handle Error instances
   if (message instanceof Error) {
-    return message.message || 'An error occurred';
+    const msg = message.message?.trim() || '';
+    return msg || 'An error occurred';
   }
-  
-  if (message && typeof message === 'object') {
-    const obj = message as any;
-    // Try to extract a meaningful message from the object
-    if (obj.message && typeof obj.message === 'string') {
-      return obj.message;
-    }
-    if (obj.error_description && typeof obj.error_description === 'string') {
-      return obj.error_description;
-    }
-    if (obj.details && typeof obj.details === 'string') {
-      return obj.details;
-    }
-    if (obj.hint && typeof obj.hint === 'string') {
-      return obj.hint;
-    }
-    // If none of the above work, check if it's an Auth Error
-    if (typeof obj.name === 'string' && obj.name.includes('Error')) {
-      return `${obj.name}: ${obj.message || 'An error occurred'}`;
-    }
-  }
-  
+
+  // Handle null/undefined
   if (typeof message === 'undefined' || message === null) {
     return 'An error occurred';
   }
-  
-  const stringified = String(message);
-  // Prevent displaying [object Object]
-  if (stringified === '[object Object]') {
-    return 'An unexpected error occurred';
+
+  // Handle objects
+  if (typeof message === 'object') {
+    const obj = message as any;
+
+    // Try to extract a meaningful message from the object
+    if (obj.message && typeof obj.message === 'string') {
+      const msg = obj.message.trim();
+      if (msg && msg !== '[object Object]') {
+        return msg;
+      }
+    }
+
+    if (obj.error_description && typeof obj.error_description === 'string') {
+      const msg = obj.error_description.trim();
+      if (msg && msg !== '[object Object]') {
+        return msg;
+      }
+    }
+
+    if (obj.details && typeof obj.details === 'string') {
+      const msg = obj.details.trim();
+      if (msg && msg !== '[object Object]') {
+        return msg;
+      }
+    }
+
+    if (obj.hint && typeof obj.hint === 'string') {
+      const msg = obj.hint.trim();
+      if (msg && msg !== '[object Object]') {
+        return msg;
+      }
+    }
+
+    // Check for error name
+    if (typeof obj.name === 'string' && obj.name.includes('Error')) {
+      const msgPart = obj.message ? `: ${String(obj.message)}` : '';
+      return `${obj.name}${msgPart}`;
+    }
+
+    // Last resort: try to stringify and check
+    try {
+      const stringified = String(message);
+      if (stringified && stringified !== '[object Object]' && stringified !== 'null' && stringified !== 'undefined') {
+        return stringified;
+      }
+    } catch (stringifyError) {
+      // Continue to fallback
+    }
   }
-  
-  return stringified;
+
+  // Final fallback
+  return 'An unexpected error occurred';
 };
 
 // Safe wrapper around sonner toast that also sanitizes options
