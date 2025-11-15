@@ -441,14 +441,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     if (error) {
       setLoading(false);
-      // Return error without showing toast - let the component handle it
-      return { error: error as AuthError };
+      // Ensure error is a proper Error object with a message property
+      let formattedError: Error;
+      if (error instanceof Error) {
+        formattedError = error;
+      } else if (error && typeof error === 'object') {
+        const errObj = error as any;
+        const message = errObj.message || errObj.error_description || errObj.details || 'Authentication failed';
+        formattedError = new Error(typeof message === 'string' ? message : JSON.stringify(message));
+      } else {
+        formattedError = new Error(String(error) || 'Authentication failed');
+      }
+      return { error: formattedError as AuthError };
     }
 
     if (data?.error) {
       setLoading(false);
-      // Return error without showing toast - let the component handle it
-      return { error: data.error };
+      // Ensure error is a proper Error object with a message property
+      let formattedError: Error;
+      if (data.error instanceof Error) {
+        formattedError = data.error;
+      } else if (data.error && typeof data.error === 'object') {
+        const errObj = data.error as any;
+        const message = errObj.message || errObj.error_description || errObj.details || 'Authentication failed';
+        formattedError = new Error(typeof message === 'string' ? message : JSON.stringify(message));
+      } else {
+        formattedError = new Error(String(data.error) || 'Authentication failed');
+      }
+      return { error: formattedError as AuthError };
     }
 
     // Immediately update auth state to avoid UI waiting for onAuthStateChange
