@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 const { Client } = require('pg');
-require('dotenv').config({ path: '.env.local' });
 
 (async () => {
   // Use the PostgreSQL connection string provided by user
