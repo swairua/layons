@@ -152,6 +152,10 @@ export const generatePDF = (data: DocumentData) => {
   // Use company details from data or fall back to defaults
   const company = data.company || DEFAULT_COMPANY;
 
+  // Default services fallback
+  const DEFAULT_SERVICES = 'BUILDING WORKS, RENOVATIONS, ROADWORKS, LANDSCAPING, ELECTRICAL WORKS, WATER WORKS';
+  const companyServices = company.company_services || DEFAULT_SERVICES;
+
   // Analyze which columns have values
   const visibleColumns = analyzeColumns(data.items);
   const formatCurrency = (amount: number) => {
