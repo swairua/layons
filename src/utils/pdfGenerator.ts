@@ -1622,11 +1622,9 @@ export const generatePDF = (data: DocumentData) => {
           <div class="header-content">
             <!-- Left side: Services and Client info (formatted like attachment) -->
             <div class="company-info">
-              ${company.company_services ? `
               <div style="font-size: 10px; font-weight: bold; color: #333; margin-bottom: 8px; line-height: 1.4; text-transform: uppercase;">
-                ${company.company_services.split('\\n').filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
+                ${companyServices.split(/[\n,]/).filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
               </div>
-              ` : ''}
 
               <div style="margin-top: 6px; font-size: 10px; line-height:1.6;">
                 <div style="margin-bottom:6px; font-weight:600;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
