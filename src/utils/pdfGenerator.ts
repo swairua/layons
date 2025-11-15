@@ -220,9 +220,9 @@ export const generatePDF = (data: DocumentData) => {
           <table class="items">
             <thead>
               <tr>
-                <th style="width:10%">ITEM</th>
-                <th style="width:70%; text-align:left">DESCRIPTION</th>
-                <th style="width:20%">AMOUNT (KSHS)</th>
+                <th style="width:10%; font-weight: bold;">ITEM</th>
+                <th style="width:70%; text-align:left; font-weight: bold;">DESCRIPTION</th>
+                <th style="width:20%; font-weight: bold;">AMOUNT (KSHS)</th>
               </tr>
             </thead>
             <tbody>
@@ -361,7 +361,7 @@ export const generatePDF = (data: DocumentData) => {
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
-        .items thead th { background:#000; color:#fff; font-weight:700; }
+        .items thead th { background:#000; color:#fff; font-weight:bold; text-transform: uppercase; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding:8px; }
         .item-row td.num { text-align:center; }
         .item-row td.desc { width:55%; }
@@ -406,21 +406,21 @@ export const generatePDF = (data: DocumentData) => {
               </div>
               ` : ''}
 
-              <div style="margin-bottom: 4px;"><strong>Client:</strong> ${data.customer.name}</div>
-              ${boqProject ? `<div style="margin-bottom: 4px;"><strong>Project:</strong> ${boqProject}</div>` : ''}
-              <div style="margin-bottom: 4px;"><strong>Subject:</strong> Bill of Quantities</div>
-              <div style="margin-bottom: 4px;"><strong>Date:</strong> ${formatDateLong(data.date)}</div>
-              <div style="margin-bottom: 4px;"><strong>BOQ No:</strong> ${data.number}</div>
+              <div style="margin-bottom: 4px; font-weight: bold;"><strong>Client:</strong> ${data.customer.name}</div>
+              ${boqProject ? `<div style="margin-bottom: 4px; font-weight: bold;"><strong>Project:</strong> ${boqProject}</div>` : ''}
+              <div style="margin-bottom: 4px; font-weight: bold;"><strong>Subject:</strong> Bill of Quantities</div>
+              <div style="margin-bottom: 4px; font-weight: bold;"><strong>Date:</strong> ${formatDateLong(data.date)}</div>
+              <div style="margin-bottom: 4px; font-weight: bold;"><strong>BOQ No:</strong> ${data.number}</div>
             </div>
 
             <!-- Right side: Company details (right-aligned) -->
             <div class="header-right">
               <div class="company-name">${company.name}</div>
-              ${company.address ? `<div>${company.address}</div>` : ''}
-              ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-              ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
-              ${company.email ? `<div>${company.email}</div>` : ''}
-              ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
+              ${company.address ? `<div style="font-weight: bold;">${company.address}</div>` : ''}
+              ${company.city ? `<div style="font-weight: bold;">${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+              ${company.phone ? `<div style="font-weight: bold;">Telephone: ${company.phone}</div>` : ''}
+              ${company.email ? `<div style="font-weight: bold;">${company.email}</div>` : ''}
+              ${company.tax_number ? `<div style="font-weight: bold;">PIN: ${company.tax_number}</div>` : ''}
             </div>
           </div>
         </div>
@@ -430,12 +430,12 @@ export const generatePDF = (data: DocumentData) => {
         <table class="items">
           <thead>
             <tr>
-              <th style="width:5%">#</th>
-              <th style="width:55%; text-align:left">ITEM DESCRIPTION</th>
-              <th style="width:8%">QTY</th>
-              <th style="width:9%">UNIT</th>
-              <th style="width:11%">RATE</th>
-              <th style="width:12%">AMOUNT (KSHS)</th>
+              <th style="width:5%; font-weight: bold;">#</th>
+              <th style="width:55%; text-align:left; font-weight: bold;">ITEM DESCRIPTION</th>
+              <th style="width:8%; font-weight: bold;">QTY</th>
+              <th style="width:9%; font-weight: bold;">UNIT</th>
+              <th style="width:11%; font-weight: bold;">RATE</th>
+              <th style="width:12%; font-weight: bold;">AMOUNT (KSHS)</th>
             </tr>
           </thead>
           <tbody>
@@ -568,7 +568,7 @@ export const generatePDF = (data: DocumentData) => {
     // Render one section per page
     data.sections.forEach((section, sectionIndex) => {
       const sectionMaterialsTotal = section.items.reduce((sum, item) => sum + (item.line_total || 0), 0);
-      const sectionLaborCost = section.labor_cost || 0;
+      const sectionLaborCost = Number(section.labor_cost || 0);
       const sectionTotal = sectionMaterialsTotal + sectionLaborCost;
       const sectionTaxAmount = section.items.reduce((sum, item) => sum + (item.tax_amount || 0), 0);
 
@@ -607,11 +607,11 @@ export const generatePDF = (data: DocumentData) => {
               <!-- Right side: Company details (right-aligned) -->
               <div style="text-align: right; font-size: 10px; line-height: 1.6;">
                 <div style="font-weight: bold; margin-bottom: 6px; font-size: 12px;">${company.name}</div>
-                ${company.address ? `<div>${company.address}</div>` : ''}
-                ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-                ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
-                ${company.email ? `<div>${company.email}</div>` : ''}
-                ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
+                ${company.address ? `<div style="font-weight: bold;">${company.address}</div>` : ''}
+                ${company.city ? `<div style="font-weight: bold;">${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+                ${company.phone ? `<div style="font-weight: bold;">Telephone: ${company.phone}</div>` : ''}
+                ${company.email ? `<div style="font-weight: bold;">${company.email}</div>` : ''}
+                ${company.tax_number ? `<div style="font-weight: bold;">PIN: ${company.tax_number}</div>` : ''}
               </div>
             </div>
           </div>
@@ -657,7 +657,7 @@ export const generatePDF = (data: DocumentData) => {
           </div>
 
           <!-- Labour Subsection (only display if labor cost > 0) -->
-          ${sectionLaborCost > 0 ? `
+          ${Number(sectionLaborCost) > 0 ? `
           <div class="subsection" style="margin-bottom:12px;">
             <div style="font-weight:600; margin-bottom:6px;">Labour</div>
             <table class="items-table">
@@ -699,7 +699,7 @@ export const generatePDF = (data: DocumentData) => {
 
     // Add Summary Page with section totals only
     const grandTotal = data.sections.reduce((sum, sec) => {
-      const secTotal = sec.items.reduce((s, item) => s + (item.line_total || 0), 0) + (sec.labor_cost || 0);
+      const secTotal = sec.items.reduce((s, item) => s + (item.line_total || 0), 0) + Number(sec.labor_cost || 0);
       return sum + secTotal;
     }, 0);
 
@@ -718,7 +718,7 @@ export const generatePDF = (data: DocumentData) => {
               ${data.sections.map((section, idx) => {
                 const sectionLetter = String.fromCharCode(65 + idx);
                 const matTotal = section.items.reduce((sum, item) => sum + (item.line_total || 0), 0);
-                const labour = section.labor_cost || 0;
+                const labour = Number(section.labor_cost || 0);
                 const secTotal = matTotal + labour;
 
                 return `

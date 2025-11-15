@@ -152,6 +152,13 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
     }));
   };
 
+  const updateSubsectionLabel = (sectionId: string, subsectionId: string, label: string) => {
+    setSections(prev => prev.map(s => s.id === sectionId ? {
+      ...s,
+      subsections: s.subsections.map(sub => sub.id === subsectionId ? { ...sub, label } : sub)
+    } : s));
+  };
+
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
 
   const calculateSubsectionTotal = (subsection: BOQSubsectionRow): number => {
@@ -254,6 +261,8 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
         country: currentCompany.country || undefined,
         phone: currentCompany.phone || undefined,
         email: currentCompany.email || undefined,
+        tax_number: currentCompany.tax_number || undefined,
+        company_services: currentCompany.company_services || undefined,
       } : undefined);
 
       toast.success(`BOQ ${boqNumber} generated and saved`);
@@ -335,8 +344,25 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
 
                   {section.subsections.map((subsection) => (
                     <div key={subsection.id} className="space-y-3 bg-muted/30 rounded-lg p-3 border border-border/50">
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm font-semibold">Subsection {subsection.name}: {subsection.label}</div>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <div className="text-sm font-semibold">Subsection {subsection.name}:</div>
+                          {subsection.name === 'A' ? (
+                            <Select value={subsection.label} onValueChange={(val) => updateSubsectionLabel(section.id, subsection.id, val)}>
+                              <SelectTrigger className="w-48">
+                                <SelectValue placeholder="Select label" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Materials">Materials</SelectItem>
+                                <SelectItem value="Services">Services</SelectItem>
+                                <SelectItem value="Equipment">Equipment</SelectItem>
+                                <SelectItem value="Other">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <div className="text-sm font-semibold">{subsection.label}</div>
+                          )}
+                        </div>
                         <div className="text-sm text-muted-foreground">Subtotal: {formatCurrency(calculateSubsectionTotal(subsection))}</div>
                       </div>
 
