@@ -358,7 +358,7 @@ export const generatePDF = (data: DocumentData) => {
         .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; }
 
         /* Header content styling */
-        .header-content { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
+        .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
         .header-top { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 12px; }
         .header-left { display: flex; flex-direction: column; gap: 8px; font-size: 10px; line-height: 1.6; text-align: left; }
         .header-right { text-align: right; font-size: 10px; line-height: 1.6; }
