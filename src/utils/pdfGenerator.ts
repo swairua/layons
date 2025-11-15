@@ -568,7 +568,7 @@ export const generatePDF = (data: DocumentData) => {
     // Render one section per page
     data.sections.forEach((section, sectionIndex) => {
       const sectionMaterialsTotal = section.items.reduce((sum, item) => sum + (item.line_total || 0), 0);
-      const sectionLaborCost = section.labor_cost || 0;
+      const sectionLaborCost = Number(section.labor_cost || 0);
       const sectionTotal = sectionMaterialsTotal + sectionLaborCost;
       const sectionTaxAmount = section.items.reduce((sum, item) => sum + (item.tax_amount || 0), 0);
 
@@ -657,7 +657,7 @@ export const generatePDF = (data: DocumentData) => {
           </div>
 
           <!-- Labour Subsection (only display if labor cost > 0) -->
-          ${sectionLaborCost > 0 ? `
+          ${Number(sectionLaborCost) > 0 ? `
           <div class="subsection" style="margin-bottom:12px;">
             <div style="font-weight:600; margin-bottom:6px;">Labour</div>
             <table class="items-table">
