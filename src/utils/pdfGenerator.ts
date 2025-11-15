@@ -152,6 +152,10 @@ export const generatePDF = (data: DocumentData) => {
   // Use company details from data or fall back to defaults
   const company = data.company || DEFAULT_COMPANY;
 
+  // Default services fallback
+  const DEFAULT_SERVICES = 'BUILDING WORKS, RENOVATIONS, ROADWORKS, LANDSCAPING, ELECTRICAL WORKS, WATER WORKS';
+  const companyServices = company.company_services || DEFAULT_SERVICES;
+
   // Analyze which columns have values
   const visibleColumns = analyzeColumns(data.items);
   const formatCurrency = (amount: number) => {
@@ -396,27 +400,22 @@ export const generatePDF = (data: DocumentData) => {
           <!-- Full-width header image (same as quotations) -->
           <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
-          <!-- Services Section -->
-          ${company.company_services ? (() => {
-            const services = company.company_services.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-            if (services.length === 0) return '';
-            const midpoint = Math.ceil(services.length / 2);
-            const firstRow = services.slice(0, midpoint).join(' • ');
-            const secondRow = services.slice(midpoint).join(' • ');
-            return `
-            <div style="margin: 12px 0 15px 0; padding: 10px 0; border-bottom: 2px solid #000;">
-              <div style="font-size: 9px; font-weight: bold; color: #333; text-transform: uppercase; line-height: 1.6;">
-                <div style="margin-bottom: 4px;">${firstRow}</div>
-                ${secondRow ? `<div>${secondRow}</div>` : ''}
-              </div>
-            </div>
-            `;
-          })() : ''}
-
           <!-- Header content below image -->
           <div class="header-content">
             <!-- Left side: Client and Document Details -->
             <div class="header-left">
+              <!-- Services Section -->
+              <div style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #ddd;">
+                <div style="font-size: 9px; font-weight: bold; color: #333; text-transform: uppercase; line-height: 1.4;">
+                  ${(() => {
+                    const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+                    const midpoint = Math.ceil(services.length / 2);
+                    const firstRow = services.slice(0, midpoint).join(' • ');
+                    const secondRow = services.slice(midpoint).join(' • ');
+                    return `<div style="margin-bottom: 3px;">${firstRow}</div>${secondRow ? `<div>${secondRow}</div>` : ''}`;
+                  })()}
+                </div>
+              </div>
 
               <div style="margin-bottom: 4px; font-weight: bold;"><strong>Client:</strong> ${data.customer.name}</div>
               ${boqProject ? `<div style="margin-bottom: 4px; font-weight: bold;"><strong>Project:</strong> ${boqProject}</div>` : ''}
@@ -426,8 +425,7 @@ export const generatePDF = (data: DocumentData) => {
             </div>
 
             <!-- Right side: Company details (right-aligned) -->
-            <div class="header-right">
-              <div class="company-name">${company.name}</div>
+            <div class="header-right" style="font-size: 12px;">
               ${company.address ? `<div style="font-weight: bold;">${company.address}</div>` : ''}
               ${company.city ? `<div style="font-weight: bold;">${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
               ${company.phone ? `<div style="font-weight: bold;">Telephone: ${company.phone}</div>` : ''}
@@ -472,7 +470,13 @@ export const generatePDF = (data: DocumentData) => {
         <div style="margin-bottom: 25px;">
           <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Terms;</h3>
           <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
-            <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows; a. 50% Upon Order (${formatCurrency(grandTotalForBOQ * 0.5)}) b. 40% As Progressive (${formatCurrency(grandTotalForBOQ * 0.4)}) c. 10% Upon Completion (${formatCurrency(grandTotalForBOQ * 0.1)})</li>
+            <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
+              <ul style="font-size: 11px; line-height: 1.6; margin: 6px 0 6px 20px; padding-left: 20px; color: #333; list-style-type: lower-alpha;">
+                <li style="margin-bottom: 4px;">50% Upon Order (${formatCurrency(grandTotalForBOQ * 0.5)})</li>
+                <li style="margin-bottom: 4px;">40% As Progressive (${formatCurrency(grandTotalForBOQ * 0.4)})</li>
+                <li style="margin-bottom: 4px;">10% Upon Completion (${formatCurrency(grandTotalForBOQ * 0.1)})</li>
+              </ul>
+            </li>
             <li style="margin-bottom: 6px;">All work will be executed based on the drawings and samples approved by the client</li>
             <li style="margin-bottom: 6px;">Any Changes/alterations to the scope of work outlined will affect the final quantity will be measured, and charges will be applied on a pro-rata basis at the agreed rate</li>
             <li style="margin-bottom: 6px;">We are not responsible for any damages caused by negligence from other Sub Contractors Hired by the Client.</li>
@@ -487,20 +491,12 @@ export const generatePDF = (data: DocumentData) => {
           <p style="font-size: 11px; margin: 0; color: #333;">The above prices specifications and terms are satisfactory.</p>
         </div>
 
-        <!-- Contractor and Client Section -->
-        <div style="display: flex; gap: 40px; margin-bottom: 25px; margin-top: 30px;">
-          <!-- Contractor Section -->
-          <div style="flex: 1;">
-            <div style="font-size: 11px; line-height: 1.8; color: #333;">
-              <div><strong>Contractor;</strong> ${company.name}</div>
-              <div><strong>Tel No;</strong> 254720717463</div>
-              <div><strong>Signed;</strong> KELVIN MURIITHI</div>
-            </div>
-          </div>
-
-          <!-- Stamp Area -->
-          <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 120px;">
-            <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="height:140px; width:auto; object-fit:contain;" />
+        <!-- Contractor Section -->
+        <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
+          <div style="font-size: 11px; line-height: 1.8; color: #333;">
+            <div><strong>Contractor;</strong> ${company.name}</div>
+            <div><strong>Tel No;</strong> 254720717463</div>
+            <div><strong>Signed;</strong> KELVIN MURIITHI</div>
           </div>
         </div>
 
@@ -603,12 +599,20 @@ export const generatePDF = (data: DocumentData) => {
             <div class="header-content" style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-top: 20px;">
               <!-- Left side: Client and Document Details (matches supplied attachment) -->
               <div style="display: flex; flex-direction: column; gap: 8px; font-size: 10px; line-height: 1.6; text-align:left;">
-                ${company.company_services ? `
-                <div style="font-size: 10px; font-weight: bold; color: #333; margin-bottom: 6px; line-height: 1.4; text-transform: uppercase;">
-                  ${company.company_services.split('\n').filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
+                <!-- Services Section -->
+                <div style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #ddd;">
+                  <div style="font-size: 9px; font-weight: bold; color: #333; text-transform: uppercase; line-height: 1.4;">
+                    ${(() => {
+                      const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+                      const midpoint = Math.ceil(services.length / 2);
+                      const firstRow = services.slice(0, midpoint).join(' • ');
+                      const secondRow = services.slice(midpoint).join(' • ');
+                      return `<div style="margin-bottom: 3px;">${firstRow}</div>${secondRow ? `<div>${secondRow}</div>` : ''}`;
+                    })()}
+                  </div>
                 </div>
-                ` : ''}
 
+                <!-- Client Details -->
                 <div style="margin-bottom: 4px;"><strong>Client:</strong> ${data.customer?.name || ''}</div>
                 ${data.project_title ? `<div style="margin-bottom: 4px;"><strong>Project:</strong> ${data.project_title}</div>` : ''}
                 <div style="margin-bottom: 4px;"><strong>Subject:</strong> ${data.type === 'boq' ? 'Bill of Quantities' : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
@@ -617,13 +621,12 @@ export const generatePDF = (data: DocumentData) => {
               </div>
 
               <!-- Right side: Company details (right-aligned) -->
-              <div style="text-align: right; font-size: 10px; line-height: 1.6;">
-                <div style="font-weight: bold; margin-bottom: 6px; font-size: 12px;">${company.name}</div>
-                ${company.address ? `<div style="font-weight: bold;">${company.address}</div>` : ''}
-                ${company.city ? `<div style="font-weight: bold;">${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-                ${company.phone ? `<div style="font-weight: bold;">Telephone: ${company.phone}</div>` : ''}
-                ${company.email ? `<div style="font-weight: bold;">${company.email}</div>` : ''}
-                ${company.tax_number ? `<div style="font-weight: bold;">PIN: ${company.tax_number}</div>` : ''}
+              <div style="text-align: right; font-size: 12px; line-height: 1.7; font-weight: bold;">
+                ${company.address ? `<div>${company.address}</div>` : ''}
+                ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+                ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
+                ${company.email ? `<div>${company.email}</div>` : ''}
+                ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
               </div>
             </div>
           </div>
@@ -770,7 +773,13 @@ export const generatePDF = (data: DocumentData) => {
           <div style="margin-bottom: 25px;">
             <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Terms;</h3>
             <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
-              <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows; a. 50% Upon Order (${formatCurrency(grandTotal * 0.5)}) b. 40% As Progressive (${formatCurrency(grandTotal * 0.4)}) c. 10% Upon Completion (${formatCurrency(grandTotal * 0.1)})</li>
+              <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
+                <ul style="font-size: 11px; line-height: 1.6; margin: 6px 0 6px 20px; padding-left: 20px; color: #333; list-style-type: lower-alpha;">
+                  <li style="margin-bottom: 4px;">50% Upon Order (${formatCurrency(grandTotal * 0.5)})</li>
+                  <li style="margin-bottom: 4px;">40% As Progressive (${formatCurrency(grandTotal * 0.4)})</li>
+                  <li style="margin-bottom: 4px;">10% Upon Completion (${formatCurrency(grandTotal * 0.1)})</li>
+                </ul>
+              </li>
               <li style="margin-bottom: 6px;">All work will be executed based on the drawings and samples approved by the client</li>
               <li style="margin-bottom: 6px;">Any Changes/alterations to the scope of work outlined will affect the final quantity will be measured, and charges will be applied on a pro-rata basis at the agreed rate</li>
               <li style="margin-bottom: 6px;">We are not responsible for any damages caused by negligence from other Sub Contractors Hired by the Client.</li>
@@ -785,20 +794,12 @@ export const generatePDF = (data: DocumentData) => {
             <p style="font-size: 11px; margin: 0; color: #333;">The above prices specifications and terms are satisfactory.</p>
           </div>
 
-          <!-- Contractor and Client Section -->
-          <div style="display: flex; gap: 40px; margin-bottom: 25px; margin-top: 30px;">
-            <!-- Contractor Section -->
-            <div style="flex: 1;">
-              <div style="font-size: 11px; line-height: 1.8; color: #333;">
-                <div><strong>Contractor;</strong> ${company.name}</div>
-                <div><strong>Tel No;</strong> 254720717463</div>
-                <div><strong>Signed;</strong> KELVIN MURIITHI</div>
-              </div>
-            </div>
-
-            <!-- Stamp Area -->
-            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 120px;">
-              <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="height:140px; width:auto; object-fit:contain;" />
+          <!-- Contractor Section -->
+          <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
+            <div style="font-size: 11px; line-height: 1.8; color: #333;">
+              <div><strong>Contractor;</strong> ${company.name}</div>
+              <div><strong>Tel No;</strong> 254720717463</div>
+              <div><strong>Signed;</strong> KELVIN MURIITHI</div>
             </div>
           </div>
 
@@ -1620,11 +1621,9 @@ export const generatePDF = (data: DocumentData) => {
           <div class="header-content">
             <!-- Left side: Services and Client info (formatted like attachment) -->
             <div class="company-info">
-              ${company.company_services ? `
               <div style="font-size: 10px; font-weight: bold; color: #333; margin-bottom: 8px; line-height: 1.4; text-transform: uppercase;">
-                ${company.company_services.split('\\n').filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
+                ${companyServices.split(/[\n,]/).filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
               </div>
-              ` : ''}
 
               <div style="margin-top: 6px; font-size: 10px; line-height:1.6;">
                 <div style="margin-bottom:6px; font-weight:600;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
@@ -1638,8 +1637,7 @@ export const generatePDF = (data: DocumentData) => {
 
             <!-- Right side: Document info -->
             <div class="document-info">
-              <div style="text-align: right; font-size: 10px; line-height: 1.6; margin-bottom: 8px;">
-                <div style="font-weight: bold; margin-bottom: 6px; font-size: 12px;">${company.name}</div>
+              <div style="text-align: right; font-size: 12px; line-height: 1.7; margin-bottom: 8px; font-weight: bold;">
                 ${company.address ? `<div>${company.address}</div>` : ''}
                 ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
                 ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
@@ -1896,7 +1894,13 @@ export const generatePDF = (data: DocumentData) => {
           <div style="margin-bottom: 25px;">
             <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Terms;</h3>
             <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
-              <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows; a. 50% Upon Order (${formatCurrency(data.total_amount * 0.5)}) b. 40% As Progressive (${formatCurrency(data.total_amount * 0.4)}) c. 10% Upon Completion (${formatCurrency(data.total_amount * 0.1)})</li>
+              <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
+                <ul style="font-size: 11px; line-height: 1.6; margin: 6px 0 6px 20px; padding-left: 20px; color: #333; list-style-type: lower-alpha;">
+                  <li style="margin-bottom: 4px;">50% Upon Order (${formatCurrency(data.total_amount * 0.5)})</li>
+                  <li style="margin-bottom: 4px;">40% As Progressive (${formatCurrency(data.total_amount * 0.4)})</li>
+                  <li style="margin-bottom: 4px;">10% Upon Completion (${formatCurrency(data.total_amount * 0.1)})</li>
+                </ul>
+              </li>
               <li style="margin-bottom: 6px;">All work will be executed based on the drawings and samples approved by the client</li>
               <li style="margin-bottom: 6px;">Any Changes/alterations to the scope of work outlined will affect the final quantity will be measured, and charges will be applied on a pro-rata basis at the agreed rate</li>
               <li style="margin-bottom: 6px;">We are not responsible for any damages caused by negligence from other Sub Contractors Hired by the Client.</li>
@@ -1911,20 +1915,12 @@ export const generatePDF = (data: DocumentData) => {
             <p style="font-size: 11px; margin: 0; color: #333;">The above prices specifications and terms are satisfactory.</p>
           </div>
 
-          <!-- Contractor and Client Section -->
-          <div style="display: flex; gap: 40px; margin-bottom: 25px; margin-top: 30px;">
-            <!-- Contractor Section -->
-            <div style="flex: 1;">
-              <div style="font-size: 11px; line-height: 1.8; color: #333;">
-                <div><strong>Contractor;</strong> ${company.name}</div>
-                <div><strong>Tel No;</strong> 254720717463</div>
-                <div><strong>Signed;</strong> KELVIN MURIITHI</div>
-              </div>
-            </div>
-
-            <!-- Stamp Area -->
-            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 120px;">
-              <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="height:140px; width:auto; object-fit:contain;" />
+          <!-- Contractor Section -->
+          <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
+            <div style="font-size: 11px; line-height: 1.8; color: #333;">
+              <div><strong>Contractor;</strong> ${company.name}</div>
+              <div><strong>Tel No;</strong> 254720717463</div>
+              <div><strong>Signed;</strong> KELVIN MURIITHI</div>
             </div>
           </div>
 
