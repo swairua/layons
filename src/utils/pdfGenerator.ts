@@ -607,11 +607,9 @@ export const generatePDF = (data: DocumentData) => {
             <div class="header-content" style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-top: 20px;">
               <!-- Left side: Client and Document Details (matches supplied attachment) -->
               <div style="display: flex; flex-direction: column; gap: 8px; font-size: 10px; line-height: 1.6; text-align:left;">
-                ${company.company_services ? `
                 <div style="font-size: 10px; font-weight: bold; color: #333; margin-bottom: 6px; line-height: 1.4; text-transform: uppercase;">
-                  ${company.company_services.split('\n').filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
+                  ${companyServices.split(/[\n,]/).filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
                 </div>
-                ` : ''}
 
                 <div style="margin-bottom: 4px;"><strong>Client:</strong> ${data.customer?.name || ''}</div>
                 ${data.project_title ? `<div style="margin-bottom: 4px;"><strong>Project:</strong> ${data.project_title}</div>` : ''}
