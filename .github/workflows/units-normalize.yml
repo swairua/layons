@@ -1,0 +1,26 @@
+name: Nightly Units Normalization
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # every day at 02:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install
+        run: npm ci
+
+      - name: Run normalization
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: node scripts/units_normalize_runner.cjs

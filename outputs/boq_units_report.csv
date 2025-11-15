@@ -1,0 +1,2 @@
+boq_id,boq_number,company_id,section_title,item_index,item_description,unit_id,unit_name,unit_abbreviation,rate,quantity,line_total
+253646e8-098b-4a3d-8ddc-3478d4fd9076,BOQ-SAMPLE-001,5401b22c-274e-448d-bd07-db65c2963cb4,General Works,0,"Excavation",db137073-ab40-4453-8b4b-4028e6273aff,"","m3",1500,10,

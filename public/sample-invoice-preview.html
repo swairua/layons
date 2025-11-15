@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Sample Invoice Preview</title>
+  <style>
+    :root { --primary: 46 65% 53%; --primary-foreground: 0 0% 10%; }
+    body { font-family: Arial, sans-serif; color: #333; margin: 0; padding: 20px; }
+    .page { width: 210mm; margin: 0 auto; background: white; padding: 15mm; }
+    .header { border-bottom: 2px solid hsl(var(--primary)); padding-bottom: 14px; display:flex; gap:20px; align-items:flex-start; }
+    .header-image { width:100%; max-height:120px; object-fit:cover; }
+    .header-content { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; width:100%; }
+    .left { text-align:left; font-size:12px; }
+    .services { font-size:10px; font-weight:700; text-transform:uppercase; margin-bottom:8px; }
+    .client-block { font-size:11px; line-height:1.5; }
+    .right { text-align:right; font-size:12px; }
+    .company-name { font-weight:700; font-size:13px; margin-bottom:6px; }
+    .document-title { font-size:20px; font-weight:700; color: hsl(var(--primary)); text-transform:uppercase; margin-bottom:8px; }
+    .items-table { width:100%; border-collapse:collapse; margin-top:18px; }
+    .items-table th, .items-table td { border:1px solid #e6e6e6; padding:8px; font-size:12px; }
+    .totals { margin-top:12px; width:100%; display:flex; justify-content:flex-end; }
+    .totals table { border-collapse:collapse; }
+    .totals td { padding:6px 10px; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- Header image -->
+    <img class="header-image" src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=1200" alt="Header" />
+
+    <div class="header-content" style="margin-top:12px;">
+      <div class="left">
+        <div class="services">BUILDING WORKS, RENOVATIONS, ROAD WORKS, LANDSCAPING, ELECTRICAL WORKS, WATER WORKS</div>
+        <div class="client-block">
+          <div><strong>Client:</strong> Mr. Mwangi</div>
+          <div><strong>Project:</strong> Building Works</div>
+          <div><strong>Subject:</strong> Bill of Quantities</div>
+          <div><strong>Date:</strong> 23 July 2025</div>
+          <div><strong>Qtn No:</strong> 3072025</div>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="company-name">NORTHERN BYPASS MILESTONE BUSINESS CENTRE</div>
+        <div>P.O. Box 2424 - 01000 Nairobi Kenya.</div>
+        <div>Telephone: 0720 717 643</div>
+        <div>info@layonsconstruction.com</div>
+      </div>
+    </div>
+
+    <!-- Sample items -->
+    <table class="items-table">
+      <thead>
+        <tr><th style="width:6%">#</th><th style="width:56%">Description</th><th style="width:12%">Qty</th><th style="width:13%">Unit Price</th><th style="width:13%">Total</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Excavation and site preparation</td><td class="center">10</td><td>KES 1,000.00</td><td>KES 10,000.00</td></tr>
+        <tr><td>2</td><td>Concrete foundation works</td><td class="center">5</td><td>KES 5,000.00</td><td>KES 25,000.00</td></tr>
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <table>
+        <tr><td>Subtotal:</td><td style="text-align:right; font-weight:700;">KES 35,000.00</td></tr>
+        <tr><td>Tax (16%):</td><td style="text-align:right;">KES 5,600.00</td></tr>
+        <tr><td style="font-weight:700">Grand Total:</td><td style="text-align:right; font-weight:700;">KES 40,600.00</td></tr>
+      </table>
+    </div>
+
+  </div>
+</body>
+</html>
