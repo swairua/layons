@@ -493,7 +493,6 @@ export const generatePDF = (data: DocumentData) => {
           </div>
         </div>
       </div>
-      </div>
       <div class="pagefoot">${company.name} • Generated on ${new Date().toLocaleDateString()}</div>
     </body>
     </html>
