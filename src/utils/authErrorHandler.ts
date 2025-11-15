@@ -12,31 +12,42 @@ export interface AuthErrorInfo {
 
 const NON_MEANINGFUL_MESSAGES = new Set(['', '[object object]', 'null', 'undefined']);
 
-const sanitizeAuthMessage = (error: AuthError | Error): string => {
+const sanitizeAuthMessage = (error: AuthError | Error | any): string => {
   const candidates: string[] = [];
 
+  // Handle string errors directly
+  if (typeof error === 'string') {
+    candidates.push(error);
+  }
+
+  // Handle Error instances
+  if (error instanceof Error) {
+    if (error.message) {
+      candidates.push(error.message);
+    }
+  }
+
+  // Handle objects (AuthError, plain objects, etc.)
   if (error && typeof error === 'object') {
     const authError = error as any;
-    if (typeof authError.message === 'string') {
+    if (typeof authError.message === 'string' && authError.message) {
       candidates.push(authError.message);
     }
-    if (typeof authError.error_description === 'string') {
+    if (typeof authError.error_description === 'string' && authError.error_description) {
       candidates.push(authError.error_description);
     }
-    if (typeof authError.details === 'string') {
+    if (typeof authError.details === 'string' && authError.details) {
       candidates.push(authError.details);
     }
-    if (typeof authError.hint === 'string') {
+    if (typeof authError.hint === 'string' && authError.hint) {
       candidates.push(authError.hint);
     }
   }
 
-  if (typeof error === 'string') {
-    candidates.unshift(error);
-  }
-
+  // Filter out non-meaningful candidates
   const meaningfulCandidate = candidates.find(candidate => {
-    const normalized = candidate?.trim().toLowerCase();
+    if (!candidate) return false;
+    const normalized = String(candidate).trim().toLowerCase();
     return normalized && !NON_MEANINGFUL_MESSAGES.has(normalized);
   });
 
@@ -44,8 +55,9 @@ const sanitizeAuthMessage = (error: AuthError | Error): string => {
     return meaningfulCandidate.trim();
   }
 
+  // Fallback to parseErrorMessage which has additional safeguards
   const parsed = parseErrorMessage(error);
-  const normalizedParsed = parsed.trim().toLowerCase();
+  const normalizedParsed = String(parsed).trim().toLowerCase();
 
   if (!NON_MEANINGFUL_MESSAGES.has(normalizedParsed)) {
     return parsed.trim();
