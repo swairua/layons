@@ -5,7 +5,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Key, Mail, Copy, CheckCircle, AlertTriangle } from 'lucide-react';
 import { setupSuperAdmin, SUPER_ADMIN_CREDENTIALS } from '@/utils/createSuperAdmin';
-import { toast } from 'sonner';
+import { toast } from '@/utils/safeToast';
 
 export function SuperAdminSetup() {
   const [isCreating, setIsCreating] = useState(false);
@@ -23,7 +23,7 @@ export function SuperAdminSetup() {
         setShowCredentials(true);
         toast.success('Super admin created successfully!');
       } else {
-        toast.error(`Setup failed: ${result.error}`);
+        toast.error(result.error ? `Setup failed: ${typeof result.error === 'string' ? result.error : 'Unknown error'}` : 'Setup failed');
       }
     } catch (error) {
       console.error('Setup error:', error);

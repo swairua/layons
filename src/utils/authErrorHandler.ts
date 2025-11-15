@@ -12,51 +12,99 @@ export interface AuthErrorInfo {
 
 const NON_MEANINGFUL_MESSAGES = new Set(['', '[object object]', 'null', 'undefined']);
 
-const sanitizeAuthMessage = (error: AuthError | Error): string => {
-  const candidates: string[] = [];
+const sanitizeAuthMessage = (error: AuthError | Error | any): string => {
+  try {
+    const candidates: string[] = [];
 
-  if (error && typeof error === 'object') {
-    const authError = error as any;
-    if (typeof authError.message === 'string') {
-      candidates.push(authError.message);
+    // Handle string errors directly
+    if (typeof error === 'string') {
+      const trimmed = error.trim();
+      if (trimmed && trimmed !== '[object Object]') {
+        candidates.push(trimmed);
+      }
     }
-    if (typeof authError.error_description === 'string') {
-      candidates.push(authError.error_description);
+
+    // Handle Error instances
+    if (error instanceof Error) {
+      if (error.message && typeof error.message === 'string') {
+        const trimmed = error.message.trim();
+        if (trimmed && trimmed !== '[object Object]') {
+          candidates.push(trimmed);
+        }
+      }
     }
-    if (typeof authError.details === 'string') {
-      candidates.push(authError.details);
+
+    // Handle objects (AuthError, plain objects, etc.)
+    if (error && typeof error === 'object') {
+      const authError = error as any;
+
+      // Try multiple property names that Supabase might use
+      const messageSources = [
+        authError.message,
+        authError.error_description,
+        authError.error_message,
+        authError.details,
+        authError.hint,
+        authError.msg,
+        authError.error,
+      ];
+
+      for (const source of messageSources) {
+        if (typeof source === 'string') {
+          const trimmed = source.trim();
+          if (trimmed && trimmed !== '[object Object]' && !candidates.includes(trimmed)) {
+            candidates.push(trimmed);
+          }
+        }
+      }
     }
-    if (typeof authError.hint === 'string') {
-      candidates.push(authError.hint);
+
+    // Filter out non-meaningful candidates
+    const meaningfulCandidate = candidates.find(candidate => {
+      if (!candidate) return false;
+      const normalized = String(candidate).trim().toLowerCase();
+      return normalized && !NON_MEANINGFUL_MESSAGES.has(normalized) && normalized !== '[object object]';
+    });
+
+    if (meaningfulCandidate) {
+      return meaningfulCandidate.trim();
     }
+
+    // Fallback to parseErrorMessage which has additional safeguards
+    const parsed = parseErrorMessage(error);
+    const safeParsed = typeof parsed === 'string' ? parsed : String(parsed || '');
+    const normalizedParsed = safeParsed.trim().toLowerCase();
+
+    if (!NON_MEANINGFUL_MESSAGES.has(normalizedParsed) && normalizedParsed !== '[object object]') {
+      const trimmedParsed = safeParsed.trim();
+      if (trimmedParsed && trimmedParsed !== '[object Object]') {
+        return trimmedParsed;
+      }
+    }
+
+    return 'An unexpected authentication error occurred';
+  } catch (sanitizeError) {
+    console.error('Error sanitizing auth message:', sanitizeError);
+    return 'An unexpected authentication error occurred';
   }
-
-  if (typeof error === 'string') {
-    candidates.unshift(error);
-  }
-
-  const meaningfulCandidate = candidates.find(candidate => {
-    const normalized = candidate?.trim().toLowerCase();
-    return normalized && !NON_MEANINGFUL_MESSAGES.has(normalized);
-  });
-
-  if (meaningfulCandidate) {
-    return meaningfulCandidate.trim();
-  }
-
-  const parsed = parseErrorMessage(error);
-  const normalizedParsed = parsed.trim().toLowerCase();
-
-  if (!NON_MEANINGFUL_MESSAGES.has(normalizedParsed)) {
-    return parsed.trim();
-  }
-
-  return 'An unexpected authentication error occurred';
 };
 
 export function analyzeAuthError(error: AuthError | Error): AuthErrorInfo {
   const errorMessage = sanitizeAuthMessage(error);
-  const message = errorMessage.toLowerCase();
+
+  // Ensure errorMessage is a string
+  const safeMessage = typeof errorMessage === 'string' ? errorMessage : String(errorMessage || '');
+  const message = safeMessage.toLowerCase().trim();
+
+  // Prevent empty messages from proceeding
+  if (!message || message === '[object object]') {
+    return {
+      type: 'unknown',
+      message: 'An unexpected authentication error occurred',
+      action: 'Please try again or contact support if the problem persists',
+      retry: true
+    };
+  }
 
   if (message.includes('invalid login credentials')) {
     return {
@@ -101,18 +149,19 @@ export function analyzeAuthError(error: AuthError | Error): AuthErrorInfo {
     };
   }
 
-  const fallbackMessage = NON_MEANINGFUL_MESSAGES.has(message)
+  // Use the safe message directly if it's meaningful
+  const finalMessage = NON_MEANINGFUL_MESSAGES.has(message)
     ? 'An unexpected authentication error occurred'
-    : errorMessage;
+    : safeMessage.trim();
 
-  // Ensure message is always a string
-  const finalMessage = typeof fallbackMessage === 'string'
-    ? fallbackMessage
+  // Ensure it's a non-empty string
+  const displayMessage = (finalMessage && finalMessage !== '[object Object]')
+    ? finalMessage
     : 'An unexpected authentication error occurred';
 
   return {
     type: 'unknown',
-    message: finalMessage,
+    message: displayMessage,
     action: 'Please try again or contact support if the problem persists',
     retry: true
   };
@@ -124,14 +173,38 @@ export function handleAuthError(error: AuthError | Error): AuthErrorInfo {
   // Log for debugging using structured logger
   logError('Authentication error', error, { parsed: errorInfo });
 
-  // Ensure the message is a string and not an object
-  const messageToShow = typeof errorInfo.message === 'string'
-    ? errorInfo.message
-    : 'An unexpected authentication error occurred';
+  // Triple-check that message is definitely a string
+  let messageToShow = 'An unexpected authentication error occurred';
+  if (errorInfo.message) {
+    if (typeof errorInfo.message === 'string') {
+      messageToShow = errorInfo.message.trim();
+      // Prevent "[object Object]" from being displayed
+      if (messageToShow === '[object Object]' || !messageToShow) {
+        messageToShow = 'An unexpected authentication error occurred';
+      }
+    } else {
+      // If message is somehow not a string, convert it
+      const stringified = String(errorInfo.message);
+      if (stringified && stringified !== '[object Object]') {
+        messageToShow = stringified;
+      }
+    }
+  }
 
-  const descriptionToShow = typeof errorInfo.action === 'string'
-    ? errorInfo.action
-    : undefined;
+  let descriptionToShow: string | undefined;
+  if (errorInfo.action) {
+    if (typeof errorInfo.action === 'string') {
+      descriptionToShow = errorInfo.action.trim();
+      if (descriptionToShow === '[object Object]' || !descriptionToShow) {
+        descriptionToShow = undefined;
+      }
+    } else {
+      const stringified = String(errorInfo.action);
+      if (stringified && stringified !== '[object Object]') {
+        descriptionToShow = stringified;
+      }
+    }
+  }
 
   // Show appropriate toast with guaranteed string values
   if (errorInfo.retry) {
