@@ -491,20 +491,12 @@ export const generatePDF = (data: DocumentData) => {
           <p style="font-size: 11px; margin: 0; color: #333;">The above prices specifications and terms are satisfactory.</p>
         </div>
 
-        <!-- Contractor and Client Section -->
-        <div style="display: flex; gap: 40px; margin-bottom: 25px; margin-top: 30px;">
-          <!-- Contractor Section -->
-          <div style="flex: 1;">
-            <div style="font-size: 11px; line-height: 1.8; color: #333;">
-              <div><strong>Contractor;</strong> ${company.name}</div>
-              <div><strong>Tel No;</strong> 254720717463</div>
-              <div><strong>Signed;</strong> KELVIN MURIITHI</div>
-            </div>
-          </div>
-
-          <!-- Stamp Area -->
-          <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 120px;">
-            <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="height:140px; width:auto; object-fit:contain;" />
+        <!-- Contractor Section -->
+        <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
+          <div style="font-size: 11px; line-height: 1.8; color: #333;">
+            <div><strong>Contractor;</strong> ${company.name}</div>
+            <div><strong>Tel No;</strong> 254720717463</div>
+            <div><strong>Signed;</strong> KELVIN MURIITHI</div>
           </div>
         </div>
 
