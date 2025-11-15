@@ -44,25 +44,39 @@ const formatToastMessage = (message: unknown): string => {
   return stringified;
 };
 
+// Safe wrapper around sonner toast that also sanitizes options
+const sanitizeToastOptions = (options?: any): any => {
+  if (!options) return options;
+
+  const sanitized = { ...options };
+
+  // Sanitize description if present
+  if (sanitized.description) {
+    sanitized.description = formatToastMessage(sanitized.description);
+  }
+
+  return sanitized;
+};
+
 // Safe wrapper around sonner toast
 export const toast = {
   error: (message: unknown, options?: any): string | number => {
-    return sonnerToast.error(formatToastMessage(message), options) as string | number;
+    return sonnerToast.error(formatToastMessage(message), sanitizeToastOptions(options)) as string | number;
   },
   success: (message: unknown, options?: any): string | number => {
-    return sonnerToast.success(formatToastMessage(message), options) as string | number;
+    return sonnerToast.success(formatToastMessage(message), sanitizeToastOptions(options)) as string | number;
   },
   info: (message: unknown, options?: any): string | number => {
-    return sonnerToast.info(formatToastMessage(message), options) as string | number;
+    return sonnerToast.info(formatToastMessage(message), sanitizeToastOptions(options)) as string | number;
   },
   warning: (message: unknown, options?: any): string | number => {
-    return sonnerToast.warning(formatToastMessage(message), options) as string | number;
+    return sonnerToast.warning(formatToastMessage(message), sanitizeToastOptions(options)) as string | number;
   },
   loading: (message: unknown, options?: any): string | number => {
-    return sonnerToast.loading(formatToastMessage(message), options) as string | number;
+    return sonnerToast.loading(formatToastMessage(message), sanitizeToastOptions(options)) as string | number;
   },
   custom: (message: unknown, options?: any): string | number => {
-    return sonnerToast.custom(formatToastMessage(message), options) as string | number;
+    return sonnerToast.custom(formatToastMessage(message), sanitizeToastOptions(options)) as string | number;
   },
   promise: (promise: any, messages: any, options?: any): string | number => {
     const formattedMessages = {
@@ -70,7 +84,7 @@ export const toast = {
       success: formatToastMessage(messages?.success || 'Success!'),
       error: formatToastMessage(messages?.error || 'Error occurred'),
     };
-    return sonnerToast.promise(promise, formattedMessages, options) as string | number;
+    return sonnerToast.promise(promise, formattedMessages, sanitizeToastOptions(options)) as string | number;
   },
   dismiss: (toastId?: string | number): void => {
     sonnerToast.dismiss(toastId);
