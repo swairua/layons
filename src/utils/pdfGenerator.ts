@@ -404,6 +404,18 @@ export const generatePDF = (data: DocumentData) => {
           <div class="header-content">
             <!-- Left side: Client and Document Details -->
             <div class="header-left">
+              <!-- Services Section -->
+              <div style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #ddd;">
+                <div style="font-size: 9px; font-weight: bold; color: #333; text-transform: uppercase; line-height: 1.4;">
+                  ${(() => {
+                    const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+                    const midpoint = Math.ceil(services.length / 2);
+                    const firstRow = services.slice(0, midpoint).join(' • ');
+                    const secondRow = services.slice(midpoint).join(' • ');
+                    return `<div style="margin-bottom: 3px;">${firstRow}</div>${secondRow ? `<div>${secondRow}</div>` : ''}`;
+                  })()}
+                </div>
+              </div>
 
               <div style="margin-bottom: 4px; font-weight: bold;"><strong>Client:</strong> ${data.customer.name}</div>
               ${boqProject ? `<div style="margin-bottom: 4px; font-weight: bold;"><strong>Project:</strong> ${boqProject}</div>` : ''}
