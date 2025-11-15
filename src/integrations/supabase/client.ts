@@ -2,23 +2,9 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Get environment variables - must be set in .env.local or via environment
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ||
-                     import.meta.env.NEXT_PUBLIC_SUPABASE_URL;
-
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ||
-                                import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-// Validate that we have valid values
-if (!SUPABASE_URL || SUPABASE_URL === 'undefined') {
-  console.error('❌ SUPABASE_URL is not defined. Please check your environment variables.');
-  throw new Error('Supabase URL is required but not found in environment variables.');
-}
-
-if (!SUPABASE_PUBLISHABLE_KEY || SUPABASE_PUBLISHABLE_KEY === 'undefined') {
-  console.error('❌ SUPABASE_PUBLISHABLE_KEY is not defined. Please check your environment variables.');
-  throw new Error('Supabase publishable key is required but not found in environment variables.');
-}
+// Hardcoded Supabase credentials
+const SUPABASE_URL = 'https://eubrvlzkvzevidivsfha.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1YnJ2bHprdnpldmlkaXZzZmhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwNjA4NTgsImV4cCI6MjA3MzYzNjg1OH0.ni7Ogq-dKLvnCDzi8KvUVG2c1P7s0qY4xdF4AuvKwKk';
 
 console.log('✅ Supabase client initializing with URL:', SUPABASE_URL.substring(0, 30) + '...');
 
