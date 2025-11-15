@@ -48,43 +48,48 @@ export function downloadBOQPDF(doc: BoqDocument, company?: { name: string; logo_
     // Handle new subsection structure
     if (section.subsections && section.subsections.length > 0) {
       section.subsections.forEach((subsection) => {
-        // Add subsection header as bold/special row
-        flatItems.push({
-          description: `→ Subsection ${subsection.name}: ${subsection.label}`,
-          quantity: 0,
-          unit_price: 0,
-          line_total: 0,
-          _isSectionHeader: true
-        });
-
-        // Add items for this subsection
-        subsection.items.forEach((it) => {
-          const qty = safeN(it.quantity ?? 1);
-          const rate = safeN(it.rate ?? (it.amount ? it.amount : 0));
-          const amount = safeN(it.amount ?? qty * rate);
-          flatItems.push({
-            description: it.description,
-            quantity: qty,
-            unit_price: rate,
-            line_total: amount,
-            unit_of_measure: it.unit_name || it.unit || 'Item',
-            unit_abbreviation: (it.unit_abbreviation || ''),
-          });
-        });
-
-        // Add subsection subtotal row
+        // Calculate subsection total first
         const subsectionTotal = subsection.items.reduce((sum, it) => {
           const qty = safeN(it.quantity ?? 1);
           const rate = safeN(it.rate ?? 0);
           return sum + (qty * rate);
         }, 0);
-        flatItems.push({
-          description: `Subsection ${subsection.name} Subtotal`,
-          quantity: 0,
-          unit_price: 0,
-          line_total: subsectionTotal,
-          _isSubtotal: true
-        });
+
+        // Only add subsection if it has items with total > 0
+        if (subsectionTotal > 0) {
+          // Add subsection header as bold/special row
+          flatItems.push({
+            description: `→ Subsection ${subsection.name}: ${subsection.label}`,
+            quantity: 0,
+            unit_price: 0,
+            line_total: 0,
+            _isSectionHeader: true
+          });
+
+          // Add items for this subsection
+          subsection.items.forEach((it) => {
+            const qty = safeN(it.quantity ?? 1);
+            const rate = safeN(it.rate ?? (it.amount ? it.amount : 0));
+            const amount = safeN(it.amount ?? qty * rate);
+            flatItems.push({
+              description: it.description,
+              quantity: qty,
+              unit_price: rate,
+              line_total: amount,
+              unit_of_measure: it.unit_name || it.unit || 'Item',
+              unit_abbreviation: (it.unit_abbreviation || ''),
+            });
+          });
+
+          // Add subsection subtotal row
+          flatItems.push({
+            description: `Subsection ${subsection.name} Subtotal`,
+            quantity: 0,
+            unit_price: 0,
+            line_total: subsectionTotal,
+            _isSubtotal: true
+          });
+        }
       });
 
       // Add section total row (sum of all subsections)
