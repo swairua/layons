@@ -152,6 +152,13 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
     }));
   };
 
+  const updateSubsectionLabel = (sectionId: string, subsectionId: string, label: string) => {
+    setSections(prev => prev.map(s => s.id === sectionId ? {
+      ...s,
+      subsections: s.subsections.map(sub => sub.id === subsectionId ? { ...sub, label } : sub)
+    } : s));
+  };
+
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
 
   const calculateSubsectionTotal = (subsection: BOQSubsectionRow): number => {
