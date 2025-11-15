@@ -396,15 +396,27 @@ export const generatePDF = (data: DocumentData) => {
           <!-- Full-width header image (same as quotations) -->
           <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
+          <!-- Services Section -->
+          ${company.company_services ? (() => {
+            const services = company.company_services.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+            if (services.length === 0) return '';
+            const midpoint = Math.ceil(services.length / 2);
+            const firstRow = services.slice(0, midpoint).join(' • ');
+            const secondRow = services.slice(midpoint).join(' • ');
+            return `
+            <div style="margin: 12px 0 15px 0; padding: 10px 0; border-bottom: 2px solid #000;">
+              <div style="font-size: 9px; font-weight: bold; color: #333; text-transform: uppercase; line-height: 1.6;">
+                <div style="margin-bottom: 4px;">${firstRow}</div>
+                ${secondRow ? `<div>${secondRow}</div>` : ''}
+              </div>
+            </div>
+            `;
+          })() : ''}
+
           <!-- Header content below image -->
           <div class="header-content">
             <!-- Left side: Client and Document Details -->
             <div class="header-left">
-              ${company.company_services ? `
-              <div style="font-size: 10px; font-weight: bold; color: #333; margin-bottom: 6px; line-height: 1.4; text-transform: uppercase;">
-                ${company.company_services.split('\n').filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
-              </div>
-              ` : ''}
 
               <div style="margin-bottom: 4px; font-weight: bold;"><strong>Client:</strong> ${data.customer.name}</div>
               ${boqProject ? `<div style="margin-bottom: 4px; font-weight: bold;"><strong>Project:</strong> ${boqProject}</div>` : ''}
