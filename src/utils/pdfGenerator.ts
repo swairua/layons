@@ -582,10 +582,20 @@ export const generatePDF = (data: DocumentData) => {
             <div class="header-content" style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-top: 20px;">
               <!-- Left side: Client and Document Details (matches supplied attachment) -->
               <div style="display: flex; flex-direction: column; gap: 8px; font-size: 10px; line-height: 1.6; text-align:left;">
-                <div style="font-size: 10px; font-weight: bold; color: #333; margin-bottom: 6px; line-height: 1.4; text-transform: uppercase;">
-                  ${companyServices.split(/[\n,]/).filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
+                <!-- Services Section -->
+                <div style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #ddd;">
+                  <div style="font-size: 9px; font-weight: bold; color: #333; text-transform: uppercase; line-height: 1.4;">
+                    ${(() => {
+                      const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+                      const midpoint = Math.ceil(services.length / 2);
+                      const firstRow = services.slice(0, midpoint).join(' • ');
+                      const secondRow = services.slice(midpoint).join(' • ');
+                      return `<div style="margin-bottom: 3px;">${firstRow}</div>${secondRow ? `<div>${secondRow}</div>` : ''}`;
+                    })()}
+                  </div>
                 </div>
 
+                <!-- Client Details -->
                 <div style="margin-bottom: 4px;"><strong>Client:</strong> ${data.customer?.name || ''}</div>
                 ${data.project_title ? `<div style="margin-bottom: 4px;"><strong>Project:</strong> ${data.project_title}</div>` : ''}
                 <div style="margin-bottom: 4px;"><strong>Subject:</strong> ${data.type === 'boq' ? 'Bill of Quantities' : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
