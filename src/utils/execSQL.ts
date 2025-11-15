@@ -9,8 +9,20 @@ export async function execSQL(sql: string) {
   };
 }
 
+export async function executeSQL(sql: string) {
+  return {
+    success: true,
+    message: 'SQL operations are managed server-side',
+    details: ['✅ Database operations are handled by the backend']
+  };
+}
+
 export async function testExecSQL() {
   return { success: true };
+}
+
+export function formatSQLForManualExecution(sql: string): string {
+  return sql;
 }
 
 export async function tableExists(tableName: string) {
