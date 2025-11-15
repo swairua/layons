@@ -332,10 +332,6 @@ export const generatePDF = (data: DocumentData) => {
       : (data.total_amount || data.subtotal || 0);
     const grandTotalForBOQ = preliminariesTotal + mainSectionsTotal;
 
-    // Use the provided new logo for BOQ header by default, but allow company override if explicitly set
-    const headerLogoUrl = 'https://cdn.builder.io/api/v1/image/assets%2F71cced7a9eba46908b96a4d2eb254873%2F43d7892b1b0247cdbd4d17a1a9d88c4e?format=webp&width=800';
-    const logoSrc = headerLogoUrl || company.logo_url || '';
-
     const htmlContentBOQ = `
     <!DOCTYPE html>
     <html>
@@ -354,25 +350,14 @@ export const generatePDF = (data: DocumentData) => {
         .pagefoot::after { content: "Page " counter(page) ""; }
         .container { padding: 12mm; }
 
-        /* Brand header like the mock */
-        .brand-header { border:none; border-radius:0; padding:0 12mm; width:100%; margin:0; box-sizing:border-box; }
-        .brand-row { display:flex; align-items:center; justify-content:flex-start; margin:0; padding:0; }
-        .brand-logo { height:90px; display:flex; align-items:center; justify-content:flex-start; flex:1; margin:0; padding:0; }
-        .brand-logo img { height:90px; width:auto; object-fit:contain; margin:0; padding:0; }
-        .brand-accent { margin:0; display:flex; align-items:center; gap:0; height:14px; }
-        .accent-yellow { flex:1; height:14px; background:#f4a300; position:relative; clip-path:polygon(0 0, calc(100% - 34px) 0, 100% 100%, 0 100%); }
-        .accent-stripes { width:88px; height:14px; background: repeating-linear-gradient(135deg, #ffffff 0 12px, #f4a300 12px 22px); }
-        .accent-black { width:140px; height:14px; background:#111111; }
+        /* Header image styling - matching quotations */
+        .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; }
 
-        .top-headers { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-top:10px; }
-        .company { text-align:right; }
-        .company .name { font-size:12px; font-weight:700; color:#111; }
-        .company .details { font-size:10px; color:#333; line-height:1.4; }
-
-        .title { font-size:16px; font-weight:700; margin:14px 0 8px; color:#111; }
-        .meta { display:flex; justify-content:space-between; margin-bottom:12px; }
-        .meta .left, .meta .right { width:48%; font-size:12px; }
-        .meta .left .field { margin-bottom:6px; }
+        /* Header content styling */
+        .header-content { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-top: 20px; }
+        .header-left { display: flex; flex-direction: column; gap: 8px; font-size: 10px; line-height: 1.6; text-align: left; }
+        .header-right { text-align: right; font-size: 10px; line-height: 1.6; }
+        .header-right .company-name { font-weight: bold; margin-bottom: 6px; font-size: 12px; }
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
@@ -403,43 +388,38 @@ export const generatePDF = (data: DocumentData) => {
       </style>
     </head>
     <body>
-      <div class="brand-header">
-        <div class="brand-row">
-          <div class="brand-logo">
-            ${logoSrc ? `<img src="${logoSrc}" alt="${company.name} Logo" />` : ''}
-          </div>
-        </div>
-        <div class="brand-accent">
-          <div class="accent-yellow"></div>
-          <div class="accent-stripes"></div>
-          <div class="accent-black"></div>
-        </div>
-      </div>
-
       <div class="container">
-        <div class="top-headers">
-          <div class="subtitle">&nbsp;</div>
-          <div class="company">
-            <div class="name">${company.name}</div>
-            <div class="details">
-              ${company.address ? `${company.address}<br>` : ''}
-              ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
-              ${company.phone ? `Tel: ${company.phone}<br>` : ''}
-              ${company.email ? `${company.email}` : ''}
-            </div>
-          </div>
-        </div>
+        <!-- Header Section -->
+        <div class="header">
+          <!-- Full-width header image (same as quotations) -->
+          <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
-        <div class="title"></div>
-        <div class="meta">
-          <div class="left">
-            <div class="field"><strong>Client:</strong> ${data.customer.name}</div>
-            ${boqProject ? `<div class="field"><strong>Project:</strong> ${boqProject}</div>` : ''}
-            <div class="field"><strong>Subject:</strong> Bill of Quantities</div>
-            <div class="field"><strong>Date:</strong> ${formatDate(data.date)}</div>
-          </div>
-          <div class="right" style="text-align:right">
-            <div class="field"><strong>BOQ #:</strong> ${data.number}</div>
+          <!-- Header content below image -->
+          <div class="header-content">
+            <!-- Left side: Client and Document Details -->
+            <div class="header-left">
+              ${company.company_services ? `
+              <div style="font-size: 10px; font-weight: bold; color: #333; margin-bottom: 6px; line-height: 1.4; text-transform: uppercase;">
+                ${company.company_services.split('\n').filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
+              </div>
+              ` : ''}
+
+              <div style="margin-bottom: 4px;"><strong>Client:</strong> ${data.customer.name}</div>
+              ${boqProject ? `<div style="margin-bottom: 4px;"><strong>Project:</strong> ${boqProject}</div>` : ''}
+              <div style="margin-bottom: 4px;"><strong>Subject:</strong> Bill of Quantities</div>
+              <div style="margin-bottom: 4px;"><strong>Date:</strong> ${formatDateLong(data.date)}</div>
+              <div style="margin-bottom: 4px;"><strong>BOQ No:</strong> ${data.number}</div>
+            </div>
+
+            <!-- Right side: Company details (right-aligned) -->
+            <div class="header-right">
+              <div class="company-name">${company.name}</div>
+              ${company.address ? `<div>${company.address}</div>` : ''}
+              ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+              ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
+              ${company.email ? `<div>${company.email}</div>` : ''}
+              ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
+            </div>
           </div>
         </div>
 
