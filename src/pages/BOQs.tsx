@@ -87,11 +87,16 @@ export default function BOQs() {
         </Button>
       </div>
 
-      <Card>
+      <Card className="shadow-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center space-x-2">
             <Layers className="h-5 w-5 text-primary" />
-            BOQ Records
+            <span>BOQs List</span>
+            {!isLoading && (
+              <Badge variant="outline" className="ml-auto">
+                {boqs.length} boqs
+              </Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
