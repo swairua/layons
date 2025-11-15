@@ -454,7 +454,7 @@ export const generatePDF = (data: DocumentData) => {
       </div>
 
       <!-- Terms and Conditions Page (Final Page) -->
-      <div style="page-break-before: always; padding: 12mm;">
+      <div class="terms-page" style="padding: 12mm;">
 
         <!-- Terms Section -->
         <div style="margin-bottom: 25px;">
