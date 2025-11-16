@@ -374,10 +374,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                   setSession(bgSession);
                   setUser(bgSession.user);
 
-                  // Fetch profile
+                  // Fetch profile (non-critical if it fails)
                   const userProfile = await fetchProfile(bgSession.user.id);
                   if (mountedRef.current) {
-                    setProfile(userProfile);
+                    setProfile(userProfile || {
+                      id: bgSession.user.id,
+                      email: bgSession.user.email || '',
+                      created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString()
+                    } as UserProfile);
                     if (userProfile) {
                       updateLastLogin(bgSession.user.id).catch(err =>
                         logError('Background retry update last login failed:', err, {
