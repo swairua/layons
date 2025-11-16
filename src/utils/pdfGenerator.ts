@@ -630,13 +630,11 @@ export const generatePDF = async (data: DocumentData) => {
         .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; }
 
         /* Header content styling */
-        .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; margin-bottom: 12px; }
-        .header-top { display: flex; align-items: flex-start; gap: 20px; width: 100%; margin-bottom: 12px; box-sizing: border-box; }
-        .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; }
-        .header-right { text-align: right; font-size: 12px; line-height: 1.6; flex-shrink: 0; box-sizing: border-box; }
-        .header-right .company-name { font-weight: bold; margin-bottom: 6px; font-size: 12px; }
-        .header-right > div { font-weight: bold; }
-        .services-section { font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 1; box-sizing: border-box; }
+        .header-content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; margin-bottom: 12px; width: 100%; box-sizing: border-box; }
+        .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; grid-column: 1 / -1; }
+        .header-right { text-align: right; font-size: 11px; line-height: 1.5; font-weight: bold; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; }
+        .header-right div { margin: 2px 0; }
+        .services-section { font-size: 11px; font-weight: bold; color: #333; line-height: 1.5; text-align: left; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; }
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; margin-bottom: 6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
