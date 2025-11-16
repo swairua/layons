@@ -630,16 +630,17 @@ export const generatePDF = async (data: DocumentData) => {
         .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; max-width: 100%; }
 
         /* Header content styling - matching quotation layout exactly */
-        .header-content { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; padding: 20px 0; margin: 0; width: 100%; border-bottom: 2px solid #000; box-sizing: border-box; }
-        .header-company-info { flex: 0 1 auto; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-        .header-logo { width: 120px; height: 120px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 4px; overflow: hidden; flex-shrink: 0; }
-        .header-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .company-name { font-size: 18px; font-weight: bold; color: #212529; margin: 0 0 8px 0; }
-        .company-details { font-size: 10px; color: #666; line-height: 1.6; }
-        .header-document-info { text-align: right; flex: 0 1 auto; min-width: 0; }
-        .document-title { font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #000; text-transform: uppercase; }
-        .document-details { font-size: 10px; font-weight: bold; color: #333; line-height: 1.6; }
-        .document-details div { margin-bottom: 4px; }
+        .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+        .header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: calc(100% + 12mm); margin-right: -12mm; box-sizing: border-box; min-width: 0; }
+        .header-company-info { flex: 0 1 auto; display: flex; flex-direction: column; gap: 0; min-width: 0; }
+        .header-logo { width: 0; height: 0; display: none; }
+        .header-logo img { display: none; }
+        .company-name { display: none; }
+        .company-details { font-size: 12px; color: #333; line-height: 1.6; font-weight: bold; }
+        .header-document-info { text-align: right; flex: 0 0 auto; min-width: 0; padding-right: 12mm; }
+        .document-title { display: none; }
+        .document-details { font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; }
+        .document-details div { margin-bottom: 2px; }
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; margin-bottom: 6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
