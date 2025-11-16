@@ -1322,26 +1322,24 @@ export const generatePDF = (data: DocumentData) => {
         }
 
         .header-top {
-          display: table;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
           width: 100%;
           margin: 0 0 10px 0;
           padding: 0;
-          table-layout: fixed;
-          border-collapse: collapse;
-          border-spacing: 0;
+          gap: 20px;
           box-sizing: border-box;
         }
 
         .services-section {
-          display: table-cell;
-          width: 50%;
+          display: block;
           font-size: 12px;
           font-weight: bold;
           color: #333;
           line-height: 1.6;
           text-align: left;
-          padding: 0 20px 0 0;
-          vertical-align: top;
+          flex: 1;
           box-sizing: border-box;
         }
 
@@ -1354,12 +1352,12 @@ export const generatePDF = (data: DocumentData) => {
         }
 
         .header-right {
-          display: table-cell;
-          width: 50%;
+          display: block;
           text-align: right;
           font-size: 12px;
           line-height: 1.6;
-          vertical-align: top;
+          flex-shrink: 0;
+          white-space: nowrap;
           padding: 0;
           margin: 0;
           box-sizing: border-box;
