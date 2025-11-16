@@ -711,8 +711,12 @@ export const generatePDF = async (data: DocumentData) => {
           }
           .header-content {
             margin: 0;
-            padding: 20px 0;
+            padding: 0;
             width: 100%;
+          }
+          .header-top {
+            width: calc(100% + 12mm) !important;
+            margin-right: -12mm !important;
           }
         }
 
@@ -723,8 +727,12 @@ export const generatePDF = async (data: DocumentData) => {
           }
           .header-content {
             margin: 0;
-            padding: 20px 0;
+            padding: 0;
             width: 100%;
+          }
+          .header-top {
+            width: calc(100% + 12mm) !important;
+            margin-right: -12mm !important;
           }
         }
       </style>
