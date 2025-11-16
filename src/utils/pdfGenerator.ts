@@ -1097,8 +1097,8 @@ export const generatePDF = (data: DocumentData) => {
           }
 
           .items-table thead {
-            background: #000;
-            color: white;
+            background: #f8f9fa;
+            color: #000;
           }
 
           .items-table th {
