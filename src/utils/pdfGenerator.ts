@@ -530,7 +530,7 @@ export const generatePDF = async (data: DocumentData) => {
     const sectionTotals: number[] = [];
 
     // Helpers to detect row kinds
-    const isSectionHeader = (d: string) => d.startsWith('➤ ');
+    const isSectionHeader = (d: string) => d.startsWith('��� ');
     const isSubsectionHeader = (d: string) => /^\s*[→-]?\s*subsection\s+[^:]+:\s*/i.test(d);
     const isSubsectionSubtotal = (d: string) => /^subsection\s+[^\s]+\s+subtotal\s*$/i.test(d);
     const isSectionTotalRow = (d: string) => /^section\s+total$/i.test(d);
@@ -542,7 +542,10 @@ export const generatePDF = async (data: DocumentData) => {
         if (isSectionHeader(desc)) {
           currentSection = desc.replace(/^➤\s*/, '');
           itemNo = 0;
-          rowsHtml += `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\">${currentSection}</td></tr>`;
+          // Add spacer row before section headers (except first section) to force page breaks
+          const isFirstSection = !rowsHtml.includes('section-row');
+          const spacerRow = !isFirstSection ? `<tr class=\"spacer-row\"><td colspan=\"6\" style=\"height: 15mm; border: none; background: none;\"></td></tr>` : '';
+          rowsHtml += spacerRow + `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\">${currentSection}</td></tr>`;
           return;
         }
 
@@ -581,7 +584,10 @@ export const generatePDF = async (data: DocumentData) => {
           runningSectionTotal = 0;
           itemNo = 0;
           currentSection = it.description.replace(/^➤\s*/, '');
-          rowsHtml += `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\">${currentSection}</td></tr>`;
+          // Add spacer row before section headers (except first section) to force page breaks
+          const isFirstSection = sectionTotals.length === 0;
+          const spacerRow = !isFirstSection ? `<tr class=\"spacer-row\"><td colspan=\"6\" style=\"height: 15mm; border: none; background: none;\"></td></tr>` : '';
+          rowsHtml += spacerRow + `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\">${currentSection}</td></tr>`;
           return;
         }
         itemNo += 1;
@@ -610,7 +616,7 @@ export const generatePDF = async (data: DocumentData) => {
       <meta charset="UTF-8">
       <style>
         ${pdfRootVars}
-        @page { size: A4; margin: 0 0 12mm 0; }
+        @page { size: A4; margin: 12mm 12mm 20mm 12mm; orphans: 3; widows: 3; }
         @media print {
           @page { counter-increment: page; }
         }
@@ -618,36 +624,43 @@ export const generatePDF = async (data: DocumentData) => {
         body { font-family: 'Arial', sans-serif; margin:0; color:#222; font-size:12px; }
         body { counter-reset: page; }
         .pagefoot::after { content: "Page " counter(page) ""; }
-        .container { padding: 12mm; }
+        .container { padding: 0; }
 
         /* Header image styling - matching quotations */
         .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; }
 
         /* Header content styling */
-        .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-        .header-top { display: flex; align-items: flex-start; gap: 20px; width: 100%; margin-bottom: 12px; box-sizing: border-box; }
-        .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; }
-        .header-right { text-align: right; font-size: 12px; line-height: 1.6; flex-shrink: 0; box-sizing: border-box; }
-        .header-right .company-name { font-weight: bold; margin-bottom: 6px; font-size: 12px; }
-        .header-right > div { font-weight: bold; }
-        .services-section { font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 1; box-sizing: border-box; }
+        .header-content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; margin-bottom: 12px; width: 100%; box-sizing: border-box; }
+        .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; grid-column: 1 / -1; }
+        .header-right { text-align: right; font-size: 11px; line-height: 1.5; font-weight: bold; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; }
+        .header-right div { margin: 2px 0; }
+        .services-section { font-size: 11px; font-weight: bold; color: #333; line-height: 1.5; text-align: left; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; }
 
-        .items { width:100%; border-collapse:collapse; margin-top:6px; }
+        .items { width:100%; border-collapse:collapse; margin-top:6px; margin-bottom: 6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
         .items thead th { background:#f8f9fa; color:#000; font-weight:bold; text-transform: uppercase; }
+        .items thead { display: table-header-group; }
+        .spacer-row { height: 15mm; page-break-inside: avoid; }
+        .spacer-row td { border: none !important; background: none !important; padding: 0 !important; height: 15mm; }
+        .section-row { page-break-inside: avoid; page-break-before: always; page-break-after: avoid; }
+        .section-row:first-of-type { page-break-before: avoid; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding:8px; }
+        .item-row { page-break-inside: avoid; }
         .item-row td.num { text-align:center; }
         .item-row td.desc { width:55%; }
         .item-row td.qty, .item-row td.unit, .item-row td.rate, .item-row td.amount { text-align:right; }
+        .section-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 8mm; }
         .section-total td { font-weight:700; background:#fafafa; }
         .section-total .label { text-align:right; padding-right:12px; }
-        .preliminaries-section { margin-bottom:12px; }
+        .preliminaries-section { margin-bottom:12px; page-break-inside: avoid; }
         .preliminaries-section .items { margin-top:0; }
+        .subsection-row { page-break-inside: avoid; page-break-after: avoid; }
         .subsection-row td { background:#fcfcfc; font-weight:600; }
         .subsection-title { padding:6px 8px; }
+        .subsection-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 6mm; }
         .subsection-total td { font-weight:600; background:#fdfdfd; }
         .subsection-total .label { text-align:right; padding-right:12px; }
-        .totals { margin-top:10px; width:100%; }
+        .totals { margin-top:12px; width:100%; page-break-inside: avoid; padding-bottom: 30mm; }
         .totals .label { text-align:right; padding-right:12px; }
         .footer { margin-top:24px; display:flex; flex-direction:column; gap:18px; }
         .sig-block { display:flex; flex-direction:column; gap:8px; }
@@ -663,13 +676,16 @@ export const generatePDF = async (data: DocumentData) => {
         .boq-main {
           display: block;
           width: 100%;
-          padding-bottom: 20mm;
+          padding: 12mm;
+          padding-bottom: 40mm;
         }
 
         .terms-page {
           display: block;
           width: 100%;
-          padding: 15mm;
+          padding: 12mm;
+          padding-top: 20mm;
+          page-break-before: always;
         }
 
         .terms-page table { border-collapse: collapse; }
@@ -699,38 +715,35 @@ export const generatePDF = async (data: DocumentData) => {
       <div class="boq-main">
         <div class="container">
           <!-- Header Section -->
-          <div class="header">
+          <div class="header" style="margin: 0; padding: 0;">
             <!-- Full-width header image (same as quotations) -->
             <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
 
             <!-- Header content below image -->
-            <div class="header-content" style="margin-top: 8px; display: flex; flex-direction: column; gap: 12px;">
-              <!-- Top row: Services (left) and Company details (right) -->
-              <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: calc(100% + 12mm); margin-right: -12mm; box-sizing: border-box; min-width: 0;">
-                <!-- Services Section -->
-                <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; box-sizing: border-box; min-width: 0;">
-                  ${(() => {
-                    const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-                    const itemsPerLine = Math.ceil(services.length / 3);
-                    const line1 = services.slice(0, itemsPerLine).join(' • ');
-                    const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
-                    const line3 = services.slice(itemsPerLine * 2).join(' • ');
-                    return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
-                  })()}
-                </div>
-
-                <!-- Company details (right-aligned) -->
-                <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box; padding-right: 12mm;">
-                  ${company.address ? `<div>${company.address}</div>` : ''}
-                  ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-                  ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
-                  ${company.email ? `<div>${company.email}</div>` : ''}
-                  ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
-                </div>
+            <div class="header-content" style="margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; box-sizing: border-box;">
+              <!-- Services Section -->
+              <div class="services-section" style="font-size: 11px; font-weight: bold; color: #333; line-height: 1.5; text-align: left; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word;">
+                ${(() => {
+                  const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+                  const itemsPerLine = Math.ceil(services.length / 3);
+                  const line1 = services.slice(0, itemsPerLine).join(' • ');
+                  const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
+                  const line3 = services.slice(itemsPerLine * 2).join(' • ');
+                  return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
+                })()}
               </div>
 
-              <!-- Bottom row: Client Details -->
-              <div class="header-left">
+              <!-- Company details (right-aligned) -->
+              <div class="header-right" style="text-align: right; font-size: 11px; line-height: 1.5; font-weight: bold; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word;">
+                ${company.address ? `<div style="font-size: 10px;">${company.address}</div>` : ''}
+                ${company.city ? `<div style="font-size: 10px;">${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+                ${company.phone ? `<div style="font-size: 10px;">Telephone: ${company.phone}</div>` : ''}
+                ${company.email ? `<div style="font-size: 10px;">${company.email}</div>` : ''}
+                ${company.tax_number ? `<div style="font-size: 10px;">PIN: ${company.tax_number}</div>` : ''}
+              </div>
+
+              <!-- Bottom row: Client Details (spans both columns) -->
+              <div class="header-left" style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left;">
                 <div><strong>Client:</strong> ${data.customer.name}</div>
                 ${boqProject ? `<div><strong>Project:</strong> ${boqProject}</div>` : ''}
                 <div><strong>Subject:</strong> Bill of Quantities</div>
@@ -741,6 +754,8 @@ export const generatePDF = async (data: DocumentData) => {
           </div>
 
           ${preliminariesHtml}
+
+          <div style="height: 15mm;"></div>
 
           <table class="items">
             <thead>
@@ -771,35 +786,33 @@ export const generatePDF = async (data: DocumentData) => {
 
       <!-- Page 2: Terms and Conditions -->
       <div class="terms-page">
-        <div class="container">
-
         <!-- Terms Section -->
-        <div style="margin-bottom: 15px;">
+        <div style="margin-bottom: 15px; page-break-inside: avoid;">
           <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
           <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
-            <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
+            <li style="margin-bottom: 6px; page-break-inside: avoid;">The Payment terms for each stage are as follows;
               <ul style="display: block; width: 100%; clear: both; font-size: 11px; line-height: 1.6; margin: 12px 0 6px 0; padding-left: 40px; color: #333; list-style-type: lower-alpha;">
                 <li style="margin-bottom: 4px;">50% Upon Order (${formatCurrency(grandTotalForBOQ * 0.5)})</li>
                 <li style="margin-bottom: 4px;">40% As Progressive (${formatCurrency(grandTotalForBOQ * 0.4)})</li>
                 <li style="margin-bottom: 4px;">10% Upon Completion (${formatCurrency(grandTotalForBOQ * 0.1)})</li>
               </ul>
             </li>
-            <li style="margin-bottom: 6px;">All work will be executed based on the drawings and samples approved by the client</li>
-            <li style="margin-bottom: 6px;">Any Changes/alterations to the scope of work outlined will affect the final quantity will be measured, and charges will be applied on a pro-rata basis at the agreed rate</li>
-            <li style="margin-bottom: 6px;">We are not responsible for any damages caused by negligence from other Sub Contractors Hired by the Client.</li>
-            <li style="margin-bottom: 6px;">The quotation does not include statutory fees.</li>
-            <li style="margin-bottom: 6px;">The work shall be completed within weeks from the day of Order.</li>
+            <li style="margin-bottom: 6px; page-break-inside: avoid;">All work will be executed based on the drawings and samples approved by the client</li>
+            <li style="margin-bottom: 6px; page-break-inside: avoid;">Any Changes/alterations to the scope of work outlined will affect the final quantity will be measured, and charges will be applied on a pro-rata basis at the agreed rate</li>
+            <li style="margin-bottom: 6px; page-break-inside: avoid;">We are not responsible for any damages caused by negligence from other Sub Contractors Hired by the Client.</li>
+            <li style="margin-bottom: 6px; page-break-inside: avoid;">The quotation does not include statutory fees.</li>
+            <li style="margin-bottom: 6px; page-break-inside: avoid;">The work shall be completed within weeks from the day of Order.</li>
           </ol>
         </div>
 
         <!-- Acceptance of Quote Section -->
-        <div style="margin-bottom: 12px; padding-top: 8px;">
+        <div style="margin-bottom: 12px; padding-top: 8px; page-break-inside: avoid;">
           <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Acceptance of Quote;</h3>
           <p style="font-size: 10px; margin: 0; color: #333;">The above prices specifications and terms are satisfactory.</p>
         </div>
 
         <!-- Contractor Section -->
-        <div style="margin-bottom: 10px; padding-top: 6px;">
+        <div style="margin-bottom: 10px; padding-top: 6px; page-break-inside: avoid;">
           <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #333; border: none;">
             <tr style="border: none;">
               <td style="width: 30%; border: none;"><strong>Contractor;</strong></td>
@@ -817,7 +830,7 @@ export const generatePDF = async (data: DocumentData) => {
         </div>
 
         <!-- Client Section with Stamp -->
-        <div style="margin-bottom: 10px; padding-top: 6px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+        <div style="margin-bottom: 10px; padding-top: 6px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; page-break-inside: avoid;">
           <table style="font-size: 10px; width: 72%; line-height: 1.6; color: #333; border: none;">
             <tr style="border: none;">
               <td style="width: 40%; border: none;"><strong>Client;</strong></td>
@@ -834,7 +847,7 @@ export const generatePDF = async (data: DocumentData) => {
         </div>
 
         <!-- Prepaired By Section -->
-        <div style="margin-bottom: 8px; padding-top: 4px;">
+        <div style="margin-bottom: 8px; padding-top: 4px; page-break-inside: avoid;">
           <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #333; border: none;">
             <tr style="border: none;">
               <td style="width: 30%; border: none;"><strong>PREPAIRED BY;</strong></td>
@@ -844,7 +857,7 @@ export const generatePDF = async (data: DocumentData) => {
         </div>
 
         <!-- Account Details Section -->
-        <div style="margin-top: 8px; padding-top: 4px;">
+        <div style="margin-top: 8px; padding-top: 4px; page-break-inside: avoid;">
           <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Account Details;</h3>
           <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
             <tr style="border: none;">
@@ -884,7 +897,6 @@ export const generatePDF = async (data: DocumentData) => {
               <td style="border: none;">01192659527000</td>
             </tr>
           </table>
-        </div>
         </div>
       </div>
     </body>
@@ -956,6 +968,12 @@ export const generatePDF = async (data: DocumentData) => {
         windowWidth: 210 * 3.779527559,
         proxy: undefined,
         foreignObjectRendering: false,
+        onclone: (clonedDocument) => {
+          // Ensure CSS page breaks are respected during rendering
+          const style = clonedDocument.createElement('style');
+          style.textContent = '@media print { * { page-break-inside: avoid !important; } }';
+          clonedDocument.head.appendChild(style);
+        }
       });
 
       // Add BOQ pages to PDF
@@ -964,15 +982,20 @@ export const generatePDF = async (data: DocumentData) => {
       const imgBoqHeight = (boqCanvas.height * imgBoqWidth) / boqCanvas.width;
       let boqHeightLeft = imgBoqHeight;
       let boqPosition = 0;
+      let firstPage = true;
 
-      // Add BOQ content, creating multiple pages if needed
+      // Add BOQ content, creating multiple pages if needed with proper margins
       while (boqHeightLeft >= 0) {
+        if (!firstPage) {
+          pdf.addPage();
+        }
         pdf.addImage(imgBoqData, 'PNG', 0, -boqPosition, imgBoqWidth, imgBoqHeight);
-        boqHeightLeft -= pageHeight;
+        boqHeightLeft -= (pageHeight - 8); // Account for margins and spacing
         boqPosition += pageHeight;
+        firstPage = false;
 
         if (boqHeightLeft > 0) {
-          pdf.addPage();
+          // Ensure proper spacing before next page
         }
       }
 
@@ -995,9 +1018,15 @@ export const generatePDF = async (data: DocumentData) => {
         windowWidth: 210 * 3.779527559,
         proxy: undefined,
         foreignObjectRendering: false,
+        onclone: (clonedDocument) => {
+          // Ensure CSS page breaks are respected during rendering
+          const style = clonedDocument.createElement('style');
+          style.textContent = '@media print { * { page-break-inside: avoid !important; } }';
+          clonedDocument.head.appendChild(style);
+        }
       });
 
-      // Add a fresh page for terms
+      // Add a fresh page for terms (always add new page)
       pdf.addPage();
 
       // Add terms to the new page
@@ -1006,15 +1035,20 @@ export const generatePDF = async (data: DocumentData) => {
       const imgTermsHeight = (termsCanvas.height * imgTermsWidth) / termsCanvas.width;
       let termsHeightLeft = imgTermsHeight;
       let termsPosition = 0;
+      let firstTermsPage = true;
 
       // Add terms content to PDF
       while (termsHeightLeft >= 0) {
+        if (!firstTermsPage) {
+          pdf.addPage();
+        }
         pdf.addImage(imgTermsData, 'PNG', 0, -termsPosition, imgTermsWidth, imgTermsHeight);
-        termsHeightLeft -= pageHeight;
+        termsHeightLeft -= (pageHeight - 8); // Account for margins and spacing
         termsPosition += pageHeight;
+        firstTermsPage = false;
 
         if (termsHeightLeft > 0) {
-          pdf.addPage();
+          // Proper spacing before next page
         }
       }
 
