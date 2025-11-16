@@ -1688,8 +1688,25 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .items-section {
-          margin: 15px 0 30px 0;
-        }
+            margin: 15px 0 30px 0;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            display: flex;
+            flex-direction: column;
+          }
+
+          .subsection {
+            page-break-inside: avoid;
+            break-inside: avoid;
+            margin-bottom: 12px;
+            padding: 8px;
+          }
+
+          .subsection > div:first-child {
+            font-weight: 600;
+            margin-bottom: 6px;
+            page-break-after: avoid;
+          }
 
           .items-table {
             width: 100%;
