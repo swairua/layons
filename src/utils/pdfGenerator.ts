@@ -530,8 +530,8 @@ export const generatePDF = (data: DocumentData) => {
               <td style="border: none;">________________________</td>
             </tr>
           </table>
-          <div style="width: 28%; text-align: center; flex-shrink: 0;">
-            <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" class="stamp-image" />
+          <div style="text-align: center; flex-shrink: 0; width: 100px;">
+            <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
           </div>
         </div>
 
