@@ -359,7 +359,7 @@ export const generatePDF = (data: DocumentData) => {
 
         /* Header content styling */
         .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-        .header-top { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 12px; }
+        .header-top { display: grid; grid-template-columns: 1fr auto; gap: 30px; margin-bottom: 12px; }
         .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; }
         .header-right { text-align: right; font-size: 12px; line-height: 1.6; }
         .header-right .company-name { font-weight: bold; margin-bottom: 6px; font-size: 12px; }
@@ -416,7 +416,7 @@ export const generatePDF = (data: DocumentData) => {
                 ${(() => {
                   const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                   const itemsPerLine = Math.ceil(services.length / 3);
-                  const line1 = services.slice(0, itemsPerLine).join(' ��� ');
+                  const line1 = services.slice(0, itemsPerLine).join(' ����� ');
                   const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' ��� ');
                   const line3 = services.slice(itemsPerLine * 2).join(' • ');
                   return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
