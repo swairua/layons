@@ -1357,9 +1357,9 @@ export const generatePDF = (data: DocumentData) => {
           font-size: 12px;
           line-height: 1.6;
           flex-shrink: 0;
-          white-space: nowrap;
+          margin-left: auto;
           padding: 0;
-          margin: 0;
+          margin: 0 0 0 auto;
           box-sizing: border-box;
         }
 
