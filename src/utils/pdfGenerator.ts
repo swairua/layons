@@ -495,13 +495,13 @@ export const generatePDF = (data: DocumentData) => {
         </div>
 
         <!-- Acceptance of Quote Section -->
-        <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
+        <div style="margin-bottom: 25px; padding-top: 15px;">
           <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Acceptance of Quote;</h3>
           <p style="font-size: 11px; margin: 0; color: #333;">The above prices specifications and terms are satisfactory.</p>
         </div>
 
         <!-- Contractor Section -->
-        <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
+        <div style="margin-bottom: 25px; padding-top: 15px;">
           <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
             <tr style="border: none;">
               <td style="width: 30%; border: none;"><strong>Contractor;</strong></td>
@@ -519,7 +519,7 @@ export const generatePDF = (data: DocumentData) => {
         </div>
 
         <!-- Client Section with Stamp -->
-        <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+        <div style="margin-bottom: 25px; padding-top: 15px; display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
           <table style="font-size: 10px; width: 65%; line-height: 1.8; color: #333; border: none;">
             <tr style="border: none;">
               <td style="width: 40%; border: none;"><strong>Client;</strong></td>
@@ -536,7 +536,7 @@ export const generatePDF = (data: DocumentData) => {
         </div>
 
         <!-- Prepaired By Section -->
-        <div style="margin-bottom: 20px; padding-top: 15px; border-top: 1px solid #ddd;">
+        <div style="margin-bottom: 20px; padding-top: 15px;">
           <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
             <tr style="border: none;">
               <td style="width: 30%; border: none;"><strong>PREPAIRED BY;</strong></td>
@@ -546,7 +546,7 @@ export const generatePDF = (data: DocumentData) => {
         </div>
 
         <!-- Account Details Section -->
-        <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd;">
+        <div style="margin-top: 30px; padding-top: 15px;">
           <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase;">Account Details;</h3>
           <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
             <tr style="border: none;">
