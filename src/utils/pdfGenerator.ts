@@ -969,9 +969,10 @@ export const generatePDF = (data: DocumentData) => {
             padding-bottom: 0;
             border-bottom: none;
             margin-left: 0;
-            margin-right: 0;
+            margin-right: -20mm;
             padding-left: 0;
-            padding-right: 0;
+            padding-right: 20mm;
+            width: calc(100% + 20mm);
           }
 
           .header-image {
@@ -1031,6 +1032,7 @@ export const generatePDF = (data: DocumentData) => {
           .document-info {
             text-align: right;
             flex: 1;
+            padding-right: 0;
           }
 
           .document-title {
