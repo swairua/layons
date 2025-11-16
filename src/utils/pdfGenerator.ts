@@ -1316,8 +1316,12 @@ export const generatePDF = (data: DocumentData) => {
         .header-top {
           display: table;
           width: 100%;
-          margin-bottom: 10px;
+          margin: 0 0 10px 0;
+          padding: 0;
           table-layout: fixed;
+          border-collapse: collapse;
+          border-spacing: 0;
+          box-sizing: border-box;
         }
 
         .services-section {
