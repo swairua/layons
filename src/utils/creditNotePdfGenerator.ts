@@ -58,7 +58,10 @@ const DEFAULT_COMPANY: CompanyData = {
 export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: CompanyData) => {
   // Use company details from parameter or fall back to defaults
   const companyData = company || DEFAULT_COMPANY;
-  
+
+  // Get stamp image with fallback
+  const stampImage = companyData.stamp_image || DEFAULT_COMPANY.stamp_image;
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
       style: 'currency',
