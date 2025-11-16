@@ -189,6 +189,138 @@ export default function CompanySettings() {
     }
   };
 
+  // Handler for header image upload
+  const handleHeaderImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!currentCompany) {
+      toast.error('Company not loaded');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      let headerImageUrl: string | null = null;
+
+      try {
+        headerImageUrl = await uploadToSupabaseStorage(file, currentCompany.id);
+        console.log('✅ Supabase storage upload successful');
+      } catch (storageError) {
+        console.warn('⚠️ Supabase storage failed:', storageError);
+
+        if (file.size <= 1024 * 1024) {
+          headerImageUrl = await convertToBase64(file);
+          console.log('✅ Base64 fallback successful');
+          toast.info('Header image saved locally (storage not available)');
+        } else {
+          throw new Error('File too large for local storage. Please use a smaller image or configure cloud storage.');
+        }
+      }
+
+      if (!headerImageUrl) {
+        throw new Error('Failed to process header image upload');
+      }
+
+      setCompanyData(prev => ({ ...prev, header_image: headerImageUrl }));
+      await updateCompany.mutateAsync({ id: currentCompany.id, header_image: headerImageUrl });
+
+      toast.success('Header image uploaded and saved successfully!');
+    } catch (err: any) {
+      logError(err, 'Header Image Upload');
+      let userMessage = getUserFriendlyMessage(err, 'Failed to upload header image');
+
+      if (userMessage.includes('company-logos') || userMessage.includes('bucket')) {
+        userMessage = 'Cloud storage not configured. Using local storage for smaller files (max 1MB).';
+
+        if (file.size <= 1024 * 1024) {
+          try {
+            const base64Url = await convertToBase64(file);
+            setCompanyData(prev => ({ ...prev, header_image: base64Url }));
+            await updateCompany.mutateAsync({ id: currentCompany.id, header_image: base64Url });
+            toast.success('Header image saved locally!');
+            return;
+          } catch (base64Error) {
+            userMessage = 'Failed to save header image. Please try again with a smaller file.';
+          }
+        }
+      }
+
+      toast.error(userMessage);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  // Handler for stamp image upload
+  const handleStampImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!currentCompany) {
+      toast.error('Company not loaded');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      let stampImageUrl: string | null = null;
+
+      try {
+        stampImageUrl = await uploadToSupabaseStorage(file, currentCompany.id);
+        console.log('✅ Supabase storage upload successful');
+      } catch (storageError) {
+        console.warn('⚠️ Supabase storage failed:', storageError);
+
+        if (file.size <= 1024 * 1024) {
+          stampImageUrl = await convertToBase64(file);
+          console.log('✅ Base64 fallback successful');
+          toast.info('Stamp image saved locally (storage not available)');
+        } else {
+          throw new Error('File too large for local storage. Please use a smaller image or configure cloud storage.');
+        }
+      }
+
+      if (!stampImageUrl) {
+        throw new Error('Failed to process stamp image upload');
+      }
+
+      setCompanyData(prev => ({ ...prev, stamp_image: stampImageUrl }));
+      await updateCompany.mutateAsync({ id: currentCompany.id, stamp_image: stampImageUrl });
+
+      toast.success('Stamp image uploaded and saved successfully!');
+    } catch (err: any) {
+      logError(err, 'Stamp Image Upload');
+      let userMessage = getUserFriendlyMessage(err, 'Failed to upload stamp image');
+
+      if (userMessage.includes('company-logos') || userMessage.includes('bucket')) {
+        userMessage = 'Cloud storage not configured. Using local storage for smaller files (max 1MB).';
+
+        if (file.size <= 1024 * 1024) {
+          try {
+            const base64Url = await convertToBase64(file);
+            setCompanyData(prev => ({ ...prev, stamp_image: base64Url }));
+            await updateCompany.mutateAsync({ id: currentCompany.id, stamp_image: base64Url });
+            toast.success('Stamp image saved locally!');
+            return;
+          } catch (base64Error) {
+            userMessage = 'Failed to save stamp image. Please try again with a smaller file.';
+          }
+        }
+      }
+
+      toast.error(userMessage);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   // Helper function to upload to Supabase Storage
   const uploadToSupabaseStorage = async (file: File, companyId: string): Promise<string> => {
     // Get file extension safely
