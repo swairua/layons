@@ -682,12 +682,9 @@ export const generatePDF = async (data: DocumentData) => {
         .pagefoot::after { content: "Page " counter(page) ""; }
         .container { padding: 0; width: 100%; box-sizing: border-box; max-width: 100%; }
 
-        /* Header image styling - matching quotations */
-        .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; max-width: 100%; }
-
-        /* Header content styling - matching quotation layout exactly */
+        /* Header styling - matching quotations */
         .header { margin: 0; padding: 0; width: 100%; }
-        .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; }
+        .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; max-width: 100%; }
         .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; width: 100%; padding: 0; }
         .header-top { display: flex; align-items: flex-start; width: 100%; margin: 0 0 10px 0; padding: 0; gap: 20px; box-sizing: border-box; min-width: 0; }
         .services-section { display: block; font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0; }
