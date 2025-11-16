@@ -2032,7 +2032,7 @@ export const generatePDF = (data: DocumentData) => {
           <!-- Account Details Section -->
           <div style="margin-top: 8px; padding-top: 4px;">
             <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Account Details;</h3>
-            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
+            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
               <tr>
                 <td style="width: 30%;"><strong>BANK;</strong></td>
                 <td style="width: 70%;">CO-OPERATIVE BANK OF KENYA</td>
