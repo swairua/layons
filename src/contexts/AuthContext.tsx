@@ -300,8 +300,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (quickSession?.user && mountedRef.current) {
           console.log('✅ Quick auth success - user authenticated');
 
-          // Clear the immediate start timer since we have auth
-          clearTimeout(immediateStartTimer);
+          // Clear the session check timer and start app immediately
+          clearTimeout(sessionCheckTimer);
+          appStarted = true;
 
           // Set auth state immediately
           setSession(quickSession);
