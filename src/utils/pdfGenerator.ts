@@ -368,7 +368,7 @@ export const generatePDF = (data: DocumentData) => {
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
-        .items thead th { background:#000; color:#fff; font-weight:bold; text-transform: uppercase; }
+        .items thead th { background:#f8f9fa; color:#000; font-weight:bold; text-transform: uppercase; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding:8px; }
         .item-row td.num { text-align:center; }
         .item-row td.desc { width:55%; }
@@ -417,7 +417,7 @@ export const generatePDF = (data: DocumentData) => {
                   const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                   const itemsPerLine = Math.ceil(services.length / 3);
                   const line1 = services.slice(0, itemsPerLine).join(' ��� ');
-                  const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
+                  const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' ��� ');
                   const line3 = services.slice(itemsPerLine * 2).join(' • ');
                   return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
                 })()}
@@ -753,9 +753,13 @@ export const generatePDF = (data: DocumentData) => {
 
     pagesHtml += `
       <div class="page" style="position: relative; page-break-before: always;">
+        <!-- Summary Section Title -->
+        <div style="margin: 20px 0 15px 0;">
+          <h3 style="font-size: 14px; font-weight: bold; margin: 0 0 12px 0; text-transform: uppercase; color: #000;">SECTION ${String.fromCharCode(65 + data.sections.length)}. SUMMARY</h3>
+        </div>
         <!-- Section Totals Table Only -->
         <div style="margin: 20px 0;">
-          <table class="totals-table" style="width: 400px;">
+          <table class="totals-table" style="width: 100%;">
             <thead>
               <tr style="border-bottom: 2px solid #000;">
                 <th style="text-align: left; padding: 10px 15px; font-weight: bold; color: #000; font-size: 12px;">SECTION</th>
@@ -782,7 +786,7 @@ export const generatePDF = (data: DocumentData) => {
 
         <!-- Grand Total -->
         <div style="display: flex; justify-content: flex-start; margin-top: 20px;">
-          <table class="totals-table" style="width: 400px;">
+          <table class="totals-table" style="width: 100%;">
             <tr class="total-row" style="border-top: 2px solid #000; background: #fff;">
               <td class="label" style="padding: 12px 15px; text-align: left; font-weight: bold; color: #000; font-size: 14px;">GRAND TOTAL:</td>
               <td class="amount" style="padding: 12px 15px; text-align: right; font-weight: bold; color: #000; font-size: 14px;">${formatCurrency(grandTotal)}</td>
@@ -792,7 +796,7 @@ export const generatePDF = (data: DocumentData) => {
 
         <!-- Stamp Section -->
         <div class="stamp-section" style="display:flex; justify-content:center; margin:40px 0 24px 0;">
-          <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="height:140px; width:auto; object-fit:contain;" />
+          <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="width: 100px; height: 100px; object-fit:contain;" />
         </div>
       </div>
     `;
@@ -964,8 +968,8 @@ export const generatePDF = (data: DocumentData) => {
             margin-bottom: 30px;
             padding-bottom: 0;
             border-bottom: none;
-            margin-left: -20mm;
-            margin-right: -20mm;
+            margin-left: 0;
+            margin-right: 0;
             padding-left: 0;
             padding-right: 0;
           }
@@ -1093,8 +1097,8 @@ export const generatePDF = (data: DocumentData) => {
           }
 
           .items-table thead {
-            background: #000;
-            color: white;
+            background: #f8f9fa;
+            color: #000;
           }
 
           .items-table th {
@@ -1153,7 +1157,7 @@ export const generatePDF = (data: DocumentData) => {
           }
 
           .totals-table {
-            width: 350px;
+            width: 100%;
             border-collapse: collapse;
             font-size: 12px;
           }
@@ -1472,8 +1476,8 @@ export const generatePDF = (data: DocumentData) => {
         }
 
         .items-table thead {
-          background: #000;
-          color: white;
+          background: #f8f9fa;
+          color: #000;
         }
 
         .items-table th {
@@ -1536,7 +1540,7 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .totals-table {
-          width: 300px;
+          width: 100%;
           border-collapse: collapse;
           font-size: 12px;
         }
@@ -1968,7 +1972,7 @@ export const generatePDF = (data: DocumentData) => {
         <!-- Stamp Section (not for invoice/quotation as they have their own stamp area) -->
         ${(data.type !== 'invoice' && data.type !== 'quotation') ? `
         <div class="stamp-section" style="display:flex; justify-content:center; margin:30px 0 24px 0;">
-          <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="height:140px; width:auto; object-fit:contain;" />
+          <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="width: 100px; height: 100px; object-fit:contain;" />
         </div>
         ` : ''}
 
