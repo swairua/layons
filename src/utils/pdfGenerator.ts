@@ -22,10 +22,43 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
     document.body.appendChild(wrapper);
 
     // Wait longer for images and fonts to load
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
     // Force a reflow to ensure content is rendered
     wrapper.offsetHeight;
+
+    // Preload all images in the wrapper to ensure they're loaded before canvas conversion
+    const images = wrapper.querySelectorAll('img');
+    const imageLoadPromises = Array.from(images).map(img => {
+      return new Promise<void>((resolve) => {
+        if (!img.src) {
+          resolve();
+          return;
+        }
+
+        const onLoad = () => {
+          resolve();
+        };
+
+        const onError = () => {
+          // Log error but still resolve to continue
+          console.warn('Failed to load image:', img.src);
+          resolve();
+        };
+
+        if (img.complete && img.naturalHeight > 0) {
+          resolve();
+        } else {
+          img.addEventListener('load', onLoad);
+          img.addEventListener('error', onError);
+          // Force reload
+          img.src = img.src;
+        }
+      });
+    });
+
+    await Promise.all(imageLoadPromises);
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Convert HTML to canvas
     const canvas = await html2canvas(wrapper, {
@@ -34,8 +67,8 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
       logging: false,
       allowTaint: true,
       useCORS: true,
-      imageTimeout: 10000,
-      timeout: 30000,
+      imageTimeout: 15000,
+      timeout: 45000,
       windowHeight: Math.max(wrapper.scrollHeight, wrapper.offsetHeight) || 1000,
       windowWidth: 210 * 3.779527559, // 210mm to pixels
       proxy: undefined,
