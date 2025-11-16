@@ -84,12 +84,13 @@ export function ViewRemittanceModal({
         items: remittance.items || [] // Fallback for legacy format
       };
 
-      downloadRemittancePDF(remittanceData);
-      toast.success(`PDF download started for ${remittance.advice_number || remittance.adviceNumber}`);
+      await downloadRemittancePDF(remittanceData);
+      toast.success(`Remittance ${remittance.advice_number || remittance.adviceNumber} PDF downloaded`);
       onDownload?.();
     } catch (error) {
       console.error('Error downloading PDF:', error);
-      toast.error('Failed to download PDF. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.error(`Failed to download PDF: ${errorMessage}`);
     }
   };
 

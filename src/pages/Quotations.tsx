@@ -162,11 +162,12 @@ export default function Quotations() {
         company_services: currentCompany.company_services
       } : undefined;
 
-      downloadQuotationPDF(quotation, companyDetails);
-      toast.success(`PDF download started for ${quotation.quotation_number}`);
+      await downloadQuotationPDF(quotation, companyDetails);
+      toast.success(`Quotation ${quotation.quotation_number} PDF downloaded`);
     } catch (error) {
       console.error('Error downloading PDF:', error);
-      toast.error('Failed to download PDF. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.error(`Failed to download PDF: ${errorMessage}`);
     }
   };
 
