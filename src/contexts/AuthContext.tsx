@@ -500,8 +500,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (signedInUser) {
         setSession(session);
         setUser(signedInUser);
-        // Fetch profile in background
-        fetchProfile(signedInUser.id).then(setProfile).catch(() => {});
+        // Fetch profile in background (non-critical if it fails)
+        fetchProfile(signedInUser.id).then(userProfile => {
+          setProfile(userProfile || {
+            id: signedInUser.id,
+            email: signedInUser.email || '',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          } as UserProfile);
+        }).catch(() => {
+          // Create minimal profile if fetch fails
+          setProfile({
+            id: signedInUser.id,
+            email: signedInUser.email || '',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          } as UserProfile);
+        });
       }
     } catch {}
 
