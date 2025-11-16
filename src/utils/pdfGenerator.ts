@@ -1716,11 +1716,15 @@ export const generatePDF = async (data: DocumentData) => {
             border: 2px solid #000;
             border-radius: 0;
             overflow: hidden;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            table-layout: auto;
           }
 
           .items-table thead {
             background: #f8f9fa;
             color: #000;
+            display: table-header-group;
           }
 
           .items-table th {
@@ -1731,10 +1735,17 @@ export const generatePDF = async (data: DocumentData) => {
             text-transform: uppercase;
             letter-spacing: 0.5px;
             border-right: 1px solid rgba(255,255,255,0.2);
+            page-break-after: avoid;
+            break-after: avoid;
           }
 
           .items-table th:last-child {
             border-right: none;
+          }
+
+          .items-table tbody tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
           }
 
           .items-table td {
@@ -1743,6 +1754,7 @@ export const generatePDF = async (data: DocumentData) => {
             border-right: 1px solid #e9ecef;
             text-align: center;
             vertical-align: top;
+            page-break-inside: avoid;
           }
 
           .items-table td:last-child {
