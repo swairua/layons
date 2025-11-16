@@ -227,8 +227,8 @@ export async function synchronizePayments(
         const { error: invoiceError } = await supabase
           .from('invoices')
           .update({
-            paid_amount: newPaidAmount,
-            balance_due: newBalanceDue,
+            amount_paid: newPaidAmount,
+            amount_due: newBalanceDue,
             status: newStatus,
             updated_at: new Date().toISOString()
           })
@@ -317,8 +317,8 @@ export async function recalculateAllInvoiceBalances(): Promise<{ updated: number
         const { error: updateError } = await supabase
           .from('invoices')
           .update({
-            paid_amount: totalAllocated,
-            balance_due: newBalanceDue,
+            amount_paid: totalAllocated,
+            amount_due: newBalanceDue,
             status: newStatus,
             updated_at: new Date().toISOString()
           })

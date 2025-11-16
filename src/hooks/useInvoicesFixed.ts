@@ -15,6 +15,7 @@ export const useInvoicesFixed = (companyId?: string) => {
         console.log('Fetching invoices for company:', companyId);
 
         // Step 1: Get invoices without embedded relationships
+        // Note: Use amount_paid and amount_due as per the database schema
         const { data: invoices, error: invoicesError } = await supabase
           .from('invoices')
           .select(`
@@ -28,8 +29,8 @@ export const useInvoicesFixed = (companyId?: string) => {
             subtotal,
             tax_amount,
             total_amount,
-            paid_amount,
-            balance_due,
+            amount_paid,
+            amount_due,
             notes,
             terms_and_conditions,
             lpo_number,
@@ -40,8 +41,9 @@ export const useInvoicesFixed = (companyId?: string) => {
           .order('created_at', { ascending: false });
 
         if (invoicesError) {
-          console.error('Error fetching invoices:', invoicesError);
-          throw new Error(`Failed to fetch invoices: ${invoicesError.message}`);
+          const errorMsg = invoicesError?.message || JSON.stringify(invoicesError);
+          console.error('Error fetching invoices:', errorMsg);
+          throw new Error(`Failed to fetch invoices: ${errorMsg}`);
         }
 
         console.log('Invoices fetched successfully:', invoices?.length || 0);
@@ -153,9 +155,12 @@ export const useInvoicesFixed = (companyId?: string) => {
           itemsMap.get(item.invoice_id).push(item);
         });
 
-        // Step 7: Combine data
+        // Step 7: Combine data and normalize column names
+        // Map amount_paid -> paid_amount and amount_due -> balance_due for consistency
         const enrichedInvoices = invoices.map(invoice => ({
           ...invoice,
+          paid_amount: invoice.amount_paid,  // Alias for compatibility
+          balance_due: invoice.amount_due,   // Alias for compatibility
           customers: customerMap.get(invoice.customer_id) || {
             name: 'Unknown Customer',
             email: null,
@@ -193,6 +198,7 @@ export const useCustomerInvoicesFixed = (customerId?: string, companyId?: string
         console.log('Fetching invoices for customer:', customerId);
 
         // Get invoices for specific customer
+        // Note: Use amount_paid and amount_due as per the database schema
         let query = supabase
           .from('invoices')
           .select(`
@@ -206,8 +212,8 @@ export const useCustomerInvoicesFixed = (customerId?: string, companyId?: string
             subtotal,
             tax_amount,
             total_amount,
-            paid_amount,
-            balance_due,
+            amount_paid,
+            amount_due,
             notes,
             terms_and_conditions,
             lpo_number,
@@ -324,9 +330,12 @@ export const useCustomerInvoicesFixed = (customerId?: string, companyId?: string
           itemsMap.get(item.invoice_id).push(item);
         });
 
-        // Combine data
+        // Combine data and normalize column names
+        // Map amount_paid -> paid_amount and amount_due -> balance_due for consistency
         const enrichedInvoices = invoices.map(invoice => ({
           ...invoice,
+          paid_amount: invoice.amount_paid,  // Alias for compatibility
+          balance_due: invoice.amount_due,   // Alias for compatibility
           customers: customer || {
             name: 'Unknown Customer',
             email: null,

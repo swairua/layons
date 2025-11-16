@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -51,6 +51,7 @@ import { RecordPaymentModal } from '@/components/payments/RecordPaymentModal';
 import { CreateDeliveryNoteModal } from '@/components/delivery/CreateDeliveryNoteModal';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { downloadInvoicePDF } from '@/utils/pdfGenerator';
+import { fixInvoiceColumns, calculateInvoiceStatus } from '@/utils/fixInvoiceColumns';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Invoice {
@@ -95,6 +96,7 @@ export default function Invoices() {
   const [showDeliveryNoteModal, setShowDeliveryNoteModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; invoice?: Invoice }>({ open: false });
+  const [isFixingData, setIsFixingData] = useState(false);
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState('all');
@@ -111,6 +113,31 @@ export default function Invoices() {
   // Use the fixed invoices hook
   const { data: invoices, isLoading, error, refetch } = useInvoices(currentCompany?.id);
   const deleteInvoice = useDeleteInvoice();
+
+  // Fix invoice data on page load
+  useEffect(() => {
+    if (currentCompany?.id && !isFixingData) {
+      const performFix = async () => {
+        setIsFixingData(true);
+        try {
+          const result = await fixInvoiceColumns(currentCompany.id);
+          if (result.success) {
+            console.log('Invoice columns fixed successfully:', result.message);
+          } else {
+            console.warn('Invoice column fix had issues but continuing:', result.message);
+          }
+          refetch();
+        } catch (err) {
+          const errorMsg = err instanceof Error ? err.message : JSON.stringify(err);
+          console.error('Error fixing invoice columns:', errorMsg);
+          // Don't show error toast, silently continue - invoices will still load with calculated values
+        } finally {
+          setIsFixingData(false);
+        }
+      };
+      performFix();
+    }
+  }, [currentCompany?.id]);
 
   const handleDeleteClick = (invoice: Invoice) => {
     setDeleteDialog({ open: true, invoice });
@@ -152,8 +179,9 @@ export default function Invoices() {
       invoice.customers?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       invoice.customers?.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    // Status filter
-    const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
+    // Status filter - use calculated status
+    const calculatedStatus = calculateInvoiceStatus(invoice);
+    const matchesStatus = statusFilter === 'all' || calculatedStatus === statusFilter;
 
     // Date filter
     const invoiceDate = new Date(invoice.invoice_date);
@@ -577,14 +605,14 @@ Website:`;
                       {formatCurrency(invoice.total_amount || 0)}
                     </TableCell>
                     <TableCell className="text-success">
-                      {formatCurrency(invoice.paid_amount || 0)}
+                      {formatCurrency(invoice.paid_amount ?? 0)}
                     </TableCell>
-                    <TableCell className={`font-medium ${(invoice.balance_due || 0) > 0 ? 'text-destructive' : 'text-success'}`}>
-                      {formatCurrency(invoice.balance_due || 0)}
+                    <TableCell className={`font-medium ${((invoice.balance_due ?? (invoice.total_amount || 0) - (invoice.paid_amount ?? 0)) || 0) > 0 ? 'text-destructive' : 'text-success'}`}>
+                      {formatCurrency(invoice.balance_due ?? (invoice.total_amount || 0) - (invoice.paid_amount ?? 0))}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={getStatusColor(invoice.status)}>
-                        {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+                      <Badge variant="outline" className={getStatusColor(calculateInvoiceStatus(invoice))}>
+                        {calculateInvoiceStatus(invoice).charAt(0).toUpperCase() + calculateInvoiceStatus(invoice).slice(1)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
