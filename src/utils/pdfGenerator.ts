@@ -803,7 +803,7 @@ export const generatePDF = (data: DocumentData) => {
 
           <!-- Terms Section -->
           <div style="margin-bottom: 25px;">
-            <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Terms;</h3>
+            <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Terms;</h3>
             <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
               <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
                 <ul style="font-size: 11px; line-height: 1.6; margin: 6px 0 6px 20px; padding-left: 20px; color: #333; list-style-type: lower-alpha;">
@@ -821,92 +821,95 @@ export const generatePDF = (data: DocumentData) => {
           </div>
 
           <!-- Acceptance of Quote Section -->
-          <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
+          <div style="margin-bottom: 25px; padding-top: 15px;">
             <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Acceptance of Quote;</h3>
             <p style="font-size: 11px; margin: 0; color: #333;">The above prices specifications and terms are satisfactory.</p>
           </div>
 
           <!-- Contractor Section -->
-          <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
-            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
-              <tr>
-                <td style="width: 30%;"><strong>Contractor;</strong></td>
-                <td style="width: 70%;">${company.name}</td>
+          <div style="margin-bottom: 25px; padding-top: 15px;">
+            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
+              <tr style="border: none;">
+                <td style="width: 30%; border: none;"><strong>Contractor;</strong></td>
+                <td style="width: 70%; border: none;">${company.name}</td>
               </tr>
-              <tr>
-                <td><strong>Tel No;</strong></td>
-                <td>254720717463</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>Tel No;</strong></td>
+                <td style="border: none;">254720717463</td>
               </tr>
-              <tr>
-                <td><strong>Signed;</strong></td>
-                <td>KELVIN MURIITHI</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>Signed;</strong></td>
+                <td style="border: none;">KELVIN MURIITHI</td>
               </tr>
             </table>
           </div>
 
-          <!-- Client Section -->
-          <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
-            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
-              <tr>
-                <td style="width: 30%;"><strong>Client;</strong></td>
-                <td style="width: 70%;">________________________</td>
+          <!-- Client Section with Stamp -->
+          <div style="margin-bottom: 25px; padding-top: 15px; display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+            <table style="font-size: 10px; width: 65%; line-height: 1.8; color: #333; border: none;">
+              <tr style="border: none;">
+                <td style="width: 40%; border: none;"><strong>Client;</strong></td>
+                <td style="width: 60%; border: none;">________________________</td>
               </tr>
-              <tr>
-                <td><strong>Tel No;</strong></td>
-                <td>________________________</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>Tel No;</strong></td>
+                <td style="border: none;">________________________</td>
               </tr>
             </table>
+            <div style="width: 35%; text-align: center;">
+              <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" class="stamp-image" />
+            </div>
           </div>
 
           <!-- Prepaired By Section -->
-          <div style="margin-bottom: 20px; padding-top: 15px; border-top: 1px solid #ddd;">
-            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
-              <tr>
-                <td style="width: 30%;"><strong>PREPAIRED BY;</strong></td>
-                <td style="width: 70%;">${company.name}</td>
+          <div style="margin-bottom: 20px; padding-top: 15px;">
+            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
+              <tr style="border: none;">
+                <td style="width: 30%; border: none;"><strong>PREPAIRED BY;</strong></td>
+                <td style="width: 70%; border: none;">${company.name}</td>
               </tr>
             </table>
           </div>
 
           <!-- Account Details Section -->
-          <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd;">
+          <div style="margin-top: 30px; padding-top: 15px;">
             <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase;">Account Details;</h3>
-            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
-              <tr>
-                <td style="width: 30%;"><strong>BANK;</strong></td>
-                <td style="width: 70%;">CO-OPERATIVE BANK OF KENYA</td>
+            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
+              <tr style="border: none;">
+                <td style="width: 30%; border: none;"><strong>BANK;</strong></td>
+                <td style="width: 70%; border: none;">CO-OPERATIVE BANK OF KENYA</td>
               </tr>
-              <tr>
-                <td><strong>ACCOUNT NAME;</strong></td>
-                <td>LAYONS CONSTRUCTION LIMITED</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>ACCOUNT NAME;</strong></td>
+                <td style="border: none;">LAYONS CONSTRUCTION LIMITED</td>
               </tr>
-              <tr>
-                <td><strong>ACCOUNT NUMBER;</strong></td>
-                <td>01192659527000</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>ACCOUNT NUMBER;</strong></td>
+                <td style="border: none;">01192659527000</td>
               </tr>
-              <tr>
-                <td><strong>BRANCH;</strong></td>
-                <td>JUJA</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>BRANCH;</strong></td>
+                <td style="border: none;">JUJA</td>
               </tr>
-              <tr>
-                <td><strong>SWIFT CODE;</strong></td>
-                <td>KCOOKENA</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>SWIFT CODE;</strong></td>
+                <td style="border: none;">KCOOKENA</td>
               </tr>
-              <tr>
-                <td><strong>BANK CODE;</strong></td>
-                <td>11000</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>BANK CODE;</strong></td>
+                <td style="border: none;">11000</td>
               </tr>
-              <tr>
-                <td><strong>BRANCH CODE;</strong></td>
-                <td>11124</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>BRANCH CODE;</strong></td>
+                <td style="border: none;">11124</td>
               </tr>
-              <tr>
-                <td><strong>PAYBILL;</strong></td>
-                <td>400200</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>PAYBILL;</strong></td>
+                <td style="border: none;">400200</td>
               </tr>
-              <tr>
-                <td><strong>ACCOUNT;</strong></td>
-                <td>01192659527000</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>ACCOUNT;</strong></td>
+                <td style="border: none;">01192659527000</td>
               </tr>
             </table>
           </div>
