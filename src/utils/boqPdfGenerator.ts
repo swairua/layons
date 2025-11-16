@@ -38,11 +38,18 @@ const safeN = (v: number | undefined) => (typeof v === 'number' && !isNaN(v) ? v
 
 export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string; logo_url?: string; address?: string; city?: string; country?: string; phone?: string; email?: string }) {
   // Flatten items and auto-calc amounts; prefix section titles and subsection titles as bold rows
-  const flatItems: Array<{ description: string; quantity: number; unit_price: number; line_total: number; unit_of_measure?: string }> = [];
+  const flatItems: Array<{ description: string; quantity: number; unit_price: number; line_total: number; unit_of_measure?: string; _isSectionHeader?: boolean }> = [];
 
-  doc.sections.forEach((section) => {
+  doc.sections.forEach((section, sectionIndex) => {
     if (section.title) {
-      flatItems.push({ description: `➤ ${section.title}`, quantity: 0, unit_price: 0, line_total: 0 });
+      const sectionLetter = String.fromCharCode(65 + sectionIndex); // A, B, C, etc.
+      flatItems.push({
+        description: `SECTION ${sectionLetter}: ${section.title}`,
+        quantity: 0,
+        unit_price: 0,
+        line_total: 0,
+        _isSectionHeader: true
+      });
     }
 
     // Handle new subsection structure
