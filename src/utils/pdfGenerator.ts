@@ -8,24 +8,50 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
     // Create a temporary container for the HTML
     const container = document.createElement('div');
     container.innerHTML = htmlContent;
-    container.style.position = 'absolute';
-    container.style.left = '-9999px';
-    container.style.top = '-9999px';
+
+    // Set container styles for proper rendering
+    container.style.position = 'fixed';
+    container.style.left = '0';
+    container.style.top = '0';
     container.style.width = '210mm';
     container.style.height = 'auto';
+    container.style.backgroundColor = '#ffffff';
+    container.style.zIndex = '-10000';
+    container.style.visibility = 'hidden';
+    container.style.pointerEvents = 'none';
+    container.style.margin = '0';
+    container.style.padding = '0';
+    container.style.boxSizing = 'border-box';
+
+    // Append to body
     document.body.appendChild(container);
 
-    // Wait a bit for images to load
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Wait for layout and image loading
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Convert HTML to canvas
+    // Trigger layout recalculation
+    const element = container.querySelector('body') || container;
+    const scrollHeight = element.scrollHeight;
+
+    // Convert HTML to canvas with better options
     const canvas = await html2canvas(container, {
       scale: 2,
       backgroundColor: '#ffffff',
       logging: false,
       allowTaint: true,
-      useCORS: true
+      useCORS: true,
+      imageTimeout: 5000,
+      windowHeight: scrollHeight || undefined,
+      windowWidth: 210 * 3.779527559, // 210mm to pixels at 96 DPI
+      proxy: undefined
     });
+
+    // Check if canvas is empty
+    if (!canvas || canvas.width === 0 || canvas.height === 0) {
+      console.error('Canvas is empty - content may not have rendered');
+      document.body.removeChild(container);
+      throw new Error('Failed to render content to canvas');
+    }
 
     // Get canvas dimensions
     const imgData = canvas.toDataURL('image/png');
@@ -38,7 +64,6 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
     // Create PDF
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeightPdf = pdf.internal.pageSize.getHeight();
 
     // Add images to PDF pages
     while (heightLeft >= 0) {
@@ -56,9 +81,12 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
     pdf.save(filename);
 
     // Clean up
-    document.body.removeChild(container);
+    if (document.body.contains(container)) {
+      document.body.removeChild(container);
+    }
   } catch (error) {
     console.error('Error generating PDF:', error);
+    throw error;
   }
 };
 
