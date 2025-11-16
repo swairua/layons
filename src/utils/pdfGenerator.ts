@@ -1,6 +1,7 @@
 // PDF Generation utility using jsPDF + html2canvas for auto-download
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { PDF_PAGE_CSS } from './pdfMarginConstants';
 
 // Helper function to render HTML content to canvas
 const renderHTMLToCanvas = async (htmlContent: string, pageSelector: string) => {
@@ -672,7 +673,8 @@ export const generatePDF = async (data: DocumentData) => {
       <meta charset="UTF-8">
       <style>
         ${pdfRootVars}
-        @page { size: A4; margin: 15mm; orphans: 3; widows: 3; }
+        ${PDF_PAGE_CSS}
+        @media print { @page { orphans: 3; widows: 3; } }
         @media print {
           @page { counter-increment: page; }
         }
@@ -1369,10 +1371,7 @@ export const generatePDF = async (data: DocumentData) => {
         <meta charset="UTF-8">
         <style>
           ${pdfRootVars}
-          @page {
-            size: A4;
-            margin: 15mm;
-          }
+          ${PDF_PAGE_CSS}
 
           * {
             box-sizing: border-box;
@@ -1736,10 +1735,7 @@ export const generatePDF = async (data: DocumentData) => {
       <meta charset="UTF-8">
       <style>
         ${pdfRootVars}
-        @page {
-          size: A4;
-          margin: 15mm;
-        }
+        ${PDF_PAGE_CSS}
 
         * {
           box-sizing: border-box;

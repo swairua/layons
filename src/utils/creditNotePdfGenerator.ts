@@ -1,4 +1,5 @@
 import type { CreditNote } from '@/hooks/useCreditNotes';
+import { PDF_PAGE_CSS } from './pdfMarginConstants';
 
 export interface CreditNotePDFData extends CreditNote {
   customers: {
@@ -92,10 +93,7 @@ export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: C
       <title>Credit Note ${creditNote.credit_note_number}</title>
       <meta charset="UTF-8">
       <style>
-        @page {
-          size: A4;
-          margin: 15mm;
-        }
+        ${PDF_PAGE_CSS}
         
         * {
           box-sizing: border-box;
