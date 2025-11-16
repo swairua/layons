@@ -12,13 +12,23 @@ const convertHTMLToPDFAndDownload = (htmlContent: string, filename: string) => {
     margin: 0,
     filename: filename,
     image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { format: 'a4', orientation: 'portrait' }
+    html2canvas: { scale: 2, backgroundColor: '#ffffff' },
+    jsPDF: { format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: 'avoid' }
   };
 
-  html2pdf().set(options).from(element).save().finally(() => {
-    document.body.removeChild(element);
-  });
+  try {
+    (html2pdf() as any).set(options).from(element).save().finally(() => {
+      if (document.body.contains(element)) {
+        document.body.removeChild(element);
+      }
+    });
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    if (document.body.contains(element)) {
+      document.body.removeChild(element);
+    }
+  }
 };
 
 export interface DocumentData {
