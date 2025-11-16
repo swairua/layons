@@ -662,7 +662,7 @@ export const generatePDF = async (data: DocumentData) => {
     </html>
     `;
 
-    convertHTMLToPDFAndDownload(htmlContentBOQ, `BOQ-${data.number}.pdf`);
+    await convertHTMLToPDFAndDownload(htmlContentBOQ, `BOQ-${data.number}.pdf`);
   }
 
   // Handle quotations, invoices, and proformas with sections
