@@ -397,7 +397,7 @@ export const generatePDF = (data: DocumentData) => {
         .terms-page table { border-collapse: collapse; }
         .terms-page table tr { border: none; }
         .terms-page table td { border: none; padding: 4px 0; }
-        .stamp-image { width: 120px; height: 120px; }
+        .stamp-image { width: 180px; height: 180px; }
       </style>
     </head>
     <body>
@@ -1835,7 +1835,7 @@ export const generatePDF = (data: DocumentData) => {
                   <td style="font-size: 10px;">
                     ${(item as any).quantity_delivered >= (item as any).quantity_ordered ?
                       '<span style="color: hsl(var(--primary)); font-weight: bold;">✓ Complete</span>' :
-                      '<span style="color: #F59E0B; font-weight: bold;">⚠ Partial</span>'
+                      '<span style="color: #F59E0B; font-weight: bold;">��� Partial</span>'
                     }
                   </td>
                   ` : data.type === 'boq' ? `
