@@ -407,8 +407,8 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
         subtotal: totalMaterials,
         tax_amount: totalTax,
         total_amount: grandTotal,
-        paid_amount: 0,
-        balance_due: grandTotal,
+        amount_paid: 0,
+        amount_due: grandTotal,
         terms_and_conditions: termsAndConditions,
         notes: notes,
         created_by: profile.id
