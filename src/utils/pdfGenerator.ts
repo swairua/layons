@@ -1368,8 +1368,9 @@ export const generatePDF = (data: DocumentData) => {
         .header-right > div {
           font-weight: bold;
           text-align: right;
-          white-space: nowrap;
           margin-bottom: 4px;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
         }
 
         .header-right > div:last-child {
