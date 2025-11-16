@@ -1027,6 +1027,142 @@ export default function CompanySettings() {
           </CardContent>
         </Card>
 
+        {/* PDF Header Image */}
+        <Card className="shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Image className="h-5 w-5" />
+              PDF Header Image
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Upload a header image to display at the top of quotations, invoices, and BOQ PDFs
+            </p>
+            <div className="space-y-4">
+              {companyData.header_image ? (
+                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                  <img
+                    src={companyData.header_image}
+                    alt="PDF Header"
+                    className="h-24 object-contain"
+                    onError={(e) => {
+                      console.error('Header image failed to load:', companyData.header_image);
+                      const target = e.target as HTMLImageElement;
+                      target.src = '';
+                    }}
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">Header image configured</p>
+                    <p className="text-xs text-muted-foreground">
+                      {companyData.header_image.startsWith('data:') ? 'Local storage (Base64)' : 'Cloud storage'}
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+              <div className="flex flex-wrap gap-2">
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                  onChange={handleHeaderImageUpload}
+                  style={{ display: 'none' }}
+                  id="header-image-input"
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => document.getElementById('header-image-input')?.click()}
+                  disabled={uploading}
+                  className="flex items-center gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  {uploading ? 'Uploading...' : 'Upload Header Image'}
+                </Button>
+                {companyData.header_image && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setCompanyData(prev => ({ ...prev, header_image: '' }));
+                      toast.success('Header image removed. Click Save Settings to apply changes.');
+                    }}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    Remove Header Image
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* PDF Stamp Image */}
+        <Card className="shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Image className="h-5 w-5" />
+              PDF Stamp Image
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Upload a company stamp image to display on quotations, invoices, and BOQ PDFs
+            </p>
+            <div className="space-y-4">
+              {companyData.stamp_image ? (
+                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                  <img
+                    src={companyData.stamp_image}
+                    alt="PDF Stamp"
+                    className="h-24 object-contain"
+                    onError={(e) => {
+                      console.error('Stamp image failed to load:', companyData.stamp_image);
+                      const target = e.target as HTMLImageElement;
+                      target.src = '';
+                    }}
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">Stamp image configured</p>
+                    <p className="text-xs text-muted-foreground">
+                      {companyData.stamp_image.startsWith('data:') ? 'Local storage (Base64)' : 'Cloud storage'}
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+              <div className="flex flex-wrap gap-2">
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                  onChange={handleStampImageUpload}
+                  style={{ display: 'none' }}
+                  id="stamp-image-input"
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => document.getElementById('stamp-image-input')?.click()}
+                  disabled={uploading}
+                  className="flex items-center gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  {uploading ? 'Uploading...' : 'Upload Stamp Image'}
+                </Button>
+                {companyData.stamp_image && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setCompanyData(prev => ({ ...prev, stamp_image: '' }));
+                      toast.success('Stamp image removed. Click Save Settings to apply changes.');
+                    }}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    Remove Stamp Image
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Default Settings */}
         <Card className="shadow-card">
           <CardHeader>
