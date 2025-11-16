@@ -708,28 +708,28 @@ export const generatePDF = async (data: DocumentData) => {
       <div class="boq-main">
         <div class="container">
           <!-- Header Section -->
-          <div class="header">
+          <div class="header" style="margin: 0; padding: 0;">
             <!-- Full-width header image (same as quotations) -->
             <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
 
             <!-- Header content below image -->
             <div class="header-content" style="margin-top: 8px; display: flex; flex-direction: column; gap: 12px;">
               <!-- Top row: Services (left) and Company details (right) -->
-              <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: calc(100% + 12mm); margin-right: -12mm; box-sizing: border-box; min-width: 0;">
+              <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: 100%; box-sizing: border-box; min-width: 0;">
                 <!-- Services Section -->
                 <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; box-sizing: border-box; min-width: 0;">
                   ${(() => {
                     const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                     const itemsPerLine = Math.ceil(services.length / 3);
                     const line1 = services.slice(0, itemsPerLine).join(' • ');
-                    const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
+                    const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' ��� ');
                     const line3 = services.slice(itemsPerLine * 2).join(' • ');
                     return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
                   })()}
                 </div>
 
                 <!-- Company details (right-aligned) -->
-                <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box; padding-right: 12mm;">
+                <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box;">
                   ${company.address ? `<div>${company.address}</div>` : ''}
                   ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
                   ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
