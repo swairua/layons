@@ -1,6 +1,66 @@
-// PDF Generation utility using HTML to print/PDF conversion
-// Since we don't have jsPDF installed, I'll create a simple HTML-to-print function
-// In a real app, you'd want to use a proper PDF library like jsPDF or react-pdf
+// PDF Generation utility using jsPDF + html2canvas for auto-download
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+
+// Helper function to convert HTML to PDF and auto-download
+const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string) => {
+  try {
+    // Create a temporary container for the HTML
+    const container = document.createElement('div');
+    container.innerHTML = htmlContent;
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '-9999px';
+    container.style.width = '210mm';
+    container.style.height = 'auto';
+    document.body.appendChild(container);
+
+    // Wait a bit for images to load
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Convert HTML to canvas
+    const canvas = await html2canvas(container, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      logging: false,
+      allowTaint: true,
+      useCORS: true
+    });
+
+    // Get canvas dimensions
+    const imgData = canvas.toDataURL('image/png');
+    const imgWidth = 210; // A4 width in mm
+    const pageHeight = 297; // A4 height in mm
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // Create PDF
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeightPdf = pdf.internal.pageSize.getHeight();
+
+    // Add images to PDF pages
+    while (heightLeft >= 0) {
+      const heightToPrint = Math.min(pageHeight, heightLeft);
+      pdf.addImage(imgData, 'PNG', 0, -position, pageWidth, imgHeight);
+      heightLeft -= pageHeight;
+      position += pageHeight;
+
+      if (heightLeft > 0) {
+        pdf.addPage();
+      }
+    }
+
+    // Download the PDF
+    pdf.save(filename);
+
+    // Clean up
+    document.body.removeChild(container);
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+  }
+};
 
 export interface DocumentData {
   type: 'quotation' | 'invoice' | 'remittance' | 'proforma' | 'delivery' | 'statement' | 'receipt' | 'lpo' | 'boq';
@@ -138,7 +198,7 @@ const analyzeColumns = (items: DocumentData['items']) => {
   return columns;
 };
 
-export const generatePDF = (data: DocumentData) => {
+export const generatePDF = async (data: DocumentData) => {
   // Extract theme color variables from the main document so PDFs match the app theme
   const computed = typeof window !== 'undefined' ? getComputedStyle(document.documentElement) : null;
   const primaryVar = computed ? (computed.getPropertyValue('--primary') || '46 65% 53%').trim() : '46 65% 53%';
@@ -185,12 +245,6 @@ export const generatePDF = (data: DocumentData) => {
       return String(date || '');
     }
   };
-
-  // Create a new window with the document content
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) {
-    throw new Error('Could not open print window. Please allow popups.');
-  }
 
   const documentTitle = data.type === 'proforma' ? 'Proforma Invoice' :
                        data.type === 'delivery' ? 'Delivery Note' :
@@ -426,9 +480,9 @@ export const generatePDF = (data: DocumentData) => {
           <!-- Header content below image -->
           <div class="header-content" style="margin-top: 8px; display: flex; flex-direction: column; gap: 12px;">
             <!-- Top row: Services (left) and Company details (right) -->
-            <div class="header-top" style="display: flex; align-items: flex-start; gap: 20px; width: 100%; box-sizing: border-box; min-width: 0;">
+            <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: calc(100% + 12mm); margin-right: -12mm; box-sizing: border-box; min-width: 0;">
               <!-- Services Section -->
-              <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0;">
+              <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; box-sizing: border-box; min-width: 0;">
                 ${(() => {
                   const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                   const itemsPerLine = Math.ceil(services.length / 3);
@@ -440,7 +494,7 @@ export const generatePDF = (data: DocumentData) => {
               </div>
 
               <!-- Company details (right-aligned) -->
-              <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box;">
+              <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box; padding-right: 12mm;">
                 ${company.address ? `<div>${company.address}</div>` : ''}
                 ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
                 ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
@@ -608,13 +662,7 @@ export const generatePDF = (data: DocumentData) => {
     </html>
     `;
 
-    printWindow.document.write(htmlContentBOQ);
-    printWindow.document.close();
-
-    printWindow.onload = () => setTimeout(() => printWindow.print(), 500);
-    setTimeout(() => { if (printWindow && !printWindow.closed) printWindow.print(); }, 1000);
-
-    return printWindow;
+    await convertHTMLToPDFAndDownload(htmlContentBOQ, `BOQ-${data.number}.pdf`);
   }
 
   // Handle quotations, invoices, and proformas with sections
@@ -646,9 +694,9 @@ export const generatePDF = (data: DocumentData) => {
             <!-- Header content below image -->
             <div class="header-content" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
               <!-- Top row: Services (left) and Company details (right) -->
-              <div class="header-top" style="display: flex; align-items: flex-start; gap: 20px; width: 100%; box-sizing: border-box; min-width: 0;">
+              <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: calc(100% + 12mm); margin-right: -12mm; box-sizing: border-box; min-width: 0;">
                 <!-- Services Section -->
-                <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0;">
+                <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; box-sizing: border-box; min-width: 0;">
                   ${(() => {
                     const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                     const itemsPerLine = Math.ceil(services.length / 3);
@@ -660,7 +708,7 @@ export const generatePDF = (data: DocumentData) => {
                 </div>
 
                 <!-- Company details (right-aligned) -->
-                <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box;">
+                <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box; padding-right: 12mm;">
                   ${company.address ? `<div>${company.address}</div>` : ''}
                   ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
                   ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
@@ -1288,13 +1336,10 @@ export const generatePDF = (data: DocumentData) => {
       </html>
     `;
 
-    printWindow.document.write(htmlContentWithSections);
-    printWindow.document.close();
-
-    printWindow.onload = () => setTimeout(() => printWindow.print(), 500);
-    setTimeout(() => { if (printWindow && !printWindow.closed) printWindow.print(); }, 1000);
-
-    return printWindow;
+    const filename = data.type === 'invoice' ? `Invoice-${data.number}.pdf` :
+                     data.type === 'proforma' ? `Proforma-${data.number}.pdf` :
+                     `Quotation-${data.number}.pdf`;
+    await convertHTMLToPDFAndDownload(htmlContentWithSections, filename);
   }
 
   // Fallback generic document HTML (existing template)
@@ -2193,24 +2238,8 @@ export const generatePDF = (data: DocumentData) => {
     </html>
   `;
 
-  printWindow.document.write(htmlContent);
-  printWindow.document.close();
-
-  // Wait for content to load before printing
-  printWindow.onload = () => {
-    setTimeout(() => {
-      printWindow.print();
-    }, 500);
-  };
-
-  // Fallback if onload doesn't fire
-  setTimeout(() => {
-    if (printWindow && !printWindow.closed) {
-      printWindow.print();
-    }
-  }, 1000);
-
-  return printWindow;
+  const fallbackFilename = `${documentTitle.replace(/\s+/g, '-')}-${data.number}.pdf`;
+  await convertHTMLToPDFAndDownload(htmlContent, fallbackFilename);
 };
 
 // Specific function for invoice PDF generation
