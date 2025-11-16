@@ -319,11 +319,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setInitialized(true);
           initializingRef.current = false;
 
-          // Fetch profile in background
-          fetchProfile(quickSession.user.id)
+          // Fetch profile in background (non-critical if it fails)
+      fetchProfile(quickSession.user.id)
             .then(userProfile => {
               if (mountedRef.current) {
-                setProfile(userProfile);
+                // Set profile even if null - app should work with just the auth user
+                setProfile(userProfile || {
+                  id: quickSession.user.id,
+                  email: quickSession.user.email || '',
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                } as UserProfile);
                 console.log('✅ Profile loaded in background');
 
                 // Update last login silently
