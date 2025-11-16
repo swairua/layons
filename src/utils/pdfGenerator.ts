@@ -1311,6 +1311,7 @@ export const generatePDF = (data: DocumentData) => {
           flex-direction: column;
           gap: 10px;
           margin-top: 0;
+          width: 100%;
         }
 
         .header-top {
