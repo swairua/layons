@@ -122,8 +122,8 @@ export async function fixInvoiceColumns(companyId: string) {
           const { error: updateError } = await supabase
             .from('invoices')
             .update({
-              paid_amount: update.paid_amount,
-              balance_due: update.balance_due,
+              amount_paid: update.paid_amount,
+              amount_due: update.balance_due,
               status: update.status,
               updated_at: new Date().toISOString()
             })
