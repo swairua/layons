@@ -988,7 +988,7 @@ export const generatePDF = (data: DocumentData) => {
             justify-content: space-between;
             align-items: flex-start;
             gap: 30px;
-            padding: 20px 20px 20px 20px;
+            padding: 20px 0 20px 20px;
             margin: 0;
             border-bottom: 2px solid #000;
           }
@@ -1336,7 +1336,7 @@ export const generatePDF = (data: DocumentData) => {
           color: #333;
           line-height: 1.6;
           text-align: left;
-          padding: 0 20px 0 0;
+          padding: 0 30px 0 0;
           vertical-align: top;
           box-sizing: border-box;
         }
@@ -1356,7 +1356,8 @@ export const generatePDF = (data: DocumentData) => {
           font-size: 12px;
           line-height: 1.6;
           vertical-align: top;
-          padding: 0 0 0 20px;
+          padding: 0 0 0 0;
+          margin-right: 0;
           box-sizing: border-box;
         }
 
