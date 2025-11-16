@@ -2203,24 +2203,8 @@ export const generatePDF = (data: DocumentData) => {
     </html>
   `;
 
-  printWindow.document.write(htmlContent);
-  printWindow.document.close();
-
-  // Wait for content to load before printing
-  printWindow.onload = () => {
-    setTimeout(() => {
-      printWindow.print();
-    }, 500);
-  };
-
-  // Fallback if onload doesn't fire
-  setTimeout(() => {
-    if (printWindow && !printWindow.closed) {
-      printWindow.print();
-    }
-  }, 1000);
-
-  return printWindow;
+  const fallbackFilename = `${documentTitle.replace(/\s+/g, '-')}-${data.number}.pdf`;
+  convertHTMLToPDFAndDownload(htmlContent, fallbackFilename);
 };
 
 // Specific function for invoice PDF generation
