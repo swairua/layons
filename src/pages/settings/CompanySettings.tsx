@@ -97,6 +97,8 @@ export default function CompanySettings() {
         currency: currentCompany.currency || 'KES',
         fiscal_year_start: currentCompany.fiscal_year_start || 1,
         logo_url: currentCompany.logo_url || '',
+        header_image: currentCompany.header_image || '',
+        stamp_image: currentCompany.stamp_image || '',
         company_services: currentCompany.company_services || ''
       });
     }
