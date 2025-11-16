@@ -1,6 +1,5 @@
-// PDF Generation utility using HTML to print/PDF conversion
-// Since we don't have jsPDF installed, I'll create a simple HTML-to-print function
-// In a real app, you'd want to use a proper PDF library like jsPDF or react-pdf
+// PDF Generation utility using html2pdf for auto-download
+import html2pdf from 'html2pdf.js';
 
 export interface DocumentData {
   type: 'quotation' | 'invoice' | 'remittance' | 'proforma' | 'delivery' | 'statement' | 'receipt' | 'lpo' | 'boq';
