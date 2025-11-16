@@ -398,6 +398,22 @@ export const generatePDF = (data: DocumentData) => {
         .terms-page table tr { border: none; }
         .terms-page table td { border: none; padding: 4px 0; }
         .stamp-image { width: 100px; height: 100px; }
+
+        @media screen {
+          .header {
+            margin: 0 -12mm 15px -12mm;
+            padding: 0 12mm 15px 12mm;
+            width: calc(100% + 24mm);
+            box-sizing: border-box;
+          }
+        }
+
+        @media print {
+          .header {
+            margin: 0;
+            padding: 0;
+          }
+        }
       </style>
     </head>
     <body>
@@ -1013,6 +1029,14 @@ export const generatePDF = (data: DocumentData) => {
             box-sizing: border-box;
           }
 
+          @media screen {
+            .header-content {
+              margin: 0 -20mm;
+              padding: 20px 20mm;
+              width: calc(100% + 40mm);
+            }
+          }
+
           .company-info {
             flex: 1;
           }
@@ -1328,6 +1352,14 @@ export const generatePDF = (data: DocumentData) => {
           border-bottom: 1px solid #000;
           width: 100%;
           box-sizing: border-box;
+        }
+
+        @media screen {
+          .header {
+            margin: 0 -20mm 15px -20mm;
+            padding: 0 20mm 15px 20mm;
+            width: calc(100% + 40mm);
+          }
         }
 
         .header-image {
