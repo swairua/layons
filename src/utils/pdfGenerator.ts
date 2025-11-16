@@ -735,12 +735,12 @@ export const generatePDF = async (data: DocumentData) => {
         body { font-family: 'Arial', sans-serif; margin:0; padding:0; color:#222; font-size:12px; }
         body { counter-reset: page; }
         .pagefoot::after { content: "Page " counter(page) ""; }
-        .container { padding: 0 15mm; width: 100%; box-sizing: border-box; max-width: 100%; }
+        .container { width: 100%; box-sizing: border-box; max-width: 100%; margin: 0; padding: 0; }
 
-        /* Header styling - matching quotations with proper margins */
-        .header { margin: 0; padding: 0; width: calc(100% + 30mm); margin-left: -15mm; margin-right: -15mm; }
-        .header-image { width: calc(100% + 30mm); height: auto; display: block; margin: 0; padding: 0; }
-        .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; width: 100%; padding: 0; }
+        /* Header styling - full page width, no overflow */
+        .header { margin: 0; padding: 0; width: 100%; box-sizing: border-box; }
+        .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; }
+        .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; width: 100%; padding: 0 15mm; box-sizing: border-box; }
         .header-top { display: flex; align-items: flex-start; width: 100%; margin: 0 0 10px 0; padding: 0; gap: 20px; box-sizing: border-box; min-width: 0; }
         .services-section { display: block; font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0; }
         .services-section > div { margin: 0 0 4px 0; }
@@ -749,7 +749,7 @@ export const generatePDF = async (data: DocumentData) => {
         .header-right > div { font-weight: bold; text-align: right; margin-bottom: 4px; word-wrap: break-word; overflow-wrap: break-word; }
         .header-right > div:last-child { margin-bottom: 0; }
 
-        .items { width:100%; border-collapse:collapse; margin-top:6px; margin-bottom: 6px; }
+        .items { width:100%; border-collapse:collapse; margin-top:6px; margin-bottom: 6px; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm); }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; font-size: 11px; }
         .items thead th { background:#f8f9fa; color:#000; font-weight:bold; text-transform: uppercase; }
         .items thead { display: table-header-group; }
@@ -768,15 +768,15 @@ export const generatePDF = async (data: DocumentData) => {
         .section-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 8mm; }
         .section-total td { font-weight:700; background:#fafafa; }
         .section-total .label { text-align:right; padding-right:12px; }
-        .preliminaries-section { margin-bottom:12px; page-break-inside: avoid; }
-        .preliminaries-section .items { margin-top:0; }
+        .preliminaries-section { margin-bottom:12px; page-break-inside: avoid; margin-left: 15mm; margin-right: 15mm; }
+        .preliminaries-section .items { margin-top:0; margin-left: 0; margin-right: 0; width: 100%; }
         .subsection-row { page-break-inside: avoid; page-break-after: avoid; }
         .subsection-row td { background:#fcfcfc; font-weight:600; }
         .subsection-title { padding:6px 8px; }
         .subsection-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 6mm; }
         .subsection-total td { font-weight:600; background:#fdfdfd; }
         .subsection-total .label { text-align:right; padding-right:12px; }
-        .totals { margin-top:12px; width:100%; page-break-inside: avoid; padding-bottom: 30mm; }
+        .totals { margin-top:12px; width: calc(100% - 30mm); margin-left: 15mm; margin-right: 15mm; page-break-inside: avoid; padding-bottom: 30mm; }
         .totals .label { text-align:right; padding-right:12px; }
         .footer { margin-top:24px; display:flex; flex-direction:column; gap:18px; }
         .sig-block { display:flex; flex-direction:column; gap:8px; }
