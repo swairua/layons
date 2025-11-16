@@ -600,8 +600,8 @@ export const generatePDF = async (data: DocumentData) => {
           <table class="items">
             <thead>
               <tr>
-                <th style="width:10%; font-weight: bold;">ITEM</th>
-                <th style="width:70%; text-align:left; font-weight: bold;">DESCRIPTION</th>
+                <th style="width:8%; font-weight: bold;">ITEM</th>
+                <th style="width:72%; text-align:left; font-weight: bold;">DESCRIPTION</th>
                 <th style="width:20%; font-weight: bold;">AMOUNT (KSHS)</th>
               </tr>
             </thead>
@@ -611,8 +611,8 @@ export const generatePDF = async (data: DocumentData) => {
       let itemNo = 1;
       data.preliminaries_items.forEach((item) => {
         preliminariesHtml += `<tr class="item-row">
-          <td class="num" style="text-align:center; width:10%">${item.item_code || ''}</td>
-          <td class="desc" style="width:70%">${item.description}</td>
+          <td class="num" style="text-align:center; width:8%">${item.item_code || ''}</td>
+          <td class="desc" style="width:72%">${item.description}</td>
           <td class="amount" style="width:20%; text-align:right; font-weight:600">${formatCurrency(item.line_total || 0)}</td>
         </tr>`;
         preliminariesTotal += item.line_total || 0;
@@ -735,11 +735,11 @@ export const generatePDF = async (data: DocumentData) => {
         body { font-family: 'Arial', sans-serif; margin:0; padding:0; color:#222; font-size:12px; }
         body { counter-reset: page; }
         .pagefoot::after { content: "Page " counter(page) ""; }
-        .container { padding: 0; width: 100%; box-sizing: border-box; max-width: 100%; }
+        .container { padding: 0 15mm; width: 100%; box-sizing: border-box; max-width: 100%; }
 
-        /* Header styling - matching quotations */
-        .header { margin: 0; padding: 0; width: 100%; }
-        .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; max-width: 100%; }
+        /* Header styling - matching quotations with proper margins */
+        .header { margin: 0; padding: 0; width: 100%; margin-left: -15mm; margin-right: -15mm; }
+        .header-image { width: 100vw; height: auto; display: block; margin: 0; padding: 0; max-width: calc(100% + 30mm); }
         .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; width: 100%; padding: 0; }
         .header-top { display: flex; align-items: flex-start; width: 100%; margin: 0 0 10px 0; padding: 0; gap: 20px; box-sizing: border-box; min-width: 0; }
         .services-section { display: block; font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0; }
@@ -750,7 +750,7 @@ export const generatePDF = async (data: DocumentData) => {
         .header-right > div:last-child { margin-bottom: 0; }
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; margin-bottom: 6px; }
-        .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
+        .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; font-size: 11px; }
         .items thead th { background:#f8f9fa; color:#000; font-weight:bold; text-transform: uppercase; }
         .items thead { display: table-header-group; }
         .spacer-row { height: 15mm; page-break-inside: avoid; }
@@ -759,9 +759,12 @@ export const generatePDF = async (data: DocumentData) => {
         .section-row:first-of-type { page-break-before: avoid; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding:8px; }
         .item-row { page-break-inside: avoid; }
-        .item-row td.num { text-align:center; }
-        .item-row td.desc { width:55%; }
-        .item-row td.qty, .item-row td.unit, .item-row td.rate, .item-row td.amount { text-align:right; }
+        .item-row td.num { text-align:center; width: 5%; }
+        .item-row td.desc { width: 55%; }
+        .item-row td.qty { width: 8%; text-align:center; }
+        .item-row td.unit { width: 9%; text-align:center; }
+        .item-row td.rate { width: 11%; text-align:right; }
+        .item-row td.amount { width: 12%; text-align:right; }
         .section-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 8mm; }
         .section-total td { font-weight:700; background:#fafafa; }
         .section-total .label { text-align:right; padding-right:12px; }
@@ -783,7 +786,7 @@ export const generatePDF = async (data: DocumentData) => {
         .field-row { display:flex; align-items:flex-end; gap:8px; }
         .field-row .label { width:80px; font-weight:600; }
         .field-row .fill { flex:1; height:16px; border-bottom:1px dotted #999; }
-        .pagefoot { position:fixed; bottom:12mm; left:12mm; right:12mm; text-align:center; font-size:10px; color:#666; }
+        .pagefoot { position:fixed; bottom:15mm; left:15mm; right:15mm; text-align:center; font-size:10px; color:#666; }
 
         /* Page sections are rendered separately to avoid text cutting */
         .boq-main {
@@ -810,6 +813,7 @@ export const generatePDF = async (data: DocumentData) => {
         @media print {
           .header { margin: 0; padding: 0; }
           .header-content { margin: 0; padding: 0; }
+          body { margin: 0; padding: 0; }
         }
       </style>
     </head>
@@ -826,12 +830,12 @@ export const generatePDF = async (data: DocumentData) => {
           <table class="items">
             <thead>
               <tr>
-                <th style="width:5%; font-weight: bold;">#</th>
-                <th style="width:55%; text-align:left; font-weight: bold;">ITEM DESCRIPTION</th>
-                <th style="width:8%; font-weight: bold;">QTY</th>
-                <th style="width:9%; font-weight: bold;">UNIT</th>
-                <th style="width:11%; font-weight: bold;">RATE</th>
-                <th style="width:12%; font-weight: bold;">AMOUNT (KSHS)</th>
+                <th style="width:5%; text-align:center;">#</th>
+                <th style="width:55%; text-align:left;">ITEM DESCRIPTION</th>
+                <th style="width:8%; text-align:center;">QTY</th>
+                <th style="width:9%; text-align:center;">UNIT</th>
+                <th style="width:11%; text-align:right;">RATE</th>
+                <th style="width:12%; text-align:right;">AMOUNT (KSHS)</th>
               </tr>
             </thead>
             <tbody>
