@@ -535,8 +535,23 @@ export const generatePDF = async (data: DocumentData) => {
         .field-row .label { width:80px; font-weight:600; }
         .field-row .fill { flex:1; height:16px; border-bottom:1px dotted #999; }
         .pagefoot { position:fixed; bottom:12mm; left:12mm; right:12mm; text-align:center; font-size:10px; color:#666; }
-        .boq-main { page-break-after: always; }
-        .terms-page { page-break-before: always; }
+
+        /* Explicit page break mechanism for html2canvas rendering */
+        .boq-main {
+          min-height: calc(297mm - 24mm);
+          page-break-after: always;
+          display: block;
+          width: 100%;
+        }
+
+        .terms-page {
+          min-height: calc(297mm - 24mm);
+          page-break-before: always;
+          display: block;
+          width: 100%;
+          margin-top: 12mm;
+        }
+
         .terms-page table { border-collapse: collapse; }
         .terms-page table tr { border: none; }
         .terms-page table td { border: none; padding: 4px 0; }
