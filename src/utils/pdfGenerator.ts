@@ -358,10 +358,13 @@ export const generatePDF = (data: DocumentData) => {
         .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; }
 
         /* Header content styling */
-        .header-content { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-top: 20px; }
-        .header-left { display: flex; flex-direction: column; gap: 8px; font-size: 10px; line-height: 1.6; text-align: left; }
-        .header-right { text-align: right; font-size: 10px; line-height: 1.6; }
+        .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        .header-top { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 12px; }
+        .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; }
+        .header-right { text-align: right; font-size: 12px; line-height: 1.6; }
         .header-right .company-name { font-weight: bold; margin-bottom: 6px; font-size: 12px; }
+        .header-right > div { font-weight: bold; }
+        .services-section { font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; }
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
@@ -391,6 +394,10 @@ export const generatePDF = (data: DocumentData) => {
         .pagefoot { position:fixed; bottom:12mm; left:12mm; right:12mm; text-align:center; font-size:10px; color:#666; }
         .boq-main { page-break-after: always; }
         .terms-page { page-break-before: always; }
+        .terms-page table { border-collapse: collapse; }
+        .terms-page table tr { border: none; }
+        .terms-page table td { border: none; padding: 4px 0; }
+        .stamp-image { width: 180px; height: 180px; }
       </style>
     </head>
     <body>
@@ -401,37 +408,38 @@ export const generatePDF = (data: DocumentData) => {
           <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
           <!-- Header content below image -->
-          <div class="header-content">
-            <!-- Left side: Client and Document Details -->
-            <div class="header-left">
+          <div class="header-content" style="margin-top: 8px;">
+            <!-- Top row: Services (left) and Company details (right) -->
+            <div class="header-top">
               <!-- Services Section -->
-              <div style="margin-bottom: 8px;">
-                <div style="font-size: 10px; font-weight: bold; color: #333; text-transform: uppercase; line-height: 1.4;">
-                  ${(() => {
-                    const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-                    const midpoint = Math.ceil(services.length / 2);
-                    const firstRow = services.slice(0, midpoint).join(' • ');
-                    const secondRow = services.slice(midpoint).join(' • ');
-                    return `<div style="margin-bottom: 3px;">${firstRow}</div>${secondRow ? `<div>${secondRow}</div>` : ''}`;
-                  })()}
-                </div>
+              <div class="services-section">
+                ${(() => {
+                  const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+                  const itemsPerLine = Math.ceil(services.length / 3);
+                  const line1 = services.slice(0, itemsPerLine).join(' • ');
+                  const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
+                  const line3 = services.slice(itemsPerLine * 2).join(' • ');
+                  return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
+                })()}
               </div>
 
-              <!-- Client Details -->
-              <div style="margin-bottom: 4px; font-weight: bold;"><strong>Client:</strong> ${data.customer.name}</div>
-              ${boqProject ? `<div style="margin-bottom: 4px; font-weight: bold;"><strong>Project:</strong> ${boqProject}</div>` : ''}
-              <div style="margin-bottom: 4px; font-weight: bold;"><strong>Subject:</strong> Bill of Quantities</div>
-              <div style="margin-bottom: 4px; font-weight: bold;"><strong>Date:</strong> ${formatDateLong(data.date)}</div>
-              <div style="margin-bottom: 4px; font-weight: bold;"><strong>BOQ No:</strong> ${data.number}</div>
+              <!-- Company details (right-aligned) -->
+              <div class="header-right" style="font-size: 12px;">
+                ${company.address ? `<div style="font-weight: bold;">${company.address}</div>` : ''}
+                ${company.city ? `<div style="font-weight: bold;">${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+                ${company.phone ? `<div style="font-weight: bold;">Telephone: ${company.phone}</div>` : ''}
+                ${company.email ? `<div style="font-weight: bold;">${company.email}</div>` : ''}
+                ${company.tax_number ? `<div style="font-weight: bold;">PIN: ${company.tax_number}</div>` : ''}
+              </div>
             </div>
 
-            <!-- Right side: Company details (right-aligned) -->
-            <div class="header-right" style="font-size: 12px;">
-              ${company.address ? `<div style="font-weight: bold;">${company.address}</div>` : ''}
-              ${company.city ? `<div style="font-weight: bold;">${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-              ${company.phone ? `<div style="font-weight: bold;">Telephone: ${company.phone}</div>` : ''}
-              ${company.email ? `<div style="font-weight: bold;">${company.email}</div>` : ''}
-              ${company.tax_number ? `<div style="font-weight: bold;">PIN: ${company.tax_number}</div>` : ''}
+            <!-- Bottom row: Client Details -->
+            <div class="header-left">
+              <div><strong>Client:</strong> ${data.customer.name}</div>
+              ${boqProject ? `<div><strong>Project:</strong> ${boqProject}</div>` : ''}
+              <div><strong>Subject:</strong> Bill of Quantities</div>
+              <div><strong>Date:</strong> ${formatDateLong(data.date)}</div>
+              <div><strong>BOQ No:</strong> ${data.number}</div>
             </div>
           </div>
         </div>
@@ -469,7 +477,7 @@ export const generatePDF = (data: DocumentData) => {
 
         <!-- Terms Section -->
         <div style="margin-bottom: 25px;">
-          <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Terms;</h3>
+          <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Terms;</h3>
           <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
             <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
               <ul style="font-size: 11px; line-height: 1.6; margin: 6px 0 6px 20px; padding-left: 20px; color: #333; list-style-type: lower-alpha;">
@@ -487,92 +495,95 @@ export const generatePDF = (data: DocumentData) => {
         </div>
 
         <!-- Acceptance of Quote Section -->
-        <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
+        <div style="margin-bottom: 25px; padding-top: 15px;">
           <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Acceptance of Quote;</h3>
           <p style="font-size: 11px; margin: 0; color: #333;">The above prices specifications and terms are satisfactory.</p>
         </div>
 
         <!-- Contractor Section -->
-        <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
-          <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
-            <tr>
-              <td style="width: 30%;"><strong>Contractor;</strong></td>
-              <td style="width: 70%;">${company.name}</td>
+        <div style="margin-bottom: 25px; padding-top: 15px;">
+          <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
+            <tr style="border: none;">
+              <td style="width: 30%; border: none;"><strong>Contractor;</strong></td>
+              <td style="width: 70%; border: none;">${company.name}</td>
             </tr>
-            <tr>
-              <td><strong>Tel No;</strong></td>
-              <td>254720717463</td>
+            <tr style="border: none;">
+              <td style="border: none;"><strong>Tel No;</strong></td>
+              <td style="border: none;">254720717463</td>
             </tr>
-            <tr>
-              <td><strong>Signed;</strong></td>
-              <td>KELVIN MURIITHI</td>
+            <tr style="border: none;">
+              <td style="border: none;"><strong>Signed;</strong></td>
+              <td style="border: none;">KELVIN MURIITHI</td>
             </tr>
           </table>
         </div>
 
-        <!-- Client Section -->
-        <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
-          <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
-            <tr>
-              <td style="width: 30%;"><strong>Client;</strong></td>
-              <td style="width: 70%;">________________________</td>
+        <!-- Client Section with Stamp -->
+        <div style="margin-bottom: 25px; padding-top: 15px; display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+          <table style="font-size: 10px; width: 65%; line-height: 1.8; color: #333; border: none;">
+            <tr style="border: none;">
+              <td style="width: 40%; border: none;"><strong>Client;</strong></td>
+              <td style="width: 60%; border: none;">________________________</td>
             </tr>
-            <tr>
-              <td><strong>Tel No;</strong></td>
-              <td>________________________</td>
+            <tr style="border: none;">
+              <td style="border: none;"><strong>Tel No;</strong></td>
+              <td style="border: none;">________________________</td>
             </tr>
           </table>
+          <div style="width: 35%; text-align: center;">
+            <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" class="stamp-image" />
+          </div>
         </div>
 
         <!-- Prepaired By Section -->
-        <div style="margin-bottom: 20px; padding-top: 15px; border-top: 1px solid #ddd;">
-          <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
-            <tr>
-              <td style="width: 30%;"><strong>PREPAIRED BY;</strong></td>
-              <td style="width: 70%;">${company.name}</td>
+        <div style="margin-bottom: 20px; padding-top: 15px;">
+          <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
+            <tr style="border: none;">
+              <td style="width: 30%; border: none;"><strong>PREPAIRED BY;</strong></td>
+              <td style="width: 70%; border: none;">${company.name}</td>
             </tr>
           </table>
         </div>
 
         <!-- Account Details Section -->
-        <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd;">
+        <div style="margin-top: 30px; padding-top: 15px;">
           <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase;">Account Details;</h3>
-          <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
-            <tr>
-              <td style="width: 30%;"><strong>BANK;</strong></td>
-              <td style="width: 70%;">CO-OPERATIVE BANK OF KENYA</td>
+          <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
+            <tr style="border: none;">
+              <td style="width: 30%; border: none;"><strong>BANK;</strong></td>
+              <td style="width: 70%; border: none;">CO-OPERATIVE BANK OF KENYA</td>
             </tr>
-            <tr>
-              <td><strong>ACCOUNT NAME;</strong></td>
-              <td>LAYONS CONSTRUCTION LIMITED</td>
+            <tr style="border: none;">
+              <td style="border: none;"><strong>ACCOUNT NAME;</strong></td>
+              <td style="border: none;">LAYONS CONSTRUCTION LIMITED</td>
             </tr>
-            <tr>
-              <td><strong>ACCOUNT NUMBER;</strong></td>
-              <td>01192659527000</td>
+            <tr style="border: none;">
+              <td style="border: none;"><strong>ACCOUNT NUMBER;</strong></td>
+              <td style="border: none;">01192659527000</td>
             </tr>
-            <tr>
-              <td><strong>BRANCH;</strong></td>
-              <td>JUJA</td>
+            <tr style="border: none;">
+              <td style="border: none;"><strong>BRANCH;</strong></td>
+              <td style="border: none;">JUJA</td>
             </tr>
-            <tr>
-              <td><strong>SWIFT CODE;</strong></td>
-              <td>KCOOKENA</td>
+            <tr style="border: none;">
+              <td style="border: none;"><strong>SWIFT CODE;</strong></td>
+              <td style="border: none;">KCOOKENA</td>
             </tr>
-            <tr>
-              <td><strong>BANK CODE;</strong></td>
-              <td>11000</td>
+            <tr style="border: none;">
+              <td style="border: none;"><strong>BANK CODE;</strong></td>
+              <td style="border: none;">11000</td>
             </tr>
-            <tr>
-              <td><strong>BRANCH CODE;</strong></td>
-              <td>11124</td>
+            <tr style="border: none;">
+              <td style="border: none;"><strong>BRANCH CODE;</strong></td>
+              <td style="border: none;">11124</td>
             </tr>
-            <tr>
-              <td><strong>PAYBILL;</strong></td>
-              <td>400200</td>
+            <tr style="border: none;">
+              <td style="border: none;"><strong>PAYBILL;</strong></td>
+              <td style="border: none;">400200</td>
             </tr>
-            <tr>
-              <td><strong>ACCOUNT;</strong></td>
-              <td>01192659527000</td>
+            <tr style="border: none;">
+              <td style="border: none;"><strong>ACCOUNT;</strong></td>
+              <td style="border: none;">01192659527000</td>
             </tr>
           </table>
         </div>
@@ -617,37 +628,38 @@ export const generatePDF = (data: DocumentData) => {
             <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
             <!-- Header content below image -->
-            <div class="header-content" style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-top: 20px;">
-              <!-- Left side: Client and Document Details (matches supplied attachment) -->
-              <div style="display: flex; flex-direction: column; gap: 8px; font-size: 10px; line-height: 1.6; text-align:left;">
+            <div class="header-content" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
+              <!-- Top row: Services (left) and Company details (right) -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
                 <!-- Services Section -->
-                <div style="margin-bottom: 8px;">
-                  <div style="font-size: 10px; font-weight: bold; color: #333; text-transform: uppercase; line-height: 1.4;">
-                    ${(() => {
-                      const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-                      const midpoint = Math.ceil(services.length / 2);
-                      const firstRow = services.slice(0, midpoint).join(' • ');
-                      const secondRow = services.slice(midpoint).join(' • ');
-                      return `<div style="margin-bottom: 3px;">${firstRow}</div>${secondRow ? `<div>${secondRow}</div>` : ''}`;
-                    })()}
-                  </div>
+                <div style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left;">
+                  ${(() => {
+                    const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+                    const itemsPerLine = Math.ceil(services.length / 3);
+                    const line1 = services.slice(0, itemsPerLine).join(' • ');
+                    const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
+                    const line3 = services.slice(itemsPerLine * 2).join(' • ');
+                    return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
+                  })()}
                 </div>
 
-                <!-- Client Details -->
-                <div style="margin-bottom: 4px;"><strong>Client:</strong> ${data.customer?.name || ''}</div>
-                ${data.project_title ? `<div style="margin-bottom: 4px;"><strong>Project:</strong> ${data.project_title}</div>` : ''}
-                <div style="margin-bottom: 4px;"><strong>Subject:</strong> ${data.type === 'boq' ? 'Bill of Quantities' : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
-                <div style="margin-bottom: 4px;"><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
-                <div style="margin-bottom: 4px;"><strong>Qtn No:</strong> ${data.number || ''}</div>
+                <!-- Company details (right-aligned) -->
+                <div style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold;">
+                  ${company.address ? `<div>${company.address}</div>` : ''}
+                  ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+                  ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
+                  ${company.email ? `<div>${company.email}</div>` : ''}
+                  ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
+                </div>
               </div>
 
-              <!-- Right side: Company details (right-aligned) -->
-              <div style="text-align: right; font-size: 12px; line-height: 1.7; font-weight: bold;">
-                ${company.address ? `<div>${company.address}</div>` : ''}
-                ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-                ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
-                ${company.email ? `<div>${company.email}</div>` : ''}
-                ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
+              <!-- Bottom row: Client Details -->
+              <div style="display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left;">
+                <div><strong>Client:</strong> ${data.customer?.name || ''}</div>
+                ${data.project_title ? `<div><strong>Project:</strong> ${data.project_title}</div>` : ''}
+                <div><strong>Subject:</strong> ${data.type === 'boq' ? 'Bill of Quantities' : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
+                <div><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
+                <div><strong>Qtn No:</strong> ${data.number || ''}</div>
               </div>
             </div>
           </div>
@@ -792,7 +804,7 @@ export const generatePDF = (data: DocumentData) => {
 
           <!-- Terms Section -->
           <div style="margin-bottom: 25px;">
-            <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Terms;</h3>
+            <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Terms;</h3>
             <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
               <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
                 <ul style="font-size: 11px; line-height: 1.6; margin: 6px 0 6px 20px; padding-left: 20px; color: #333; list-style-type: lower-alpha;">
@@ -810,92 +822,95 @@ export const generatePDF = (data: DocumentData) => {
           </div>
 
           <!-- Acceptance of Quote Section -->
-          <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
+          <div style="margin-bottom: 25px; padding-top: 15px;">
             <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Acceptance of Quote;</h3>
             <p style="font-size: 11px; margin: 0; color: #333;">The above prices specifications and terms are satisfactory.</p>
           </div>
 
           <!-- Contractor Section -->
-          <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
-            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
-              <tr>
-                <td style="width: 30%;"><strong>Contractor;</strong></td>
-                <td style="width: 70%;">${company.name}</td>
+          <div style="margin-bottom: 25px; padding-top: 15px;">
+            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
+              <tr style="border: none;">
+                <td style="width: 30%; border: none;"><strong>Contractor;</strong></td>
+                <td style="width: 70%; border: none;">${company.name}</td>
               </tr>
-              <tr>
-                <td><strong>Tel No;</strong></td>
-                <td>254720717463</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>Tel No;</strong></td>
+                <td style="border: none;">254720717463</td>
               </tr>
-              <tr>
-                <td><strong>Signed;</strong></td>
-                <td>KELVIN MURIITHI</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>Signed;</strong></td>
+                <td style="border: none;">KELVIN MURIITHI</td>
               </tr>
             </table>
           </div>
 
-          <!-- Client Section -->
-          <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
-            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
-              <tr>
-                <td style="width: 30%;"><strong>Client;</strong></td>
-                <td style="width: 70%;">________________________</td>
+          <!-- Client Section with Stamp -->
+          <div style="margin-bottom: 25px; padding-top: 15px; display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+            <table style="font-size: 10px; width: 65%; line-height: 1.8; color: #333; border: none;">
+              <tr style="border: none;">
+                <td style="width: 40%; border: none;"><strong>Client;</strong></td>
+                <td style="width: 60%; border: none;">________________________</td>
               </tr>
-              <tr>
-                <td><strong>Tel No;</strong></td>
-                <td>________________________</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>Tel No;</strong></td>
+                <td style="border: none;">________________________</td>
               </tr>
             </table>
+            <div style="width: 35%; text-align: center;">
+              <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" class="stamp-image" />
+            </div>
           </div>
 
           <!-- Prepaired By Section -->
-          <div style="margin-bottom: 20px; padding-top: 15px; border-top: 1px solid #ddd;">
-            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
-              <tr>
-                <td style="width: 30%;"><strong>PREPAIRED BY;</strong></td>
-                <td style="width: 70%;">${company.name}</td>
+          <div style="margin-bottom: 20px; padding-top: 15px;">
+            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
+              <tr style="border: none;">
+                <td style="width: 30%; border: none;"><strong>PREPAIRED BY;</strong></td>
+                <td style="width: 70%; border: none;">${company.name}</td>
               </tr>
             </table>
           </div>
 
           <!-- Account Details Section -->
-          <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd;">
+          <div style="margin-top: 30px; padding-top: 15px;">
             <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase;">Account Details;</h3>
-            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
-              <tr>
-                <td style="width: 30%;"><strong>BANK;</strong></td>
-                <td style="width: 70%;">CO-OPERATIVE BANK OF KENYA</td>
+            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
+              <tr style="border: none;">
+                <td style="width: 30%; border: none;"><strong>BANK;</strong></td>
+                <td style="width: 70%; border: none;">CO-OPERATIVE BANK OF KENYA</td>
               </tr>
-              <tr>
-                <td><strong>ACCOUNT NAME;</strong></td>
-                <td>LAYONS CONSTRUCTION LIMITED</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>ACCOUNT NAME;</strong></td>
+                <td style="border: none;">LAYONS CONSTRUCTION LIMITED</td>
               </tr>
-              <tr>
-                <td><strong>ACCOUNT NUMBER;</strong></td>
-                <td>01192659527000</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>ACCOUNT NUMBER;</strong></td>
+                <td style="border: none;">01192659527000</td>
               </tr>
-              <tr>
-                <td><strong>BRANCH;</strong></td>
-                <td>JUJA</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>BRANCH;</strong></td>
+                <td style="border: none;">JUJA</td>
               </tr>
-              <tr>
-                <td><strong>SWIFT CODE;</strong></td>
-                <td>KCOOKENA</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>SWIFT CODE;</strong></td>
+                <td style="border: none;">KCOOKENA</td>
               </tr>
-              <tr>
-                <td><strong>BANK CODE;</strong></td>
-                <td>11000</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>BANK CODE;</strong></td>
+                <td style="border: none;">11000</td>
               </tr>
-              <tr>
-                <td><strong>BRANCH CODE;</strong></td>
-                <td>11124</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>BRANCH CODE;</strong></td>
+                <td style="border: none;">11124</td>
               </tr>
-              <tr>
-                <td><strong>PAYBILL;</strong></td>
-                <td>400200</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>PAYBILL;</strong></td>
+                <td style="border: none;">400200</td>
               </tr>
-              <tr>
-                <td><strong>ACCOUNT;</strong></td>
-                <td>01192659527000</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>ACCOUNT;</strong></td>
+                <td style="border: none;">01192659527000</td>
               </tr>
             </table>
           </div>
@@ -1293,15 +1308,44 @@ export const generatePDF = (data: DocumentData) => {
 
         .header-content {
           display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 40px;
-          padding: 0;
-          margin: 0;
+          flex-direction: column;
+          gap: 12px;
+          margin-top: 20px;
         }
 
-        .company-info {
-          flex: 1;
+        .header-top {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 30px;
+          margin-bottom: 12px;
+        }
+
+        .services-section {
+          font-size: 12px;
+          font-weight: bold;
+          color: #333;
+          line-height: 1.6;
+          text-align: left;
+        }
+
+        .header-right {
+          text-align: right;
+          font-size: 12px;
+          line-height: 1.6;
+        }
+
+        .header-right > div {
+          font-weight: bold;
+        }
+
+        .header-left {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          font-size: 12px;
+          font-weight: bold;
+          line-height: 1.6;
+          text-align: left;
         }
 
         .logo {
@@ -1312,26 +1356,6 @@ export const generatePDF = (data: DocumentData) => {
           width: 100%;
           height: 100%;
           object-fit: contain;
-        }
-
-        .company-name {
-          font-size: 16px;
-          font-weight: bold;
-          margin-bottom: 8px;
-          color: #000;
-        }
-
-        .company-details {
-          font-size: 10px;
-          line-height: 1.6;
-          color: #666;
-          margin-bottom: 0;
-        }
-
-        .document-info {
-          text-align: left;
-          flex: 1;
-          max-width: 100%;
         }
         
         .document-title {
@@ -1659,34 +1683,38 @@ export const generatePDF = (data: DocumentData) => {
           <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
           <!-- Header content below image -->
-          <div class="header-content">
-            <!-- Left side: Services and Client info (formatted like attachment) -->
-            <div class="company-info">
-              <div style="font-size: 10px; font-weight: bold; color: #333; margin-bottom: 8px; line-height: 1.4; text-transform: uppercase;">
-                ${companyServices.split(/[\n,]/).filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
+          <div class="header-content" style="margin-top: 8px;">
+            <!-- Top row: Services (left) and Company details (right) -->
+            <div class="header-top">
+              <!-- Services Section -->
+              <div class="services-section">
+                ${(() => {
+                  const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+                  const itemsPerLine = Math.ceil(services.length / 3);
+                  const line1 = services.slice(0, itemsPerLine).join(' • ');
+                  const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
+                  const line3 = services.slice(itemsPerLine * 2).join(' • ');
+                  return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
+                })()}
               </div>
 
-              <div style="margin-top: 6px; font-size: 10px; line-height:1.6;">
-                <div style="margin-bottom:6px; font-weight:600;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
-                <div style="margin-bottom:4px;">${data.customer?.name || ''}</div>
-                ${data.project_title ? `<div style="margin-bottom:4px;"><strong>Project:</strong> ${data.project_title}</div>` : ''}
-                <div style="margin-bottom:4px;"><strong>Subject:</strong> ${data.type === 'boq' ? 'Bill of Quantities' : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
-                <div style="margin-bottom:4px;"><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
-                <div style="margin-bottom:4px;"><strong>Qtn No:</strong> ${data.number || ''}</div>
-              </div>
-            </div>
-
-            <!-- Right side: Document info -->
-            <div class="document-info">
-              <div style="text-align: right; font-size: 12px; line-height: 1.7; margin-bottom: 8px; font-weight: bold;">
+              <!-- Company details (right-aligned) -->
+              <div class="header-right">
                 ${company.address ? `<div>${company.address}</div>` : ''}
                 ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
                 ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
                 ${company.email ? `<div>${company.email}</div>` : ''}
                 ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
               </div>
+            </div>
 
-              <!-- Document title and metadata removed as requested -->
+            <!-- Bottom row: Client Details -->
+            <div class="header-left">
+              <div><strong>${data.type === 'lpo' ? 'Supplier' : 'Client'}:</strong> ${data.customer?.name || ''}</div>
+              ${data.project_title ? `<div><strong>Project:</strong> ${data.project_title}</div>` : ''}
+              <div><strong>Subject:</strong> ${data.type === 'boq' ? 'Bill of Quantities' : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
+              <div><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
+              <div><strong>${data.type === 'boq' ? 'BOQ No' : 'Qtn No'}:</strong> ${data.number || ''}</div>
             </div>
           </div>
         </div>
