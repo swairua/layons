@@ -711,12 +711,22 @@ export const generatePDF = async (data: DocumentData) => {
             width: calc(100% + 24mm);
             box-sizing: border-box;
           }
+          .header-content {
+            margin: 0 -12mm;
+            padding: 20px 12mm;
+            width: calc(100% + 24mm);
+          }
         }
 
         @media print {
           .header {
             margin: 0;
             padding: 0;
+          }
+          .header-content {
+            margin: 0;
+            padding: 20px 0;
+            width: 100%;
           }
         }
       </style>
