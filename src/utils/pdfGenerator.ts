@@ -397,7 +397,7 @@ export const generatePDF = (data: DocumentData) => {
         .terms-page table { border-collapse: collapse; }
         .terms-page table tr { border: none; }
         .terms-page table td { border: none; padding: 4px 0; }
-        .stamp-image { width: 120px; height: 120px; }
+        .stamp-image { width: 100px; height: 100px; }
       </style>
     </head>
     <body>
