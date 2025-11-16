@@ -738,8 +738,8 @@ export const generatePDF = async (data: DocumentData) => {
         .container { padding: 0 15mm; width: 100%; box-sizing: border-box; max-width: 100%; }
 
         /* Header styling - matching quotations with proper margins */
-        .header { margin: 0; padding: 0; width: 100%; margin-left: -15mm; margin-right: -15mm; }
-        .header-image { width: 100vw; height: auto; display: block; margin: 0; padding: 0; max-width: calc(100% + 30mm); }
+        .header { margin: 0; padding: 0; width: calc(100% + 30mm); margin-left: -15mm; margin-right: -15mm; }
+        .header-image { width: calc(100% + 30mm); height: auto; display: block; margin: 0; padding: 0; }
         .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; width: 100%; padding: 0; }
         .header-top { display: flex; align-items: flex-start; width: 100%; margin: 0 0 10px 0; padding: 0; gap: 20px; box-sizing: border-box; min-width: 0; }
         .services-section { display: block; font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0; }
