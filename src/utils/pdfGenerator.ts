@@ -988,9 +988,9 @@ export const generatePDF = (data: DocumentData) => {
             justify-content: space-between;
             align-items: flex-start;
             gap: 30px;
-            padding: 20px 20mm 20px 20px;
-            margin: 0 -20mm 0 0;
-            width: calc(100% + 20mm);
+            padding: 20px 0;
+            margin: 0;
+            width: 100%;
             border-bottom: 2px solid #000;
             box-sizing: border-box;
           }
