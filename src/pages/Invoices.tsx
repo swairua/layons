@@ -251,9 +251,12 @@ export default function Invoices() {
             products(id, name, product_code, unit_of_measure)
           `)
           .eq('invoice_id', invoice.id);
-        if (!error && items) {
-          enrichedInvoice = { ...invoice, invoice_items: items };
+        if (error) {
+          console.error('Failed to fetch invoice items:', error);
+          toast.error('Failed to load invoice items for PDF');
+          return;
         }
+        enrichedInvoice = { ...invoice, invoice_items: items || [] };
       }
 
       // Get current company details for PDF
@@ -270,10 +273,11 @@ export default function Invoices() {
       } : undefined;
 
       await downloadInvoicePDF(enrichedInvoice, 'INVOICE', companyDetails);
-      toast.success(`PDF download started for ${invoice.invoice_number}`);
+      toast.success(`Invoice ${invoice.invoice_number} PDF downloaded`);
     } catch (error) {
       console.error('Error downloading PDF:', error);
-      toast.error('Failed to download PDF. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.error(`Failed to download PDF: ${errorMessage}`);
     }
   };
 
