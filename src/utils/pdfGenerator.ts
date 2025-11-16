@@ -406,6 +406,62 @@ const analyzeColumns = (items: DocumentData['items']) => {
   return columns;
 };
 
+// Reusable function to generate PDF header HTML
+const generatePDFHeader = (
+  headerImage: string,
+  company: CompanyDetails,
+  companyServices: string,
+  data: DocumentData,
+  formatDateLong: (date: string) => string,
+  documentType: string = 'Quotation'
+): string => {
+  const documentNumber = documentType === 'Bill of Quantities' ? 'BOQ No' : 'Qtn No';
+
+  return `
+    <!-- Header Section -->
+    <div class="header">
+      <!-- Full-width header image -->
+      <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
+
+      <!-- Header content below image -->
+      <div class="header-content" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
+        <!-- Top row: Services (left) and Company details (right) -->
+        <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: calc(100% + 12mm); margin-right: -12mm; box-sizing: border-box; min-width: 0;">
+          <!-- Services Section -->
+          <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; box-sizing: border-box; min-width: 0;">
+            ${(() => {
+              const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+              const itemsPerLine = Math.ceil(services.length / 3);
+              const line1 = services.slice(0, itemsPerLine).join(' • ');
+              const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
+              const line3 = services.slice(itemsPerLine * 2).join(' • ');
+              return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
+            })()}
+          </div>
+
+          <!-- Company details (right-aligned) -->
+          <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box; padding-right: 12mm; white-space: nowrap;">
+            ${company.address ? `<div>${company.address}</div>` : ''}
+            ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+            ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
+            ${company.email ? `<div>${company.email}</div>` : ''}
+            ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
+          </div>
+        </div>
+
+        <!-- Bottom row: Client Details -->
+        <div style="display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left;">
+          <div><strong>Client:</strong> ${data.customer?.name || ''}</div>
+          ${data.project_title ? `<div><strong>Project:</strong> ${data.project_title}</div>` : ''}
+          <div><strong>Subject:</strong> ${documentType}</div>
+          <div><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
+          <div><strong>${documentNumber}:</strong> ${data.number || ''}</div>
+        </div>
+      </div>
+    </div>
+  `;
+};
+
 export const generatePDF = async (data: DocumentData) => {
   // Extract theme color variables from the main document so PDFs match the app theme
   const computed = typeof window !== 'undefined' ? getComputedStyle(document.documentElement) : null;
@@ -626,20 +682,17 @@ export const generatePDF = async (data: DocumentData) => {
         .pagefoot::after { content: "Page " counter(page) ""; }
         .container { padding: 0; width: 100%; box-sizing: border-box; max-width: 100%; }
 
-        /* Header image styling - matching quotations */
+        /* Header styling - matching quotations */
+        .header { margin: 0; padding: 0; width: 100%; }
         .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; max-width: 100%; }
-
-        /* Header content styling - matching quotation layout exactly */
-        .header-content { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; padding: 20px 0; margin: 0; width: 100%; border-bottom: 2px solid #000; box-sizing: border-box; }
-        .header-company-info { flex: 0 1 auto; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-        .header-logo { width: 120px; height: 120px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 4px; overflow: hidden; flex-shrink: 0; }
-        .header-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .company-name { font-size: 18px; font-weight: bold; color: #212529; margin: 0 0 8px 0; }
-        .company-details { font-size: 10px; color: #666; line-height: 1.6; }
-        .header-document-info { text-align: right; flex: 0 1 auto; min-width: 0; }
-        .document-title { font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #000; text-transform: uppercase; }
-        .document-details { font-size: 10px; font-weight: bold; color: #333; line-height: 1.6; }
-        .document-details div { margin-bottom: 4px; }
+        .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; width: 100%; padding: 0; }
+        .header-top { display: flex; align-items: flex-start; width: 100%; margin: 0 0 10px 0; padding: 0; gap: 20px; box-sizing: border-box; min-width: 0; }
+        .services-section { display: block; font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0; }
+        .services-section > div { margin: 0 0 4px 0; }
+        .services-section > div:last-child { margin-bottom: 0; }
+        .header-right { display: block; text-align: right; font-size: 12px; line-height: 1.6; flex: 0 0 auto; padding: 0; margin: 0; box-sizing: border-box; }
+        .header-right > div { font-weight: bold; text-align: right; margin-bottom: 4px; word-wrap: break-word; overflow-wrap: break-word; }
+        .header-right > div:last-child { margin-bottom: 0; }
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; margin-bottom: 6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
@@ -701,30 +754,9 @@ export const generatePDF = async (data: DocumentData) => {
         .terms-page table td { border: none; padding: 4px 0; }
         .stamp-image { width: 100px; height: 100px; }
 
-        @media screen {
-          .header {
-            margin: 0 -12mm 15px -12mm;
-            padding: 0 12mm 15px 12mm;
-            width: calc(100% + 24mm);
-            box-sizing: border-box;
-          }
-          .header-content {
-            margin: 0;
-            padding: 20px 0;
-            width: 100%;
-          }
-        }
-
         @media print {
-          .header {
-            margin: 0;
-            padding: 0;
-          }
-          .header-content {
-            margin: 0;
-            padding: 20px 0;
-            width: 100%;
-          }
+          .header { margin: 0; padding: 0; }
+          .header-content { margin: 0; padding: 0; }
         }
       </style>
     </head>
@@ -732,43 +764,7 @@ export const generatePDF = async (data: DocumentData) => {
       <!-- Page 1: BOQ Details -->
       <div class="boq-main">
         <div class="container">
-          <!-- Header Section -->
-          <div class="header" style="margin: 0; padding: 0;">
-            <!-- Full-width header image (same as quotations) -->
-            <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
-
-            <!-- Header content below image -->
-            <div class="header-content">
-              <!-- Left side: Company info with logo -->
-              <div class="header-company-info">
-                <div class="header-logo">
-                  <img src="${company.logo_url || 'https://cdn.builder.io/api/v1/image/assets%2Fb048b36350454e4dba55aefd37788f9c%2Fbd04dab542504461a2451b061741034c?format=webp&width=800'}" alt="${company.name}" />
-                </div>
-                <div>
-                  <div class="company-name">${company.name}</div>
-                  <div class="company-details">
-                    ${company.address ? `<div>${company.address}</div>` : ''}
-                    ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-                    ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
-                    ${company.email ? `<div>${company.email}</div>` : ''}
-                    ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
-                  </div>
-                </div>
-              </div>
-
-              <!-- Right side: Document info -->
-              <div class="header-document-info">
-                <div class="document-title">Bill of Quantities</div>
-                <div class="document-details">
-                  <div><strong>Client:</strong> ${data.customer.name}</div>
-                  ${boqProject ? `<div><strong>Project:</strong> ${boqProject}</div>` : ''}
-                  <div><strong>Subject:</strong> Bill of Quantities</div>
-                  <div><strong>Date:</strong> ${formatDateLong(data.date)}</div>
-                  <div><strong>BOQ No:</strong> ${data.number}</div>
-                </div>
-              </div>
-            </div>
-          </div>
+          ${generatePDFHeader(headerImage, company, companyServices, { ...data, project_title: boqProject }, formatDateLong, 'Bill of Quantities')}
 
           ${preliminariesHtml}
 
@@ -1107,50 +1103,8 @@ export const generatePDF = async (data: DocumentData) => {
       const showHeader = sectionIndex === 0;
 
       pagesHtml += `
-        <div class="page" style="page-break-after: always;">
-          ${showHeader ? `
-          <!-- Header Section (only on first page) -->
-          <div class="header">
-            <!-- Full-width header image -->
-            <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
-
-            <!-- Header content below image -->
-            <div class="header-content" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
-              <!-- Top row: Services (left) and Company details (right) -->
-              <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: calc(100% + 12mm); margin-right: -12mm; box-sizing: border-box; min-width: 0;">
-                <!-- Services Section -->
-                <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; box-sizing: border-box; min-width: 0;">
-                  ${(() => {
-                    const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-                    const itemsPerLine = Math.ceil(services.length / 3);
-                    const line1 = services.slice(0, itemsPerLine).join(' • ');
-                    const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
-                    const line3 = services.slice(itemsPerLine * 2).join(' • ');
-                    return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
-                  })()}
-                </div>
-
-                <!-- Company details (right-aligned) -->
-                <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box; padding-right: 12mm;">
-                  ${company.address ? `<div>${company.address}</div>` : ''}
-                  ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-                  ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
-                  ${company.email ? `<div>${company.email}</div>` : ''}
-                  ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
-                </div>
-              </div>
-
-              <!-- Bottom row: Client Details -->
-              <div style="display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left;">
-                <div><strong>Client:</strong> ${data.customer?.name || ''}</div>
-                ${data.project_title ? `<div><strong>Project:</strong> ${data.project_title}</div>` : ''}
-                <div><strong>Subject:</strong> ${data.type === 'boq' ? 'Bill of Quantities' : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
-                <div><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
-                <div><strong>Qtn No:</strong> ${data.number || ''}</div>
-              </div>
-            </div>
-          </div>
-          ` : ''}
+        <div class="page">
+          ${showHeader ? generatePDFHeader(headerImage, company, companyServices, data, formatDateLong, data.type === 'invoice' ? 'Invoice' : 'Quotation') : ''}
 
           <!-- Section Title with alphabetical letter -->
           <div class="section-title" style="margin: ${showHeader ? '25px 0 15px 0' : '20px 0 15px 0'}; padding: 12px; background: #fff; border-left: 4px solid #000; font-size: 14px; font-weight: bold; text-transform: uppercase;">${sectionTitleWithLetter}</div>
@@ -1239,7 +1193,7 @@ export const generatePDF = async (data: DocumentData) => {
     }, 0);
 
     pagesHtml += `
-      <div class="page" style="position: relative; page-break-before: always;">
+      <div class="page">
         <!-- Summary Section Title -->
         <div style="margin: 20px 0 15px 0;">
           <h3 style="font-size: 14px; font-weight: bold; margin: 0 0 12px 0; text-transform: uppercase; color: #000;">SECTION ${String.fromCharCode(65 + data.sections.length)}. SUMMARY</h3>
@@ -1290,7 +1244,7 @@ export const generatePDF = async (data: DocumentData) => {
 
     // Add Terms and Conditions Page (Final Page)
     pagesHtml += `
-      <div class="page" style="position: relative; page-break-before: always;">
+      <div class="page">
         <div style="padding: 8px;">
 
           <!-- Terms Section -->
@@ -1438,15 +1392,18 @@ export const generatePDF = async (data: DocumentData) => {
 
           .page {
             width: 100%;
-            min-height: 297mm;
             margin: 0;
             background: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             padding: 0;
             position: relative;
-            /* Ensure each .page begins on a new printed page */
             page-break-after: always;
             break-after: page;
+          }
+
+          .page:last-of-type {
+            page-break-after: auto;
+            break-after: auto;
           }
 
           @media print {
@@ -1456,6 +1413,12 @@ export const generatePDF = async (data: DocumentData) => {
               margin: 0;
               padding: 0;
               min-height: auto;
+              page-break-after: always;
+            }
+
+            .page:last-of-type {
+              page-break-after: auto;
+              break-after: auto;
             }
           }
 
@@ -1464,6 +1427,7 @@ export const generatePDF = async (data: DocumentData) => {
               width: 210mm;
               padding: 20mm;
               margin: 0 auto;
+              min-height: auto;
             }
           }
 
@@ -1795,7 +1759,6 @@ export const generatePDF = async (data: DocumentData) => {
 
         .page {
           width: 100%;
-          min-height: 297mm;
           margin: 0;
           background: white;
           box-shadow: 0 0 10px rgba(0,0,0,0.1);
@@ -2530,7 +2493,7 @@ export const generatePDF = async (data: DocumentData) => {
 
       <!-- Last Page for Invoices and Quotations -->
       ${(data.type === 'invoice' || data.type === 'quotation') ? `
-      <div class="page" style="page-break-before: always; position: relative;">
+      <div class="page">
         <div style="padding: 10mm;">
 
           <!-- Terms Section -->
