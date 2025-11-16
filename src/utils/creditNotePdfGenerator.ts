@@ -38,6 +38,8 @@ export interface CompanyData {
   tax_number?: string;
   registration_number?: string;
   logo_url?: string;
+  header_image?: string;
+  stamp_image?: string;
 }
 
 // Default company details (fallback) - logo will be determined dynamically
