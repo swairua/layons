@@ -359,12 +359,12 @@ export const generatePDF = (data: DocumentData) => {
 
         /* Header content styling */
         .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-        .header-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-bottom: 12px; }
+        .header-top { display: flex; align-items: flex-start; gap: 20px; width: 100%; margin-bottom: 12px; width: 100%; }
         .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; }
-        .header-right { text-align: right; font-size: 12px; line-height: 1.6; flex-shrink: 0; white-space: nowrap; }
+        .header-right { text-align: right; font-size: 12px; line-height: 1.6; flex-shrink: 0; margin-left: auto; }
         .header-right .company-name { font-weight: bold; margin-bottom: 6px; font-size: 12px; }
         .header-right > div { font-weight: bold; }
-        .services-section { font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 1; }
+        .services-section { font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; max-width: 50%; }
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
@@ -416,8 +416,8 @@ export const generatePDF = (data: DocumentData) => {
                 ${(() => {
                   const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                   const itemsPerLine = Math.ceil(services.length / 3);
-                  const line1 = services.slice(0, itemsPerLine).join(' ����� ');
-                  const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' ��� ');
+                  const line1 = services.slice(0, itemsPerLine).join(' • ');
+                  const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
                   const line3 = services.slice(itemsPerLine * 2).join(' • ');
                   return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
                 })()}
@@ -632,7 +632,7 @@ export const generatePDF = (data: DocumentData) => {
               <!-- Top row: Services (left) and Company details (right) -->
               <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
                 <!-- Services Section -->
-                <div style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 1;">
+                <div style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; max-width: 50%;">
                   ${(() => {
                     const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                     const itemsPerLine = Math.ceil(services.length / 3);
@@ -644,7 +644,7 @@ export const generatePDF = (data: DocumentData) => {
                 </div>
 
                 <!-- Company details (right-aligned, no flex growth) -->
-                <div style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex-shrink: 0; white-space: nowrap;">
+                <div style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex-shrink: 0; margin-left: auto;">
                   ${company.address ? `<div>${company.address}</div>` : ''}
                   ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
                   ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
@@ -1323,7 +1323,6 @@ export const generatePDF = (data: DocumentData) => {
 
         .header-top {
           display: flex;
-          justify-content: space-between;
           align-items: flex-start;
           width: 100%;
           margin: 0 0 10px 0;
@@ -1339,7 +1338,8 @@ export const generatePDF = (data: DocumentData) => {
           color: #333;
           line-height: 1.6;
           text-align: left;
-          flex: 1;
+          flex: 0 1 auto;
+          max-width: 50%;
           box-sizing: border-box;
         }
 
@@ -1357,9 +1357,8 @@ export const generatePDF = (data: DocumentData) => {
           font-size: 12px;
           line-height: 1.6;
           flex-shrink: 0;
-          white-space: nowrap;
           padding: 0;
-          margin: 0;
+          margin: 0 0 0 auto;
           box-sizing: border-box;
         }
 
