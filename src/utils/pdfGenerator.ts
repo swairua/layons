@@ -740,33 +740,37 @@ export const generatePDF = async (data: DocumentData) => {
 
             <!-- Header content below image -->
             <div class="header-content">
-              <!-- Left side: Company info with logo -->
-              <div class="header-company-info">
-                <div class="header-logo">
-                  <img src="${company.logo_url || 'https://cdn.builder.io/api/v1/image/assets%2Fb048b36350454e4dba55aefd37788f9c%2Fbd04dab542504461a2451b061741034c?format=webp&width=800'}" alt="${company.name}" />
+              <!-- Top row: Services (left) and Company details (right) -->
+              <div class="header-top">
+                <!-- Services Section -->
+                <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; box-sizing: border-box; min-width: 0;">
+                  ${(() => {
+                    const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+                    const itemsPerLine = Math.ceil(services.length / 3);
+                    const line1 = services.slice(0, itemsPerLine).join(' • ');
+                    const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
+                    const line3 = services.slice(itemsPerLine * 2).join(' • ');
+                    return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
+                  })()}
                 </div>
-                <div>
-                  <div class="company-name">${company.name}</div>
-                  <div class="company-details">
-                    ${company.address ? `<div>${company.address}</div>` : ''}
-                    ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-                    ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
-                    ${company.email ? `<div>${company.email}</div>` : ''}
-                    ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
-                  </div>
+
+                <!-- Company details (right-aligned) -->
+                <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box; padding-right: 12mm;">
+                  ${company.address ? `<div>${company.address}</div>` : ''}
+                  ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+                  ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
+                  ${company.email ? `<div>${company.email}</div>` : ''}
+                  ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
                 </div>
               </div>
 
-              <!-- Right side: Document info -->
-              <div class="header-document-info">
-                <div class="document-title">Bill of Quantities</div>
-                <div class="document-details">
-                  <div><strong>Client:</strong> ${data.customer.name}</div>
-                  ${boqProject ? `<div><strong>Project:</strong> ${boqProject}</div>` : ''}
-                  <div><strong>Subject:</strong> Bill of Quantities</div>
-                  <div><strong>Date:</strong> ${formatDateLong(data.date)}</div>
-                  <div><strong>BOQ No:</strong> ${data.number}</div>
-                </div>
+              <!-- Bottom row: Client Details -->
+              <div style="display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left;">
+                <div><strong>Client:</strong> ${data.customer.name}</div>
+                ${boqProject ? `<div><strong>Project:</strong> ${boqProject}</div>` : ''}
+                <div><strong>Subject:</strong> Bill of Quantities</div>
+                <div><strong>Date:</strong> ${formatDateLong(data.date)}</div>
+                <div><strong>BOQ No:</strong> ${data.number}</div>
               </div>
             </div>
           </div>
