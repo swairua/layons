@@ -753,6 +753,10 @@ export const generatePDF = (data: DocumentData) => {
 
     pagesHtml += `
       <div class="page" style="position: relative; page-break-before: always;">
+        <!-- Summary Section Title -->
+        <div style="margin: 20px 0 15px 0;">
+          <h3 style="font-size: 14px; font-weight: bold; margin: 0 0 12px 0; text-transform: uppercase; color: #000;">SECTION ${String.fromCharCode(65 + data.sections.length)}. SUMMARY</h3>
+        </div>
         <!-- Section Totals Table Only -->
         <div style="margin: 20px 0;">
           <table class="totals-table" style="width: 100%;">
