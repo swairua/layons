@@ -1193,7 +1193,7 @@ export const generatePDF = async (data: DocumentData) => {
     }, 0);
 
     pagesHtml += `
-      <div class="page" style="position: relative; page-break-before: always;">
+      <div class="page">
         <!-- Summary Section Title -->
         <div style="margin: 20px 0 15px 0;">
           <h3 style="font-size: 14px; font-weight: bold; margin: 0 0 12px 0; text-transform: uppercase; color: #000;">SECTION ${String.fromCharCode(65 + data.sections.length)}. SUMMARY</h3>
