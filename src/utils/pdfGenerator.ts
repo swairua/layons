@@ -630,7 +630,7 @@ export const generatePDF = (data: DocumentData) => {
             <!-- Header content below image -->
             <div class="header-content" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
               <!-- Top row: Services (left) and Company details (right) -->
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+              <div style="display: grid; grid-template-columns: 1fr auto; gap: 30px;">
                 <!-- Services Section -->
                 <div style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left;">
                   ${(() => {
