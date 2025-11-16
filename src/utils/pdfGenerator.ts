@@ -858,7 +858,7 @@ export const generatePDF = (data: DocumentData) => {
               </tr>
             </table>
             <div style="text-align: center; flex-shrink: 0; width: 80px;">
-              <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" style="width: 80px; height: 80px; object-fit: contain;" />
+              <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
             </div>
           </div>
 
@@ -2045,7 +2045,7 @@ export const generatePDF = (data: DocumentData) => {
               </tr>
             </table>
             <div style="text-align: center; flex-shrink: 0; width: 80px;">
-              <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" style="width: 80px; height: 80px; object-fit: contain;" />
+              <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
             </div>
           </div>
 
