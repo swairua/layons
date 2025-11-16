@@ -2239,7 +2239,7 @@ export const generatePDF = async (data: DocumentData) => {
   `;
 
   const fallbackFilename = `${documentTitle.replace(/\s+/g, '-')}-${data.number}.pdf`;
-  convertHTMLToPDFAndDownload(htmlContent, fallbackFilename);
+  await convertHTMLToPDFAndDownload(htmlContent, fallbackFilename);
 };
 
 // Specific function for invoice PDF generation
