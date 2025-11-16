@@ -10,14 +10,14 @@ export async function fixInvoiceColumns(companyId: string) {
   try {
     console.log('Starting invoice column fix for company:', companyId);
 
-    // Step 1: Get all invoices for the company with basic columns that should always exist
+    // Step 1: Get all invoices for the company
+    // Note: The database schema uses amount_paid and amount_due, not paid_amount and balance_due
     let invoices: any[] = [];
 
     try {
-      // Try with the expected columns first
       const { data, error } = await supabase
         .from('invoices')
-        .select('id, company_id, total_amount, paid_amount, balance_due, status, due_date')
+        .select('id, company_id, total_amount, amount_paid, amount_due, status, due_date')
         .eq('company_id', companyId);
 
       if (error) {
@@ -26,24 +26,11 @@ export async function fixInvoiceColumns(companyId: string) {
       }
 
       invoices = data || [];
+      console.log(`Successfully fetched ${invoices.length} invoices`);
     } catch (err: any) {
-      // Try fallback with fewer columns if the above fails
-      console.warn('Primary query failed, trying fallback:', err?.message);
-
-      try {
-        const { data, error } = await supabase
-          .from('invoices')
-          .select('id, total_amount, status, due_date')
-          .eq('company_id', companyId);
-
-        if (error) throw error;
-        invoices = data || [];
-        console.log('Using fallback query - some columns may be missing');
-      } catch (fallbackErr: any) {
-        const errorMsg = fallbackErr?.message || JSON.stringify(fallbackErr);
-        console.error('Both invoice fetch attempts failed:', errorMsg);
-        throw new Error(`Failed to fetch invoices: ${errorMsg}`);
-      }
+      const errorMsg = err?.message || JSON.stringify(err);
+      console.error('Error fetching invoices:', errorMsg);
+      throw new Error(`Failed to fetch invoices: ${errorMsg}`);
     }
 
     if (!invoices || invoices.length === 0) {
