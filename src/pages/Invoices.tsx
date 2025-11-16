@@ -115,7 +115,7 @@ export default function Invoices() {
   const deleteInvoice = useDeleteInvoice();
 
   // Fix invoice data on page load
-  React.useEffect(() => {
+  useEffect(() => {
     if (currentCompany?.id && !isFixingData) {
       const performFix = async () => {
         setIsFixingData(true);
