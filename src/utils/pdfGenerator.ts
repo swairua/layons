@@ -800,11 +800,11 @@ export const generatePDF = (data: DocumentData) => {
     // Add Terms and Conditions Page (Final Page)
     pagesHtml += `
       <div class="page" style="position: relative; page-break-before: always;">
-        <div style="padding: 0;">
+        <div style="padding: 8px;">
 
           <!-- Terms Section -->
-          <div style="margin-bottom: 25px;">
-            <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Terms;</h3>
+          <div style="margin-bottom: 15px;">
+            <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
             <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
               <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
                 <ul style="font-size: 11px; line-height: 1.6; margin: 6px 0 6px 20px; padding-left: 20px; color: #333; list-style-type: lower-alpha;">
