@@ -55,7 +55,7 @@ const RemittanceAdvice = () => {
     setShowEditModal(true);
   };
 
-  const handleDownloadRemittance = (remittance: any) => {
+  const handleDownloadRemittance = async (remittance: any) => {
     try {
       // Use live data format
       const remittanceData = {

@@ -2,6 +2,129 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
+// Helper function to render HTML content to canvas
+const renderHTMLToCanvas = async (htmlContent: string, pageSelector: string) => {
+  let wrapper: HTMLElement | null = null;
+  try {
+    // Create a temporary wrapper for proper rendering
+    wrapper = document.createElement('div');
+    wrapper.style.position = 'absolute';
+    wrapper.style.left = '0';
+    wrapper.style.top = '0';
+    wrapper.style.width = '210mm';
+    wrapper.style.height = 'auto';
+    wrapper.style.backgroundColor = '#ffffff';
+    wrapper.style.zIndex = '-999999';
+    wrapper.style.pointerEvents = 'none';
+    wrapper.innerHTML = htmlContent;
+
+    // Append to body to allow CSS to render
+    document.body.appendChild(wrapper);
+
+    // Wait longer for images and fonts to load
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
+    // Force a reflow to ensure content is rendered
+    wrapper.offsetHeight;
+
+    // Preload all images in the wrapper to ensure they're loaded before canvas conversion
+    const images = wrapper.querySelectorAll('img');
+    const imageLoadPromises = Array.from(images).map(img => {
+      return new Promise<void>((resolve) => {
+        if (!img.src) {
+          resolve();
+          return;
+        }
+
+        const onLoad = () => {
+          resolve();
+        };
+
+        const onError = () => {
+          // Log error but still resolve to continue
+          console.warn('Failed to load image:', img.src);
+          resolve();
+        };
+
+        if (img.complete && img.naturalHeight > 0) {
+          resolve();
+        } else {
+          img.addEventListener('load', onLoad);
+          img.addEventListener('error', onError);
+          // Force reload
+          img.src = img.src;
+        }
+      });
+    });
+
+    await Promise.all(imageLoadPromises);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Select the specific page section to render
+    const pageElement = wrapper.querySelector(pageSelector) as HTMLElement;
+    if (!pageElement) {
+      throw new Error(`Page selector "${pageSelector}" not found in HTML content`);
+    }
+
+    // Convert HTML to canvas - render only the specific page
+    const canvas = await html2canvas(pageElement, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      logging: false,
+      allowTaint: true,
+      useCORS: true,
+      imageTimeout: 15000,
+      timeout: 45000,
+      windowHeight: Math.max(pageElement.scrollHeight, pageElement.offsetHeight) || 1000,
+      windowWidth: 210 * 3.779527559, // 210mm to pixels
+      proxy: undefined,
+      foreignObjectRendering: false,
+      ignoreElements: (el) => {
+        // Don't ignore any elements needed for PDF
+        return false;
+      }
+    });
+
+    return { canvas, wrapper };
+  } catch (error) {
+    if (wrapper && wrapper.parentNode) {
+      wrapper.parentNode.removeChild(wrapper);
+    }
+    throw error;
+  }
+};
+
+// Helper function to add canvas to PDF with proper page handling
+const addCanvasToPDF = async (pdf: jsPDF, canvas: HTMLCanvasElement, pageWidth: number, pageHeight: number) => {
+  // Validate canvas
+  if (!canvas || canvas.width === 0 || canvas.height === 0) {
+    console.error('Canvas rendering failed - content may not be visible', {
+      width: canvas?.width,
+      height: canvas?.height
+    });
+    throw new Error('Failed to render content to canvas - canvas is empty');
+  }
+
+  // Get canvas data
+  const imgData = canvas.toDataURL('image/png');
+  const imgWidth = pageWidth; // A4 width in mm
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  let heightLeft = imgHeight;
+  let position = 0;
+
+  // Add images to PDF pages
+  while (heightLeft >= 0) {
+    const heightToPrint = Math.min(pageHeight, heightLeft);
+    pdf.addImage(imgData, 'PNG', 0, -position, pageWidth, imgHeight);
+    heightLeft -= pageHeight;
+    position += pageHeight;
+
+    if (heightLeft > 0) {
+      pdf.addPage();
+    }
+  }
+};
+
 // Helper function to convert HTML to PDF and auto-download
 const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string) => {
   let wrapper: HTMLElement | null = null;
@@ -535,8 +658,20 @@ export const generatePDF = async (data: DocumentData) => {
         .field-row .label { width:80px; font-weight:600; }
         .field-row .fill { flex:1; height:16px; border-bottom:1px dotted #999; }
         .pagefoot { position:fixed; bottom:12mm; left:12mm; right:12mm; text-align:center; font-size:10px; color:#666; }
-        .boq-main { page-break-after: always; }
-        .terms-page { page-break-before: always; }
+
+        /* Page sections are rendered separately to avoid text cutting */
+        .boq-main {
+          display: block;
+          width: 100%;
+          padding-bottom: 20mm;
+        }
+
+        .terms-page {
+          display: block;
+          width: 100%;
+          padding: 15mm;
+        }
+
         .terms-page table { border-collapse: collapse; }
         .terms-page table tr { border: none; }
         .terms-page table td { border: none; padding: 4px 0; }
@@ -560,79 +695,83 @@ export const generatePDF = async (data: DocumentData) => {
       </style>
     </head>
     <body>
-      <div class="container boq-main">
-        <!-- Header Section -->
-        <div class="header">
-          <!-- Full-width header image (same as quotations) -->
-          <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
+      <!-- Page 1: BOQ Details -->
+      <div class="boq-main">
+        <div class="container">
+          <!-- Header Section -->
+          <div class="header">
+            <!-- Full-width header image (same as quotations) -->
+            <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
 
-          <!-- Header content below image -->
-          <div class="header-content" style="margin-top: 8px; display: flex; flex-direction: column; gap: 12px;">
-            <!-- Top row: Services (left) and Company details (right) -->
-            <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: calc(100% + 12mm); margin-right: -12mm; box-sizing: border-box; min-width: 0;">
-              <!-- Services Section -->
-              <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; box-sizing: border-box; min-width: 0;">
-                ${(() => {
-                  const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-                  const itemsPerLine = Math.ceil(services.length / 3);
-                  const line1 = services.slice(0, itemsPerLine).join(' • ');
-                  const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
-                  const line3 = services.slice(itemsPerLine * 2).join(' • ');
-                  return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
-                })()}
+            <!-- Header content below image -->
+            <div class="header-content" style="margin-top: 8px; display: flex; flex-direction: column; gap: 12px;">
+              <!-- Top row: Services (left) and Company details (right) -->
+              <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: calc(100% + 12mm); margin-right: -12mm; box-sizing: border-box; min-width: 0;">
+                <!-- Services Section -->
+                <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; box-sizing: border-box; min-width: 0;">
+                  ${(() => {
+                    const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+                    const itemsPerLine = Math.ceil(services.length / 3);
+                    const line1 = services.slice(0, itemsPerLine).join(' • ');
+                    const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
+                    const line3 = services.slice(itemsPerLine * 2).join(' • ');
+                    return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
+                  })()}
+                </div>
+
+                <!-- Company details (right-aligned) -->
+                <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box; padding-right: 12mm;">
+                  ${company.address ? `<div>${company.address}</div>` : ''}
+                  ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+                  ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
+                  ${company.email ? `<div>${company.email}</div>` : ''}
+                  ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
+                </div>
               </div>
 
-              <!-- Company details (right-aligned) -->
-              <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box; padding-right: 12mm;">
-                ${company.address ? `<div>${company.address}</div>` : ''}
-                ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-                ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
-                ${company.email ? `<div>${company.email}</div>` : ''}
-                ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
+              <!-- Bottom row: Client Details -->
+              <div class="header-left">
+                <div><strong>Client:</strong> ${data.customer.name}</div>
+                ${boqProject ? `<div><strong>Project:</strong> ${boqProject}</div>` : ''}
+                <div><strong>Subject:</strong> Bill of Quantities</div>
+                <div><strong>Date:</strong> ${formatDateLong(data.date)}</div>
+                <div><strong>BOQ No:</strong> ${data.number}</div>
               </div>
-            </div>
-
-            <!-- Bottom row: Client Details -->
-            <div class="header-left">
-              <div><strong>Client:</strong> ${data.customer.name}</div>
-              ${boqProject ? `<div><strong>Project:</strong> ${boqProject}</div>` : ''}
-              <div><strong>Subject:</strong> Bill of Quantities</div>
-              <div><strong>Date:</strong> ${formatDateLong(data.date)}</div>
-              <div><strong>BOQ No:</strong> ${data.number}</div>
             </div>
           </div>
-        </div>
 
-        ${preliminariesHtml}
+          ${preliminariesHtml}
 
-        <table class="items">
-          <thead>
-            <tr>
-              <th style="width:5%; font-weight: bold;">#</th>
-              <th style="width:55%; text-align:left; font-weight: bold;">ITEM DESCRIPTION</th>
-              <th style="width:8%; font-weight: bold;">QTY</th>
-              <th style="width:9%; font-weight: bold;">UNIT</th>
-              <th style="width:11%; font-weight: bold;">RATE</th>
-              <th style="width:12%; font-weight: bold;">AMOUNT (KSHS)</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rowsHtml}
-          </tbody>
-        </table>
-
-        <div class="totals">
-          <table style="width:100%; margin-top:8px;">
-            <tr>
-              <td class="label" style="text-align:right; font-weight:700;">TOTAL:</td>
-              <td style="width:150px; text-align:right; font-weight:700;">${formatCurrency(grandTotalForBOQ)}</td>
-            </tr>
+          <table class="items">
+            <thead>
+              <tr>
+                <th style="width:5%; font-weight: bold;">#</th>
+                <th style="width:55%; text-align:left; font-weight: bold;">ITEM DESCRIPTION</th>
+                <th style="width:8%; font-weight: bold;">QTY</th>
+                <th style="width:9%; font-weight: bold;">UNIT</th>
+                <th style="width:11%; font-weight: bold;">RATE</th>
+                <th style="width:12%; font-weight: bold;">AMOUNT (KSHS)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
           </table>
+
+          <div class="totals">
+            <table style="width:100%; margin-top:8px;">
+              <tr>
+                <td class="label" style="text-align:right; font-weight:700;">TOTAL:</td>
+                <td style="width:150px; text-align:right; font-weight:700;">${formatCurrency(grandTotalForBOQ)}</td>
+              </tr>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Terms and Conditions Page (Final Page) -->
-      <div class="terms-page" style="padding: 10mm;">
+      <!-- Page 2: Terms and Conditions -->
+      <div class="terms-page">
+        <div class="container">
 
         <!-- Terms Section -->
         <div style="margin-bottom: 15px;">
@@ -746,12 +885,155 @@ export const generatePDF = async (data: DocumentData) => {
             </tr>
           </table>
         </div>
+        </div>
       </div>
     </body>
     </html>
     `;
 
-    await convertHTMLToPDFAndDownload(htmlContentBOQ, `BOQ-${data.number}.pdf`);
+    // Use separate rendering for BOQ main content and terms to avoid text cutting
+    let boqWrapper: HTMLElement | null = null;
+    let termsWrapper: HTMLElement | null = null;
+
+    try {
+      // Create PDF
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
+
+      // Render Page 1: BOQ Main Content
+      console.log('Rendering BOQ main content...');
+      boqWrapper = document.createElement('div');
+      boqWrapper.style.position = 'absolute';
+      boqWrapper.style.left = '0';
+      boqWrapper.style.top = '0';
+      boqWrapper.style.width = '210mm';
+      boqWrapper.style.height = 'auto';
+      boqWrapper.style.backgroundColor = '#ffffff';
+      boqWrapper.style.zIndex = '-999999';
+      boqWrapper.style.pointerEvents = 'none';
+      boqWrapper.innerHTML = htmlContentBOQ;
+
+      document.body.appendChild(boqWrapper);
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      boqWrapper.offsetHeight;
+
+      // Preload images
+      const boqImages = boqWrapper.querySelectorAll('img');
+      const boqImagePromises = Array.from(boqImages).map(img => {
+        return new Promise<void>((resolve) => {
+          if (!img.src) {
+            resolve();
+            return;
+          }
+          if (img.complete && img.naturalHeight > 0) {
+            resolve();
+          } else {
+            img.addEventListener('load', () => resolve());
+            img.addEventListener('error', () => resolve());
+            img.src = img.src;
+          }
+        });
+      });
+      await Promise.all(boqImagePromises);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Render BOQ main section
+      const boqMainElement = boqWrapper.querySelector('.boq-main') as HTMLElement;
+      if (!boqMainElement) {
+        throw new Error('BOQ main section not found');
+      }
+
+      const boqCanvas = await html2canvas(boqMainElement, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        allowTaint: true,
+        useCORS: true,
+        imageTimeout: 15000,
+        timeout: 45000,
+        windowHeight: Math.max(boqMainElement.scrollHeight, boqMainElement.offsetHeight) || 1000,
+        windowWidth: 210 * 3.779527559,
+        proxy: undefined,
+        foreignObjectRendering: false,
+      });
+
+      // Add BOQ pages to PDF
+      const imgBoqData = boqCanvas.toDataURL('image/png');
+      const imgBoqWidth = pageWidth; // 210mm
+      const imgBoqHeight = (boqCanvas.height * imgBoqWidth) / boqCanvas.width;
+      let boqHeightLeft = imgBoqHeight;
+      let boqPosition = 0;
+
+      // Add BOQ content, creating multiple pages if needed
+      while (boqHeightLeft >= 0) {
+        pdf.addImage(imgBoqData, 'PNG', 0, -boqPosition, imgBoqWidth, imgBoqHeight);
+        boqHeightLeft -= pageHeight;
+        boqPosition += pageHeight;
+
+        if (boqHeightLeft > 0) {
+          pdf.addPage();
+        }
+      }
+
+      // Render Page 2: Terms and Conditions (on a fresh page)
+      console.log('Rendering terms and conditions...');
+      const termsElement = boqWrapper.querySelector('.terms-page') as HTMLElement;
+      if (!termsElement) {
+        throw new Error('Terms page section not found');
+      }
+
+      const termsCanvas = await html2canvas(termsElement, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        allowTaint: true,
+        useCORS: true,
+        imageTimeout: 15000,
+        timeout: 45000,
+        windowHeight: Math.max(termsElement.scrollHeight, termsElement.offsetHeight) || 1000,
+        windowWidth: 210 * 3.779527559,
+        proxy: undefined,
+        foreignObjectRendering: false,
+      });
+
+      // Add a fresh page for terms
+      pdf.addPage();
+
+      // Add terms to the new page
+      const imgTermsData = termsCanvas.toDataURL('image/png');
+      const imgTermsWidth = pageWidth; // 210mm
+      const imgTermsHeight = (termsCanvas.height * imgTermsWidth) / termsCanvas.width;
+      let termsHeightLeft = imgTermsHeight;
+      let termsPosition = 0;
+
+      // Add terms content to PDF
+      while (termsHeightLeft >= 0) {
+        pdf.addImage(imgTermsData, 'PNG', 0, -termsPosition, imgTermsWidth, imgTermsHeight);
+        termsHeightLeft -= pageHeight;
+        termsPosition += pageHeight;
+
+        if (termsHeightLeft > 0) {
+          pdf.addPage();
+        }
+      }
+
+      // Download PDF
+      pdf.save(`BOQ-${data.number}.pdf`);
+      console.log('BOQ PDF generated successfully');
+
+    } catch (error) {
+      console.error('Error generating BOQ PDF:', error);
+      throw error;
+    } finally {
+      // Clean up
+      if (boqWrapper && boqWrapper.parentNode) {
+        boqWrapper.parentNode.removeChild(boqWrapper);
+      }
+      if (termsWrapper && termsWrapper.parentNode) {
+        termsWrapper.parentNode.removeChild(termsWrapper);
+      }
+    }
   }
 
   // Handle quotations, invoices, and proformas with sections
@@ -1929,7 +2211,7 @@ export const generatePDF = async (data: DocumentData) => {
         <!-- Header Section -->
         <div class="header">
           <!-- Full-width header image -->
-          <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
+          <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
 
           <!-- Header content below image -->
           <div class="header-content">
