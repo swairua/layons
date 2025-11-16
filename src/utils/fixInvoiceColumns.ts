@@ -63,45 +63,58 @@ export async function fixInvoiceColumns(companyId: string) {
     // Step 2: Calculate correct values for each invoice
     for (const invoice of invoices) {
       const totalAmount = invoice.total_amount || 0;
-      
+
       // Determine paid amount: use paid_amount if it exists and is not null, otherwise use amount_paid
-      let paidAmount = invoice.paid_amount;
-      if (paidAmount === null || paidAmount === undefined) {
-        paidAmount = invoice.amount_paid || 0;
+      let paidAmount: number;
+      if (invoice.paid_amount !== null && invoice.paid_amount !== undefined) {
+        paidAmount = Number(invoice.paid_amount) || 0;
+      } else if (invoice.amount_paid !== null && invoice.amount_paid !== undefined) {
+        paidAmount = Number(invoice.amount_paid) || 0;
+      } else {
+        paidAmount = 0;
       }
 
       // Calculate balance due
-      const balanceDue = totalAmount - (paidAmount || 0);
+      const balanceDue = Math.max(0, totalAmount - paidAmount);
 
       // Determine correct status based on payment and due date
       let correctStatus = invoice.status || 'draft';
-      
+
       if (correctStatus !== 'draft' && correctStatus !== 'sent') {
         // Only change status if it's not draft or sent
-        if (balanceDue <= 0) {
+        if (balanceDue <= 0.01) { // Allow for floating point precision
           correctStatus = 'paid';
-        } else if ((paidAmount || 0) > 0) {
+        } else if (paidAmount > 0.01) {
           correctStatus = 'partial';
         } else if (invoice.due_date) {
           // Check if overdue
           const dueDate = new Date(invoice.due_date);
-          if (dueDate < today && balanceDue > 0) {
+          if (dueDate < today && balanceDue > 0.01) {
             correctStatus = 'overdue';
           }
         }
       }
 
-      // Check if update is needed
-      const needsUpdate = 
-        (paidAmount !== null && paidAmount !== invoice.paid_amount) ||
-        (balanceDue !== invoice.balance_due) ||
-        (correctStatus !== invoice.status && invoice.status !== 'draft' && invoice.status !== 'sent');
+      // Check if update is needed (only if the calculated values differ significantly)
+      const currentPaidAmount = invoice.paid_amount !== null && invoice.paid_amount !== undefined
+        ? Number(invoice.paid_amount)
+        : (invoice.amount_paid !== null && invoice.amount_paid !== undefined ? Number(invoice.amount_paid) : null);
+
+      const currentBalance = invoice.balance_due !== null && invoice.balance_due !== undefined
+        ? Number(invoice.balance_due)
+        : null;
+
+      const needsUpdate =
+        currentPaidAmount === null ||
+        currentBalance === null ||
+        Math.abs((currentPaidAmount || 0) - paidAmount) > 0.01 ||
+        Math.abs((currentBalance || 0) - balanceDue) > 0.01;
 
       if (needsUpdate) {
         updates.push({
           id: invoice.id,
-          paid_amount: paidAmount || 0,
-          balance_due: Math.max(0, balanceDue), // Don't allow negative balance
+          paid_amount: paidAmount,
+          balance_due: balanceDue,
           status: correctStatus
         });
         fixedCount++;
