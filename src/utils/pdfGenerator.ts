@@ -1298,9 +1298,9 @@ export const generatePDF = (data: DocumentData) => {
           margin-bottom: 15px;
           padding-bottom: 15px;
           border-bottom: 1px solid #000;
-          margin: 0 -20mm 0 -20mm;
-          padding: 0 20mm 15px 20mm;
-          width: calc(100% + 40mm);
+          margin: 0;
+          padding: 0;
+          width: 100%;
           box-sizing: border-box;
         }
 
@@ -1319,6 +1319,7 @@ export const generatePDF = (data: DocumentData) => {
           padding: 0;
           width: 100%;
           box-sizing: border-box;
+          overflow: hidden;
         }
 
         .header-top {
@@ -1329,6 +1330,7 @@ export const generatePDF = (data: DocumentData) => {
           padding: 0;
           gap: 20px;
           box-sizing: border-box;
+          min-width: 0;
         }
 
         .services-section {
@@ -1338,9 +1340,9 @@ export const generatePDF = (data: DocumentData) => {
           color: #333;
           line-height: 1.6;
           text-align: left;
-          flex: 0 1 auto;
-          max-width: 50%;
+          flex: 0 1 50%;
           box-sizing: border-box;
+          min-width: 0;
         }
 
         .services-section > div {
@@ -1356,10 +1358,12 @@ export const generatePDF = (data: DocumentData) => {
           text-align: right;
           font-size: 12px;
           line-height: 1.6;
-          flex-shrink: 0;
+          flex: 0 0 auto;
           padding: 0;
-          margin: 0 0 0 auto;
+          margin: 0;
           box-sizing: border-box;
+          white-space: nowrap;
+          max-width: 40%;
         }
 
         .header-right > div {
