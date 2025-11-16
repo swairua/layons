@@ -358,13 +358,13 @@ export const generatePDF = (data: DocumentData) => {
         .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; }
 
         /* Header content styling */
-        .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-        .header-top { display: flex; align-items: flex-start; gap: 20px; width: 100%; margin-bottom: 12px; width: 100%; }
+        .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; overflow: hidden; }
+        .header-top { display: flex; align-items: flex-start; gap: 20px; width: 100%; margin-bottom: 12px; box-sizing: border-box; min-width: 0; }
         .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; }
-        .header-right { text-align: right; font-size: 12px; line-height: 1.6; flex-shrink: 0; margin-left: auto; }
+        .header-right { text-align: right; font-size: 12px; line-height: 1.6; flex: 0 0 auto; max-width: 40%; box-sizing: border-box; }
         .header-right .company-name { font-weight: bold; margin-bottom: 6px; font-size: 12px; }
         .header-right > div { font-weight: bold; }
-        .services-section { font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; max-width: 50%; }
+        .services-section { font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0; }
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
