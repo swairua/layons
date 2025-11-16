@@ -801,11 +801,12 @@ export const generatePDF = async (data: DocumentData) => {
         .terms-page {
           display: block;
           width: 100%;
-          padding: 0;
+          padding: 0 15mm;
           page-break-before: always;
+          box-sizing: border-box;
         }
 
-        .terms-page table { border-collapse: collapse; }
+        .terms-page table { border-collapse: collapse; width: 100%; }
         .terms-page table tr { border: none; }
         .terms-page table td { border: none; padding: 4px 0; }
         .stamp-image { width: 100px; height: 100px; }
