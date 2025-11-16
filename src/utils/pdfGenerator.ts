@@ -364,7 +364,7 @@ export const generatePDF = (data: DocumentData) => {
         .header-right { text-align: right; font-size: 12px; line-height: 1.6; }
         .header-right .company-name { font-weight: bold; margin-bottom: 6px; font-size: 12px; }
         .header-right > div { font-weight: bold; }
-        .services-section { font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; }
+        .services-section { font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 1; }
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
