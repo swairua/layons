@@ -542,7 +542,10 @@ export const generatePDF = async (data: DocumentData) => {
         if (isSectionHeader(desc)) {
           currentSection = desc.replace(/^➤\s*/, '');
           itemNo = 0;
-          rowsHtml += `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\">${currentSection}</td></tr>`;
+          // Add spacer row before section headers (except first section) to force page breaks
+          const isFirstSection = !rowsHtml.includes('section-row');
+          const spacerRow = !isFirstSection ? `<tr class=\"spacer-row\"><td colspan=\"6\" style=\"height: 15mm; border: none; background: none;\"></td></tr>` : '';
+          rowsHtml += spacerRow + `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\">${currentSection}</td></tr>`;
           return;
         }
 
