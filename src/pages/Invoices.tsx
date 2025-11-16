@@ -120,13 +120,17 @@ export default function Invoices() {
       const performFix = async () => {
         setIsFixingData(true);
         try {
-          await fixInvoiceColumns(currentCompany.id);
-          console.log('Invoice columns fixed successfully');
+          const result = await fixInvoiceColumns(currentCompany.id);
+          if (result.success) {
+            console.log('Invoice columns fixed successfully:', result.message);
+          } else {
+            console.warn('Invoice column fix had issues but continuing:', result.message);
+          }
           refetch();
         } catch (err) {
           const errorMsg = err instanceof Error ? err.message : JSON.stringify(err);
           console.error('Error fixing invoice columns:', errorMsg);
-          // Don't show error toast, silently continue
+          // Don't show error toast, silently continue - invoices will still load with calculated values
         } finally {
           setIsFixingData(false);
         }
