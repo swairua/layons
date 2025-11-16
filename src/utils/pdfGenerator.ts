@@ -1490,35 +1490,52 @@ export const generatePDF = async (data: DocumentData) => {
             background: white;
           }
 
-          .page {
+          .page,
+          .page-section {
             width: 100%;
-            margin: 0;
+            margin: 15mm 0;
             background: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            padding: 0;
+            padding: 15mm;
             position: relative;
             page-break-after: always;
+            page-break-inside: avoid;
             break-after: page;
+            break-inside: avoid;
+            box-sizing: border-box;
+            min-height: 277mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
           }
 
-          .page:last-of-type {
+          .page:last-of-type,
+          .page-section:last-of-type {
             page-break-after: auto;
             break-after: auto;
+            margin-bottom: 0;
           }
 
           @media print {
-            .page {
+            .page,
+            .page-section {
               box-shadow: none;
               width: 100%;
-              margin: 0;
-              padding: 0;
-              min-height: auto;
+              margin: 15mm 0;
+              padding: 15mm;
+              min-height: 277mm;
               page-break-after: always;
+              page-break-inside: avoid;
+              break-after: page;
+              break-inside: avoid;
+              box-sizing: border-box;
             }
 
-            .page:last-of-type {
+            .page:last-of-type,
+            .page-section:last-of-type {
               page-break-after: auto;
               break-after: auto;
+              margin-bottom: 0;
             }
           }
 
