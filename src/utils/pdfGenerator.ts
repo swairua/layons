@@ -1707,14 +1707,18 @@ export const generatePDF = (data: DocumentData) => {
         @media print {
           body {
             background: white;
+            margin: 0;
+            padding: 0;
           }
-          
+
           .page {
             box-shadow: none;
             margin: 0;
             padding: 0;
+            width: 100%;
+            min-height: auto;
           }
-          
+
           .watermark {
             display: ${data.type === 'proforma' ? 'block' : 'none'};
           }
