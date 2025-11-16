@@ -753,16 +753,6 @@ export const generatePDF = async (data: DocumentData) => {
                 <div><strong>BOQ No:</strong> ${data.number}</div>
               </div>
             </div>
-
-              <!-- Bottom row: Client Details -->
-              <div class="header-left">
-                <div><strong>Client:</strong> ${data.customer.name}</div>
-                ${boqProject ? `<div><strong>Project:</strong> ${boqProject}</div>` : ''}
-                <div><strong>Subject:</strong> Bill of Quantities</div>
-                <div><strong>Date:</strong> ${formatDateLong(data.date)}</div>
-                <div><strong>BOQ No:</strong> ${data.number}</div>
-              </div>
-            </div>
           </div>
 
           ${preliminariesHtml}
