@@ -575,79 +575,83 @@ export const generatePDF = async (data: DocumentData) => {
       </style>
     </head>
     <body>
-      <div class="container boq-main">
-        <!-- Header Section -->
-        <div class="header">
-          <!-- Full-width header image (same as quotations) -->
-          <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
+      <!-- Page 1: BOQ Details -->
+      <div class="boq-main">
+        <div class="container">
+          <!-- Header Section -->
+          <div class="header">
+            <!-- Full-width header image (same as quotations) -->
+            <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
 
-          <!-- Header content below image -->
-          <div class="header-content" style="margin-top: 8px; display: flex; flex-direction: column; gap: 12px;">
-            <!-- Top row: Services (left) and Company details (right) -->
-            <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: calc(100% + 12mm); margin-right: -12mm; box-sizing: border-box; min-width: 0;">
-              <!-- Services Section -->
-              <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; box-sizing: border-box; min-width: 0;">
-                ${(() => {
-                  const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-                  const itemsPerLine = Math.ceil(services.length / 3);
-                  const line1 = services.slice(0, itemsPerLine).join(' • ');
-                  const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
-                  const line3 = services.slice(itemsPerLine * 2).join(' • ');
-                  return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
-                })()}
+            <!-- Header content below image -->
+            <div class="header-content" style="margin-top: 8px; display: flex; flex-direction: column; gap: 12px;">
+              <!-- Top row: Services (left) and Company details (right) -->
+              <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: calc(100% + 12mm); margin-right: -12mm; box-sizing: border-box; min-width: 0;">
+                <!-- Services Section -->
+                <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; box-sizing: border-box; min-width: 0;">
+                  ${(() => {
+                    const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+                    const itemsPerLine = Math.ceil(services.length / 3);
+                    const line1 = services.slice(0, itemsPerLine).join(' • ');
+                    const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
+                    const line3 = services.slice(itemsPerLine * 2).join(' • ');
+                    return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
+                  })()}
+                </div>
+
+                <!-- Company details (right-aligned) -->
+                <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box; padding-right: 12mm;">
+                  ${company.address ? `<div>${company.address}</div>` : ''}
+                  ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+                  ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
+                  ${company.email ? `<div>${company.email}</div>` : ''}
+                  ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
+                </div>
               </div>
 
-              <!-- Company details (right-aligned) -->
-              <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box; padding-right: 12mm;">
-                ${company.address ? `<div>${company.address}</div>` : ''}
-                ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-                ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
-                ${company.email ? `<div>${company.email}</div>` : ''}
-                ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
+              <!-- Bottom row: Client Details -->
+              <div class="header-left">
+                <div><strong>Client:</strong> ${data.customer.name}</div>
+                ${boqProject ? `<div><strong>Project:</strong> ${boqProject}</div>` : ''}
+                <div><strong>Subject:</strong> Bill of Quantities</div>
+                <div><strong>Date:</strong> ${formatDateLong(data.date)}</div>
+                <div><strong>BOQ No:</strong> ${data.number}</div>
               </div>
-            </div>
-
-            <!-- Bottom row: Client Details -->
-            <div class="header-left">
-              <div><strong>Client:</strong> ${data.customer.name}</div>
-              ${boqProject ? `<div><strong>Project:</strong> ${boqProject}</div>` : ''}
-              <div><strong>Subject:</strong> Bill of Quantities</div>
-              <div><strong>Date:</strong> ${formatDateLong(data.date)}</div>
-              <div><strong>BOQ No:</strong> ${data.number}</div>
             </div>
           </div>
-        </div>
 
-        ${preliminariesHtml}
+          ${preliminariesHtml}
 
-        <table class="items">
-          <thead>
-            <tr>
-              <th style="width:5%; font-weight: bold;">#</th>
-              <th style="width:55%; text-align:left; font-weight: bold;">ITEM DESCRIPTION</th>
-              <th style="width:8%; font-weight: bold;">QTY</th>
-              <th style="width:9%; font-weight: bold;">UNIT</th>
-              <th style="width:11%; font-weight: bold;">RATE</th>
-              <th style="width:12%; font-weight: bold;">AMOUNT (KSHS)</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rowsHtml}
-          </tbody>
-        </table>
-
-        <div class="totals">
-          <table style="width:100%; margin-top:8px;">
-            <tr>
-              <td class="label" style="text-align:right; font-weight:700;">TOTAL:</td>
-              <td style="width:150px; text-align:right; font-weight:700;">${formatCurrency(grandTotalForBOQ)}</td>
-            </tr>
+          <table class="items">
+            <thead>
+              <tr>
+                <th style="width:5%; font-weight: bold;">#</th>
+                <th style="width:55%; text-align:left; font-weight: bold;">ITEM DESCRIPTION</th>
+                <th style="width:8%; font-weight: bold;">QTY</th>
+                <th style="width:9%; font-weight: bold;">UNIT</th>
+                <th style="width:11%; font-weight: bold;">RATE</th>
+                <th style="width:12%; font-weight: bold;">AMOUNT (KSHS)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
           </table>
+
+          <div class="totals">
+            <table style="width:100%; margin-top:8px;">
+              <tr>
+                <td class="label" style="text-align:right; font-weight:700;">TOTAL:</td>
+                <td style="width:150px; text-align:right; font-weight:700;">${formatCurrency(grandTotalForBOQ)}</td>
+              </tr>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Terms and Conditions Page (Final Page) -->
-      <div class="terms-page" style="padding: 10mm;">
+      <!-- Page 2: Terms and Conditions -->
+      <div class="terms-page">
+        <div class="container">
 
         <!-- Terms Section -->
         <div style="margin-bottom: 15px;">
