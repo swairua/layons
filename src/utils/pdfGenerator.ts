@@ -665,6 +665,7 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         if (isSubsectionHeader(desc)) {
+          itemNo = 0;
           rowsHtml += `<tr class=\"subsection-row\"><td class=\"num\"></td><td colspan=\"5\" class=\"subsection-title\">${desc.replace(/^\s*[→-]?\s*/, '')}</td></tr>`;
           return;
         }
