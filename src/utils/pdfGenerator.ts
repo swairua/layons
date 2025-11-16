@@ -1729,6 +1729,11 @@ export const generatePDF = (data: DocumentData) => {
             background: #f5f5f5;
             padding: 20px;
           }
+
+          .page {
+            padding: 20mm;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+          }
         }
         \n        .payment-banner {\n          background: #f8f9fa;\n          padding: 8px 15px;\n          margin-bottom: 20px;\n          border-left: 4px solid hsl(var(--primary));\n          font-size: 10px;\n          color: #333;\n          text-align: center;\n          border-radius: 4px;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          background: #f8f9fa;\n          padding: 10px;\n          margin: 15px 0;\n          border-left: 4px solid hsl(var(--primary));\n          font-size: 10px;\n          color: #333;\n          text-align: center;\n          border-radius: 4px;\n          font-weight: 600;\n        }\n      </style>
     </head>
