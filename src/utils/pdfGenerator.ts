@@ -694,7 +694,7 @@ export const generatePDF = async (data: DocumentData) => {
           }
           runningSectionTotal = 0;
           itemNo = 0;
-          currentSection = it.description.replace(/^➤\s*/, '');
+          currentSection = it.description;
           // Add spacer row before section headers (except first section) to force page breaks
           const isFirstSection = sectionTotals.length === 0;
           const spacerRow = !isFirstSection ? `<tr class=\"spacer-row\"><td colspan=\"6\" style=\"height: 15mm; border: none; background: none;\"></td></tr>` : '';
