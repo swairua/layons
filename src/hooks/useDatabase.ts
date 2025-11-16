@@ -1105,15 +1105,15 @@ export const useCreatePayment = () => {
         }
 
         // 3. Get current invoice data and update balances
-        // Note: Use amount_paid and amount_due per database schema
+        // Note: Use paid_amount and balance_due per database schema
         const { data: invoice, error: fetchError } = await supabase
           .from('invoices')
-          .select('id, total_amount, amount_paid, amount_due, status')
+          .select('id, total_amount, paid_amount, balance_due, status')
           .eq('id', invoice_id)
           .single();
 
         if (!fetchError && invoice) {
-          const newPaidAmount = (invoice.amount_paid || 0) + paymentData.amount;
+          const newPaidAmount = (invoice.paid_amount || 0) + paymentData.amount;
           const newBalanceDue = Math.max(0, invoice.total_amount - newPaidAmount);
           let newStatus = invoice.status;
 
@@ -1126,8 +1126,8 @@ export const useCreatePayment = () => {
           const { error: invoiceError } = await supabase
             .from('invoices')
             .update({
-              amount_paid: newPaidAmount,
-              amount_due: newBalanceDue,
+              paid_amount: newPaidAmount,
+              balance_due: newBalanceDue,
               status: newStatus,
               updated_at: new Date().toISOString()
             })
