@@ -146,17 +146,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       if (isErrorType(error, 'network')) {
-        console.warn('Profile fetch failed due to network issue');
-
-        // Prevent toast spam - only show network error toast every 10 seconds
-        const now = Date.now();
-        if (now - lastNetworkErrorToast.current > TOAST_COOLDOWN) {
-          lastNetworkErrorToast.current = now;
-          setTimeout(() => toast.error(
-            'Network connection issue while loading profile. Please check your connection.',
-            { duration: 5000 }
-          ), 0);
-        }
+        console.warn('Profile fetch failed due to network issue - app will continue without full profile');
+        // Don't show toast for network errors on profile fetch - it's not critical
+        // The app can work with just the auth user info
         return null;
       }
 
