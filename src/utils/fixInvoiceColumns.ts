@@ -51,6 +51,8 @@ export async function fixInvoiceColumns(companyId: string) {
       return { success: true, message: 'No invoices to fix' };
     }
 
+    console.log(`Found ${invoices.length} invoices to process`);
+
     let fixedCount = 0;
     const updates: Array<{
       id: string;
@@ -64,14 +66,12 @@ export async function fixInvoiceColumns(companyId: string) {
 
     // Step 2: Calculate correct values for each invoice
     for (const invoice of invoices) {
-      const totalAmount = invoice.total_amount || 0;
+      const totalAmount = Number(invoice.total_amount) || 0;
 
-      // Determine paid amount: use paid_amount if it exists and is not null, otherwise use amount_paid
+      // Determine paid amount: use paid_amount if it exists and is not null, otherwise default to 0
       let paidAmount: number;
       if (invoice.paid_amount !== null && invoice.paid_amount !== undefined) {
         paidAmount = Number(invoice.paid_amount) || 0;
-      } else if (invoice.amount_paid !== null && invoice.amount_paid !== undefined) {
-        paidAmount = Number(invoice.amount_paid) || 0;
       } else {
         paidAmount = 0;
       }
@@ -100,7 +100,7 @@ export async function fixInvoiceColumns(companyId: string) {
       // Check if update is needed (only if the calculated values differ significantly)
       const currentPaidAmount = invoice.paid_amount !== null && invoice.paid_amount !== undefined
         ? Number(invoice.paid_amount)
-        : (invoice.amount_paid !== null && invoice.amount_paid !== undefined ? Number(invoice.amount_paid) : null);
+        : null;
 
       const currentBalance = invoice.balance_due !== null && invoice.balance_due !== undefined
         ? Number(invoice.balance_due)
@@ -126,23 +126,37 @@ export async function fixInvoiceColumns(companyId: string) {
     // Step 3: Batch update all invoices
     if (updates.length > 0) {
       console.log(`Updating ${updates.length} invoices with correct paid_amount and balance_due`);
-      
-      for (const update of updates) {
-        const { error: updateError } = await supabase
-          .from('invoices')
-          .update({
-            paid_amount: update.paid_amount,
-            balance_due: update.balance_due,
-            status: update.status,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', update.id);
 
-        if (updateError) {
-          console.error(`Error updating invoice ${update.id}:`, updateError);
-          // Continue with other invoices even if one fails
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const update of updates) {
+        try {
+          const { error: updateError } = await supabase
+            .from('invoices')
+            .update({
+              paid_amount: update.paid_amount,
+              balance_due: update.balance_due,
+              status: update.status,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', update.id);
+
+          if (updateError) {
+            console.error(`Error updating invoice ${update.id}:`, updateError?.message);
+            failCount++;
+          } else {
+            successCount++;
+          }
+        } catch (err: any) {
+          console.error(`Exception updating invoice ${update.id}:`, err?.message);
+          failCount++;
         }
       }
+
+      console.log(`Update results: ${successCount} succeeded, ${failCount} failed`);
+    } else {
+      console.log('No invoices needed updating');
     }
 
     console.log(`Invoice column fix complete: ${fixedCount} invoices updated`);
