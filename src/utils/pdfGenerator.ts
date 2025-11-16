@@ -846,8 +846,8 @@ export const generatePDF = (data: DocumentData) => {
           </div>
 
           <!-- Client Section with Stamp -->
-          <div style="margin-bottom: 10px; padding-top: 6px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
-            <table style="font-size: 10px; width: 72%; line-height: 1.6; color: #333; border: none;">
+          <div style="margin-bottom: 10px; padding-top: 6px; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+            <table style="font-size: 10px; flex: 1; line-height: 1.6; color: #333; border: none;">
               <tr style="border: none;">
                 <td style="width: 40%; border: none;"><strong>Client;</strong></td>
                 <td style="width: 60%; border: none;">________________________</td>
@@ -2003,8 +2003,8 @@ export const generatePDF = (data: DocumentData) => {
           </div>
 
           <!-- Client Section with Stamp -->
-          <div style="margin-bottom: 10px; padding-top: 6px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
-            <table style="font-size: 10px; width: 72%; line-height: 1.6; color: #333; border: none;">
+          <div style="margin-bottom: 10px; padding-top: 6px; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+            <table style="font-size: 10px; flex: 1; line-height: 1.6; color: #333; border: none;">
               <tr style="border: none;">
                 <td style="width: 40%; border: none;"><strong>Client;</strong></td>
                 <td style="width: 60%; border: none;">________________________</td>
