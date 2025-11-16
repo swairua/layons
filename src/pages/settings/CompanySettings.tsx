@@ -44,6 +44,8 @@ export default function CompanySettings() {
     currency: 'KES',
     fiscal_year_start: 1,
     logo_url: '',
+    header_image: '',
+    stamp_image: '',
     company_services: ''
   });
 
@@ -95,6 +97,8 @@ export default function CompanySettings() {
         currency: currentCompany.currency || 'KES',
         fiscal_year_start: currentCompany.fiscal_year_start || 1,
         logo_url: currentCompany.logo_url || '',
+        header_image: currentCompany.header_image || '',
+        stamp_image: currentCompany.stamp_image || '',
         company_services: currentCompany.company_services || ''
       });
     }
@@ -179,6 +183,138 @@ export default function CompanySettings() {
     } finally {
       setUploading(false);
       // Clear the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  // Handler for header image upload
+  const handleHeaderImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!currentCompany) {
+      toast.error('Company not loaded');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      let headerImageUrl: string | null = null;
+
+      try {
+        headerImageUrl = await uploadToSupabaseStorage(file, currentCompany.id);
+        console.log('✅ Supabase storage upload successful');
+      } catch (storageError) {
+        console.warn('⚠️ Supabase storage failed:', storageError);
+
+        if (file.size <= 1024 * 1024) {
+          headerImageUrl = await convertToBase64(file);
+          console.log('✅ Base64 fallback successful');
+          toast.info('Header image saved locally (storage not available)');
+        } else {
+          throw new Error('File too large for local storage. Please use a smaller image or configure cloud storage.');
+        }
+      }
+
+      if (!headerImageUrl) {
+        throw new Error('Failed to process header image upload');
+      }
+
+      setCompanyData(prev => ({ ...prev, header_image: headerImageUrl }));
+      await updateCompany.mutateAsync({ id: currentCompany.id, header_image: headerImageUrl });
+
+      toast.success('Header image uploaded and saved successfully!');
+    } catch (err: any) {
+      logError(err, 'Header Image Upload');
+      let userMessage = getUserFriendlyMessage(err, 'Failed to upload header image');
+
+      if (userMessage.includes('company-logos') || userMessage.includes('bucket')) {
+        userMessage = 'Cloud storage not configured. Using local storage for smaller files (max 1MB).';
+
+        if (file.size <= 1024 * 1024) {
+          try {
+            const base64Url = await convertToBase64(file);
+            setCompanyData(prev => ({ ...prev, header_image: base64Url }));
+            await updateCompany.mutateAsync({ id: currentCompany.id, header_image: base64Url });
+            toast.success('Header image saved locally!');
+            return;
+          } catch (base64Error) {
+            userMessage = 'Failed to save header image. Please try again with a smaller file.';
+          }
+        }
+      }
+
+      toast.error(userMessage);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  // Handler for stamp image upload
+  const handleStampImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!currentCompany) {
+      toast.error('Company not loaded');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      let stampImageUrl: string | null = null;
+
+      try {
+        stampImageUrl = await uploadToSupabaseStorage(file, currentCompany.id);
+        console.log('✅ Supabase storage upload successful');
+      } catch (storageError) {
+        console.warn('⚠️ Supabase storage failed:', storageError);
+
+        if (file.size <= 1024 * 1024) {
+          stampImageUrl = await convertToBase64(file);
+          console.log('✅ Base64 fallback successful');
+          toast.info('Stamp image saved locally (storage not available)');
+        } else {
+          throw new Error('File too large for local storage. Please use a smaller image or configure cloud storage.');
+        }
+      }
+
+      if (!stampImageUrl) {
+        throw new Error('Failed to process stamp image upload');
+      }
+
+      setCompanyData(prev => ({ ...prev, stamp_image: stampImageUrl }));
+      await updateCompany.mutateAsync({ id: currentCompany.id, stamp_image: stampImageUrl });
+
+      toast.success('Stamp image uploaded and saved successfully!');
+    } catch (err: any) {
+      logError(err, 'Stamp Image Upload');
+      let userMessage = getUserFriendlyMessage(err, 'Failed to upload stamp image');
+
+      if (userMessage.includes('company-logos') || userMessage.includes('bucket')) {
+        userMessage = 'Cloud storage not configured. Using local storage for smaller files (max 1MB).';
+
+        if (file.size <= 1024 * 1024) {
+          try {
+            const base64Url = await convertToBase64(file);
+            setCompanyData(prev => ({ ...prev, stamp_image: base64Url }));
+            await updateCompany.mutateAsync({ id: currentCompany.id, stamp_image: base64Url });
+            toast.success('Stamp image saved locally!');
+            return;
+          } catch (base64Error) {
+            userMessage = 'Failed to save stamp image. Please try again with a smaller file.';
+          }
+        }
+      }
+
+      toast.error(userMessage);
+    } finally {
+      setUploading(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -409,6 +545,8 @@ export default function CompanySettings() {
         postal_code: companyData.postal_code?.trim() || null,
         country: companyData.country?.trim() || 'Kenya',
         logo_url: companyData.logo_url?.trim() || null,
+        header_image: companyData.header_image?.trim() || null,
+        stamp_image: companyData.stamp_image?.trim() || null,
         company_services: companyData.company_services?.trim() || null
       };
 
@@ -883,6 +1021,142 @@ export default function CompanySettings() {
                       </div>
                     )}
                   </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* PDF Header Image */}
+        <Card className="shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Image className="h-5 w-5" />
+              PDF Header Image
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Upload a header image to display at the top of quotations, invoices, and BOQ PDFs
+            </p>
+            <div className="space-y-4">
+              {companyData.header_image ? (
+                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                  <img
+                    src={companyData.header_image}
+                    alt="PDF Header"
+                    className="h-24 object-contain"
+                    onError={(e) => {
+                      console.error('Header image failed to load:', companyData.header_image);
+                      const target = e.target as HTMLImageElement;
+                      target.src = '';
+                    }}
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">Header image configured</p>
+                    <p className="text-xs text-muted-foreground">
+                      {companyData.header_image.startsWith('data:') ? 'Local storage (Base64)' : 'Cloud storage'}
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+              <div className="flex flex-wrap gap-2">
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                  onChange={handleHeaderImageUpload}
+                  style={{ display: 'none' }}
+                  id="header-image-input"
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => document.getElementById('header-image-input')?.click()}
+                  disabled={uploading}
+                  className="flex items-center gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  {uploading ? 'Uploading...' : 'Upload Header Image'}
+                </Button>
+                {companyData.header_image && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setCompanyData(prev => ({ ...prev, header_image: '' }));
+                      toast.success('Header image removed. Click Save Settings to apply changes.');
+                    }}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    Remove Header Image
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* PDF Stamp Image */}
+        <Card className="shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Image className="h-5 w-5" />
+              PDF Stamp Image
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Upload a company stamp image to display on quotations, invoices, and BOQ PDFs
+            </p>
+            <div className="space-y-4">
+              {companyData.stamp_image ? (
+                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                  <img
+                    src={companyData.stamp_image}
+                    alt="PDF Stamp"
+                    className="h-24 object-contain"
+                    onError={(e) => {
+                      console.error('Stamp image failed to load:', companyData.stamp_image);
+                      const target = e.target as HTMLImageElement;
+                      target.src = '';
+                    }}
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">Stamp image configured</p>
+                    <p className="text-xs text-muted-foreground">
+                      {companyData.stamp_image.startsWith('data:') ? 'Local storage (Base64)' : 'Cloud storage'}
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+              <div className="flex flex-wrap gap-2">
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                  onChange={handleStampImageUpload}
+                  style={{ display: 'none' }}
+                  id="stamp-image-input"
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => document.getElementById('stamp-image-input')?.click()}
+                  disabled={uploading}
+                  className="flex items-center gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  {uploading ? 'Uploading...' : 'Upload Stamp Image'}
+                </Button>
+                {companyData.stamp_image && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setCompanyData(prev => ({ ...prev, stamp_image: '' }));
+                      toast.success('Stamp image removed. Click Save Settings to apply changes.');
+                    }}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    Remove Stamp Image
+                  </Button>
                 )}
               </div>
             </div>

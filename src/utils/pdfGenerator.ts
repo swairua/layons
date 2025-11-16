@@ -22,10 +22,43 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
     document.body.appendChild(wrapper);
 
     // Wait longer for images and fonts to load
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
     // Force a reflow to ensure content is rendered
     wrapper.offsetHeight;
+
+    // Preload all images in the wrapper to ensure they're loaded before canvas conversion
+    const images = wrapper.querySelectorAll('img');
+    const imageLoadPromises = Array.from(images).map(img => {
+      return new Promise<void>((resolve) => {
+        if (!img.src) {
+          resolve();
+          return;
+        }
+
+        const onLoad = () => {
+          resolve();
+        };
+
+        const onError = () => {
+          // Log error but still resolve to continue
+          console.warn('Failed to load image:', img.src);
+          resolve();
+        };
+
+        if (img.complete && img.naturalHeight > 0) {
+          resolve();
+        } else {
+          img.addEventListener('load', onLoad);
+          img.addEventListener('error', onError);
+          // Force reload
+          img.src = img.src;
+        }
+      });
+    });
+
+    await Promise.all(imageLoadPromises);
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Convert HTML to canvas
     const canvas = await html2canvas(wrapper, {
@@ -34,8 +67,8 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
       logging: false,
       allowTaint: true,
       useCORS: true,
-      imageTimeout: 10000,
-      timeout: 30000,
+      imageTimeout: 15000,
+      timeout: 45000,
       windowHeight: Math.max(wrapper.scrollHeight, wrapper.offsetHeight) || 1000,
       windowWidth: 210 * 3.779527559, // 210mm to pixels
       proxy: undefined,
@@ -199,6 +232,8 @@ interface CompanyDetails {
   tax_number?: string;
   company_services?: string;
   logo_url?: string;
+  header_image?: string;
+  stamp_image?: string;
 }
 
 // Default company details (fallback) - logo will be determined dynamically
@@ -210,7 +245,9 @@ const DEFAULT_COMPANY: CompanyDetails = {
   phone: '',
   email: 'layonscoltd@gmail.com',
   tax_number: '',
-  logo_url: 'https://cdn.builder.io/api/v1/image/assets%2Fb048b36350454e4dba55aefd37788f9c%2Fbd04dab542504461a2451b061741034c?format=webp&width=800'
+  logo_url: 'https://cdn.builder.io/api/v1/image/assets%2Fb048b36350454e4dba55aefd37788f9c%2Fbd04dab542504461a2451b061741034c?format=webp&width=800',
+  header_image: 'https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800',
+  stamp_image: 'https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800'
 };
 
 // Helper function to determine which columns have values
@@ -263,6 +300,10 @@ export const generatePDF = async (data: DocumentData) => {
   // Default services fallback
   const DEFAULT_SERVICES = 'BUILDING WORKS, RENOVATIONS, ROADWORKS, LANDSCAPING, ELECTRICAL WORKS, WATER WORKS';
   const companyServices = company.company_services || DEFAULT_SERVICES;
+
+  // Get header and stamp images with fallbacks
+  const headerImage = company.header_image || DEFAULT_COMPANY.header_image;
+  const stampImage = company.stamp_image || DEFAULT_COMPANY.stamp_image;
 
   // Analyze which columns have values
   const visibleColumns = analyzeColumns(data.items);
@@ -523,7 +564,7 @@ export const generatePDF = async (data: DocumentData) => {
         <!-- Header Section -->
         <div class="header">
           <!-- Full-width header image (same as quotations) -->
-          <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
+          <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
 
           <!-- Header content below image -->
           <div class="header-content" style="margin-top: 8px; display: flex; flex-direction: column; gap: 12px;">
@@ -649,7 +690,7 @@ export const generatePDF = async (data: DocumentData) => {
             </tr>
           </table>
           <div style="text-align: center; flex-shrink: 0; width: 100px;">
-            <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
+            <img src="${stampImage}" alt="Layons Construction Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
           </div>
         </div>
 
@@ -737,7 +778,7 @@ export const generatePDF = async (data: DocumentData) => {
           <!-- Header Section (only on first page) -->
           <div class="header">
             <!-- Full-width header image -->
-            <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
+            <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
 
             <!-- Header content below image -->
             <div class="header-content" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
@@ -908,7 +949,7 @@ export const generatePDF = async (data: DocumentData) => {
 
         <!-- Stamp Section -->
         <div class="stamp-section" style="display:flex; justify-content:center; margin:40px 0 24px 0;">
-          <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="width: 100px; height: 100px; object-fit:contain;" />
+          <img src="${stampImage}" alt="Company Stamp" style="width: 100px; height: 100px; object-fit:contain;" />
         </div>
       </div>
     `;
@@ -974,7 +1015,7 @@ export const generatePDF = async (data: DocumentData) => {
               </tr>
             </table>
             <div style="text-align: center; flex-shrink: 0; width: 100px;">
-              <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
+              <img src="${stampImage}" alt="Layons Construction Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
             </div>
           </div>
 
@@ -2137,7 +2178,7 @@ export const generatePDF = async (data: DocumentData) => {
         <!-- Stamp Section (not for invoice/quotation as they have their own stamp area) -->
         ${(data.type !== 'invoice' && data.type !== 'quotation') ? `
         <div class="stamp-section" style="display:flex; justify-content:center; margin:30px 0 24px 0;">
-          <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="width: 100px; height: 100px; object-fit:contain;" />
+          <img src="${stampImage}" alt="Company Stamp" style="width: 100px; height: 100px; object-fit:contain;" />
         </div>
         ` : ''}
 
@@ -2223,7 +2264,7 @@ export const generatePDF = async (data: DocumentData) => {
               </tr>
             </table>
             <div style="text-align: center; flex-shrink: 0; width: 100px;">
-              <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
+              <img src="${stampImage}" alt="Layons Construction Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
             </div>
           </div>
 

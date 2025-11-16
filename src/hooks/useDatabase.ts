@@ -16,6 +16,8 @@ export interface Company {
   country?: string;
   currency?: string;
   logo_url?: string;
+  header_image?: string;
+  stamp_image?: string;
   fiscal_year_start?: number;
   tax_settings?: TaxSetting[];
   company_services?: string;

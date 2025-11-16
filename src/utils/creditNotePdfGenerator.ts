@@ -38,6 +38,8 @@ export interface CompanyData {
   tax_number?: string;
   registration_number?: string;
   logo_url?: string;
+  header_image?: string;
+  stamp_image?: string;
 }
 
 // Default company details (fallback) - logo will be determined dynamically
@@ -49,13 +51,17 @@ const DEFAULT_COMPANY: CompanyData = {
   phone: '',
   email: 'layonscoltd@gmail.com',
   tax_number: '',
-  logo_url: 'https://cdn.builder.io/api/v1/image/assets%2Fb048b36350454e4dba55aefd37788f9c%2Fbd04dab542504461a2451b061741034c?format=webp&width=800'
+  logo_url: 'https://cdn.builder.io/api/v1/image/assets%2Fb048b36350454e4dba55aefd37788f9c%2Fbd04dab542504461a2451b061741034c?format=webp&width=800',
+  stamp_image: 'https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800'
 };
 
 export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: CompanyData) => {
   // Use company details from parameter or fall back to defaults
   const companyData = company || DEFAULT_COMPANY;
-  
+
+  // Get stamp image with fallback
+  const stampImage = companyData.stamp_image || DEFAULT_COMPANY.stamp_image;
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
       style: 'currency',
@@ -598,7 +604,7 @@ export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: C
 
         <!-- Stamp Section -->
         <div style="display:flex; justify-content:center; margin:30px 0 24px 0;">
-          <img src="https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800" alt="Company Stamp" style="height:140px; width:auto; object-fit:contain;" />
+          <img src="${stampImage}" alt="Company Stamp" style="height:140px; width:auto; object-fit:contain;" />
         </div>
 
         <!-- Footer -->
