@@ -797,47 +797,7 @@ export const generatePDF = async (data: DocumentData) => {
       <!-- Page 1: BOQ Details -->
       <div class="boq-main">
         <div class="container">
-          <!-- Header Section -->
-          <div class="header" style="margin: 0; padding: 0;">
-            <!-- Full-width header image (same as quotations) -->
-            <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
-
-            <!-- Header content below image -->
-            <div class="header-content">
-              <!-- Top row: Services (left) and Company details (right) -->
-              <div class="header-top">
-                <!-- Services Section -->
-                <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; box-sizing: border-box; min-width: 0;">
-                  ${(() => {
-                    const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-                    const itemsPerLine = Math.ceil(services.length / 3);
-                    const line1 = services.slice(0, itemsPerLine).join(' • ');
-                    const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
-                    const line3 = services.slice(itemsPerLine * 2).join(' • ');
-                    return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
-                  })()}
-                </div>
-
-                <!-- Company details (right-aligned) -->
-                <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box; padding-right: 12mm;">
-                  ${company.address ? `<div>${company.address}</div>` : ''}
-                  ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-                  ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
-                  ${company.email ? `<div>${company.email}</div>` : ''}
-                  ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
-                </div>
-              </div>
-
-              <!-- Bottom row: Client Details -->
-              <div style="display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left;">
-                <div><strong>Client:</strong> ${data.customer.name}</div>
-                ${boqProject ? `<div><strong>Project:</strong> ${boqProject}</div>` : ''}
-                <div><strong>Subject:</strong> Bill of Quantities</div>
-                <div><strong>Date:</strong> ${formatDateLong(data.date)}</div>
-                <div><strong>BOQ No:</strong> ${data.number}</div>
-              </div>
-            </div>
-          </div>
+          ${generatePDFHeader(headerImage, company, companyServices, { ...data, project_title: boqProject }, formatDateLong, 'Bill of Quantities')}
 
           ${preliminariesHtml}
 
