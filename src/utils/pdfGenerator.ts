@@ -1922,6 +1922,23 @@ export const generatePDF = async (data: DocumentData) => {
             page-break-inside: avoid;
           }
 
+          /* Stamp and footer sections */
+          .stamp-section {
+            page-break-inside: avoid;
+            page-break-before: avoid;
+            margin: 30mm 0 15mm 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 120px;
+          }
+
+          .stamp-section img {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: contain;
+          }
+
           @media print {
             body {
               background: white;
