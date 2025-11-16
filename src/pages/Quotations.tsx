@@ -147,7 +147,7 @@ export default function Quotations() {
     toast.success('Quotation updated successfully!');
   };
 
-  const handleDownloadQuotation = (quotation: Quotation) => {
+  const handleDownloadQuotation = async (quotation: Quotation) => {
     try {
       // Get current company details for PDF
       const companyDetails = currentCompany ? {

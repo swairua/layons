@@ -16,7 +16,7 @@ const Index = () => {
   const { data: quotations } = useQuotations(currentCompany?.id);
   const [showAuthPerformance, setShowAuthPerformance] = useState(false);
 
-  const handleTestPDF = () => {
+  const handleTestPDF = async () => {
     try {
       // Use real quotation data if available, otherwise use test data
       const realQuotation = quotations?.[0];

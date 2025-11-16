@@ -99,79 +99,103 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Fetch user profile from database with error handling and retry logic
   const fetchProfile = useCallback(async (userId: string): Promise<UserProfile | null> => {
-    try {
+    const maxRetries = 2;
+    let lastError: any = null;
 
-      const { data: profileData, error } = await supabase
-        .from('profiles')
-        .select('id, email, full_name, avatar_url, phone, company_id, department, position, role, status, last_login, created_at, updated_at')
-        .eq('id', userId)
-        .maybeSingle(); // Use maybeSingle to handle 0 results gracefully
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const { data: profileData, error } = await supabase
+          .from('profiles')
+          .select('id, email, full_name, avatar_url, phone, company_id, department, position, role, status, last_login, created_at, updated_at')
+          .eq('id', userId)
+          .maybeSingle(); // Use maybeSingle to handle 0 results gracefully
 
-      if (error) {
-        throw error;
-      }
-
-      if (!profileData) {
-        return null;
-      }
-
-
-      return profileData;
-    } catch (error) {
-      // Use proper error logging utilities to prevent [object Object]
-      logError('Exception fetching profile:', error, { userId, context: 'fetchProfile' });
-
-      // Handle specific error types using the error type checker
-      if (isErrorType(error, 'auth')) {
-        console.warn('Profile fetch failed due to expired token - user may need to re-authenticate');
-        return null; // Don't show error toast for auth issues
-      }
-
-      if (isErrorType(error, 'network')) {
-        console.warn('Profile fetch failed due to network issue');
-
-        // Prevent toast spam - only show network error toast every 10 seconds
-        const now = Date.now();
-        if (now - lastNetworkErrorToast.current > TOAST_COOLDOWN) {
-          lastNetworkErrorToast.current = now;
-          setTimeout(() => toast.error(
-            'Network connection issue while loading profile. Please check your connection.',
-            { duration: 5000 }
-          ), 0);
+        if (error) {
+          throw error;
         }
-        return null;
-      }
 
-      if (isErrorType(error, 'permission')) {
-        console.warn('Profile fetch failed due to permissions');
+        if (!profileData) {
+          return null;
+        }
 
-        // Prevent toast spam - only show permission error toast every 10 seconds
+        return profileData;
+      } catch (fetchError) {
+        lastError = fetchError;
+
+        // Check if it's a network error
+        const errorMsg = (fetchError instanceof Error) ? fetchError.message : String(fetchError);
+        const isNetworkError = errorMsg.includes('Failed to fetch') ||
+                              errorMsg.includes('Network') ||
+                              errorMsg.includes('timeout') ||
+                              errorMsg.includes('ECONNREFUSED') ||
+                              errorMsg.includes('ENOTFOUND');
+
+        if (isNetworkError && attempt < maxRetries - 1) {
+          // Wait before retrying (exponential backoff: 500ms, then 1s)
+          const delayMs = 500 * Math.pow(2, attempt);
+          console.warn(`Profile fetch network error (attempt ${attempt + 1}/${maxRetries}). Retrying in ${delayMs}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+          continue;
+        }
+
+        // Format error message properly to avoid [object Object]
+        let errorMessage = 'Unknown error';
+        if (fetchError instanceof Error) {
+          errorMessage = fetchError.message;
+        } else if (typeof fetchError === 'string') {
+          errorMessage = fetchError;
+        } else if (fetchError && typeof fetchError === 'object') {
+          const errObj = fetchError as any;
+          errorMessage = errObj.message || errObj.error_description || errObj.details || String(fetchError);
+        }
+        console.error(`Profile fetch error for user ${userId}: ${errorMessage}`);
+
+        // Handle specific error types using the error type checker
+        if (isErrorType(fetchError, 'auth')) {
+          console.warn('Profile fetch failed due to expired token - user may need to re-authenticate');
+          return null; // Don't show error toast for auth issues
+        }
+
+        if (isErrorType(fetchError, 'network')) {
+          console.warn('Profile fetch failed due to network issue - app will continue without full profile');
+          // Don't show toast for network errors on profile fetch - it's not critical
+          // The app can work with just the auth user info
+          return null;
+        }
+
+        if (isErrorType(fetchError, 'permission')) {
+          console.warn('Profile fetch failed due to permissions');
+
+          // Prevent toast spam - only show permission error toast every 10 seconds
+          const now = Date.now();
+          if (now - lastPermissionErrorToast.current > TOAST_COOLDOWN) {
+            lastPermissionErrorToast.current = now;
+            setTimeout(() => toast.error(
+              'Permission error accessing profile. Please sign in again.',
+              { duration: 4000 }
+            ), 0);
+          }
+          return null;
+        }
+
+        // Show general error message for other cases
+        const friendlyMessage = getUserFriendlyErrorMessage(fetchError);
+
+        // Prevent toast spam - only show general error toast every 10 seconds
         const now = Date.now();
-        if (now - lastPermissionErrorToast.current > TOAST_COOLDOWN) {
-          lastPermissionErrorToast.current = now;
+        if (now - lastGeneralErrorToast.current > TOAST_COOLDOWN) {
+          lastGeneralErrorToast.current = now;
           setTimeout(() => toast.error(
-            'Permission error accessing profile. Please sign in again.',
+            `Failed to load user profile: ${friendlyMessage}`,
             { duration: 4000 }
           ), 0);
         }
+
         return null;
       }
-
-      // Show general error message for other cases
-      const friendlyMessage = getUserFriendlyErrorMessage(error);
-
-      // Prevent toast spam - only show general error toast every 10 seconds
-      const now = Date.now();
-      if (now - lastGeneralErrorToast.current > TOAST_COOLDOWN) {
-        lastGeneralErrorToast.current = now;
-        setTimeout(() => toast.error(
-          `Failed to load user profile: ${friendlyMessage}`,
-          { duration: 4000 }
-        ), 0);
-      }
-
-      return null;
     }
+
+    return null;
   }, []);
 
   // Update last login timestamp silently
@@ -250,17 +274,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const initializeAuthState = async () => {
       console.log('🚀 Starting fast auth initialization...');
 
-      // Always start the app immediately - don't block on auth
-      const startAppImmediately = () => {
-        if (mountedRef.current) {
+      // Start app after initial session check completes (max 2 seconds)
+      let appStarted = false;
+      const startAppAfterCheck = () => {
+        if (mountedRef.current && !appStarted) {
+          appStarted = true;
           setLoading(false);
           setInitialized(true);
-          console.log('🏁 App started immediately (auth will continue in background)');
+          console.log('🏁 App started after initial session check');
         }
       };
 
-      // Start app immediately regardless of auth status
-      const immediateStartTimer = setTimeout(startAppImmediately, 0);
+      // Give session check 2 seconds before forcing app start
+      const sessionCheckTimer = setTimeout(startAppAfterCheck, 2000);
 
       try {
         // Very fast auth check with 3-second timeout
@@ -298,8 +324,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (quickSession?.user && mountedRef.current) {
           console.log('✅ Quick auth success - user authenticated');
 
-          // Clear the immediate start timer since we have auth
-          clearTimeout(immediateStartTimer);
+          // Clear the session check timer and start app immediately
+          clearTimeout(sessionCheckTimer);
+          appStarted = true;
 
           // Set auth state immediately
           setSession(quickSession);
@@ -308,11 +335,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setInitialized(true);
           initializingRef.current = false;
 
-          // Fetch profile in background
-          fetchProfile(quickSession.user.id)
+          // Fetch profile in background (non-critical if it fails)
+      fetchProfile(quickSession.user.id)
             .then(userProfile => {
               if (mountedRef.current) {
-                setProfile(userProfile);
+                // Set profile even if null - app should work with just the auth user
+                setProfile(userProfile || {
+                  id: quickSession.user.id,
+                  email: quickSession.user.email || '',
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                } as UserProfile);
                 console.log('✅ Profile loaded in background');
 
                 // Update last login silently
@@ -357,10 +390,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                   setSession(bgSession);
                   setUser(bgSession.user);
 
-                  // Fetch profile
+                  // Fetch profile (non-critical if it fails)
                   const userProfile = await fetchProfile(bgSession.user.id);
                   if (mountedRef.current) {
-                    setProfile(userProfile);
+                    setProfile(userProfile || {
+                      id: bgSession.user.id,
+                      email: bgSession.user.email || '',
+                      created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString()
+                    } as UserProfile);
                     if (userProfile) {
                       updateLastLogin(bgSession.user.id).catch(err =>
                         logError('Background retry update last login failed:', err, {
@@ -478,8 +516,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (signedInUser) {
         setSession(session);
         setUser(signedInUser);
-        // Fetch profile in background
-        fetchProfile(signedInUser.id).then(setProfile).catch(() => {});
+        // Fetch profile in background (non-critical if it fails)
+        fetchProfile(signedInUser.id).then(userProfile => {
+          setProfile(userProfile || {
+            id: signedInUser.id,
+            email: signedInUser.email || '',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          } as UserProfile);
+        }).catch(() => {
+          // Create minimal profile if fetch fails
+          setProfile({
+            id: signedInUser.id,
+            email: signedInUser.email || '',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          } as UserProfile);
+        });
       }
     } catch {}
 
