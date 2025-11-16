@@ -643,8 +643,8 @@ export const generatePDF = (data: DocumentData) => {
                   })()}
                 </div>
 
-                <!-- Company details (right-aligned, constrained width) -->
-                <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; max-width: 40%; box-sizing: border-box;">
+                <!-- Company details (right-aligned) -->
+                <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box;">
                   ${company.address ? `<div>${company.address}</div>` : ''}
                   ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
                   ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
