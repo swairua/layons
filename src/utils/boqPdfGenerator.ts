@@ -127,7 +127,7 @@ export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string;
 
   const subtotal = flatItems.reduce((s, r) => s + (r.line_total || 0), 0);
 
-  return generatePDF({
+  return await generatePDF({
     type: 'boq',
     number: doc.number,
     date: doc.date,
