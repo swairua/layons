@@ -22,7 +22,7 @@ const Index = () => {
       const realQuotation = quotations?.[0];
 
       if (realQuotation) {
-        downloadQuotationPDF(realQuotation);
+        await downloadQuotationPDF(realQuotation);
         toast.success('PDF generated.');
         return;
       }
@@ -75,7 +75,7 @@ const Index = () => {
         ]
       };
 
-      downloadQuotationPDF(testQuotation);
+      await downloadQuotationPDF(testQuotation);
       toast.success('Test PDF generated using sample data');
     } catch (error) {
       console.error('Error generating PDF:', error);

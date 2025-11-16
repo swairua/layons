@@ -67,6 +67,11 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
 
+    // Validate PDF was created
+    if (!pdf || !pdf.internal) {
+      throw new Error('Failed to create PDF document');
+    }
+
     // Add images to PDF pages
     while (heightLeft >= 0) {
       const heightToPrint = Math.min(pageHeight, heightLeft);
@@ -79,8 +84,20 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
       }
     }
 
-    // Download the PDF
-    pdf.save(filename);
+    // Validate PDF has content
+    if (pdf.internal.pages.length === 0) {
+      throw new Error('Failed to add content to PDF');
+    }
+
+    // Download the PDF with proper error handling
+    try {
+      pdf.save(filename);
+      // Give browser time to start download before returning
+      await new Promise(resolve => setTimeout(resolve, 100));
+    } catch (downloadError) {
+      console.error('Failed to trigger PDF download:', downloadError);
+      throw new Error(`Failed to download PDF file: ${downloadError instanceof Error ? downloadError.message : 'Unknown error'}`);
+    }
   } catch (error) {
     console.error('Error generating PDF:', error);
     // Re-throw to be handled by caller

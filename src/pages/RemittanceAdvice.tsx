@@ -87,11 +87,12 @@ const RemittanceAdvice = () => {
         company_services: currentCompany.company_services
       } : undefined;
 
-      downloadRemittancePDF(remittanceData, companyDetails);
-      toast.success(`PDF download started for ${remittance.advice_number}`);
+      await downloadRemittancePDF(remittanceData, companyDetails);
+      toast.success(`Remittance ${remittance.advice_number} PDF downloaded`);
     } catch (error) {
       console.error('Error downloading PDF:', error);
-      toast.error('Failed to download PDF. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.error(`Failed to download PDF: ${errorMessage}`);
     }
   };
 

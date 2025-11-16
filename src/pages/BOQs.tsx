@@ -26,6 +26,10 @@ export default function BOQs() {
 
   const handleDownloadPDF = async (boq: any) => {
     try {
+      if (!boq || !boq.data) {
+        toast.error('BOQ data is not available');
+        return;
+      }
       await downloadBOQPDF(boq.data, currentCompany ? {
         name: currentCompany.name,
         logo_url: currentCompany.logo_url || undefined,
@@ -35,10 +39,11 @@ export default function BOQs() {
         phone: currentCompany.phone || undefined,
         email: currentCompany.email || undefined,
       } : undefined);
-      toast.success('BOQ downloaded');
+      toast.success(`BOQ ${boq.number} PDF downloaded`);
     } catch (err) {
       console.error('Download failed', err);
-      toast.error('Failed to download BOQ');
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      toast.error(`Failed to download BOQ: ${errorMessage}`);
     }
   };
 
