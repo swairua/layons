@@ -678,6 +678,9 @@ export const generatePDF = async (data: DocumentData) => {
           width: 100%;
           padding: 12mm;
           padding-bottom: 40mm;
+          box-sizing: border-box;
+          max-width: 100%;
+          overflow: hidden;
         }
 
         .terms-page {
