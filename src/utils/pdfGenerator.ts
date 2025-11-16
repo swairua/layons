@@ -630,9 +630,9 @@ export const generatePDF = (data: DocumentData) => {
             <!-- Header content below image -->
             <div class="header-content" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
               <!-- Top row: Services (left) and Company details (right) -->
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+              <div class="header-top" style="display: flex; align-items: flex-start; gap: 20px; width: 100%; box-sizing: border-box; min-width: 0;">
                 <!-- Services Section -->
-                <div style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; max-width: 50%;">
+                <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0;">
                   ${(() => {
                     const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                     const itemsPerLine = Math.ceil(services.length / 3);
@@ -643,8 +643,8 @@ export const generatePDF = (data: DocumentData) => {
                   })()}
                 </div>
 
-                <!-- Company details (right-aligned, no flex growth) -->
-                <div style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex-shrink: 0; margin-left: auto;">
+                <!-- Company details (right-aligned, constrained width) -->
+                <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; max-width: 40%; box-sizing: border-box;">
                   ${company.address ? `<div>${company.address}</div>` : ''}
                   ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
                   ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
