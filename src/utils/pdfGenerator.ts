@@ -1317,7 +1317,7 @@ export const generatePDF = (data: DocumentData) => {
           display: table;
           width: 100%;
           margin-bottom: 10px;
-          table-layout: fixed;
+          table-layout: auto;
         }
 
         .services-section {
@@ -1328,8 +1328,10 @@ export const generatePDF = (data: DocumentData) => {
           color: #333;
           line-height: 1.6;
           text-align: left;
-          padding-right: 40px;
+          padding-right: 30px;
           padding-left: 0;
+          padding-top: 0;
+          padding-bottom: 0;
           vertical-align: top;
         }
 
@@ -1348,8 +1350,10 @@ export const generatePDF = (data: DocumentData) => {
           font-size: 12px;
           line-height: 1.6;
           vertical-align: top;
-          padding-left: 40px;
+          padding-left: 30px;
           padding-right: 0;
+          padding-top: 0;
+          padding-bottom: 0;
         }
 
         .header-right > div {
