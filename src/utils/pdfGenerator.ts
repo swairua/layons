@@ -1593,11 +1593,13 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           @media screen {
-            .page {
+            .page,
+            .page-section {
               width: 210mm;
-              padding: 20mm;
-              margin: 0 auto;
+              padding: 15mm;
+              margin: 15mm auto;
               min-height: auto;
+              box-sizing: border-box;
             }
           }
 
