@@ -11,8 +11,16 @@ import {
   Database,
   Loader2
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/utils/safeToast';
 import { fixStockMovementsSchema, STOCK_MOVEMENTS_FIX_SQL } from '@/utils/fixStockMovementsSchema';
+
+function formatErrorMessage(error: any): string {
+  if (!error) return 'Unknown error occurred';
+  if (typeof error === 'string') return error;
+  if (error instanceof Error) return error.message;
+  if (error?.message && typeof error.message === 'string') return error.message;
+  return 'An unexpected error occurred';
+}
 
 export function StockMovementsSchemaFix() {
   const [isFixing, setIsFixing] = useState(false);
@@ -30,10 +38,11 @@ export function StockMovementsSchemaFix() {
       if (result.success) {
         toast.success('Stock movements schema fixed successfully!');
       } else {
-        toast.error(`Fix failed: ${result.error}`);
+        const errorMsg = formatErrorMessage(result.error);
+        toast.error(`Fix failed: ${errorMsg}`);
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = formatErrorMessage(error);
       setFixResult({ success: false, error: errorMessage });
       toast.error(`Fix failed: ${errorMessage}`);
     } finally {
@@ -85,7 +94,7 @@ export function StockMovementsSchemaFix() {
             )}
             <AlertDescription>
               <strong>{fixResult.success ? 'Success!' : 'Error:'}</strong><br />
-              {fixResult.success ? fixResult.message : fixResult.error}
+              {fixResult.success ? fixResult.message : formatErrorMessage(fixResult.error)}
             </AlertDescription>
           </Alert>
         )}

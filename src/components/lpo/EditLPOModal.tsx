@@ -29,8 +29,16 @@ import {
   Edit
 } from 'lucide-react';
 import { useUpdateLPOWithItems, useAllSuppliersAndCustomers, useProducts, useCompanies } from '@/hooks/useDatabase';
-import { toast } from 'sonner';
+import { toast } from '@/utils/safeToast';
 import { validateLPOEdit } from '@/utils/lpoValidation';
+
+function formatErrorMessage(error: any): string {
+  if (!error) return 'Unknown error occurred';
+  if (typeof error === 'string') return error;
+  if (error instanceof Error) return error.message;
+  if (error?.message && typeof error.message === 'string') return error.message;
+  return 'An unexpected error occurred';
+}
 
 interface LPOItem {
   id: string;
@@ -187,7 +195,7 @@ export const EditLPOModal = ({
     });
 
     if (!validationResult.isValid) {
-      validationResult.errors.forEach(error => toast.error(error));
+      validationResult.errors.forEach(error => toast.error(formatErrorMessage(error)));
       return;
     }
 

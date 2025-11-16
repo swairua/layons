@@ -3,8 +3,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, AlertTriangle, Wrench, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/utils/safeToast';
 import { runStockMovementsConstraintFix } from '@/utils/runConstraintFix';
+
+function formatErrorMessage(error: any): string {
+  if (!error) return 'Unknown error occurred';
+  if (typeof error === 'string') return error;
+  if (error instanceof Error) return error.message;
+  if (error?.message && typeof error.message === 'string') return error.message;
+  return 'An unexpected error occurred';
+}
 
 export function ConstraintFixRunner() {
   const [isFixing, setIsFixing] = useState(false);
@@ -21,10 +29,11 @@ export function ConstraintFixRunner() {
       if (result.success) {
         toast.success('Stock movements constraints fixed successfully!');
       } else {
-        toast.error(`Failed to fix constraints: ${result.error}`);
+        const errorMsg = formatErrorMessage(result.error);
+        toast.error(`Failed to fix constraints: ${errorMsg}`);
       }
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Unknown error occurred';
+      const errorMsg = formatErrorMessage(error);
       setFixResult({ success: false, error: errorMsg });
       toast.error(`Error: ${errorMsg}`);
     } finally {
@@ -57,7 +66,7 @@ export function ConstraintFixRunner() {
               <AlertTriangle className="h-4 w-4 text-red-600" />
             )}
             <AlertDescription className={fixResult.success ? "text-green-800" : "text-red-800"}>
-              {fixResult.success ? fixResult.message : fixResult.error}
+              {fixResult.success ? fixResult.message : formatErrorMessage(fixResult.error)}
             </AlertDescription>
           </Alert>
         )}

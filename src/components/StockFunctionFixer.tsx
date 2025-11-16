@@ -3,8 +3,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, AlertTriangle, Database, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/utils/safeToast';
 import { createStockUpdateFunction, testStockUpdateFunction } from '@/utils/runStockFunctionFix';
+
+function formatErrorMessage(error: any): string {
+  if (!error) return 'Unknown error occurred';
+  if (typeof error === 'string') return error;
+  if (error instanceof Error) return error.message;
+  if (error?.message && typeof error.message === 'string') return error.message;
+  return 'An unexpected error occurred';
+}
 
 export function StockFunctionFixer() {
   const [isFixing, setIsFixing] = useState(false);
@@ -20,17 +28,18 @@ export function StockFunctionFixer() {
       
       if (result.success) {
         toast.success('Stock update function created successfully!');
-        
+
         // Test the function after creation
         const testResult = await testStockUpdateFunction();
         if (!testResult.success) {
           toast.warning('Function created but test failed. Please check logs.');
         }
       } else {
-        toast.error(`Failed to create function: ${result.error}`);
+        const errorMsg = formatErrorMessage(result.error);
+        toast.error(`Failed to create function: ${errorMsg}`);
       }
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Unknown error occurred';
+      const errorMsg = formatErrorMessage(error);
       setFixResult({ success: false, error: errorMsg });
       toast.error(`Error: ${errorMsg}`);
     } finally {
@@ -63,7 +72,7 @@ export function StockFunctionFixer() {
               <AlertTriangle className="h-4 w-4 text-red-600" />
             )}
             <AlertDescription className={fixResult.success ? "text-green-800" : "text-red-800"}>
-              {fixResult.success ? fixResult.message : fixResult.error}
+              {fixResult.success ? fixResult.message : formatErrorMessage(fixResult.error)}
             </AlertDescription>
           </Alert>
         )}

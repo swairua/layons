@@ -10,7 +10,20 @@ import {
   Database
 } from 'lucide-react';
 import { checkProformaTables, setupProformaTables, ensureProformaSchema } from '@/utils/proformaDatabaseSetup';
-import { toast } from 'sonner';
+import { toast } from '@/utils/safeToast';
+
+function formatErrorMessage(error: any): string {
+  if (!error) return 'Unknown error occurred';
+  if (typeof error === 'string') return error;
+  if (error instanceof Error) return error.message;
+  if (error?.message && typeof error.message === 'string') return error.message;
+  return 'An unexpected error occurred';
+}
+
+function formatErrorArray(errors: any[] | undefined): string {
+  if (!Array.isArray(errors)) return 'Unknown error';
+  return errors.map(e => formatErrorMessage(e)).filter(Boolean).join(', ') || 'Unknown error';
+}
 
 export function ProformaSetupBanner() {
   const [status, setStatus] = useState<'checking' | 'ready' | 'missing' | 'error' | 'setting-up'>('checking');
@@ -54,7 +67,8 @@ export function ProformaSetupBanner() {
         toast.success('Proforma tables created and schema harmonized!');
         setStatus('ready');
       } else {
-        toast.error(`Setup failed: ${result.errors.join(', ')}`);
+        const errorMsg = formatErrorArray(result.errors);
+        toast.error(`Setup failed: ${errorMsg}`);
         setStatus('error');
       }
     } catch (error) {
@@ -100,8 +114,8 @@ export function ProformaSetupBanner() {
         return {
           icon: <AlertTriangle className="h-5 w-5" />,
           title: 'Setup Error',
-          description: setupResult ? 
-            `Setup failed: ${setupResult.errors?.join(', ') || 'Unknown error'}` :
+          description: setupResult ?
+            `Setup failed: ${formatErrorArray(setupResult.errors)}` :
             'An error occurred while checking the database configuration.',
           variant: 'destructive' as const,
           showAction: true,
