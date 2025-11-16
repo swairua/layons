@@ -1079,8 +1079,8 @@ export const generatePDF = (data: DocumentData) => {
           }
 
           .items-section {
-            margin: 12px 0 30px 0;
-          }
+          margin: 15px 0 30px 0;
+        }
 
           .items-table {
             width: 100%;
@@ -1458,7 +1458,7 @@ export const generatePDF = (data: DocumentData) => {
         }
 
         .items-section {
-          margin: 12px 0 30px 0;
+          margin: 15px 0 30px 0;
         }
 
         .items-table {
