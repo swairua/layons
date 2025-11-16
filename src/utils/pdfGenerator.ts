@@ -722,7 +722,7 @@ export const generatePDF = async (data: DocumentData) => {
                     const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                     const itemsPerLine = Math.ceil(services.length / 3);
                     const line1 = services.slice(0, itemsPerLine).join(' • ');
-                    const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' ��� ');
+                    const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
                     const line3 = services.slice(itemsPerLine * 2).join(' • ');
                     return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
                   })()}
@@ -780,35 +780,33 @@ export const generatePDF = async (data: DocumentData) => {
 
       <!-- Page 2: Terms and Conditions -->
       <div class="terms-page">
-        <div class="container">
-
         <!-- Terms Section -->
-        <div style="margin-bottom: 15px;">
+        <div style="margin-bottom: 15px; page-break-inside: avoid;">
           <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
           <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
-            <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
+            <li style="margin-bottom: 6px; page-break-inside: avoid;">The Payment terms for each stage are as follows;
               <ul style="display: block; width: 100%; clear: both; font-size: 11px; line-height: 1.6; margin: 12px 0 6px 0; padding-left: 40px; color: #333; list-style-type: lower-alpha;">
                 <li style="margin-bottom: 4px;">50% Upon Order (${formatCurrency(grandTotalForBOQ * 0.5)})</li>
                 <li style="margin-bottom: 4px;">40% As Progressive (${formatCurrency(grandTotalForBOQ * 0.4)})</li>
                 <li style="margin-bottom: 4px;">10% Upon Completion (${formatCurrency(grandTotalForBOQ * 0.1)})</li>
               </ul>
             </li>
-            <li style="margin-bottom: 6px;">All work will be executed based on the drawings and samples approved by the client</li>
-            <li style="margin-bottom: 6px;">Any Changes/alterations to the scope of work outlined will affect the final quantity will be measured, and charges will be applied on a pro-rata basis at the agreed rate</li>
-            <li style="margin-bottom: 6px;">We are not responsible for any damages caused by negligence from other Sub Contractors Hired by the Client.</li>
-            <li style="margin-bottom: 6px;">The quotation does not include statutory fees.</li>
-            <li style="margin-bottom: 6px;">The work shall be completed within weeks from the day of Order.</li>
+            <li style="margin-bottom: 6px; page-break-inside: avoid;">All work will be executed based on the drawings and samples approved by the client</li>
+            <li style="margin-bottom: 6px; page-break-inside: avoid;">Any Changes/alterations to the scope of work outlined will affect the final quantity will be measured, and charges will be applied on a pro-rata basis at the agreed rate</li>
+            <li style="margin-bottom: 6px; page-break-inside: avoid;">We are not responsible for any damages caused by negligence from other Sub Contractors Hired by the Client.</li>
+            <li style="margin-bottom: 6px; page-break-inside: avoid;">The quotation does not include statutory fees.</li>
+            <li style="margin-bottom: 6px; page-break-inside: avoid;">The work shall be completed within weeks from the day of Order.</li>
           </ol>
         </div>
 
         <!-- Acceptance of Quote Section -->
-        <div style="margin-bottom: 12px; padding-top: 8px;">
+        <div style="margin-bottom: 12px; padding-top: 8px; page-break-inside: avoid;">
           <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Acceptance of Quote;</h3>
           <p style="font-size: 10px; margin: 0; color: #333;">The above prices specifications and terms are satisfactory.</p>
         </div>
 
         <!-- Contractor Section -->
-        <div style="margin-bottom: 10px; padding-top: 6px;">
+        <div style="margin-bottom: 10px; padding-top: 6px; page-break-inside: avoid;">
           <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #333; border: none;">
             <tr style="border: none;">
               <td style="width: 30%; border: none;"><strong>Contractor;</strong></td>
@@ -826,7 +824,7 @@ export const generatePDF = async (data: DocumentData) => {
         </div>
 
         <!-- Client Section with Stamp -->
-        <div style="margin-bottom: 10px; padding-top: 6px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+        <div style="margin-bottom: 10px; padding-top: 6px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; page-break-inside: avoid;">
           <table style="font-size: 10px; width: 72%; line-height: 1.6; color: #333; border: none;">
             <tr style="border: none;">
               <td style="width: 40%; border: none;"><strong>Client;</strong></td>
@@ -843,7 +841,7 @@ export const generatePDF = async (data: DocumentData) => {
         </div>
 
         <!-- Prepaired By Section -->
-        <div style="margin-bottom: 8px; padding-top: 4px;">
+        <div style="margin-bottom: 8px; padding-top: 4px; page-break-inside: avoid;">
           <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #333; border: none;">
             <tr style="border: none;">
               <td style="width: 30%; border: none;"><strong>PREPAIRED BY;</strong></td>
@@ -853,7 +851,7 @@ export const generatePDF = async (data: DocumentData) => {
         </div>
 
         <!-- Account Details Section -->
-        <div style="margin-top: 8px; padding-top: 4px;">
+        <div style="margin-top: 8px; padding-top: 4px; page-break-inside: avoid;">
           <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Account Details;</h3>
           <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
             <tr style="border: none;">
@@ -893,7 +891,6 @@ export const generatePDF = async (data: DocumentData) => {
               <td style="border: none;">01192659527000</td>
             </tr>
           </table>
-        </div>
         </div>
       </div>
     </body>
