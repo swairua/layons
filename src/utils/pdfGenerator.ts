@@ -1307,11 +1307,44 @@ export const generatePDF = (data: DocumentData) => {
 
         .header-content {
           display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 40px;
-          padding: 0;
-          margin: 0;
+          flex-direction: column;
+          gap: 12px;
+          margin-top: 20px;
+        }
+
+        .header-top {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 30px;
+          margin-bottom: 12px;
+        }
+
+        .services-section {
+          font-size: 12px;
+          font-weight: bold;
+          color: #333;
+          line-height: 1.6;
+          text-align: left;
+        }
+
+        .header-right {
+          text-align: right;
+          font-size: 12px;
+          line-height: 1.6;
+        }
+
+        .header-right > div {
+          font-weight: bold;
+        }
+
+        .header-left {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          font-size: 12px;
+          font-weight: bold;
+          line-height: 1.6;
+          text-align: left;
         }
 
         .company-info {
