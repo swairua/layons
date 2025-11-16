@@ -734,8 +734,7 @@ export const generatePDF = async (data: DocumentData) => {
         .boq-main {
           display: block;
           width: 100%;
-          padding: 12mm;
-          padding-bottom: 40mm;
+          padding: 0;
           box-sizing: border-box;
           max-width: 100%;
           overflow: hidden;
@@ -744,8 +743,7 @@ export const generatePDF = async (data: DocumentData) => {
         .terms-page {
           display: block;
           width: 100%;
-          padding: 12mm;
-          padding-top: 20mm;
+          padding: 0;
           page-break-before: always;
         }
 
