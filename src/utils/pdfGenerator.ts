@@ -1323,7 +1323,6 @@ export const generatePDF = (data: DocumentData) => {
 
         .header-top {
           display: flex;
-          justify-content: space-between;
           align-items: flex-start;
           width: 100%;
           margin: 0 0 10px 0;
