@@ -250,17 +250,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const initializeAuthState = async () => {
       console.log('🚀 Starting fast auth initialization...');
 
-      // Always start the app immediately - don't block on auth
-      const startAppImmediately = () => {
-        if (mountedRef.current) {
+      // Start app after initial session check completes (max 2 seconds)
+      let appStarted = false;
+      const startAppAfterCheck = () => {
+        if (mountedRef.current && !appStarted) {
+          appStarted = true;
           setLoading(false);
           setInitialized(true);
-          console.log('🏁 App started immediately (auth will continue in background)');
+          console.log('🏁 App started after initial session check');
         }
       };
 
-      // Start app immediately regardless of auth status
-      const immediateStartTimer = setTimeout(startAppImmediately, 0);
+      // Give session check 2 seconds before forcing app start
+      const sessionCheckTimer = setTimeout(startAppAfterCheck, 2000);
 
       try {
         // Very fast auth check with 3-second timeout
