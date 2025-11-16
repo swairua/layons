@@ -1305,11 +1305,9 @@ export const generatePDF = (data: DocumentData) => {
 
         .header {
           display: block;
-          margin-bottom: 15px;
-          padding-bottom: 15px;
+          margin: 0 0 15px 0;
+          padding: 0 0 15px 0;
           border-bottom: 1px solid #000;
-          margin: 0;
-          padding: 0;
           width: 100%;
           box-sizing: border-box;
         }
