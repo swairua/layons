@@ -1338,7 +1338,8 @@ export const generatePDF = (data: DocumentData) => {
           color: #333;
           line-height: 1.6;
           text-align: left;
-          flex: 1;
+          flex: 0 1 auto;
+          max-width: 50%;
           box-sizing: border-box;
         }
 
