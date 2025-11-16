@@ -964,8 +964,8 @@ export const generatePDF = (data: DocumentData) => {
             margin-bottom: 30px;
             padding-bottom: 0;
             border-bottom: none;
-            margin-left: -20mm;
-            margin-right: -20mm;
+            margin-left: 0;
+            margin-right: 0;
             padding-left: 0;
             padding-right: 0;
           }
