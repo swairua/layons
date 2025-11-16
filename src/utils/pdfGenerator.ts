@@ -408,7 +408,7 @@ export const generatePDF = (data: DocumentData) => {
           <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
           <!-- Header content below image -->
-          <div class="header-content">
+          <div class="header-content" style="margin-top: 8px;">
             <!-- Top row: Services (left) and Company details (right) -->
             <div class="header-top">
               <!-- Services Section -->
