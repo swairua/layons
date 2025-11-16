@@ -1012,9 +1012,15 @@ export const generatePDF = async (data: DocumentData) => {
         windowWidth: 210 * 3.779527559,
         proxy: undefined,
         foreignObjectRendering: false,
+        onclone: (clonedDocument) => {
+          // Ensure CSS page breaks are respected during rendering
+          const style = clonedDocument.createElement('style');
+          style.textContent = '@media print { * { page-break-inside: avoid !important; } }';
+          clonedDocument.head.appendChild(style);
+        }
       });
 
-      // Add a fresh page for terms
+      // Add a fresh page for terms (always add new page)
       pdf.addPage();
 
       // Add terms to the new page
@@ -1023,15 +1029,20 @@ export const generatePDF = async (data: DocumentData) => {
       const imgTermsHeight = (termsCanvas.height * imgTermsWidth) / termsCanvas.width;
       let termsHeightLeft = imgTermsHeight;
       let termsPosition = 0;
+      let firstTermsPage = true;
 
       // Add terms content to PDF
       while (termsHeightLeft >= 0) {
+        if (!firstTermsPage) {
+          pdf.addPage();
+        }
         pdf.addImage(imgTermsData, 'PNG', 0, -termsPosition, imgTermsWidth, imgTermsHeight);
-        termsHeightLeft -= pageHeight;
+        termsHeightLeft -= (pageHeight - 8); // Account for margins and spacing
         termsPosition += pageHeight;
+        firstTermsPage = false;
 
         if (termsHeightLeft > 0) {
-          pdf.addPage();
+          // Proper spacing before next page
         }
       }
 
