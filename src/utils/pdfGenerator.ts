@@ -1362,8 +1362,6 @@ export const generatePDF = (data: DocumentData) => {
           padding: 0;
           margin: 0;
           box-sizing: border-box;
-          white-space: nowrap;
-          max-width: 40%;
         }
 
         .header-right > div {
