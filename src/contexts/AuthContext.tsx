@@ -99,7 +99,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Fetch user profile from database with error handling and retry logic
   const fetchProfile = useCallback(async (userId: string): Promise<UserProfile | null> => {
-    const maxRetries = 2;
+    const maxRetries = 3;
     let lastError: any = null;
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
@@ -115,6 +115,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
 
         if (!profileData) {
+          console.warn(`No profile data found for user ${userId} - this is expected if profile hasn't been created yet`);
           return null;
         }
 
@@ -128,27 +129,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                               errorMsg.includes('Network') ||
                               errorMsg.includes('timeout') ||
                               errorMsg.includes('ECONNREFUSED') ||
-                              errorMsg.includes('ENOTFOUND');
+                              errorMsg.includes('ENOTFOUND') ||
+                              errorMsg.includes('NetworkError') ||
+                              errorMsg.includes('CORS') ||
+                              errorMsg.includes('fetch');
 
         if (isNetworkError && attempt < maxRetries - 1) {
-          // Wait before retrying (exponential backoff: 500ms, then 1s)
+          // Wait before retrying (exponential backoff: 500ms, 1s, 2s)
           const delayMs = 500 * Math.pow(2, attempt);
-          console.warn(`Profile fetch network error (attempt ${attempt + 1}/${maxRetries}). Retrying in ${delayMs}ms...`);
+          console.warn(`Profile fetch network error (attempt ${attempt + 1}/${maxRetries}). Retrying in ${delayMs}ms... Error: ${errorMsg}`);
           await new Promise(resolve => setTimeout(resolve, delayMs));
           continue;
         }
 
         // Format error message properly to avoid [object Object]
         let errorMessage = 'Unknown error';
+        let errorDetails = '';
         if (fetchError instanceof Error) {
           errorMessage = fetchError.message;
+          errorDetails = fetchError.stack ? ` Stack: ${fetchError.stack.substring(0, 100)}` : '';
         } else if (typeof fetchError === 'string') {
           errorMessage = fetchError;
         } else if (fetchError && typeof fetchError === 'object') {
           const errObj = fetchError as any;
           errorMessage = errObj.message || errObj.error_description || errObj.details || String(fetchError);
+          errorDetails = errObj.hint ? ` Hint: ${errObj.hint}` : '';
         }
-        console.error(`Profile fetch error for user ${userId}: ${errorMessage}`);
+
+        // Log comprehensive error info for debugging
+        console.error(`Profile fetch error for user ${userId}: ${errorMessage}${errorDetails} (attempt ${attempt + 1}/${maxRetries})`);
 
         // Handle specific error types using the error type checker
         if (isErrorType(fetchError, 'auth')) {
@@ -594,7 +603,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signOut = useCallback(async () => {
     try {
-      console.log('🚪 Starting sign out process...');
+      console.log('���� Starting sign out process...');
       setLoading(true);
 
       const { error } = await supabase.auth.signOut();
