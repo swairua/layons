@@ -980,8 +980,10 @@ export const generatePDF = async (data: DocumentData) => {
     try {
       // Create PDF
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageWidth = pdf.internal.pageSize.getWidth(); // 210mm
       const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
+      const margin = 15; // 15mm margins on all sides
+      const contentWidth = pageWidth - (margin * 2); // 180mm
 
       // Render Page 1: BOQ Main Content
       console.log('Rendering BOQ main content...');
@@ -989,7 +991,7 @@ export const generatePDF = async (data: DocumentData) => {
       boqWrapper.style.position = 'absolute';
       boqWrapper.style.left = '0';
       boqWrapper.style.top = '0';
-      boqWrapper.style.width = '210mm';
+      boqWrapper.style.width = `${pageWidth}mm`;
       boqWrapper.style.height = 'auto';
       boqWrapper.style.backgroundColor = '#ffffff';
       boqWrapper.style.zIndex = '-999999';
