@@ -55,15 +55,15 @@ export async function fixInvoiceColumns(companyId: string) {
     for (const invoice of invoices) {
       const totalAmount = Number(invoice.total_amount) || 0;
 
-      // Determine paid amount: use paid_amount if it exists and is not null, otherwise default to 0
+      // Determine paid amount: use amount_paid (the actual database column)
       let paidAmount: number;
-      if (invoice.paid_amount !== null && invoice.paid_amount !== undefined) {
-        paidAmount = Number(invoice.paid_amount) || 0;
+      if (invoice.amount_paid !== null && invoice.amount_paid !== undefined) {
+        paidAmount = Number(invoice.amount_paid) || 0;
       } else {
         paidAmount = 0;
       }
 
-      // Calculate balance due
+      // Calculate balance due (amount_due should match this)
       const balanceDue = Math.max(0, totalAmount - paidAmount);
 
       // Determine correct status based on payment and due date
@@ -85,12 +85,12 @@ export async function fixInvoiceColumns(companyId: string) {
       }
 
       // Check if update is needed (only if the calculated values differ significantly)
-      const currentPaidAmount = invoice.paid_amount !== null && invoice.paid_amount !== undefined
-        ? Number(invoice.paid_amount)
+      const currentPaidAmount = invoice.amount_paid !== null && invoice.amount_paid !== undefined
+        ? Number(invoice.amount_paid)
         : null;
 
-      const currentBalance = invoice.balance_due !== null && invoice.balance_due !== undefined
-        ? Number(invoice.balance_due)
+      const currentBalance = invoice.amount_due !== null && invoice.amount_due !== undefined
+        ? Number(invoice.amount_due)
         : null;
 
       const needsUpdate =
