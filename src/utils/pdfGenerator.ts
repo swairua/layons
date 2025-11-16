@@ -501,8 +501,8 @@ export const generatePDF = (data: DocumentData) => {
         </div>
 
         <!-- Contractor Section -->
-        <div style="margin-bottom: 12px; padding-top: 8px;">
-          <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
+        <div style="margin-bottom: 10px; padding-top: 6px;">
+          <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #333; border: none;">
             <tr style="border: none;">
               <td style="width: 30%; border: none;"><strong>Contractor;</strong></td>
               <td style="width: 70%; border: none;">${company.name}</td>
@@ -519,8 +519,8 @@ export const generatePDF = (data: DocumentData) => {
         </div>
 
         <!-- Client Section with Stamp -->
-        <div style="margin-bottom: 25px; padding-top: 15px; display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
-          <table style="font-size: 10px; width: 65%; line-height: 1.8; color: #333; border: none;">
+        <div style="margin-bottom: 10px; padding-top: 6px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+          <table style="font-size: 10px; width: 72%; line-height: 1.6; color: #333; border: none;">
             <tr style="border: none;">
               <td style="width: 40%; border: none;"><strong>Client;</strong></td>
               <td style="width: 60%; border: none;">________________________</td>
@@ -530,14 +530,14 @@ export const generatePDF = (data: DocumentData) => {
               <td style="border: none;">________________________</td>
             </tr>
           </table>
-          <div style="width: 35%; text-align: center;">
+          <div style="width: 28%; text-align: center; flex-shrink: 0;">
             <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" class="stamp-image" />
           </div>
         </div>
 
         <!-- Prepaired By Section -->
-        <div style="margin-bottom: 20px; padding-top: 15px;">
-          <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
+        <div style="margin-bottom: 8px; padding-top: 4px;">
+          <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #333; border: none;">
             <tr style="border: none;">
               <td style="width: 30%; border: none;"><strong>PREPAIRED BY;</strong></td>
               <td style="width: 70%; border: none;">${company.name}</td>
@@ -546,8 +546,8 @@ export const generatePDF = (data: DocumentData) => {
         </div>
 
         <!-- Account Details Section -->
-        <div style="margin-top: 30px; padding-top: 15px;">
-          <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase;">Account Details;</h3>
+        <div style="margin-top: 8px; padding-top: 4px;">
+          <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Account Details;</h3>
           <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
             <tr style="border: none;">
               <td style="width: 30%; border: none;"><strong>BANK;</strong></td>
