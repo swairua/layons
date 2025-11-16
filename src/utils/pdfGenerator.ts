@@ -2493,7 +2493,7 @@ export const generatePDF = async (data: DocumentData) => {
 
       <!-- Last Page for Invoices and Quotations -->
       ${(data.type === 'invoice' || data.type === 'quotation') ? `
-      <div class="page" style="page-break-before: always; position: relative;">
+      <div class="page">
         <div style="padding: 10mm;">
 
           <!-- Terms Section -->
