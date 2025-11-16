@@ -1286,8 +1286,7 @@ export const generatePDF = (data: DocumentData) => {
         }
 
         .header {
-          display: flex;
-          flex-direction: column;
+          display: block;
           margin-bottom: 12px;
           padding-bottom: 0;
           border-bottom: none;
@@ -1295,6 +1294,7 @@ export const generatePDF = (data: DocumentData) => {
           margin-right: 0;
           padding-left: 0;
           padding-right: 0;
+          width: 100%;
         }
 
         .header-image {
@@ -1307,34 +1307,38 @@ export const generatePDF = (data: DocumentData) => {
         }
 
         .header-content {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
+          display: block;
           margin-top: 0;
           width: 100%;
         }
 
         .header-top {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 40px;
-          margin-bottom: 10px;
+          display: table;
           width: 100%;
+          margin-bottom: 10px;
+          table-layout: fixed;
         }
 
         .services-section {
+          display: table-cell;
+          width: 50%;
           font-size: 12px;
           font-weight: bold;
           color: #333;
           line-height: 1.6;
           text-align: left;
+          padding-right: 40px;
+          vertical-align: top;
         }
 
         .header-right {
+          display: table-cell;
+          width: 50%;
           text-align: right;
           font-size: 12px;
           line-height: 1.6;
-          justify-self: end;
+          vertical-align: top;
+          padding-left: 40px;
         }
 
         .header-right > div {
@@ -1343,9 +1347,7 @@ export const generatePDF = (data: DocumentData) => {
         }
 
         .header-left {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
+          display: block;
           font-size: 12px;
           font-weight: bold;
           line-height: 1.6;
@@ -1353,6 +1355,11 @@ export const generatePDF = (data: DocumentData) => {
           margin-left: 0;
           padding-left: 0;
           width: 100%;
+          margin-top: 10px;
+        }
+
+        .header-left > div {
+          margin-bottom: 2px;
         }
 
         .logo {
