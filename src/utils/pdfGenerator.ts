@@ -1,6 +1,26 @@
 // PDF Generation utility using html2pdf for auto-download
 import html2pdf from 'html2pdf.js';
 
+// Helper function to convert HTML to PDF and auto-download
+const convertHTMLToPDFAndDownload = (htmlContent: string, filename: string) => {
+  const element = document.createElement('div');
+  element.innerHTML = htmlContent;
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  const options = {
+    margin: 0,
+    filename: filename,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { format: 'a4', orientation: 'portrait' }
+  };
+
+  html2pdf().set(options).from(element).save().finally(() => {
+    document.body.removeChild(element);
+  });
+};
+
 export interface DocumentData {
   type: 'quotation' | 'invoice' | 'remittance' | 'proforma' | 'delivery' | 'statement' | 'receipt' | 'lpo' | 'boq';
   number: string;
