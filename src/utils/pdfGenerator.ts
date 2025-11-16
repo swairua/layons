@@ -962,7 +962,24 @@ export const generatePDF = async (data: DocumentData) => {
       });
 
       // Add BOQ pages to PDF
-      await addCanvasToPDF(pdf, boqCanvas, pageWidth, pageHeight);
+      const imgBoqData = boqCanvas.toDataURL('image/png');
+      const imgBoqWidth = pageWidth; // 210mm
+      const imgBoqHeight = (boqCanvas.height * imgBoqWidth) / boqCanvas.width;
+      let boqHeightLeft = imgBoqHeight;
+      let boqPosition = 0;
+
+      while (boqHeightLeft >= 0) {
+        pdf.addImage(imgBoqData, 'PNG', 0, -boqPosition, imgBoqWidth, imgBoqHeight);
+        boqHeightLeft -= pageHeight;
+        boqPosition += pageHeight;
+
+        if (boqHeightLeft > 0) {
+          pdf.addPage();
+        }
+      }
+
+      // Always add a new page for terms - ensures clean page break
+      pdf.addPage();
 
       // Render Page 2: Terms and Conditions
       console.log('Rendering terms and conditions...');
@@ -985,9 +1002,26 @@ export const generatePDF = async (data: DocumentData) => {
         foreignObjectRendering: false,
       });
 
-      // Add a new page for terms if not already on a new page
-      pdf.addPage();
-      await addCanvasToPDF(pdf, termsCanvas, pageWidth, pageHeight);
+      // Add terms to the new page
+      const imgTermsData = termsCanvas.toDataURL('image/png');
+      const imgTermsWidth = pageWidth; // 210mm
+      const imgTermsHeight = (termsCanvas.height * imgTermsWidth) / termsCanvas.width;
+      let termsHeightLeft = imgTermsHeight;
+      let termsPosition = 0;
+
+      while (termsHeightLeft >= 0) {
+        // Remove the last page we added if we already rendered content there
+        if (termsPosition === 0 && pdf.internal.pages.length > 1) {
+          // We're on a fresh page, add the image
+          pdf.addImage(imgTermsData, 'PNG', 0, -termsPosition, imgTermsWidth, imgTermsHeight);
+        } else if (termsPosition > 0) {
+          pdf.addPage();
+          pdf.addImage(imgTermsData, 'PNG', 0, -termsPosition, imgTermsWidth, imgTermsHeight);
+        }
+
+        termsHeightLeft -= pageHeight;
+        termsPosition += pageHeight;
+      }
 
       // Download PDF
       pdf.save(`BOQ-${data.number}.pdf`);
