@@ -1086,6 +1086,109 @@ export const generatePDF = async (data: DocumentData) => {
 
   // Handle quotations, invoices, and proformas with sections
   if ((data.type === 'quotation' || data.type === 'invoice' || data.type === 'proforma') && data.sections && data.sections.length > 0) {
+    // For section-based PDFs, render each section separately to avoid text cutting across pages
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
+    const pageContentHeight = pageHeight - 30; // Account for margins (15mm top + 15mm bottom = 30mm)
+    let firstPage = true;
+
+    // Helper function to render a single page section
+    const renderPageSection = async (htmlContent: string): Promise<void> => {
+      let wrapper: HTMLElement | null = null;
+      try {
+        wrapper = document.createElement('div');
+        wrapper.style.position = 'absolute';
+        wrapper.style.left = '0';
+        wrapper.style.top = '0';
+        wrapper.style.width = '210mm';
+        wrapper.style.height = 'auto';
+        wrapper.style.backgroundColor = '#ffffff';
+        wrapper.style.zIndex = '-999999';
+        wrapper.style.pointerEvents = 'none';
+        wrapper.innerHTML = htmlContent;
+
+        document.body.appendChild(wrapper);
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        wrapper.offsetHeight;
+
+        // Preload images
+        const images = wrapper.querySelectorAll('img');
+        const imagePromises = Array.from(images).map(img => {
+          return new Promise<void>((resolve) => {
+            if (!img.src) {
+              resolve();
+              return;
+            }
+            if (img.complete && img.naturalHeight > 0) {
+              resolve();
+            } else {
+              img.addEventListener('load', () => resolve());
+              img.addEventListener('error', () => resolve());
+              img.src = img.src;
+            }
+          });
+        });
+        await Promise.all(imagePromises);
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Get the page element and render it
+        const pageElement = wrapper.querySelector('.page-section') as HTMLElement;
+        if (!pageElement) {
+          throw new Error('Page section not found');
+        }
+
+        const canvas = await html2canvas(pageElement, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          logging: false,
+          allowTaint: true,
+          useCORS: true,
+          imageTimeout: 15000,
+          timeout: 45000,
+          windowHeight: Math.max(pageElement.scrollHeight, pageElement.offsetHeight) || 1000,
+          windowWidth: 210 * 3.779527559,
+          proxy: undefined,
+          foreignObjectRendering: false,
+        });
+
+        // Add to PDF
+        if (!firstPage) {
+          pdf.addPage();
+        }
+
+        const imgData = canvas.toDataURL('image/png');
+        const imgHeight = (canvas.height * pageWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+        let isFirstPageOfSection = !firstPage;
+
+        while (heightLeft >= 0) {
+          if (!isFirstPageOfSection) {
+            pdf.addPage();
+          }
+          pdf.addImage(imgData, 'PNG', 0, -position, pageWidth, imgHeight);
+          heightLeft -= pageContentHeight;
+          position += pageContentHeight;
+          isFirstPageOfSection = false;
+
+          if (heightLeft > 0) {
+            // More content to add on next page
+          }
+        }
+
+        firstPage = false;
+      } catch (error) {
+        console.error('Error rendering page section:', error);
+        throw error;
+      } finally {
+        if (wrapper && wrapper.parentNode) {
+          wrapper.parentNode.removeChild(wrapper);
+        }
+      }
+    };
+
+    // Render header with first section
     let pagesHtml = '';
 
     // Render one section per page
@@ -1103,7 +1206,7 @@ export const generatePDF = async (data: DocumentData) => {
       const showHeader = sectionIndex === 0;
 
       pagesHtml += `
-        <div class="page">
+        <div class="page-section">
           ${showHeader ? generatePDFHeader(headerImage, company, companyServices, data, formatDateLong, data.type === 'invoice' ? 'Invoice' : 'Quotation') : ''}
 
           <!-- Section Title with alphabetical letter -->
