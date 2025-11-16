@@ -1288,19 +1288,19 @@ export const generatePDF = (data: DocumentData) => {
         .header {
           display: flex;
           flex-direction: column;
-          margin-bottom: 8px;
+          margin-bottom: 12px;
           padding-bottom: 0;
           border-bottom: none;
-          margin-left: -20mm;
-          margin-right: -20mm;
-          padding-left: 20mm;
-          padding-right: 20mm;
+          margin-left: 0;
+          margin-right: 0;
+          padding-left: 0;
+          padding-right: 0;
         }
 
         .header-image {
-          width: calc(100% + 40mm);
+          width: 100%;
           height: auto;
-          margin: 0 -20mm 5px -20mm;
+          margin: 0 0 12px 0;
           padding: 0;
           display: block;
           border: none;
@@ -1309,15 +1309,15 @@ export const generatePDF = (data: DocumentData) => {
         .header-content {
           display: flex;
           flex-direction: column;
-          gap: 12px;
-          margin-top: 20px;
+          gap: 10px;
+          margin-top: 0;
         }
 
         .header-top {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 30px;
-          margin-bottom: 12px;
+          gap: 40px;
+          margin-bottom: 10px;
         }
 
         .services-section {
