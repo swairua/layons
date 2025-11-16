@@ -2,6 +2,129 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
+// Helper function to render HTML content to canvas
+const renderHTMLToCanvas = async (htmlContent: string, pageSelector: string) => {
+  let wrapper: HTMLElement | null = null;
+  try {
+    // Create a temporary wrapper for proper rendering
+    wrapper = document.createElement('div');
+    wrapper.style.position = 'absolute';
+    wrapper.style.left = '0';
+    wrapper.style.top = '0';
+    wrapper.style.width = '210mm';
+    wrapper.style.height = 'auto';
+    wrapper.style.backgroundColor = '#ffffff';
+    wrapper.style.zIndex = '-999999';
+    wrapper.style.pointerEvents = 'none';
+    wrapper.innerHTML = htmlContent;
+
+    // Append to body to allow CSS to render
+    document.body.appendChild(wrapper);
+
+    // Wait longer for images and fonts to load
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
+    // Force a reflow to ensure content is rendered
+    wrapper.offsetHeight;
+
+    // Preload all images in the wrapper to ensure they're loaded before canvas conversion
+    const images = wrapper.querySelectorAll('img');
+    const imageLoadPromises = Array.from(images).map(img => {
+      return new Promise<void>((resolve) => {
+        if (!img.src) {
+          resolve();
+          return;
+        }
+
+        const onLoad = () => {
+          resolve();
+        };
+
+        const onError = () => {
+          // Log error but still resolve to continue
+          console.warn('Failed to load image:', img.src);
+          resolve();
+        };
+
+        if (img.complete && img.naturalHeight > 0) {
+          resolve();
+        } else {
+          img.addEventListener('load', onLoad);
+          img.addEventListener('error', onError);
+          // Force reload
+          img.src = img.src;
+        }
+      });
+    });
+
+    await Promise.all(imageLoadPromises);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Select the specific page section to render
+    const pageElement = wrapper.querySelector(pageSelector) as HTMLElement;
+    if (!pageElement) {
+      throw new Error(`Page selector "${pageSelector}" not found in HTML content`);
+    }
+
+    // Convert HTML to canvas - render only the specific page
+    const canvas = await html2canvas(pageElement, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      logging: false,
+      allowTaint: true,
+      useCORS: true,
+      imageTimeout: 15000,
+      timeout: 45000,
+      windowHeight: Math.max(pageElement.scrollHeight, pageElement.offsetHeight) || 1000,
+      windowWidth: 210 * 3.779527559, // 210mm to pixels
+      proxy: undefined,
+      foreignObjectRendering: false,
+      ignoreElements: (el) => {
+        // Don't ignore any elements needed for PDF
+        return false;
+      }
+    });
+
+    return { canvas, wrapper };
+  } catch (error) {
+    if (wrapper && wrapper.parentNode) {
+      wrapper.parentNode.removeChild(wrapper);
+    }
+    throw error;
+  }
+};
+
+// Helper function to add canvas to PDF with proper page handling
+const addCanvasToPDF = async (pdf: jsPDF, canvas: HTMLCanvasElement, pageWidth: number, pageHeight: number) => {
+  // Validate canvas
+  if (!canvas || canvas.width === 0 || canvas.height === 0) {
+    console.error('Canvas rendering failed - content may not be visible', {
+      width: canvas?.width,
+      height: canvas?.height
+    });
+    throw new Error('Failed to render content to canvas - canvas is empty');
+  }
+
+  // Get canvas data
+  const imgData = canvas.toDataURL('image/png');
+  const imgWidth = pageWidth; // A4 width in mm
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  let heightLeft = imgHeight;
+  let position = 0;
+
+  // Add images to PDF pages
+  while (heightLeft >= 0) {
+    const heightToPrint = Math.min(pageHeight, heightLeft);
+    pdf.addImage(imgData, 'PNG', 0, -position, pageWidth, imgHeight);
+    heightLeft -= pageHeight;
+    position += pageHeight;
+
+    if (heightLeft > 0) {
+      pdf.addPage();
+    }
+  }
+};
+
 // Helper function to convert HTML to PDF and auto-download
 const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string) => {
   let wrapper: HTMLElement | null = null;
