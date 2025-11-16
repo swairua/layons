@@ -709,9 +709,9 @@ export const generatePDF = async (data: DocumentData) => {
             box-sizing: border-box;
           }
           .header-content {
-            margin: 0 -12mm;
-            padding: 20px 12mm;
-            width: calc(100% + 24mm);
+            margin: 0;
+            padding: 20px 0;
+            width: 100%;
           }
         }
 
