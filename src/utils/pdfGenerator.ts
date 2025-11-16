@@ -765,6 +765,7 @@ export const generatePDF = async (data: DocumentData) => {
             </tr>
           </table>
         </div>
+        </div>
       </div>
     </body>
     </html>
