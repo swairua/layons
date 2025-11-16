@@ -755,7 +755,7 @@ export const generatePDF = (data: DocumentData) => {
       <div class="page" style="position: relative; page-break-before: always;">
         <!-- Section Totals Table Only -->
         <div style="margin: 20px 0;">
-          <table class="totals-table" style="width: 400px;">
+          <table class="totals-table" style="width: 100%;">
             <thead>
               <tr style="border-bottom: 2px solid #000;">
                 <th style="text-align: left; padding: 10px 15px; font-weight: bold; color: #000; font-size: 12px;">SECTION</th>
@@ -782,7 +782,7 @@ export const generatePDF = (data: DocumentData) => {
 
         <!-- Grand Total -->
         <div style="display: flex; justify-content: flex-start; margin-top: 20px;">
-          <table class="totals-table" style="width: 400px;">
+          <table class="totals-table" style="width: 100%;">
             <tr class="total-row" style="border-top: 2px solid #000; background: #fff;">
               <td class="label" style="padding: 12px 15px; text-align: left; font-weight: bold; color: #000; font-size: 14px;">GRAND TOTAL:</td>
               <td class="amount" style="padding: 12px 15px; text-align: right; font-weight: bold; color: #000; font-size: 14px;">${formatCurrency(grandTotal)}</td>
