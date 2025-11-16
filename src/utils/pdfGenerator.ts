@@ -1348,6 +1348,9 @@ export const generatePDF = (data: DocumentData) => {
           font-weight: bold;
           line-height: 1.6;
           text-align: left;
+          margin-left: 0;
+          padding-left: 0;
+          width: 100%;
         }
 
         .logo {
