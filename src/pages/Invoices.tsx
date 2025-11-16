@@ -600,14 +600,14 @@ Website:`;
                       {formatCurrency(invoice.total_amount || 0)}
                     </TableCell>
                     <TableCell className="text-success">
-                      {formatCurrency(invoice.paid_amount || 0)}
+                      {formatCurrency(invoice.paid_amount ?? 0)}
                     </TableCell>
-                    <TableCell className={`font-medium ${(invoice.balance_due || 0) > 0 ? 'text-destructive' : 'text-success'}`}>
-                      {formatCurrency(invoice.balance_due || 0)}
+                    <TableCell className={`font-medium ${((invoice.balance_due ?? (invoice.total_amount || 0) - (invoice.paid_amount ?? 0)) || 0) > 0 ? 'text-destructive' : 'text-success'}`}>
+                      {formatCurrency(invoice.balance_due ?? (invoice.total_amount || 0) - (invoice.paid_amount ?? 0))}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={getStatusColor(invoice.status)}>
-                        {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+                      <Badge variant="outline" className={getStatusColor(calculateInvoiceStatus(invoice))}>
+                        {calculateInvoiceStatus(invoice).charAt(0).toUpperCase() + calculateInvoiceStatus(invoice).slice(1)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
