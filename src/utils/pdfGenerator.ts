@@ -1013,6 +1013,14 @@ export const generatePDF = (data: DocumentData) => {
             box-sizing: border-box;
           }
 
+          @media screen {
+            .header-content {
+              margin: 0 -20mm;
+              padding: 20px 20mm;
+              width: calc(100% + 40mm);
+            }
+          }
+
           .company-info {
             flex: 1;
           }
