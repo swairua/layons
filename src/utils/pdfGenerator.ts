@@ -630,11 +630,11 @@ export const generatePDF = async (data: DocumentData) => {
         .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; max-width: 100%; }
 
         /* Header content styling */
-        .header-content { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; margin-bottom: 12px; width: 100%; box-sizing: border-box; max-width: 100%; overflow: hidden; }
-        .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 11px; font-weight: bold; line-height: 1.5; text-align: left; grid-column: 1 / -1; width: 100%; box-sizing: border-box; }
-        .header-right { text-align: right; font-size: 10px; line-height: 1.4; font-weight: bold; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal; width: 100%; min-width: 0; }
-        .header-right div { margin: 1px 0; font-size: 9px; }
-        .services-section { font-size: 10px; font-weight: bold; color: #333; line-height: 1.4; text-align: left; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal; width: 100%; min-width: 0; }
+        .header-content { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; margin-bottom: 12px; width: 100%; box-sizing: border-box; max-width: 100%; overflow: hidden; }
+        .header-left { display: flex; flex-direction: column; gap: 1px; font-size: 10px; font-weight: bold; line-height: 1.4; text-align: left; grid-column: 1 / -1; width: 100%; box-sizing: border-box; }
+        .header-right { text-align: right; font-size: 8px; line-height: 1.3; font-weight: bold; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal; width: 100%; min-width: 0; padding: 0; margin: 0; }
+        .header-right div { margin: 0; padding: 0; font-size: 8px; line-height: 1.2; }
+        .services-section { font-size: 9px; font-weight: bold; color: #333; line-height: 1.3; text-align: left; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal; width: 100%; min-width: 0; padding: 0; margin: 0; }
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; margin-bottom: 6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
