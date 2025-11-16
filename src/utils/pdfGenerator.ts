@@ -640,7 +640,7 @@ export const generatePDF = async (data: DocumentData) => {
     const sectionTotals: number[] = [];
 
     // Helpers to detect row kinds
-    const isSectionHeader = (d: string) => d.startsWith('��� ');
+    const isSectionHeader = (d: string) => /^section\s+[a-z]:\s*/i.test(d);
     const isSubsectionHeader = (d: string) => /^\s*[→-]?\s*subsection\s+[^:]+:\s*/i.test(d);
     const isSubsectionSubtotal = (d: string) => /^subsection\s+[^\s]+\s+subtotal\s*$/i.test(d);
     const isSectionTotalRow = (d: string) => /^section\s+total$/i.test(d);
@@ -650,7 +650,7 @@ export const generatePDF = async (data: DocumentData) => {
         const desc = String(it.description || '');
 
         if (isSectionHeader(desc)) {
-          currentSection = desc.replace(/^➤\s*/, '');
+          currentSection = desc;
           itemNo = 0;
           // Add spacer row before section headers (except first section) to force page breaks
           const isFirstSection = !rowsHtml.includes('section-row');
@@ -665,6 +665,7 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         if (isSubsectionHeader(desc)) {
+          itemNo = 0;
           rowsHtml += `<tr class=\"subsection-row\"><td class=\"num\"></td><td colspan=\"5\" class=\"subsection-title\">${desc.replace(/^\s*[→-]?\s*/, '')}</td></tr>`;
           return;
         }
@@ -693,7 +694,7 @@ export const generatePDF = async (data: DocumentData) => {
           }
           runningSectionTotal = 0;
           itemNo = 0;
-          currentSection = it.description.replace(/^➤\s*/, '');
+          currentSection = it.description;
           // Add spacer row before section headers (except first section) to force page breaks
           const isFirstSection = sectionTotals.length === 0;
           const spacerRow = !isFirstSection ? `<tr class=\"spacer-row\"><td colspan=\"6\" style=\"height: 15mm; border: none; background: none;\"></td></tr>` : '';
