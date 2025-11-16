@@ -1786,19 +1786,28 @@ export const generatePDF = async (data: DocumentData) => {
 
           .totals-section {
             margin-top: 20px;
+            margin-bottom: 15mm;
             display: flex;
             justify-content: flex-end;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            page-break-before: avoid;
+            break-before: avoid;
+            padding-bottom: 10mm;
           }
 
           .totals-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 12px;
+            page-break-inside: avoid;
+            break-inside: avoid;
           }
 
           .totals-table td {
             padding: 8px 15px;
             border: none;
+            page-break-inside: avoid;
           }
 
           .totals-table .label {
@@ -1816,6 +1825,7 @@ export const generatePDF = async (data: DocumentData) => {
           .totals-table .total-row {
             border-top: 2px solid #000;
             background: #fff;
+            page-break-inside: avoid;
           }
 
           .totals-table .total-row .label {
