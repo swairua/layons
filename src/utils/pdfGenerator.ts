@@ -268,6 +268,10 @@ export const generatePDF = async (data: DocumentData) => {
   const DEFAULT_SERVICES = 'BUILDING WORKS, RENOVATIONS, ROADWORKS, LANDSCAPING, ELECTRICAL WORKS, WATER WORKS';
   const companyServices = company.company_services || DEFAULT_SERVICES;
 
+  // Get header and stamp images with fallbacks
+  const headerImage = company.header_image || DEFAULT_COMPANY.header_image;
+  const stampImage = company.stamp_image || DEFAULT_COMPANY.stamp_image;
+
   // Analyze which columns have values
   const visibleColumns = analyzeColumns(data.items);
   const formatCurrency = (amount: number) => {
