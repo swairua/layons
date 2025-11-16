@@ -431,11 +431,11 @@ export const generatePDF = (data: DocumentData) => {
 
             <!-- Bottom row: Client Details -->
             <div class="header-left">
-              <div style="margin-bottom: 4px; font-weight: bold;"><strong>Client:</strong> ${data.customer.name}</div>
-              ${boqProject ? `<div style="margin-bottom: 4px; font-weight: bold;"><strong>Project:</strong> ${boqProject}</div>` : ''}
-              <div style="margin-bottom: 4px; font-weight: bold;"><strong>Subject:</strong> Bill of Quantities</div>
-              <div style="margin-bottom: 4px; font-weight: bold;"><strong>Date:</strong> ${formatDateLong(data.date)}</div>
-              <div style="margin-bottom: 4px; font-weight: bold;"><strong>BOQ No:</strong> ${data.number}</div>
+              <div><strong>Client:</strong> ${data.customer.name}</div>
+              ${boqProject ? `<div><strong>Project:</strong> ${boqProject}</div>` : ''}
+              <div><strong>Subject:</strong> Bill of Quantities</div>
+              <div><strong>Date:</strong> ${formatDateLong(data.date)}</div>
+              <div><strong>BOQ No:</strong> ${data.number}</div>
             </div>
           </div>
         </div>
