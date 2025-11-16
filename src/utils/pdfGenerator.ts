@@ -624,17 +624,17 @@ export const generatePDF = async (data: DocumentData) => {
         body { font-family: 'Arial', sans-serif; margin:0; color:#222; font-size:12px; }
         body { counter-reset: page; }
         .pagefoot::after { content: "Page " counter(page) ""; }
-        .container { padding: 0; }
+        .container { padding: 0; width: 100%; box-sizing: border-box; max-width: 100%; }
 
         /* Header image styling - matching quotations */
-        .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; }
+        .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; max-width: 100%; }
 
         /* Header content styling */
-        .header-content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; margin-bottom: 12px; width: 100%; box-sizing: border-box; }
-        .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; grid-column: 1 / -1; }
-        .header-right { text-align: right; font-size: 11px; line-height: 1.5; font-weight: bold; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; }
-        .header-right div { margin: 2px 0; }
-        .services-section { font-size: 11px; font-weight: bold; color: #333; line-height: 1.5; text-align: left; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; }
+        .header-content { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; margin-bottom: 12px; width: 100%; box-sizing: border-box; max-width: 100%; overflow: hidden; }
+        .header-left { display: flex; flex-direction: column; gap: 1px; font-size: 10px; font-weight: bold; line-height: 1.4; text-align: left; grid-column: 1 / -1; width: 100%; box-sizing: border-box; }
+        .header-right { text-align: right; font-size: 8px; line-height: 1.3; font-weight: bold; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal; width: 100%; min-width: 0; padding: 0; margin: 0; }
+        .header-right div { margin: 0; padding: 0; font-size: 8px; line-height: 1.2; }
+        .services-section { font-size: 9px; font-weight: bold; color: #333; line-height: 1.3; text-align: left; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal; width: 100%; min-width: 0; padding: 0; margin: 0; }
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; margin-bottom: 6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
@@ -678,6 +678,9 @@ export const generatePDF = async (data: DocumentData) => {
           width: 100%;
           padding: 12mm;
           padding-bottom: 40mm;
+          box-sizing: border-box;
+          max-width: 100%;
+          overflow: hidden;
         }
 
         .terms-page {
@@ -720,9 +723,9 @@ export const generatePDF = async (data: DocumentData) => {
             <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
 
             <!-- Header content below image -->
-            <div class="header-content" style="margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; box-sizing: border-box;">
+            <div class="header-content">
               <!-- Services Section -->
-              <div class="services-section" style="font-size: 11px; font-weight: bold; color: #333; line-height: 1.5; text-align: left; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word;">
+              <div class="services-section">
                 ${(() => {
                   const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                   const itemsPerLine = Math.ceil(services.length / 3);
@@ -734,16 +737,16 @@ export const generatePDF = async (data: DocumentData) => {
               </div>
 
               <!-- Company details (right-aligned) -->
-              <div class="header-right" style="text-align: right; font-size: 11px; line-height: 1.5; font-weight: bold; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word;">
-                ${company.address ? `<div style="font-size: 10px;">${company.address}</div>` : ''}
-                ${company.city ? `<div style="font-size: 10px;">${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-                ${company.phone ? `<div style="font-size: 10px;">Telephone: ${company.phone}</div>` : ''}
-                ${company.email ? `<div style="font-size: 10px;">${company.email}</div>` : ''}
-                ${company.tax_number ? `<div style="font-size: 10px;">PIN: ${company.tax_number}</div>` : ''}
+              <div class="header-right">
+                ${company.address ? `<div>${company.address}</div>` : ''}
+                ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+                ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
+                ${company.email ? `<div>${company.email}</div>` : ''}
+                ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
               </div>
 
               <!-- Bottom row: Client Details (spans both columns) -->
-              <div class="header-left" style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left;">
+              <div class="header-left" style="grid-column: 1 / -1;">
                 <div><strong>Client:</strong> ${data.customer.name}</div>
                 ${boqProject ? `<div><strong>Project:</strong> ${boqProject}</div>` : ''}
                 <div><strong>Subject:</strong> Bill of Quantities</div>
