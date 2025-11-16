@@ -4,30 +4,58 @@ import html2canvas from 'html2canvas';
 
 // Helper function to convert HTML to PDF and auto-download
 const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string) => {
+  let wrapper: HTMLElement | null = null;
   try {
-    // Create a temporary container for the HTML
-    const container = document.createElement('div');
-    container.innerHTML = htmlContent;
-    container.style.position = 'absolute';
-    container.style.left = '-9999px';
-    container.style.top = '-9999px';
-    container.style.width = '210mm';
-    container.style.height = 'auto';
-    document.body.appendChild(container);
+    // Create a temporary wrapper for proper rendering
+    wrapper = document.createElement('div');
+    wrapper.style.position = 'absolute';
+    wrapper.style.left = '0';
+    wrapper.style.top = '0';
+    wrapper.style.width = '210mm';
+    wrapper.style.height = 'auto';
+    wrapper.style.backgroundColor = '#ffffff';
+    wrapper.style.zIndex = '-999999';
+    wrapper.style.pointerEvents = 'none';
+    wrapper.innerHTML = htmlContent;
 
-    // Wait a bit for images to load
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Append to body to allow CSS to render
+    document.body.appendChild(wrapper);
+
+    // Wait longer for images and fonts to load
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    // Force a reflow to ensure content is rendered
+    wrapper.offsetHeight;
 
     // Convert HTML to canvas
-    const canvas = await html2canvas(container, {
+    const canvas = await html2canvas(wrapper, {
       scale: 2,
       backgroundColor: '#ffffff',
       logging: false,
       allowTaint: true,
-      useCORS: true
+      useCORS: true,
+      imageTimeout: 10000,
+      timeout: 30000,
+      windowHeight: Math.max(wrapper.scrollHeight, wrapper.offsetHeight) || 1000,
+      windowWidth: 210 * 3.779527559, // 210mm to pixels
+      proxy: undefined,
+      foreignObjectRendering: false,
+      ignoreElements: (el) => {
+        // Don't ignore any elements needed for PDF
+        return false;
+      }
     });
 
-    // Get canvas dimensions
+    // Validate canvas
+    if (!canvas || canvas.width === 0 || canvas.height === 0) {
+      console.error('Canvas rendering failed - content may not be visible', {
+        width: canvas?.width,
+        height: canvas?.height
+      });
+      throw new Error('Failed to render content to canvas - canvas is empty');
+    }
+
+    // Get canvas data
     const imgData = canvas.toDataURL('image/png');
     const imgWidth = 210; // A4 width in mm
     const pageHeight = 297; // A4 height in mm
@@ -38,7 +66,6 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
     // Create PDF
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeightPdf = pdf.internal.pageSize.getHeight();
 
     // Add images to PDF pages
     while (heightLeft >= 0) {
@@ -54,11 +81,15 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
 
     // Download the PDF
     pdf.save(filename);
-
-    // Clean up
-    document.body.removeChild(container);
   } catch (error) {
     console.error('Error generating PDF:', error);
+    // Re-throw to be handled by caller
+    throw error;
+  } finally {
+    // Clean up
+    if (wrapper && document.body.contains(wrapper)) {
+      document.body.removeChild(wrapper);
+    }
   }
 };
 
