@@ -1707,33 +1707,37 @@ export const generatePDF = (data: DocumentData) => {
 
           <!-- Header content below image -->
           <div class="header-content">
-            <!-- Left side: Services and Client info (formatted like attachment) -->
-            <div class="company-info">
-              <div style="font-size: 10px; font-weight: bold; color: #333; margin-bottom: 8px; line-height: 1.4; text-transform: uppercase;">
-                ${companyServices.split(/[\n,]/).filter((line: string) => line.trim()).map((line: string) => `<div>${line.trim()}</div>`).join('')}
+            <!-- Top row: Services (left) and Company details (right) -->
+            <div class="header-top">
+              <!-- Services Section -->
+              <div class="services-section">
+                ${(() => {
+                  const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+                  const itemsPerLine = Math.ceil(services.length / 3);
+                  const line1 = services.slice(0, itemsPerLine).join(' • ');
+                  const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
+                  const line3 = services.slice(itemsPerLine * 2).join(' • ');
+                  return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
+                })()}
               </div>
 
-              <div style="margin-top: 6px; font-size: 10px; line-height:1.6;">
-                <div style="margin-bottom:6px; font-weight:600;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
-                <div style="margin-bottom:4px;">${data.customer?.name || ''}</div>
-                ${data.project_title ? `<div style="margin-bottom:4px;"><strong>Project:</strong> ${data.project_title}</div>` : ''}
-                <div style="margin-bottom:4px;"><strong>Subject:</strong> ${data.type === 'boq' ? 'Bill of Quantities' : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
-                <div style="margin-bottom:4px;"><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
-                <div style="margin-bottom:4px;"><strong>Qtn No:</strong> ${data.number || ''}</div>
-              </div>
-            </div>
-
-            <!-- Right side: Document info -->
-            <div class="document-info">
-              <div style="text-align: right; font-size: 12px; line-height: 1.7; margin-bottom: 8px; font-weight: bold;">
+              <!-- Company details (right-aligned) -->
+              <div class="header-right">
                 ${company.address ? `<div>${company.address}</div>` : ''}
                 ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
                 ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
                 ${company.email ? `<div>${company.email}</div>` : ''}
                 ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
               </div>
+            </div>
 
-              <!-- Document title and metadata removed as requested -->
+            <!-- Bottom row: Client Details -->
+            <div class="header-left">
+              <div><strong>${data.type === 'lpo' ? 'Supplier' : 'Client'}:</strong> ${data.customer?.name || ''}</div>
+              ${data.project_title ? `<div><strong>Project:</strong> ${data.project_title}</div>` : ''}
+              <div><strong>Subject:</strong> ${data.type === 'boq' ? 'Bill of Quantities' : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
+              <div><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
+              <div><strong>${data.type === 'boq' ? 'BOQ No' : 'Qtn No'}:</strong> ${data.number || ''}</div>
             </div>
           </div>
         </div>
