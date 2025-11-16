@@ -413,6 +413,8 @@ export default function CompanySettings() {
         postal_code: companyData.postal_code?.trim() || null,
         country: companyData.country?.trim() || 'Kenya',
         logo_url: companyData.logo_url?.trim() || null,
+        header_image: companyData.header_image?.trim() || null,
+        stamp_image: companyData.stamp_image?.trim() || null,
         company_services: companyData.company_services?.trim() || null
       };
 
