@@ -33,9 +33,17 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { useCreateLPO, useGenerateLPONumber, useAllSuppliersAndCustomers, useProducts, useCompanies, useCreateCustomer } from '@/hooks/useDatabase';
-import { toast } from 'sonner';
+import { toast } from '@/utils/safeToast';
 import { validateLPO } from '@/utils/lpoValidation';
 import { validateSupplierSelection, ValidationResult } from '@/utils/customerSupplierValidation';
+
+function formatErrorMessage(error: any): string {
+  if (!error) return 'Unknown error occurred';
+  if (typeof error === 'string') return error;
+  if (error instanceof Error) return error.message;
+  if (error?.message && typeof error.message === 'string') return error.message;
+  return 'An unexpected error occurred';
+}
 
 interface LPOItem {
   id: string;
@@ -279,7 +287,7 @@ export const CreateLPOModal = ({
     });
 
     if (!validationResult.isValid) {
-      validationResult.errors.forEach(error => toast.error(error));
+      validationResult.errors.forEach(error => toast.error(formatErrorMessage(error)));
       return;
     }
 
