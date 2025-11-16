@@ -962,6 +962,12 @@ export const generatePDF = async (data: DocumentData) => {
         windowWidth: 210 * 3.779527559,
         proxy: undefined,
         foreignObjectRendering: false,
+        onclone: (clonedDocument) => {
+          // Ensure CSS page breaks are respected during rendering
+          const style = clonedDocument.createElement('style');
+          style.textContent = '@media print { * { page-break-inside: avoid !important; } }';
+          clonedDocument.head.appendChild(style);
+        }
       });
 
       // Add BOQ pages to PDF
@@ -970,15 +976,20 @@ export const generatePDF = async (data: DocumentData) => {
       const imgBoqHeight = (boqCanvas.height * imgBoqWidth) / boqCanvas.width;
       let boqHeightLeft = imgBoqHeight;
       let boqPosition = 0;
+      let firstPage = true;
 
-      // Add BOQ content, creating multiple pages if needed
+      // Add BOQ content, creating multiple pages if needed with proper margins
       while (boqHeightLeft >= 0) {
+        if (!firstPage) {
+          pdf.addPage();
+        }
         pdf.addImage(imgBoqData, 'PNG', 0, -boqPosition, imgBoqWidth, imgBoqHeight);
-        boqHeightLeft -= pageHeight;
+        boqHeightLeft -= (pageHeight - 8); // Account for margins and spacing
         boqPosition += pageHeight;
+        firstPage = false;
 
         if (boqHeightLeft > 0) {
-          pdf.addPage();
+          // Ensure proper spacing before next page
         }
       }
 
