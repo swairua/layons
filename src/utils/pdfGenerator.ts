@@ -968,6 +968,7 @@ export const generatePDF = async (data: DocumentData) => {
       let boqHeightLeft = imgBoqHeight;
       let boqPosition = 0;
 
+      // Add BOQ content, creating multiple pages if needed
       while (boqHeightLeft >= 0) {
         pdf.addImage(imgBoqData, 'PNG', 0, -boqPosition, imgBoqWidth, imgBoqHeight);
         boqHeightLeft -= pageHeight;
@@ -978,10 +979,7 @@ export const generatePDF = async (data: DocumentData) => {
         }
       }
 
-      // Always add a new page for terms - ensures clean page break
-      pdf.addPage();
-
-      // Render Page 2: Terms and Conditions
+      // Render Page 2: Terms and Conditions (on a fresh page)
       console.log('Rendering terms and conditions...');
       const termsElement = boqWrapper.querySelector('.terms-page') as HTMLElement;
       if (!termsElement) {
@@ -1002,6 +1000,9 @@ export const generatePDF = async (data: DocumentData) => {
         foreignObjectRendering: false,
       });
 
+      // Add a fresh page for terms
+      pdf.addPage();
+
       // Add terms to the new page
       const imgTermsData = termsCanvas.toDataURL('image/png');
       const imgTermsWidth = pageWidth; // 210mm
@@ -1009,18 +1010,15 @@ export const generatePDF = async (data: DocumentData) => {
       let termsHeightLeft = imgTermsHeight;
       let termsPosition = 0;
 
+      // Add terms content to PDF
       while (termsHeightLeft >= 0) {
-        // Remove the last page we added if we already rendered content there
-        if (termsPosition === 0 && pdf.internal.pages.length > 1) {
-          // We're on a fresh page, add the image
-          pdf.addImage(imgTermsData, 'PNG', 0, -termsPosition, imgTermsWidth, imgTermsHeight);
-        } else if (termsPosition > 0) {
-          pdf.addPage();
-          pdf.addImage(imgTermsData, 'PNG', 0, -termsPosition, imgTermsWidth, imgTermsHeight);
-        }
-
+        pdf.addImage(imgTermsData, 'PNG', 0, -termsPosition, imgTermsWidth, imgTermsHeight);
         termsHeightLeft -= pageHeight;
         termsPosition += pageHeight;
+
+        if (termsHeightLeft > 0) {
+          pdf.addPage();
+        }
       }
 
       // Download PDF
