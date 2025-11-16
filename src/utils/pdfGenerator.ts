@@ -1284,13 +1284,23 @@ export const generatePDF = (data: DocumentData) => {
         }
 
         .page {
-          width: 210mm;
+          width: 100%;
           min-height: 297mm;
-          margin: 0 auto;
+          margin: 0;
           background: white;
           box-shadow: 0 0 10px rgba(0,0,0,0.1);
-          padding: 20mm;
+          padding: 0;
           position: relative;
+        }
+
+        @media print {
+          .page {
+            box-shadow: none;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: auto;
+          }
         }
 
         .header {
