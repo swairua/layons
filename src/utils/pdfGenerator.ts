@@ -1402,7 +1402,7 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .page:last-of-type {
-            page-break-after: avoid;
+            page-break-after: auto;
             break-after: auto;
           }
 
@@ -1417,7 +1417,7 @@ export const generatePDF = async (data: DocumentData) => {
             }
 
             .page:last-of-type {
-              page-break-after: avoid;
+              page-break-after: auto;
               break-after: auto;
             }
           }
