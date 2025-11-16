@@ -530,7 +530,7 @@ export const generatePDF = async (data: DocumentData) => {
     const sectionTotals: number[] = [];
 
     // Helpers to detect row kinds
-    const isSectionHeader = (d: string) => d.startsWith('➤ ');
+    const isSectionHeader = (d: string) => d.startsWith('��� ');
     const isSubsectionHeader = (d: string) => /^\s*[→-]?\s*subsection\s+[^:]+:\s*/i.test(d);
     const isSubsectionSubtotal = (d: string) => /^subsection\s+[^\s]+\s+subtotal\s*$/i.test(d);
     const isSectionTotalRow = (d: string) => /^section\s+total$/i.test(d);
@@ -715,9 +715,9 @@ export const generatePDF = async (data: DocumentData) => {
             <!-- Header content below image -->
             <div class="header-content" style="margin-top: 8px; display: flex; flex-direction: column; gap: 12px;">
               <!-- Top row: Services (left) and Company details (right) -->
-              <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: 100%; box-sizing: border-box; min-width: 0;">
+              <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: 100%; box-sizing: border-box; min-width: 0; overflow: hidden;">
                 <!-- Services Section -->
-                <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; box-sizing: border-box; min-width: 0;">
+                <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 1 1 60%; box-sizing: border-box; min-width: 0; overflow-wrap: break-word;">
                   ${(() => {
                     const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                     const itemsPerLine = Math.ceil(services.length / 3);
@@ -729,7 +729,7 @@ export const generatePDF = async (data: DocumentData) => {
                 </div>
 
                 <!-- Company details (right-aligned) -->
-                <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box;">
+                <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 1 40%; box-sizing: border-box; min-width: 0; overflow-wrap: break-word;">
                   ${company.address ? `<div>${company.address}</div>` : ''}
                   ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
                   ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
