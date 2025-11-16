@@ -477,7 +477,7 @@ export const generatePDF = (data: DocumentData) => {
 
         <!-- Terms Section -->
         <div style="margin-bottom: 25px;">
-          <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Terms;</h3>
+          <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Terms;</h3>
           <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
             <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
               <ul style="font-size: 11px; line-height: 1.6; margin: 6px 0 6px 20px; padding-left: 20px; color: #333; list-style-type: lower-alpha;">
@@ -1835,7 +1835,7 @@ export const generatePDF = (data: DocumentData) => {
                   <td style="font-size: 10px;">
                     ${(item as any).quantity_delivered >= (item as any).quantity_ordered ?
                       '<span style="color: hsl(var(--primary)); font-weight: bold;">✓ Complete</span>' :
-                      '<span style="color: #F59E0B; font-weight: bold;">��� Partial</span>'
+                      '<span style="color: #F59E0B; font-weight: bold;">⚠ Partial</span>'
                     }
                   </td>
                   ` : data.type === 'boq' ? `
