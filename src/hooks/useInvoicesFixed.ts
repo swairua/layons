@@ -15,6 +15,7 @@ export const useInvoicesFixed = (companyId?: string) => {
         console.log('Fetching invoices for company:', companyId);
 
         // Step 1: Get invoices without embedded relationships
+        // Note: Use amount_paid and amount_due as per the database schema
         const { data: invoices, error: invoicesError } = await supabase
           .from('invoices')
           .select(`
@@ -28,8 +29,8 @@ export const useInvoicesFixed = (companyId?: string) => {
             subtotal,
             tax_amount,
             total_amount,
-            paid_amount,
-            balance_due,
+            amount_paid,
+            amount_due,
             notes,
             terms_and_conditions,
             lpo_number,
