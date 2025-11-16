@@ -361,9 +361,10 @@ export const generatePDF = (data: DocumentData) => {
         .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
         .header-top { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 12px; }
         .header-left { display: flex; flex-direction: column; gap: 8px; font-size: 10px; line-height: 1.6; text-align: left; }
-        .header-right { text-align: right; font-size: 10px; line-height: 1.6; }
+        .header-right { text-align: right; font-size: 12px; line-height: 1.6; }
         .header-right .company-name { font-weight: bold; margin-bottom: 6px; font-size: 12px; }
-        .services-section { font-size: 10px; font-weight: bold; color: #333; text-transform: uppercase; line-height: 1.4; text-align: left; }
+        .header-right > div { font-weight: bold; }
+        .services-section { font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; }
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
