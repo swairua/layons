@@ -480,7 +480,7 @@ export const generatePDF = (data: DocumentData) => {
           <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
           <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
             <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
-              <ul style="font-size: 11px; line-height: 1.6; margin: 6px 0 6px 20px; padding-left: 20px; color: #333; list-style-type: lower-alpha;">
+              <ul style="font-size: 11px; line-height: 1.6; margin: 6px 0 6px 0; padding-left: 40px; color: #333; list-style-type: lower-alpha;">
                 <li style="margin-bottom: 4px;">50% Upon Order (${formatCurrency(grandTotalForBOQ * 0.5)})</li>
                 <li style="margin-bottom: 4px;">40% As Progressive (${formatCurrency(grandTotalForBOQ * 0.4)})</li>
                 <li style="margin-bottom: 4px;">10% Upon Completion (${formatCurrency(grandTotalForBOQ * 0.1)})</li>
