@@ -639,8 +639,10 @@ export const generatePDF = async (data: DocumentData) => {
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
         .items thead th { background:#f8f9fa; color:#000; font-weight:bold; text-transform: uppercase; }
         .items thead { display: table-header-group; }
-        .section-row { page-break-inside: avoid; page-break-before: always; margin-top: 12mm; page-break-after: avoid; }
-        .section-row:first-of-type { page-break-before: avoid; margin-top: 0; }
+        .spacer-row { height: 15mm; page-break-inside: avoid; }
+        .spacer-row td { border: none !important; background: none !important; padding: 0 !important; height: 15mm; }
+        .section-row { page-break-inside: avoid; page-break-before: always; page-break-after: avoid; }
+        .section-row:first-of-type { page-break-before: avoid; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding:8px; }
         .item-row { page-break-inside: avoid; }
         .item-row td.num { text-align:center; }
