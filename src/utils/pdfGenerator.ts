@@ -359,12 +359,12 @@ export const generatePDF = (data: DocumentData) => {
 
         /* Header content styling */
         .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-        .header-top { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 12px; }
+        .header-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-bottom: 12px; }
         .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; }
-        .header-right { text-align: right; font-size: 12px; line-height: 1.6; }
+        .header-right { text-align: right; font-size: 12px; line-height: 1.6; flex-shrink: 0; white-space: nowrap; }
         .header-right .company-name { font-weight: bold; margin-bottom: 6px; font-size: 12px; }
         .header-right > div { font-weight: bold; }
-        .services-section { font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; }
+        .services-section { font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 1; }
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
@@ -416,7 +416,7 @@ export const generatePDF = (data: DocumentData) => {
                 ${(() => {
                   const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                   const itemsPerLine = Math.ceil(services.length / 3);
-                  const line1 = services.slice(0, itemsPerLine).join(' ��� ');
+                  const line1 = services.slice(0, itemsPerLine).join(' ����� ');
                   const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' ��� ');
                   const line3 = services.slice(itemsPerLine * 2).join(' • ');
                   return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
@@ -630,9 +630,9 @@ export const generatePDF = (data: DocumentData) => {
             <!-- Header content below image -->
             <div class="header-content" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
               <!-- Top row: Services (left) and Company details (right) -->
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
                 <!-- Services Section -->
-                <div style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left;">
+                <div style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 1;">
                   ${(() => {
                     const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                     const itemsPerLine = Math.ceil(services.length / 3);
@@ -643,8 +643,8 @@ export const generatePDF = (data: DocumentData) => {
                   })()}
                 </div>
 
-                <!-- Company details (right-aligned) -->
-                <div style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold;">
+                <!-- Company details (right-aligned, no flex growth) -->
+                <div style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex-shrink: 0; white-space: nowrap;">
                   ${company.address ? `<div>${company.address}</div>` : ''}
                   ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
                   ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
@@ -1322,26 +1322,24 @@ export const generatePDF = (data: DocumentData) => {
         }
 
         .header-top {
-          display: table;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
           width: 100%;
           margin: 0 0 10px 0;
           padding: 0;
-          table-layout: fixed;
-          border-collapse: collapse;
-          border-spacing: 0;
+          gap: 20px;
           box-sizing: border-box;
         }
 
         .services-section {
-          display: table-cell;
-          width: 50%;
+          display: block;
           font-size: 12px;
           font-weight: bold;
           color: #333;
           line-height: 1.6;
           text-align: left;
-          padding: 0 20px 0 0;
-          vertical-align: top;
+          flex: 1;
           box-sizing: border-box;
         }
 
@@ -1354,12 +1352,12 @@ export const generatePDF = (data: DocumentData) => {
         }
 
         .header-right {
-          display: table-cell;
-          width: 50%;
+          display: block;
           text-align: right;
           font-size: 12px;
           line-height: 1.6;
-          vertical-align: top;
+          flex-shrink: 0;
+          white-space: nowrap;
           padding: 0;
           margin: 0;
           box-sizing: border-box;
