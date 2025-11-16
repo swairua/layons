@@ -98,7 +98,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const TOAST_COOLDOWN = 10000; // 10 seconds between similar error toasts
 
   // Fetch user profile from database with error handling and retry logic
-  const fetchProfile = useCallback(async (userId: string): Promise<UserProfile | null> => {
+  const fetchProfile = useCallback(async (userId: string, showErrorToast: boolean = false): Promise<UserProfile | null> => {
     const maxRetries = 3;
     let lastError: any = null;
 
@@ -156,8 +156,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           errorDetails = errObj.hint ? ` Hint: ${errObj.hint}` : '';
         }
 
-        // Log comprehensive error info for debugging
-        console.error(`Profile fetch error for user ${userId}: ${errorMessage}${errorDetails} (attempt ${attempt + 1}/${maxRetries})`);
+        // Log comprehensive error info for debugging (but suppress from user by default)
+        console.warn(`Profile fetch error for user ${userId}: ${errorMessage}${errorDetails} (attempt ${attempt + 1}/${maxRetries}). App will continue without full profile.`);
 
         // Handle specific error types using the error type checker
         if (isErrorType(fetchError, 'auth')) {
@@ -175,29 +175,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (isErrorType(fetchError, 'permission')) {
           console.warn('Profile fetch failed due to permissions');
 
-          // Prevent toast spam - only show permission error toast every 10 seconds
-          const now = Date.now();
-          if (now - lastPermissionErrorToast.current > TOAST_COOLDOWN) {
-            lastPermissionErrorToast.current = now;
-            setTimeout(() => toast.error(
-              'Permission error accessing profile. Please sign in again.',
-              { duration: 4000 }
-            ), 0);
+          // Only show permission error if explicitly requested
+          if (showErrorToast) {
+            const now = Date.now();
+            if (now - lastPermissionErrorToast.current > TOAST_COOLDOWN) {
+              lastPermissionErrorToast.current = now;
+              setTimeout(() => toast.error(
+                'Permission error accessing profile. Please sign in again.',
+                { duration: 4000 }
+              ), 0);
+            }
           }
           return null;
         }
 
-        // Show general error message for other cases
-        const friendlyMessage = getUserFriendlyErrorMessage(fetchError);
-
-        // Prevent toast spam - only show general error toast every 10 seconds
-        const now = Date.now();
-        if (now - lastGeneralErrorToast.current > TOAST_COOLDOWN) {
-          lastGeneralErrorToast.current = now;
-          setTimeout(() => toast.error(
-            `Failed to load user profile: ${friendlyMessage}`,
-            { duration: 4000 }
-          ), 0);
+        // Only show general error if explicitly requested (profile fetch is non-critical for app operation)
+        if (showErrorToast) {
+          const friendlyMessage = getUserFriendlyErrorMessage(fetchError);
+          const now = Date.now();
+          if (now - lastGeneralErrorToast.current > TOAST_COOLDOWN) {
+            lastGeneralErrorToast.current = now;
+            setTimeout(() => toast.error(
+              `Failed to load user profile: ${friendlyMessage}`,
+              { duration: 4000 }
+            ), 0);
+          }
         }
 
         return null;

@@ -629,12 +629,17 @@ export const generatePDF = async (data: DocumentData) => {
         /* Header image styling - matching quotations */
         .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; max-width: 100%; }
 
-        /* Header content styling */
-        .header-content { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; margin-bottom: 12px; width: 100%; box-sizing: border-box; max-width: 100%; overflow: hidden; padding: 0; }
-        .header-left { display: flex; flex-direction: column; gap: 1px; font-size: 10px; font-weight: bold; line-height: 1.4; text-align: left; grid-column: 1 / -1; width: 100%; box-sizing: border-box; padding: 0; margin: 0; }
-        .header-right { text-align: right; font-size: 8px; line-height: 1.3; font-weight: bold; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal; min-width: 0; padding: 0; margin: 0; max-width: 100%; }
-        .header-right div { margin: 0; padding: 0; font-size: 8px; line-height: 1.2; }
-        .services-section { font-size: 9px; font-weight: bold; color: #333; line-height: 1.3; text-align: left; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal; min-width: 0; padding: 0; margin: 0; max-width: 100%; }
+        /* Header content styling - matching quotation layout exactly */
+        .header-content { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; padding: 20px 0; margin: 0; width: 100%; border-bottom: 2px solid #000; box-sizing: border-box; }
+        .header-company-info { flex: 0 1 auto; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+        .header-logo { width: 120px; height: 120px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 4px; overflow: hidden; flex-shrink: 0; }
+        .header-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .company-name { font-size: 18px; font-weight: bold; color: #212529; margin: 0 0 8px 0; }
+        .company-details { font-size: 10px; color: #666; line-height: 1.6; }
+        .header-document-info { text-align: right; flex: 0 1 auto; min-width: 0; }
+        .document-title { font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #000; text-transform: uppercase; }
+        .document-details { font-size: 10px; font-weight: bold; color: #333; line-height: 1.6; }
+        .document-details div { margin-bottom: 4px; }
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; margin-bottom: 6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
@@ -703,12 +708,22 @@ export const generatePDF = async (data: DocumentData) => {
             width: calc(100% + 24mm);
             box-sizing: border-box;
           }
+          .header-content {
+            margin: 0;
+            padding: 20px 0;
+            width: 100%;
+          }
         }
 
         @media print {
           .header {
             margin: 0;
             padding: 0;
+          }
+          .header-content {
+            margin: 0;
+            padding: 20px 0;
+            width: 100%;
           }
         }
       </style>
@@ -724,34 +739,33 @@ export const generatePDF = async (data: DocumentData) => {
 
             <!-- Header content below image -->
             <div class="header-content">
-              <!-- Services Section -->
-              <div class="services-section">
-                ${(() => {
-                  const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-                  const itemsPerLine = Math.ceil(services.length / 3);
-                  const line1 = services.slice(0, itemsPerLine).join(' • ');
-                  const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
-                  const line3 = services.slice(itemsPerLine * 2).join(' • ');
-                  return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
-                })()}
+              <!-- Left side: Company info with logo -->
+              <div class="header-company-info">
+                <div class="header-logo">
+                  <img src="${company.logo_url || 'https://cdn.builder.io/api/v1/image/assets%2Fb048b36350454e4dba55aefd37788f9c%2Fbd04dab542504461a2451b061741034c?format=webp&width=800'}" alt="${company.name}" />
+                </div>
+                <div>
+                  <div class="company-name">${company.name}</div>
+                  <div class="company-details">
+                    ${company.address ? `<div>${company.address}</div>` : ''}
+                    ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+                    ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
+                    ${company.email ? `<div>${company.email}</div>` : ''}
+                    ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
+                  </div>
+                </div>
               </div>
 
-              <!-- Company details (right-aligned) -->
-              <div class="header-right">
-                ${company.address ? `<div>${company.address}</div>` : ''}
-                ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-                ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
-                ${company.email ? `<div>${company.email}</div>` : ''}
-                ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
-              </div>
-
-              <!-- Bottom row: Client Details (spans both columns) -->
-              <div class="header-left" style="grid-column: 1 / -1;">
-                <div><strong>Client:</strong> ${data.customer.name}</div>
-                ${boqProject ? `<div><strong>Project:</strong> ${boqProject}</div>` : ''}
-                <div><strong>Subject:</strong> Bill of Quantities</div>
-                <div><strong>Date:</strong> ${formatDateLong(data.date)}</div>
-                <div><strong>BOQ No:</strong> ${data.number}</div>
+              <!-- Right side: Document info -->
+              <div class="header-document-info">
+                <div class="document-title">Bill of Quantities</div>
+                <div class="document-details">
+                  <div><strong>Client:</strong> ${data.customer.name}</div>
+                  ${boqProject ? `<div><strong>Project:</strong> ${boqProject}</div>` : ''}
+                  <div><strong>Subject:</strong> Bill of Quantities</div>
+                  <div><strong>Date:</strong> ${formatDateLong(data.date)}</div>
+                  <div><strong>BOQ No:</strong> ${data.number}</div>
+                </div>
               </div>
             </div>
           </div>
