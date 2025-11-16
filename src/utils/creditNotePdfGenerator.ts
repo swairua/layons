@@ -1,4 +1,5 @@
 import type { CreditNote } from '@/hooks/useCreditNotes';
+import { PDF_PAGE_CSS } from './pdfMarginConstants';
 
 export interface CreditNotePDFData extends CreditNote {
   customers: {
