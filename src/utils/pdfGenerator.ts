@@ -624,17 +624,17 @@ export const generatePDF = async (data: DocumentData) => {
         body { font-family: 'Arial', sans-serif; margin:0; color:#222; font-size:12px; }
         body { counter-reset: page; }
         .pagefoot::after { content: "Page " counter(page) ""; }
-        .container { padding: 0; }
+        .container { padding: 0; width: 100%; box-sizing: border-box; max-width: 100%; }
 
         /* Header image styling - matching quotations */
-        .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; }
+        .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; max-width: 100%; }
 
         /* Header content styling */
-        .header-content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; margin-bottom: 12px; width: 100%; box-sizing: border-box; }
-        .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; grid-column: 1 / -1; }
-        .header-right { text-align: right; font-size: 11px; line-height: 1.5; font-weight: bold; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; }
-        .header-right div { margin: 2px 0; }
-        .services-section { font-size: 11px; font-weight: bold; color: #333; line-height: 1.5; text-align: left; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; }
+        .header-content { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; margin-bottom: 12px; width: 100%; box-sizing: border-box; max-width: 100%; overflow: hidden; }
+        .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 11px; font-weight: bold; line-height: 1.5; text-align: left; grid-column: 1 / -1; width: 100%; box-sizing: border-box; }
+        .header-right { text-align: right; font-size: 10px; line-height: 1.4; font-weight: bold; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal; width: 100%; min-width: 0; }
+        .header-right div { margin: 1px 0; font-size: 9px; }
+        .services-section { font-size: 10px; font-weight: bold; color: #333; line-height: 1.4; text-align: left; box-sizing: border-box; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal; width: 100%; min-width: 0; }
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; margin-bottom: 6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
