@@ -198,6 +198,7 @@ export const useCustomerInvoicesFixed = (customerId?: string, companyId?: string
         console.log('Fetching invoices for customer:', customerId);
 
         // Get invoices for specific customer
+        // Note: Use amount_paid and amount_due as per the database schema
         let query = supabase
           .from('invoices')
           .select(`
@@ -211,8 +212,8 @@ export const useCustomerInvoicesFixed = (customerId?: string, companyId?: string
             subtotal,
             tax_amount,
             total_amount,
-            paid_amount,
-            balance_due,
+            amount_paid,
+            amount_due,
             notes,
             terms_and_conditions,
             lpo_number,
