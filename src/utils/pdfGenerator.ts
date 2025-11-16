@@ -1142,7 +1142,7 @@ export const generatePDF = (data: DocumentData) => {
           }
 
           .amount-cell {
-            text-align: right !important;
+            text-align: center !important;
             font-weight: 500;
           }
 
