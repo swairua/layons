@@ -51,6 +51,7 @@ import { RecordPaymentModal } from '@/components/payments/RecordPaymentModal';
 import { CreateDeliveryNoteModal } from '@/components/delivery/CreateDeliveryNoteModal';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { downloadInvoicePDF } from '@/utils/pdfGenerator';
+import { fixInvoiceColumns, calculateInvoiceStatus } from '@/utils/fixInvoiceColumns';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Invoice {
