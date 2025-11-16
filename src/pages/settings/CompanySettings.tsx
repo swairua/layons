@@ -44,6 +44,8 @@ export default function CompanySettings() {
     currency: 'KES',
     fiscal_year_start: 1,
     logo_url: '',
+    header_image: '',
+    stamp_image: '',
     company_services: ''
   });
 
