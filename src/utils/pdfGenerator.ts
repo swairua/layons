@@ -894,7 +894,117 @@ export const generatePDF = async (data: DocumentData) => {
     </html>
     `;
 
-    await convertHTMLToPDFAndDownload(htmlContentBOQ, `BOQ-${data.number}.pdf`);
+    // Use separate rendering for BOQ main content and terms to avoid text cutting
+    let boqWrapper: HTMLElement | null = null;
+    let termsWrapper: HTMLElement | null = null;
+
+    try {
+      // Create PDF
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
+
+      // Render Page 1: BOQ Main Content
+      console.log('Rendering BOQ main content...');
+      boqWrapper = document.createElement('div');
+      boqWrapper.style.position = 'absolute';
+      boqWrapper.style.left = '0';
+      boqWrapper.style.top = '0';
+      boqWrapper.style.width = '210mm';
+      boqWrapper.style.height = 'auto';
+      boqWrapper.style.backgroundColor = '#ffffff';
+      boqWrapper.style.zIndex = '-999999';
+      boqWrapper.style.pointerEvents = 'none';
+      boqWrapper.innerHTML = htmlContentBOQ;
+
+      document.body.appendChild(boqWrapper);
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      boqWrapper.offsetHeight;
+
+      // Preload images
+      const boqImages = boqWrapper.querySelectorAll('img');
+      const boqImagePromises = Array.from(boqImages).map(img => {
+        return new Promise<void>((resolve) => {
+          if (!img.src) {
+            resolve();
+            return;
+          }
+          if (img.complete && img.naturalHeight > 0) {
+            resolve();
+          } else {
+            img.addEventListener('load', () => resolve());
+            img.addEventListener('error', () => resolve());
+            img.src = img.src;
+          }
+        });
+      });
+      await Promise.all(boqImagePromises);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Render BOQ main section
+      const boqMainElement = boqWrapper.querySelector('.boq-main') as HTMLElement;
+      if (!boqMainElement) {
+        throw new Error('BOQ main section not found');
+      }
+
+      const boqCanvas = await html2canvas(boqMainElement, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        allowTaint: true,
+        useCORS: true,
+        imageTimeout: 15000,
+        timeout: 45000,
+        windowHeight: Math.max(boqMainElement.scrollHeight, boqMainElement.offsetHeight) || 1000,
+        windowWidth: 210 * 3.779527559,
+        proxy: undefined,
+        foreignObjectRendering: false,
+      });
+
+      // Add BOQ pages to PDF
+      await addCanvasToPDF(pdf, boqCanvas, pageWidth, pageHeight);
+
+      // Render Page 2: Terms and Conditions
+      console.log('Rendering terms and conditions...');
+      const termsElement = boqWrapper.querySelector('.terms-page') as HTMLElement;
+      if (!termsElement) {
+        throw new Error('Terms page section not found');
+      }
+
+      const termsCanvas = await html2canvas(termsElement, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        allowTaint: true,
+        useCORS: true,
+        imageTimeout: 15000,
+        timeout: 45000,
+        windowHeight: Math.max(termsElement.scrollHeight, termsElement.offsetHeight) || 1000,
+        windowWidth: 210 * 3.779527559,
+        proxy: undefined,
+        foreignObjectRendering: false,
+      });
+
+      // Add a new page for terms if not already on a new page
+      pdf.addPage();
+      await addCanvasToPDF(pdf, termsCanvas, pageWidth, pageHeight);
+
+      // Download PDF
+      pdf.save(`BOQ-${data.number}.pdf`);
+      console.log('BOQ PDF generated successfully');
+
+    } catch (error) {
+      console.error('Error generating BOQ PDF:', error);
+      throw error;
+    } finally {
+      // Clean up
+      if (boqWrapper && boqWrapper.parentNode) {
+        boqWrapper.parentNode.removeChild(boqWrapper);
+      }
+      if (termsWrapper && termsWrapper.parentNode) {
+        termsWrapper.parentNode.removeChild(termsWrapper);
+      }
+    }
   }
 
   // Handle quotations, invoices, and proformas with sections
