@@ -636,13 +636,14 @@ export const generatePDF = async (data: DocumentData) => {
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
         .items thead th { background:#f8f9fa; color:#000; font-weight:bold; text-transform: uppercase; }
         .items thead { display: table-header-group; }
-        .section-row { page-break-inside: avoid; page-break-after: avoid; }
+        .section-row { page-break-inside: avoid; page-break-before: always; margin-top: 12mm; page-break-after: avoid; }
+        .section-row:first-of-type { page-break-before: avoid; margin-top: 0; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding:8px; }
         .item-row { page-break-inside: avoid; }
         .item-row td.num { text-align:center; }
         .item-row td.desc { width:55%; }
         .item-row td.qty, .item-row td.unit, .item-row td.rate, .item-row td.amount { text-align:right; }
-        .section-total { page-break-inside: avoid; page-break-before: avoid; }
+        .section-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 8mm; }
         .section-total td { font-weight:700; background:#fafafa; }
         .section-total .label { text-align:right; padding-right:12px; }
         .preliminaries-section { margin-bottom:12px; page-break-inside: avoid; }
@@ -650,7 +651,7 @@ export const generatePDF = async (data: DocumentData) => {
         .subsection-row { page-break-inside: avoid; page-break-after: avoid; }
         .subsection-row td { background:#fcfcfc; font-weight:600; }
         .subsection-title { padding:6px 8px; }
-        .subsection-total { page-break-inside: avoid; page-break-before: avoid; }
+        .subsection-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 6mm; }
         .subsection-total td { font-weight:600; background:#fdfdfd; }
         .subsection-total .label { text-align:right; padding-right:12px; }
         .totals { margin-top:12px; width:100%; page-break-inside: avoid; padding-bottom: 30mm; }
