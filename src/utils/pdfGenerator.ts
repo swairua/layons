@@ -659,20 +659,17 @@ export const generatePDF = async (data: DocumentData) => {
         .field-row .fill { flex:1; height:16px; border-bottom:1px dotted #999; }
         .pagefoot { position:fixed; bottom:12mm; left:12mm; right:12mm; text-align:center; font-size:10px; color:#666; }
 
-        /* Explicit page break mechanism for html2canvas rendering */
+        /* Page sections are rendered separately to avoid text cutting */
         .boq-main {
-          min-height: calc(297mm - 24mm);
-          page-break-after: always;
           display: block;
           width: 100%;
+          padding-bottom: 20mm;
         }
 
         .terms-page {
-          min-height: calc(297mm - 24mm);
-          page-break-before: always;
           display: block;
           width: 100%;
-          margin-top: 12mm;
+          padding: 15mm;
         }
 
         .terms-page table { border-collapse: collapse; }
