@@ -1328,7 +1328,16 @@ export const generatePDF = (data: DocumentData) => {
           line-height: 1.6;
           text-align: left;
           padding-right: 40px;
+          padding-left: 0;
           vertical-align: top;
+        }
+
+        .services-section > div {
+          margin-bottom: 4px;
+        }
+
+        .services-section > div:last-child {
+          margin-bottom: 0;
         }
 
         .header-right {
