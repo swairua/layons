@@ -1803,7 +1803,6 @@ export const generatePDF = async (data: DocumentData) => {
           display: block;
           margin: 0 0 15px 0;
           padding: 0 0 15px 0;
-          border-bottom: 1px solid #000;
           width: 100%;
           box-sizing: border-box;
         }
