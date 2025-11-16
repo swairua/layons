@@ -1153,7 +1153,7 @@ export const generatePDF = (data: DocumentData) => {
           }
 
           .totals-table {
-            width: 350px;
+            width: 100%;
             border-collapse: collapse;
             font-size: 12px;
           }
@@ -1536,7 +1536,7 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .totals-table {
-          width: 300px;
+          width: 100%;
           border-collapse: collapse;
           font-size: 12px;
         }
