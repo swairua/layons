@@ -1103,7 +1103,7 @@ export const generatePDF = async (data: DocumentData) => {
       const showHeader = sectionIndex === 0;
 
       pagesHtml += `
-        <div class="page" style="page-break-after: always;">
+        <div class="page">
           ${showHeader ? generatePDFHeader(headerImage, company, companyServices, data, formatDateLong, data.type === 'invoice' ? 'Invoice' : 'Quotation') : ''}
 
           <!-- Section Title with alphabetical letter -->
