@@ -96,6 +96,7 @@ export default function Invoices() {
   const [showDeliveryNoteModal, setShowDeliveryNoteModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; invoice?: Invoice }>({ open: false });
+  const [isFixingData, setIsFixingData] = useState(false);
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState('all');
@@ -112,6 +113,26 @@ export default function Invoices() {
   // Use the fixed invoices hook
   const { data: invoices, isLoading, error, refetch } = useInvoices(currentCompany?.id);
   const deleteInvoice = useDeleteInvoice();
+
+  // Fix invoice data on page load
+  React.useEffect(() => {
+    if (currentCompany?.id && !isFixingData) {
+      const performFix = async () => {
+        setIsFixingData(true);
+        try {
+          await fixInvoiceColumns(currentCompany.id);
+          console.log('Invoice columns fixed successfully');
+          refetch();
+        } catch (err) {
+          console.error('Error fixing invoice columns:', err);
+          // Don't show error toast, silently continue
+        } finally {
+          setIsFixingData(false);
+        }
+      };
+      performFix();
+    }
+  }, [currentCompany?.id]);
 
   const handleDeleteClick = (invoice: Invoice) => {
     setDeleteDialog({ open: true, invoice });
