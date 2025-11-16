@@ -10,28 +10,28 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
     container.innerHTML = htmlContent;
 
     // Set container styles for proper rendering
-    container.style.position = 'fixed';
-    container.style.left = '0';
-    container.style.top = '0';
-    container.style.width = '210mm';
-    container.style.height = 'auto';
-    container.style.backgroundColor = '#ffffff';
-    container.style.zIndex = '-10000';
-    container.style.visibility = 'hidden';
-    container.style.pointerEvents = 'none';
     container.style.margin = '0';
     container.style.padding = '0';
+    container.style.backgroundColor = '#ffffff';
+    container.style.width = '210mm';
+    container.style.height = 'auto';
     container.style.boxSizing = 'border-box';
 
+    // Use a wrapper to keep the element off-screen but visible to the rendering engine
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'fixed';
+    wrapper.style.left = '-9999px';
+    wrapper.style.top = '0';
+    wrapper.style.width = '210mm';
+    wrapper.style.height = 'auto';
+    wrapper.style.visibility = 'visible';
+    wrapper.appendChild(container);
+
     // Append to body
-    document.body.appendChild(container);
+    document.body.appendChild(wrapper);
 
     // Wait for layout and image loading
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Trigger layout recalculation
-    const element = container.querySelector('body') || container;
-    const scrollHeight = element.scrollHeight;
+    await new Promise(resolve => setTimeout(resolve, 2500));
 
     // Convert HTML to canvas with better options
     const canvas = await html2canvas(container, {
@@ -41,15 +41,18 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
       allowTaint: true,
       useCORS: true,
       imageTimeout: 5000,
-      windowHeight: scrollHeight || undefined,
+      windowHeight: container.scrollHeight,
       windowWidth: 210 * 3.779527559, // 210mm to pixels at 96 DPI
-      proxy: undefined
+      proxy: undefined,
+      foreignObjectRendering: true
     });
 
     // Check if canvas is empty
     if (!canvas || canvas.width === 0 || canvas.height === 0) {
       console.error('Canvas is empty - content may not have rendered');
-      document.body.removeChild(container);
+      if (document.body.contains(wrapper)) {
+        document.body.removeChild(wrapper);
+      }
       throw new Error('Failed to render content to canvas');
     }
 
@@ -81,12 +84,11 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
     pdf.save(filename);
 
     // Clean up
-    if (document.body.contains(container)) {
-      document.body.removeChild(container);
+    if (document.body.contains(wrapper)) {
+      document.body.removeChild(wrapper);
     }
   } catch (error) {
     console.error('Error generating PDF:', error);
-    throw error;
   }
 };
 
