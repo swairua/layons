@@ -480,7 +480,7 @@ export const generatePDF = (data: DocumentData) => {
           <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
           <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
             <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
-              <ul style="font-size: 11px; line-height: 1.6; margin: 6px 0 6px 0; padding-left: 40px; color: #333; list-style-type: lower-alpha;">
+              <ul style="display: block; width: 100%; clear: both; font-size: 11px; line-height: 1.6; margin: 12px 0 6px 0; padding-left: 40px; color: #333; list-style-type: lower-alpha;">
                 <li style="margin-bottom: 4px;">50% Upon Order (${formatCurrency(grandTotalForBOQ * 0.5)})</li>
                 <li style="margin-bottom: 4px;">40% As Progressive (${formatCurrency(grandTotalForBOQ * 0.4)})</li>
                 <li style="margin-bottom: 4px;">10% Upon Completion (${formatCurrency(grandTotalForBOQ * 0.1)})</li>
@@ -811,7 +811,7 @@ export const generatePDF = (data: DocumentData) => {
             <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
             <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
               <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
-                <ul style="font-size: 11px; line-height: 1.6; margin: 6px 0 6px 0; padding-left: 40px; color: #333; list-style-type: lower-alpha;">
+                <ul style="display: block; width: 100%; clear: both; font-size: 11px; line-height: 1.6; margin: 12px 0 6px 0; padding-left: 40px; color: #333; list-style-type: lower-alpha;">
                   <li style="margin-bottom: 4px;">50% Upon Order (${formatCurrency(grandTotal * 0.5)})</li>
                   <li style="margin-bottom: 4px;">40% As Progressive (${formatCurrency(grandTotal * 0.4)})</li>
                   <li style="margin-bottom: 4px;">10% Upon Completion (${formatCurrency(grandTotal * 0.1)})</li>
@@ -988,9 +988,11 @@ export const generatePDF = (data: DocumentData) => {
             justify-content: space-between;
             align-items: flex-start;
             gap: 30px;
-            padding: 20px 20px 20px 20px;
-            margin: 0;
+            padding: 20px 20mm 20px 20px;
+            margin: 0 -20mm 0 0;
+            width: calc(100% + 20mm);
             border-bottom: 2px solid #000;
+            box-sizing: border-box;
           }
 
           .company-info {
@@ -1031,6 +1033,8 @@ export const generatePDF = (data: DocumentData) => {
           .document-info {
             text-align: right;
             flex: 1;
+            padding-right: 0;
+            margin-right: 0;
           }
 
           .document-title {
@@ -1294,9 +1298,9 @@ export const generatePDF = (data: DocumentData) => {
           margin-bottom: 15px;
           padding-bottom: 15px;
           border-bottom: 1px solid #000;
-          margin: 0;
-          padding: 0 0 15px 0;
-          width: 100%;
+          margin: 0 -20mm 0 -20mm;
+          padding: 0 20mm 15px 20mm;
+          width: calc(100% + 40mm);
           box-sizing: border-box;
         }
 
@@ -1356,15 +1360,17 @@ export const generatePDF = (data: DocumentData) => {
           font-size: 12px;
           line-height: 1.6;
           vertical-align: top;
-          padding: 0 0 0 20px;
+          padding: 0;
+          margin: 0;
           box-sizing: border-box;
         }
 
         .header-right > div {
           font-weight: bold;
           text-align: right;
-          white-space: nowrap;
           margin-bottom: 4px;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
         }
 
         .header-right > div:last-child {
@@ -2007,7 +2013,7 @@ export const generatePDF = (data: DocumentData) => {
             <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
             <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
               <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
-                <ul style="font-size: 11px; line-height: 1.6; margin: 6px 0 6px 0; padding-left: 40px; color: #333; list-style-type: lower-alpha;">
+                <ul style="display: block; width: 100%; clear: both; font-size: 11px; line-height: 1.6; margin: 12px 0 6px 0; padding-left: 40px; color: #333; list-style-type: lower-alpha;">
                   <li style="margin-bottom: 4px;">50% Upon Order (${formatCurrency(data.total_amount * 0.5)})</li>
                   <li style="margin-bottom: 4px;">40% As Progressive (${formatCurrency(data.total_amount * 0.4)})</li>
                   <li style="margin-bottom: 4px;">10% Upon Completion (${formatCurrency(data.total_amount * 0.1)})</li>
