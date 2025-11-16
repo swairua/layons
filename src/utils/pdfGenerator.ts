@@ -1319,6 +1319,7 @@ export const generatePDF = (data: DocumentData) => {
           grid-template-columns: 1fr 1fr;
           gap: 40px;
           margin-bottom: 10px;
+          width: 100%;
         }
 
         .services-section {
