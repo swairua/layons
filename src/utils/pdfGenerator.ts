@@ -205,12 +205,6 @@ export const generatePDF = (data: DocumentData) => {
     }
   };
 
-  // Create a new window with the document content
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) {
-    throw new Error('Could not open print window. Please allow popups.');
-  }
-
   const documentTitle = data.type === 'proforma' ? 'Proforma Invoice' :
                        data.type === 'delivery' ? 'Delivery Note' :
                        data.type === 'statement' ? 'Customer Statement' :
