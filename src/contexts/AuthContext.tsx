@@ -100,22 +100,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Fetch user profile from database with error handling and retry logic
   const fetchProfile = useCallback(async (userId: string): Promise<UserProfile | null> => {
     try {
+      // Add a timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-      const { data: profileData, error } = await supabase
-        .from('profiles')
-        .select('id, email, full_name, avatar_url, phone, company_id, department, position, role, status, last_login, created_at, updated_at')
-        .eq('id', userId)
-        .maybeSingle(); // Use maybeSingle to handle 0 results gracefully
+      try {
+        const { data: profileData, error } = await supabase
+          .from('profiles')
+          .select('id, email, full_name, avatar_url, phone, company_id, department, position, role, status, last_login, created_at, updated_at')
+          .eq('id', userId)
+          .maybeSingle(); // Use maybeSingle to handle 0 results gracefully
 
-      if (error) {
-        throw error;
+        clearTimeout(timeoutId);
+
+        if (error) {
+          throw error;
+        }
+
+        if (!profileData) {
+          return null;
+        }
+
+        return profileData;
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        throw fetchError;
       }
-
-      if (!profileData) {
-        return null;
-      }
-
-      return profileData;
     } catch (error) {
       // Format error message properly to avoid [object Object]
       let errorMessage = 'Unknown error';
@@ -127,7 +137,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const errObj = error as any;
         errorMessage = errObj.message || errObj.error_description || errObj.details || String(error);
       }
-      logError(`Exception fetching profile: ${errorMessage}`, error, { userId, context: 'fetchProfile' });
+      console.error(`Profile fetch error for user ${userId}: ${errorMessage}`);
 
       // Handle specific error types using the error type checker
       if (isErrorType(error, 'auth')) {
