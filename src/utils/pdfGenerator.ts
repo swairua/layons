@@ -640,7 +640,7 @@ export const generatePDF = async (data: DocumentData) => {
     const sectionTotals: number[] = [];
 
     // Helpers to detect row kinds
-    const isSectionHeader = (d: string) => d.startsWith('��� ');
+    const isSectionHeader = (d: string) => /^section\s+[a-z]:\s*/i.test(d);
     const isSubsectionHeader = (d: string) => /^\s*[→-]?\s*subsection\s+[^:]+:\s*/i.test(d);
     const isSubsectionSubtotal = (d: string) => /^subsection\s+[^\s]+\s+subtotal\s*$/i.test(d);
     const isSectionTotalRow = (d: string) => /^section\s+total$/i.test(d);
