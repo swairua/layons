@@ -1,6 +1,7 @@
 // PDF Generation utility using jsPDF + html2canvas for auto-download
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { PDF_PAGE_CSS } from './pdfMarginConstants';
 
 // Helper function to render HTML content to canvas
 const renderHTMLToCanvas = async (htmlContent: string, pageSelector: string) => {
