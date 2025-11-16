@@ -689,9 +689,13 @@ export const generatePDF = async (data: DocumentData) => {
         .header { margin: 0; padding: 0; width: 100%; }
         .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; }
         .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; width: 100%; padding: 0; }
-        .header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: 100%; box-sizing: border-box; min-width: 0; }
-        .services-section { font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 1; box-sizing: border-box; min-width: 0; }
-        .header-right { text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 1 auto; box-sizing: border-box; white-space: normal; }
+        .header-top { display: flex; align-items: flex-start; width: 100%; margin: 0 0 10px 0; padding: 0; gap: 20px; box-sizing: border-box; min-width: 0; }
+        .services-section { display: block; font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0; }
+        .services-section > div { margin: 0 0 4px 0; }
+        .services-section > div:last-child { margin-bottom: 0; }
+        .header-right { display: block; text-align: right; font-size: 12px; line-height: 1.6; flex: 0 0 auto; padding: 0; margin: 0; box-sizing: border-box; }
+        .header-right > div { font-weight: bold; text-align: right; margin-bottom: 4px; word-wrap: break-word; overflow-wrap: break-word; }
+        .header-right > div:last-child { margin-bottom: 0; }
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; margin-bottom: 6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
