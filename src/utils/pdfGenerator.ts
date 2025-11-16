@@ -1301,13 +1301,10 @@ export const generatePDF = (data: DocumentData) => {
       </html>
     `;
 
-    printWindow.document.write(htmlContentWithSections);
-    printWindow.document.close();
-
-    printWindow.onload = () => setTimeout(() => printWindow.print(), 500);
-    setTimeout(() => { if (printWindow && !printWindow.closed) printWindow.print(); }, 1000);
-
-    return printWindow;
+    const filename = data.type === 'invoice' ? `Invoice-${data.number}.pdf` :
+                     data.type === 'proforma' ? `Proforma-${data.number}.pdf` :
+                     `Quotation-${data.number}.pdf`;
+    convertHTMLToPDFAndDownload(htmlContentWithSections, filename);
   }
 
   // Fallback generic document HTML (existing template)
