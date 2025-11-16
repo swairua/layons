@@ -411,10 +411,11 @@ export const generatePDF = (data: DocumentData) => {
               <div class="services-section">
                 ${(() => {
                   const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-                  const midpoint = Math.ceil(services.length / 2);
-                  const firstRow = services.slice(0, midpoint).join(' • ');
-                  const secondRow = services.slice(midpoint).join(' • ');
-                  return `<div style="margin-bottom: 3px;">${firstRow}</div>${secondRow ? `<div>${secondRow}</div>` : ''}`;
+                  const itemsPerLine = Math.ceil(services.length / 3);
+                  const line1 = services.slice(0, itemsPerLine).join(' • ');
+                  const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
+                  const line3 = services.slice(itemsPerLine * 2).join(' • ');
+                  return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
                 })()}
               </div>
 
