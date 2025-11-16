@@ -1332,10 +1332,12 @@ export const generatePDF = (data: DocumentData) => {
           text-align: right;
           font-size: 12px;
           line-height: 1.6;
+          justify-self: end;
         }
 
         .header-right > div {
           font-weight: bold;
+          text-align: right;
         }
 
         .header-left {
