@@ -40,8 +40,9 @@ export const useInvoicesFixed = (companyId?: string) => {
           .order('created_at', { ascending: false });
 
         if (invoicesError) {
-          console.error('Error fetching invoices:', invoicesError);
-          throw new Error(`Failed to fetch invoices: ${invoicesError.message}`);
+          const errorMsg = invoicesError?.message || JSON.stringify(invoicesError);
+          console.error('Error fetching invoices:', errorMsg);
+          throw new Error(`Failed to fetch invoices: ${errorMsg}`);
         }
 
         console.log('Invoices fetched successfully:', invoices?.length || 0);
