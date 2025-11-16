@@ -394,6 +394,10 @@ export const generatePDF = (data: DocumentData) => {
         .pagefoot { position:fixed; bottom:12mm; left:12mm; right:12mm; text-align:center; font-size:10px; color:#666; }
         .boq-main { page-break-after: always; }
         .terms-page { page-break-before: always; }
+        .terms-page table { border-collapse: collapse; }
+        .terms-page table tr { border: none; }
+        .terms-page table td { border: none; padding: 4px 0; }
+        .stamp-image { width: 120px; height: 120px; }
       </style>
     </head>
     <body>
