@@ -402,13 +402,24 @@ export const generatePDF = (data: DocumentData) => {
         @media screen {
           .container {
             padding: 0;
-            margin: 0 auto;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
           }
 
           .header {
             margin: 0;
-            padding: 12mm;
+            padding: 12mm 12mm 0 12mm;
             width: 100%;
+            box-sizing: border-box;
+          }
+
+          .boq-main {
+            padding: 0 12mm 12mm 12mm;
+          }
+
+          .terms-page {
+            padding: 12mm;
           }
         }
 
