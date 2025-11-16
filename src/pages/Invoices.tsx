@@ -124,7 +124,8 @@ export default function Invoices() {
           console.log('Invoice columns fixed successfully');
           refetch();
         } catch (err) {
-          console.error('Error fixing invoice columns:', err);
+          const errorMsg = err instanceof Error ? err.message : JSON.stringify(err);
+          console.error('Error fixing invoice columns:', errorMsg);
           // Don't show error toast, silently continue
         } finally {
           setIsFixingData(false);
