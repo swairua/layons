@@ -530,8 +530,8 @@ export const generatePDF = (data: DocumentData) => {
               <td style="border: none;">________________________</td>
             </tr>
           </table>
-          <div style="width: 28%; text-align: center; flex-shrink: 0;">
-            <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" class="stamp-image" />
+          <div style="text-align: center; flex-shrink: 0; width: 100px;">
+            <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
           </div>
         </div>
 
@@ -857,8 +857,8 @@ export const generatePDF = (data: DocumentData) => {
                 <td style="border: none;">________________________</td>
               </tr>
             </table>
-            <div style="text-align: center; flex-shrink: 0; width: 80px;">
-              <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" style="width: 80px; height: 80px; object-fit: contain;" />
+            <div style="text-align: center; flex-shrink: 0; width: 100px;">
+              <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
             </div>
           </div>
 
@@ -1079,8 +1079,8 @@ export const generatePDF = (data: DocumentData) => {
           }
 
           .items-section {
-            margin: 12px 0 30px 0;
-          }
+          margin: 15px 0 30px 0;
+        }
 
           .items-table {
             width: 100%;
@@ -1281,73 +1281,110 @@ export const generatePDF = (data: DocumentData) => {
           margin: 0 auto;
           background: white;
           box-shadow: 0 0 10px rgba(0,0,0,0.1);
-          padding: 0 20mm 20mm 20mm;
+          padding: 20mm;
           position: relative;
         }
 
         .header {
-          display: flex;
-          flex-direction: column;
-          margin-bottom: 8px;
-          padding-bottom: 0;
-          border-bottom: none;
-          margin-left: -20mm;
-          margin-right: -20mm;
-          padding-left: 20mm;
-          padding-right: 20mm;
+          display: block;
+          margin-bottom: 15px;
+          padding-bottom: 15px;
+          border-bottom: 1px solid #000;
+          margin: 0;
+          padding: 0 0 15px 0;
+          width: 100%;
+          box-sizing: border-box;
         }
 
         .header-image {
-          width: calc(100% + 40mm);
+          width: 100%;
           height: auto;
-          margin: 0 -20mm 5px -20mm;
+          margin: 0 0 12px 0;
           padding: 0;
           display: block;
           border: none;
         }
 
         .header-content {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          margin-top: 20px;
+          display: block;
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          box-sizing: border-box;
         }
 
         .header-top {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 30px;
-          margin-bottom: 12px;
+          display: table;
+          width: 100%;
+          margin: 0 0 10px 0;
+          padding: 0;
+          table-layout: fixed;
+          border-collapse: collapse;
+          border-spacing: 0;
+          box-sizing: border-box;
         }
 
         .services-section {
+          display: table-cell;
+          width: 50%;
           font-size: 12px;
           font-weight: bold;
           color: #333;
           line-height: 1.6;
           text-align: left;
+          padding: 0 20px 0 0;
+          vertical-align: top;
+          box-sizing: border-box;
+        }
+
+        .services-section > div {
+          margin: 0 0 4px 0;
+        }
+
+        .services-section > div:last-child {
+          margin-bottom: 0;
         }
 
         .header-right {
+          display: table-cell;
+          width: 50%;
           text-align: right;
           font-size: 12px;
           line-height: 1.6;
-          justify-self: end;
+          vertical-align: top;
+          padding: 0 0 0 20px;
+          box-sizing: border-box;
         }
 
         .header-right > div {
           font-weight: bold;
           text-align: right;
+          white-space: nowrap;
+          margin-bottom: 4px;
+        }
+
+        .header-right > div:last-child {
+          margin-bottom: 0;
         }
 
         .header-left {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
+          display: block;
           font-size: 12px;
           font-weight: bold;
           line-height: 1.6;
           text-align: left;
+          margin-left: 0;
+          margin-right: 0;
+          padding-left: 0;
+          padding-right: 0;
+          width: 100%;
+          margin-top: 12px;
+          padding-top: 12px;
+          border-top: 1px solid #999;
+        }
+
+        .header-left > div {
+          margin-bottom: 4px;
         }
 
         .logo {
@@ -1421,7 +1458,7 @@ export const generatePDF = (data: DocumentData) => {
         }
 
         .items-section {
-          margin: 12px 0 30px 0;
+          margin: 15px 0 30px 0;
         }
 
         .items-table {
@@ -1685,7 +1722,7 @@ export const generatePDF = (data: DocumentData) => {
           <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
           <!-- Header content below image -->
-          <div class="header-content" style="margin-top: 8px;">
+          <div class="header-content">
             <!-- Top row: Services (left) and Company details (right) -->
             <div class="header-top">
               <!-- Services Section -->
@@ -2016,8 +2053,8 @@ export const generatePDF = (data: DocumentData) => {
                 <td style="border: none;">________________________</td>
               </tr>
             </table>
-            <div style="text-align: center; flex-shrink: 0; width: 80px;">
-              <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" style="width: 80px; height: 80px; object-fit: contain;" />
+            <div style="text-align: center; flex-shrink: 0; width: 100px;">
+              <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
             </div>
           </div>
 
