@@ -969,10 +969,9 @@ export const generatePDF = (data: DocumentData) => {
             padding-bottom: 0;
             border-bottom: none;
             margin-left: 0;
-            margin-right: -20mm;
+            margin-right: 0;
             padding-left: 0;
-            padding-right: 20mm;
-            width: calc(100% + 20mm);
+            padding-right: 0;
           }
 
           .header-image {
@@ -989,9 +988,11 @@ export const generatePDF = (data: DocumentData) => {
             justify-content: space-between;
             align-items: flex-start;
             gap: 30px;
-            padding: 20px 0 20px 20px;
-            margin: 0;
+            padding: 20px 20px 20px 20px;
+            margin: 0 -20mm 0 0;
+            width: calc(100% + 20mm);
             border-bottom: 2px solid #000;
+            box-sizing: border-box;
           }
 
           .company-info {
@@ -1033,6 +1034,7 @@ export const generatePDF = (data: DocumentData) => {
             text-align: right;
             flex: 1;
             padding-right: 0;
+            margin-right: 0;
           }
 
           .document-title {
