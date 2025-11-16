@@ -1244,7 +1244,7 @@ export const generatePDF = async (data: DocumentData) => {
 
     // Add Terms and Conditions Page (Final Page)
     pagesHtml += `
-      <div class="page" style="position: relative; page-break-before: always;">
+      <div class="page">
         <div style="padding: 8px;">
 
           <!-- Terms Section -->
