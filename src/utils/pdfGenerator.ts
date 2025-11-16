@@ -1613,6 +1613,9 @@ export const generatePDF = async (data: DocumentData) => {
             margin-right: 0;
             padding-left: 0;
             padding-right: 0;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            page-break-after: avoid;
           }
 
           .header-image {
@@ -1622,6 +1625,8 @@ export const generatePDF = async (data: DocumentData) => {
             padding: 0;
             display: block;
             border: none;
+            page-break-inside: avoid;
+            break-inside: avoid;
           }
 
           .header-content {
@@ -1634,13 +1639,15 @@ export const generatePDF = async (data: DocumentData) => {
             width: 100%;
             border-bottom: 2px solid #000;
             box-sizing: border-box;
+            page-break-inside: avoid;
+            page-break-after: avoid;
           }
 
           @media screen {
             .header-content {
-              margin: 0 -20mm;
-              padding: 20px 20mm;
-              width: calc(100% + 40mm);
+              margin: 0;
+              padding: 20px 0;
+              width: 100%;
             }
           }
 
