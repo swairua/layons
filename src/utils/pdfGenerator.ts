@@ -1666,6 +1666,13 @@ export const generatePDF = async (data: DocumentData) => {
             margin: 0 0 15px 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            padding: 12px;
+            background: #fff;
+            border-left: 4px solid #000;
+            page-break-inside: avoid;
+            page-break-before: auto;
+            page-break-after: avoid;
+            break-inside: avoid;
           }
 
           .customer-name {
