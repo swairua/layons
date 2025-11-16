@@ -845,9 +845,9 @@ export const generatePDF = (data: DocumentData) => {
             </table>
           </div>
 
-          <!-- Client Section with Stamp -->
-          <div style="margin-bottom: 10px; padding-top: 6px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
-            <table style="font-size: 10px; width: 72%; line-height: 1.6; color: #333; border: none;">
+          <!-- Client Section -->
+          <div style="margin-bottom: 10px; padding-top: 6px;">
+            <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #333; border: none;">
               <tr style="border: none;">
                 <td style="width: 40%; border: none;"><strong>Client;</strong></td>
                 <td style="width: 60%; border: none;">________________________</td>
@@ -857,9 +857,6 @@ export const generatePDF = (data: DocumentData) => {
                 <td style="border: none;">________________________</td>
               </tr>
             </table>
-            <div style="width: 28%; text-align: center; flex-shrink: 0;">
-              <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" class="stamp-image" />
-            </div>
           </div>
 
           <!-- Prepaired By Section -->
