@@ -1929,7 +1929,7 @@ export const generatePDF = async (data: DocumentData) => {
         <!-- Header Section -->
         <div class="header">
           <!-- Full-width header image -->
-          <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
+          <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
 
           <!-- Header content below image -->
           <div class="header-content">
