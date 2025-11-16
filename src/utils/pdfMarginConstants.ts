@@ -25,10 +25,72 @@ export const PDF_PAGE_CONFIG = {
 };
 
 // CSS @page rule string for injection into PDF HTML
+// Enhanced with orphans/widows and page break settings to prevent text cutting
 export const PDF_PAGE_CSS = `
   @page {
     size: A4;
     margin: ${PDF_PAGE_CONFIG.margin}mm;
+    orphans: 3;
+    widows: 3;
+  }
+
+  @page :first {
+    margin-top: ${PDF_PAGE_CONFIG.margin}mm;
+  }
+
+  /* Page break rules to prevent content cutting */
+  .page-section {
+    page-break-before: always;
+    page-break-inside: avoid;
+    page-break-after: avoid;
+    position: relative;
+  }
+
+  .page-section:first-of-type {
+    page-break-before: avoid;
+  }
+
+  /* Ensure sections don't cut across pages */
+  .section-title,
+  .section-row,
+  .preliminaries-section,
+  .subsection,
+  .totals-section,
+  .footer,
+  .stamp-section {
+    page-break-inside: avoid;
+    page-break-after: avoid;
+  }
+
+  /* Ensure table rows stay together */
+  tr {
+    page-break-inside: avoid;
+  }
+
+  /* Prevent tables from breaking */
+  table {
+    page-break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  /* Add spacing before sections to prevent cutting */
+  .section-title::before {
+    content: '';
+    display: block;
+    height: 10mm;
+  }
+
+  /* Ensure proper spacing at page boundaries */
+  body {
+    margin: ${PDF_PAGE_CONFIG.margin}mm;
+    padding: 0;
   }
 `;
 
