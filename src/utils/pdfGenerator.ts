@@ -1058,6 +1058,7 @@ export const generatePDF = async (data: DocumentData) => {
       // Download PDF
       pdf.save(`BOQ-${data.number}.pdf`);
       console.log('BOQ PDF generated successfully');
+      return;
 
     } catch (error) {
       console.error('Error generating BOQ PDF:', error);
