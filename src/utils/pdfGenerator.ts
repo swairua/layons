@@ -502,34 +502,37 @@ export const generatePDF = (data: DocumentData) => {
 
         <!-- Contractor Section -->
         <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
-          <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
-            <tr>
-              <td style="width: 30%;"><strong>Contractor;</strong></td>
-              <td style="width: 70%;">${company.name}</td>
+          <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
+            <tr style="border: none;">
+              <td style="width: 30%; border: none;"><strong>Contractor;</strong></td>
+              <td style="width: 70%; border: none;">${company.name}</td>
             </tr>
-            <tr>
-              <td><strong>Tel No;</strong></td>
-              <td>254720717463</td>
+            <tr style="border: none;">
+              <td style="border: none;"><strong>Tel No;</strong></td>
+              <td style="border: none;">254720717463</td>
             </tr>
-            <tr>
-              <td><strong>Signed;</strong></td>
-              <td>KELVIN MURIITHI</td>
+            <tr style="border: none;">
+              <td style="border: none;"><strong>Signed;</strong></td>
+              <td style="border: none;">KELVIN MURIITHI</td>
             </tr>
           </table>
         </div>
 
-        <!-- Client Section -->
-        <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
-          <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
-            <tr>
-              <td style="width: 30%;"><strong>Client;</strong></td>
-              <td style="width: 70%;">________________________</td>
+        <!-- Client Section with Stamp -->
+        <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+          <table style="font-size: 10px; width: 65%; line-height: 1.8; color: #333; border: none;">
+            <tr style="border: none;">
+              <td style="width: 40%; border: none;"><strong>Client;</strong></td>
+              <td style="width: 60%; border: none;">________________________</td>
             </tr>
-            <tr>
-              <td><strong>Tel No;</strong></td>
-              <td>________________________</td>
+            <tr style="border: none;">
+              <td style="border: none;"><strong>Tel No;</strong></td>
+              <td style="border: none;">________________________</td>
             </tr>
           </table>
+          <div style="width: 35%; text-align: center;">
+            <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" class="stamp-image" />
+          </div>
         </div>
 
         <!-- Prepaired By Section -->
