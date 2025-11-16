@@ -2495,18 +2495,10 @@ export const generatePDF = async (data: DocumentData) => {
         </div>
         ` : ''}
 
-        <!-- Stamp Section (not for invoice/quotation as they have their own stamp area) -->
-        ${(data.type !== 'invoice' && data.type !== 'quotation') ? `
+        <!-- Stamp Section (for all documents) -->
         <div class="stamp-section" style="display:flex; justify-content:center; margin:30px 0 24px 0;">
           <img src="${stampImage}" alt="Company Stamp" style="width: 100px; height: 100px; object-fit:contain;" />
         </div>
-        ` : ''}
-
-        <!-- Bank Details (only for invoices and quotations) -->
-        ${(data.type === 'invoice' || data.type === 'quotation') ? `
-        <div class="bank-details">
-        </div>
-        ` : ''}
 
         <!-- Footer (only for non-invoice/quotation types) -->
         ${(data.type !== 'invoice' && data.type !== 'quotation') ? `
