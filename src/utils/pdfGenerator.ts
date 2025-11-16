@@ -752,6 +752,8 @@ export const generatePDF = async (data: DocumentData) => {
 
           ${preliminariesHtml}
 
+          <div style="height: 15mm;"></div>
+
           <table class="items">
             <thead>
               <tr>
