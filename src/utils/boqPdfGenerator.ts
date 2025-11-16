@@ -36,7 +36,7 @@ export interface BoqDocument {
 // Helper
 const safeN = (v: number | undefined) => (typeof v === 'number' && !isNaN(v) ? v : 0);
 
-export function downloadBOQPDF(doc: BoqDocument, company?: { name: string; logo_url?: string; address?: string; city?: string; country?: string; phone?: string; email?: string }) {
+export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string; logo_url?: string; address?: string; city?: string; country?: string; phone?: string; email?: string }) {
   // Flatten items and auto-calc amounts; prefix section titles and subsection titles as bold rows
   const flatItems: Array<{ description: string; quantity: number; unit_price: number; line_total: number; unit_of_measure?: string }> = [];
 
