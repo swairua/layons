@@ -672,12 +672,12 @@ export const generatePDF = async (data: DocumentData) => {
       <meta charset="UTF-8">
       <style>
         ${pdfRootVars}
-        @page { size: A4; margin: 12mm 12mm 20mm 12mm; orphans: 3; widows: 3; }
+        @page { size: A4; margin: 15mm; orphans: 3; widows: 3; }
         @media print {
           @page { counter-increment: page; }
         }
         * { box-sizing: border-box; }
-        body { font-family: 'Arial', sans-serif; margin:0; color:#222; font-size:12px; }
+        body { font-family: 'Arial', sans-serif; margin:0; padding:0; color:#222; font-size:12px; }
         body { counter-reset: page; }
         .pagefoot::after { content: "Page " counter(page) ""; }
         .container { padding: 0; width: 100%; box-sizing: border-box; max-width: 100%; }
@@ -734,8 +734,7 @@ export const generatePDF = async (data: DocumentData) => {
         .boq-main {
           display: block;
           width: 100%;
-          padding: 12mm;
-          padding-bottom: 40mm;
+          padding: 0;
           box-sizing: border-box;
           max-width: 100%;
           overflow: hidden;
@@ -744,8 +743,7 @@ export const generatePDF = async (data: DocumentData) => {
         .terms-page {
           display: block;
           width: 100%;
-          padding: 12mm;
-          padding-top: 20mm;
+          padding: 0;
           page-break-before: always;
         }
 
