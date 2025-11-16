@@ -1281,7 +1281,7 @@ export const generatePDF = (data: DocumentData) => {
           margin: 0 auto;
           background: white;
           box-shadow: 0 0 10px rgba(0,0,0,0.1);
-          padding: 0 20mm 20mm 20mm;
+          padding: 20mm;
           position: relative;
         }
 
