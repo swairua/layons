@@ -1037,7 +1037,7 @@ export const generatePDF = async (data: DocumentData) => {
         imageTimeout: 15000,
         timeout: 45000,
         windowHeight: Math.max(boqMainElement.scrollHeight, boqMainElement.offsetHeight) || 1000,
-        windowWidth: 210 * 3.779527559,
+        windowWidth: pageWidth * 3.779527559, // 210mm to pixels (96 DPI * 210/25.4)
         proxy: undefined,
         foreignObjectRendering: false,
         onclone: (clonedDocument) => {
@@ -1048,9 +1048,9 @@ export const generatePDF = async (data: DocumentData) => {
         }
       });
 
-      // Add BOQ pages to PDF
+      // Add BOQ pages to PDF with proper margin handling
       const imgBoqData = boqCanvas.toDataURL('image/png');
-      const imgBoqWidth = pageWidth; // 210mm
+      const imgBoqWidth = pageWidth; // Full width 210mm, margins handled in CSS
       const imgBoqHeight = (boqCanvas.height * imgBoqWidth) / boqCanvas.width;
       let boqHeightLeft = imgBoqHeight;
       let boqPosition = 0;
