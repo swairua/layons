@@ -184,60 +184,113 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
     await Promise.all(imageLoadPromises);
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Convert HTML to canvas
-    const canvas = await html2canvas(wrapper, {
-      scale: 2,
-      backgroundColor: '#ffffff',
-      logging: false,
-      allowTaint: true,
-      useCORS: true,
-      imageTimeout: 15000,
-      timeout: 45000,
-      windowHeight: Math.max(wrapper.scrollHeight, wrapper.offsetHeight) || 1000,
-      windowWidth: 210 * 3.779527559, // 210mm to pixels
-      proxy: undefined,
-      foreignObjectRendering: false,
-      ignoreElements: (el) => {
-        // Don't ignore any elements needed for PDF
-        return false;
-      }
-    });
-
-    // Validate canvas
-    if (!canvas || canvas.width === 0 || canvas.height === 0) {
-      console.error('Canvas rendering failed - content may not be visible', {
-        width: canvas?.width,
-        height: canvas?.height
-      });
-      throw new Error('Failed to render content to canvas - canvas is empty');
-    }
-
-    // Get canvas data
-    const imgData = canvas.toDataURL('image/png');
-    const imgWidth = 210; // A4 width in mm
-    const pageHeight = 297; // A4 height in mm
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
-    let position = 0;
-
     // Create PDF
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
 
     // Validate PDF was created
     if (!pdf || !pdf.internal) {
       throw new Error('Failed to create PDF document');
     }
 
-    // Add images to PDF pages
-    while (heightLeft >= 0) {
-      const heightToPrint = Math.min(pageHeight, heightLeft);
-      pdf.addImage(imgData, 'PNG', 0, -position, pageWidth, imgHeight);
-      heightLeft -= pageHeight;
-      position += pageHeight;
+    // Find all page sections in the wrapper
+    const pageSections = wrapper.querySelectorAll('.page, .page-section');
+    let isFirstPage = true;
 
-      if (heightLeft > 0) {
-        pdf.addPage();
+    // Render each page section separately to avoid cutting across pages
+    for (const pageElement of pageSections) {
+      // Convert each page element to canvas
+      const pageCanvas = await html2canvas(pageElement as HTMLElement, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        allowTaint: true,
+        useCORS: true,
+        imageTimeout: 15000,
+        timeout: 45000,
+        windowHeight: Math.max((pageElement as HTMLElement).scrollHeight, (pageElement as HTMLElement).offsetHeight) || 1000,
+        windowWidth: 210 * 3.779527559, // 210mm to pixels
+        proxy: undefined,
+        foreignObjectRendering: false
+      });
+
+      // Validate canvas
+      if (!pageCanvas || pageCanvas.width === 0 || pageCanvas.height === 0) {
+        console.warn('Canvas rendering failed for a page - content may not be visible');
+        continue;
+      }
+
+      // Get canvas data with proper DPI scaling
+      const imgData = pageCanvas.toDataURL('image/png');
+      const pageImgWidth = pageWidth; // 210mm
+      const pageImgHeight = (pageCanvas.height * pageImgWidth) / pageCanvas.width;
+
+      // Account for margins - each page should have 15mm margins on all sides
+      const marginTop = 0; // Already included in the page element's padding
+      const marginLeft = 0; // Already included in the page element's padding
+
+      let heightLeft = pageImgHeight;
+      let position = 0;
+
+      // Add image to PDF, handling multiple page-heights if needed
+      while (heightLeft >= 0) {
+        if (!isFirstPage) {
+          pdf.addPage();
+        }
+
+        // Calculate the height to print on this PDF page
+        const heightToPrint = Math.min(pageHeight, heightLeft);
+        pdf.addImage(imgData, 'PNG', marginLeft, marginTop - position, pageImgWidth, pageImgHeight);
+
+        heightLeft -= pageHeight;
+        position += pageHeight;
+        isFirstPage = false;
+
+        if (heightLeft > 0) {
+          // More content to add on next page
+        }
+      }
+    }
+
+    // Fallback: if no page sections found, render entire content
+    if (pageSections.length === 0) {
+      const canvas = await html2canvas(wrapper, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        allowTaint: true,
+        useCORS: true,
+        imageTimeout: 15000,
+        timeout: 45000,
+        windowHeight: Math.max(wrapper.scrollHeight, wrapper.offsetHeight) || 1000,
+        windowWidth: 210 * 3.779527559,
+        proxy: undefined,
+        foreignObjectRendering: false
+      });
+
+      if (!canvas || canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Failed to render content to canvas - canvas is empty');
+      }
+
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      while (heightLeft >= 0) {
+        if (!isFirstPage) {
+          pdf.addPage();
+        }
+        pdf.addImage(imgData, 'PNG', 0, -position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        position += pageHeight;
+        isFirstPage = false;
+
+        if (heightLeft > 0) {
+          // More content to add
+        }
       }
     }
 
