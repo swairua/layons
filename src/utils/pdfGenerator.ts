@@ -627,13 +627,7 @@ export const generatePDF = (data: DocumentData) => {
     </html>
     `;
 
-    printWindow.document.write(htmlContentBOQ);
-    printWindow.document.close();
-
-    printWindow.onload = () => setTimeout(() => printWindow.print(), 500);
-    setTimeout(() => { if (printWindow && !printWindow.closed) printWindow.print(); }, 1000);
-
-    return printWindow;
+    convertHTMLToPDFAndDownload(htmlContentBOQ, `BOQ-${data.number}.pdf`);
   }
 
   // Handle quotations, invoices, and proformas with sections
