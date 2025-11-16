@@ -1979,56 +1979,59 @@ export const generatePDF = (data: DocumentData) => {
           </div>
 
           <!-- Acceptance of Quote Section -->
-          <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
-            <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Acceptance of Quote;</h3>
-            <p style="font-size: 11px; margin: 0; color: #333;">The above prices specifications and terms are satisfactory.</p>
+          <div style="margin-bottom: 12px; padding-top: 8px;">
+            <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Acceptance of Quote;</h3>
+            <p style="font-size: 10px; margin: 0; color: #333;">The above prices specifications and terms are satisfactory.</p>
           </div>
 
           <!-- Contractor Section -->
-          <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
-            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
-              <tr>
-                <td style="width: 30%;"><strong>Contractor;</strong></td>
-                <td style="width: 70%;">${company.name}</td>
+          <div style="margin-bottom: 10px; padding-top: 6px;">
+            <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #333; border: none;">
+              <tr style="border: none;">
+                <td style="width: 30%; border: none;"><strong>Contractor;</strong></td>
+                <td style="width: 70%; border: none;">${company.name}</td>
               </tr>
-              <tr>
-                <td><strong>Tel No;</strong></td>
-                <td>254720717463</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>Tel No;</strong></td>
+                <td style="border: none;">254720717463</td>
               </tr>
-              <tr>
-                <td><strong>Signed;</strong></td>
-                <td>KELVIN MURIITHI</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>Signed;</strong></td>
+                <td style="border: none;">KELVIN MURIITHI</td>
               </tr>
             </table>
           </div>
 
-          <!-- Client Section -->
-          <div style="margin-bottom: 25px; padding-top: 15px; border-top: 1px solid #ddd;">
-            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
-              <tr>
-                <td style="width: 30%;"><strong>Client;</strong></td>
-                <td style="width: 70%;">________________________</td>
+          <!-- Client Section with Stamp -->
+          <div style="margin-bottom: 10px; padding-top: 6px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+            <table style="font-size: 10px; width: 72%; line-height: 1.6; color: #333; border: none;">
+              <tr style="border: none;">
+                <td style="width: 40%; border: none;"><strong>Client;</strong></td>
+                <td style="width: 60%; border: none;">________________________</td>
               </tr>
-              <tr>
-                <td><strong>Tel No;</strong></td>
-                <td>________________________</td>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>Tel No;</strong></td>
+                <td style="border: none;">________________________</td>
               </tr>
             </table>
+            <div style="width: 28%; text-align: center; flex-shrink: 0;">
+              <img src="https://cdn.builder.io/api/v1/image/assets%2F3fcd4e0b9e9e4f0da09bf0544bcaf8fc%2Fe919907e76bd4ac29eef5aac570c5b6a?format=webp&width=800" alt="Layons Construction Stamp" class="stamp-image" />
+            </div>
           </div>
 
           <!-- Prepaired By Section -->
-          <div style="margin-bottom: 20px; padding-top: 15px; border-top: 1px solid #ddd;">
-            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
-              <tr>
-                <td style="width: 30%;"><strong>PREPAIRED BY;</strong></td>
-                <td style="width: 70%;">${company.name}</td>
+          <div style="margin-bottom: 8px; padding-top: 4px;">
+            <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #333; border: none;">
+              <tr style="border: none;">
+                <td style="width: 30%; border: none;"><strong>PREPAIRED BY;</strong></td>
+                <td style="width: 70%; border: none;">${company.name}</td>
               </tr>
             </table>
           </div>
 
           <!-- Account Details Section -->
-          <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd;">
-            <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase;">Account Details;</h3>
+          <div style="margin-top: 8px; padding-top: 4px;">
+            <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Account Details;</h3>
             <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333;">
               <tr>
                 <td style="width: 30%;"><strong>BANK;</strong></td>
