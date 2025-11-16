@@ -400,34 +400,15 @@ export const generatePDF = (data: DocumentData) => {
         .stamp-image { width: 100px; height: 100px; }
 
         @media screen {
-          .container {
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-          }
-
           .header {
-            margin: 0;
-            padding: 12mm 12mm 0 12mm;
-            width: 100%;
+            margin: 0 -12mm 15px -12mm;
+            padding: 0 12mm 15px 12mm;
+            width: calc(100% + 24mm);
             box-sizing: border-box;
-          }
-
-          .boq-main {
-            padding: 0 12mm 12mm 12mm;
-          }
-
-          .terms-page {
-            padding: 12mm;
           }
         }
 
         @media print {
-          .container {
-            padding: 12mm;
-          }
-
           .header {
             margin: 0;
             padding: 0;
