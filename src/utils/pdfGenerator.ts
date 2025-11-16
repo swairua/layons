@@ -1087,7 +1087,7 @@ export const generatePDF = async (data: DocumentData) => {
         imageTimeout: 15000,
         timeout: 45000,
         windowHeight: Math.max(termsElement.scrollHeight, termsElement.offsetHeight) || 1000,
-        windowWidth: 210 * 3.779527559,
+        windowWidth: pageWidth * 3.779527559, // 210mm to pixels
         proxy: undefined,
         foreignObjectRendering: false,
         onclone: (clonedDocument) => {
@@ -1103,7 +1103,7 @@ export const generatePDF = async (data: DocumentData) => {
 
       // Add terms to the new page
       const imgTermsData = termsCanvas.toDataURL('image/png');
-      const imgTermsWidth = pageWidth; // 210mm
+      const imgTermsWidth = pageWidth; // Full width 210mm, margins handled in CSS
       const imgTermsHeight = (termsCanvas.height * imgTermsWidth) / termsCanvas.width;
       let termsHeightLeft = imgTermsHeight;
       let termsPosition = 0;
