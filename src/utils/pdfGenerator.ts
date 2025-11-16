@@ -417,7 +417,7 @@ export const generatePDF = (data: DocumentData) => {
                   const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                   const itemsPerLine = Math.ceil(services.length / 3);
                   const line1 = services.slice(0, itemsPerLine).join(' ��� ');
-                  const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
+                  const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' ��� ');
                   const line3 = services.slice(itemsPerLine * 2).join(' • ');
                   return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
                 })()}
@@ -1476,8 +1476,8 @@ export const generatePDF = (data: DocumentData) => {
         }
 
         .items-table thead {
-          background: #000;
-          color: white;
+          background: #f8f9fa;
+          color: #000;
         }
 
         .items-table th {
