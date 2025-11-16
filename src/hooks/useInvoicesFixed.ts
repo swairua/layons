@@ -330,9 +330,12 @@ export const useCustomerInvoicesFixed = (customerId?: string, companyId?: string
           itemsMap.get(item.invoice_id).push(item);
         });
 
-        // Combine data
+        // Combine data and normalize column names
+        // Map amount_paid -> paid_amount and amount_due -> balance_due for consistency
         const enrichedInvoices = invoices.map(invoice => ({
           ...invoice,
+          paid_amount: invoice.amount_paid,  // Alias for compatibility
+          balance_due: invoice.amount_due,   // Alias for compatibility
           customers: customer || {
             name: 'Unknown Customer',
             email: null,
