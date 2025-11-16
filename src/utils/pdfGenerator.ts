@@ -1330,6 +1330,14 @@ export const generatePDF = (data: DocumentData) => {
           box-sizing: border-box;
         }
 
+        @media screen {
+          .header {
+            margin: 0 -20mm 15px -20mm;
+            padding: 0 20mm 15px 20mm;
+            width: calc(100% + 40mm);
+          }
+        }
+
         .header-image {
           width: 100%;
           height: auto;
