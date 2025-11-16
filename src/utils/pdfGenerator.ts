@@ -1339,7 +1339,7 @@ export const generatePDF = async (data: DocumentData) => {
     const filename = data.type === 'invoice' ? `Invoice-${data.number}.pdf` :
                      data.type === 'proforma' ? `Proforma-${data.number}.pdf` :
                      `Quotation-${data.number}.pdf`;
-    convertHTMLToPDFAndDownload(htmlContentWithSections, filename);
+    await convertHTMLToPDFAndDownload(htmlContentWithSections, filename);
   }
 
   // Fallback generic document HTML (existing template)
