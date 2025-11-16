@@ -184,60 +184,113 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
     await Promise.all(imageLoadPromises);
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Convert HTML to canvas
-    const canvas = await html2canvas(wrapper, {
-      scale: 2,
-      backgroundColor: '#ffffff',
-      logging: false,
-      allowTaint: true,
-      useCORS: true,
-      imageTimeout: 15000,
-      timeout: 45000,
-      windowHeight: Math.max(wrapper.scrollHeight, wrapper.offsetHeight) || 1000,
-      windowWidth: 210 * 3.779527559, // 210mm to pixels
-      proxy: undefined,
-      foreignObjectRendering: false,
-      ignoreElements: (el) => {
-        // Don't ignore any elements needed for PDF
-        return false;
-      }
-    });
-
-    // Validate canvas
-    if (!canvas || canvas.width === 0 || canvas.height === 0) {
-      console.error('Canvas rendering failed - content may not be visible', {
-        width: canvas?.width,
-        height: canvas?.height
-      });
-      throw new Error('Failed to render content to canvas - canvas is empty');
-    }
-
-    // Get canvas data
-    const imgData = canvas.toDataURL('image/png');
-    const imgWidth = 210; // A4 width in mm
-    const pageHeight = 297; // A4 height in mm
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
-    let position = 0;
-
     // Create PDF
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
 
     // Validate PDF was created
     if (!pdf || !pdf.internal) {
       throw new Error('Failed to create PDF document');
     }
 
-    // Add images to PDF pages
-    while (heightLeft >= 0) {
-      const heightToPrint = Math.min(pageHeight, heightLeft);
-      pdf.addImage(imgData, 'PNG', 0, -position, pageWidth, imgHeight);
-      heightLeft -= pageHeight;
-      position += pageHeight;
+    // Find all page sections in the wrapper
+    const pageSections = wrapper.querySelectorAll('.page, .page-section');
+    let isFirstPage = true;
 
-      if (heightLeft > 0) {
-        pdf.addPage();
+    // Render each page section separately to avoid cutting across pages
+    for (const pageElement of pageSections) {
+      // Convert each page element to canvas
+      const pageCanvas = await html2canvas(pageElement as HTMLElement, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        allowTaint: true,
+        useCORS: true,
+        imageTimeout: 15000,
+        timeout: 45000,
+        windowHeight: Math.max((pageElement as HTMLElement).scrollHeight, (pageElement as HTMLElement).offsetHeight) || 1000,
+        windowWidth: 210 * 3.779527559, // 210mm to pixels
+        proxy: undefined,
+        foreignObjectRendering: false
+      });
+
+      // Validate canvas
+      if (!pageCanvas || pageCanvas.width === 0 || pageCanvas.height === 0) {
+        console.warn('Canvas rendering failed for a page - content may not be visible');
+        continue;
+      }
+
+      // Get canvas data with proper DPI scaling
+      const imgData = pageCanvas.toDataURL('image/png');
+      const pageImgWidth = pageWidth; // 210mm
+      const pageImgHeight = (pageCanvas.height * pageImgWidth) / pageCanvas.width;
+
+      // Account for margins - each page should have 15mm margins on all sides
+      const marginTop = 0; // Already included in the page element's padding
+      const marginLeft = 0; // Already included in the page element's padding
+
+      let heightLeft = pageImgHeight;
+      let position = 0;
+
+      // Add image to PDF, handling multiple page-heights if needed
+      while (heightLeft >= 0) {
+        if (!isFirstPage) {
+          pdf.addPage();
+        }
+
+        // Calculate the height to print on this PDF page
+        const heightToPrint = Math.min(pageHeight, heightLeft);
+        pdf.addImage(imgData, 'PNG', marginLeft, marginTop - position, pageImgWidth, pageImgHeight);
+
+        heightLeft -= pageHeight;
+        position += pageHeight;
+        isFirstPage = false;
+
+        if (heightLeft > 0) {
+          // More content to add on next page
+        }
+      }
+    }
+
+    // Fallback: if no page sections found, render entire content
+    if (pageSections.length === 0) {
+      const canvas = await html2canvas(wrapper, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        allowTaint: true,
+        useCORS: true,
+        imageTimeout: 15000,
+        timeout: 45000,
+        windowHeight: Math.max(wrapper.scrollHeight, wrapper.offsetHeight) || 1000,
+        windowWidth: 210 * 3.779527559,
+        proxy: undefined,
+        foreignObjectRendering: false
+      });
+
+      if (!canvas || canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Failed to render content to canvas - canvas is empty');
+      }
+
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      while (heightLeft >= 0) {
+        if (!isFirstPage) {
+          pdf.addPage();
+        }
+        pdf.addImage(imgData, 'PNG', 0, -position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        position += pageHeight;
+        isFirstPage = false;
+
+        if (heightLeft > 0) {
+          // More content to add
+        }
       }
     }
 
@@ -1490,44 +1543,63 @@ export const generatePDF = async (data: DocumentData) => {
             background: white;
           }
 
-          .page {
+          .page,
+          .page-section {
             width: 100%;
-            margin: 0;
+            margin: 15mm 0;
             background: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            padding: 0;
+            padding: 15mm;
             position: relative;
             page-break-after: always;
+            page-break-inside: avoid;
             break-after: page;
+            break-inside: avoid;
+            box-sizing: border-box;
+            min-height: 277mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
           }
 
-          .page:last-of-type {
+          .page:last-of-type,
+          .page-section:last-of-type {
             page-break-after: auto;
             break-after: auto;
+            margin-bottom: 0;
           }
 
           @media print {
-            .page {
+            .page,
+            .page-section {
               box-shadow: none;
               width: 100%;
-              margin: 0;
-              padding: 0;
-              min-height: auto;
+              margin: 15mm 0;
+              padding: 15mm;
+              min-height: 277mm;
               page-break-after: always;
+              page-break-inside: avoid;
+              break-after: page;
+              break-inside: avoid;
+              box-sizing: border-box;
             }
 
-            .page:last-of-type {
+            .page:last-of-type,
+            .page-section:last-of-type {
               page-break-after: auto;
               break-after: auto;
+              margin-bottom: 0;
             }
           }
 
           @media screen {
-            .page {
+            .page,
+            .page-section {
               width: 210mm;
-              padding: 20mm;
-              margin: 0 auto;
+              padding: 15mm;
+              margin: 15mm auto;
               min-height: auto;
+              box-sizing: border-box;
             }
           }
 
@@ -1541,6 +1613,9 @@ export const generatePDF = async (data: DocumentData) => {
             margin-right: 0;
             padding-left: 0;
             padding-right: 0;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            page-break-after: avoid;
           }
 
           .header-image {
@@ -1550,6 +1625,8 @@ export const generatePDF = async (data: DocumentData) => {
             padding: 0;
             display: block;
             border: none;
+            page-break-inside: avoid;
+            break-inside: avoid;
           }
 
           .header-content {
@@ -1562,13 +1639,15 @@ export const generatePDF = async (data: DocumentData) => {
             width: 100%;
             border-bottom: 2px solid #000;
             box-sizing: border-box;
+            page-break-inside: avoid;
+            page-break-after: avoid;
           }
 
           @media screen {
             .header-content {
-              margin: 0 -20mm;
-              padding: 20px 20mm;
-              width: calc(100% + 40mm);
+              margin: 0;
+              padding: 20px 0;
+              width: 100%;
             }
           }
 
@@ -1649,6 +1728,13 @@ export const generatePDF = async (data: DocumentData) => {
             margin: 0 0 15px 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            padding: 12px;
+            background: #fff;
+            border-left: 4px solid #000;
+            page-break-inside: avoid;
+            page-break-before: auto;
+            page-break-after: avoid;
+            break-inside: avoid;
           }
 
           .customer-name {
@@ -1664,8 +1750,25 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .items-section {
-          margin: 15px 0 30px 0;
-        }
+            margin: 15px 0 30px 0;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            display: flex;
+            flex-direction: column;
+          }
+
+          .subsection {
+            page-break-inside: avoid;
+            break-inside: avoid;
+            margin-bottom: 12px;
+            padding: 8px;
+          }
+
+          .subsection > div:first-child {
+            font-weight: 600;
+            margin-bottom: 6px;
+            page-break-after: avoid;
+          }
 
           .items-table {
             width: 100%;
@@ -1675,11 +1778,15 @@ export const generatePDF = async (data: DocumentData) => {
             border: 2px solid #000;
             border-radius: 0;
             overflow: hidden;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            table-layout: auto;
           }
 
           .items-table thead {
             background: #f8f9fa;
             color: #000;
+            display: table-header-group;
           }
 
           .items-table th {
@@ -1690,10 +1797,17 @@ export const generatePDF = async (data: DocumentData) => {
             text-transform: uppercase;
             letter-spacing: 0.5px;
             border-right: 1px solid rgba(255,255,255,0.2);
+            page-break-after: avoid;
+            break-after: avoid;
           }
 
           .items-table th:last-child {
             border-right: none;
+          }
+
+          .items-table tbody tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
           }
 
           .items-table td {
@@ -1702,6 +1816,7 @@ export const generatePDF = async (data: DocumentData) => {
             border-right: 1px solid #e9ecef;
             text-align: center;
             vertical-align: top;
+            page-break-inside: avoid;
           }
 
           .items-table td:last-child {
@@ -1733,19 +1848,28 @@ export const generatePDF = async (data: DocumentData) => {
 
           .totals-section {
             margin-top: 20px;
+            margin-bottom: 15mm;
             display: flex;
             justify-content: flex-end;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            page-break-before: avoid;
+            break-before: avoid;
+            padding-bottom: 10mm;
           }
 
           .totals-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 12px;
+            page-break-inside: avoid;
+            break-inside: avoid;
           }
 
           .totals-table td {
             padding: 8px 15px;
             border: none;
+            page-break-inside: avoid;
           }
 
           .totals-table .label {
@@ -1763,6 +1887,7 @@ export const generatePDF = async (data: DocumentData) => {
           .totals-table .total-row {
             border-top: 2px solid #000;
             background: #fff;
+            page-break-inside: avoid;
           }
 
           .totals-table .total-row .label {
@@ -1795,6 +1920,23 @@ export const generatePDF = async (data: DocumentData) => {
           .section-summary .totals-table {
             break-inside: avoid;
             page-break-inside: avoid;
+          }
+
+          /* Stamp and footer sections */
+          .stamp-section {
+            page-break-inside: avoid;
+            page-break-before: avoid;
+            margin: 30mm 0 15mm 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 120px;
+          }
+
+          .stamp-section img {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: contain;
           }
 
           @media print {
