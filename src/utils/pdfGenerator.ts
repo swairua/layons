@@ -628,37 +628,38 @@ export const generatePDF = (data: DocumentData) => {
             <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
             <!-- Header content below image -->
-            <div class="header-content" style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-top: 20px;">
-              <!-- Left side: Client and Document Details (matches supplied attachment) -->
-              <div style="display: flex; flex-direction: column; gap: 8px; font-size: 10px; line-height: 1.6; text-align:left;">
+            <div class="header-content" style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
+              <!-- Top row: Services (left) and Company details (right) -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
                 <!-- Services Section -->
-                <div style="margin-bottom: 8px;">
-                  <div style="font-size: 10px; font-weight: bold; color: #333; text-transform: uppercase; line-height: 1.4;">
-                    ${(() => {
-                      const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-                      const midpoint = Math.ceil(services.length / 2);
-                      const firstRow = services.slice(0, midpoint).join(' • ');
-                      const secondRow = services.slice(midpoint).join(' • ');
-                      return `<div style="margin-bottom: 3px;">${firstRow}</div>${secondRow ? `<div>${secondRow}</div>` : ''}`;
-                    })()}
-                  </div>
+                <div style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left;">
+                  ${(() => {
+                    const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+                    const itemsPerLine = Math.ceil(services.length / 3);
+                    const line1 = services.slice(0, itemsPerLine).join(' • ');
+                    const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
+                    const line3 = services.slice(itemsPerLine * 2).join(' • ');
+                    return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
+                  })()}
                 </div>
 
-                <!-- Client Details -->
-                <div style="margin-bottom: 4px;"><strong>Client:</strong> ${data.customer?.name || ''}</div>
-                ${data.project_title ? `<div style="margin-bottom: 4px;"><strong>Project:</strong> ${data.project_title}</div>` : ''}
-                <div style="margin-bottom: 4px;"><strong>Subject:</strong> ${data.type === 'boq' ? 'Bill of Quantities' : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
-                <div style="margin-bottom: 4px;"><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
-                <div style="margin-bottom: 4px;"><strong>Qtn No:</strong> ${data.number || ''}</div>
+                <!-- Company details (right-aligned) -->
+                <div style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold;">
+                  ${company.address ? `<div>${company.address}</div>` : ''}
+                  ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+                  ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
+                  ${company.email ? `<div>${company.email}</div>` : ''}
+                  ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
+                </div>
               </div>
 
-              <!-- Right side: Company details (right-aligned) -->
-              <div style="text-align: right; font-size: 12px; line-height: 1.7; font-weight: bold;">
-                ${company.address ? `<div>${company.address}</div>` : ''}
-                ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-                ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
-                ${company.email ? `<div>${company.email}</div>` : ''}
-                ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
+              <!-- Bottom row: Client Details -->
+              <div style="display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left;">
+                <div><strong>Client:</strong> ${data.customer?.name || ''}</div>
+                ${data.project_title ? `<div><strong>Project:</strong> ${data.project_title}</div>` : ''}
+                <div><strong>Subject:</strong> ${data.type === 'boq' ? 'Bill of Quantities' : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
+                <div><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
+                <div><strong>Qtn No:</strong> ${data.number || ''}</div>
               </div>
             </div>
           </div>
