@@ -4,59 +4,58 @@ import html2canvas from 'html2canvas';
 
 // Helper function to convert HTML to PDF and auto-download
 const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string) => {
+  let wrapper: HTMLElement | null = null;
   try {
-    // Create a temporary container for the HTML
-    const container = document.createElement('div');
-    container.innerHTML = htmlContent;
-
-    // Set container styles for proper rendering
-    container.style.margin = '0';
-    container.style.padding = '0';
-    container.style.backgroundColor = '#ffffff';
-    container.style.width = '210mm';
-    container.style.height = 'auto';
-    container.style.boxSizing = 'border-box';
-
-    // Use a wrapper to keep the element off-screen but visible to the rendering engine
-    const wrapper = document.createElement('div');
-    wrapper.style.position = 'fixed';
-    wrapper.style.left = '-9999px';
+    // Create a temporary wrapper for proper rendering
+    wrapper = document.createElement('div');
+    wrapper.style.position = 'absolute';
+    wrapper.style.left = '0';
     wrapper.style.top = '0';
     wrapper.style.width = '210mm';
     wrapper.style.height = 'auto';
-    wrapper.style.visibility = 'visible';
-    wrapper.appendChild(container);
+    wrapper.style.backgroundColor = '#ffffff';
+    wrapper.style.zIndex = '-999999';
+    wrapper.style.pointerEvents = 'none';
+    wrapper.innerHTML = htmlContent;
 
-    // Append to body
+    // Append to body to allow CSS to render
     document.body.appendChild(wrapper);
 
-    // Wait for layout and image loading
-    await new Promise(resolve => setTimeout(resolve, 2500));
+    // Wait longer for images and fonts to load
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
-    // Convert HTML to canvas with better options
-    const canvas = await html2canvas(container, {
+    // Force a reflow to ensure content is rendered
+    wrapper.offsetHeight;
+
+    // Convert HTML to canvas
+    const canvas = await html2canvas(wrapper, {
       scale: 2,
       backgroundColor: '#ffffff',
       logging: false,
       allowTaint: true,
       useCORS: true,
-      imageTimeout: 5000,
-      windowHeight: container.scrollHeight,
-      windowWidth: 210 * 3.779527559, // 210mm to pixels at 96 DPI
+      imageTimeout: 10000,
+      timeout: 30000,
+      windowHeight: Math.max(wrapper.scrollHeight, wrapper.offsetHeight) || 1000,
+      windowWidth: 210 * 3.779527559, // 210mm to pixels
       proxy: undefined,
-      foreignObjectRendering: true
+      foreignObjectRendering: false,
+      ignoreElements: (el) => {
+        // Don't ignore any elements needed for PDF
+        return false;
+      }
     });
 
-    // Check if canvas is empty
+    // Validate canvas
     if (!canvas || canvas.width === 0 || canvas.height === 0) {
-      console.error('Canvas is empty - content may not have rendered');
-      if (document.body.contains(wrapper)) {
-        document.body.removeChild(wrapper);
-      }
-      throw new Error('Failed to render content to canvas');
+      console.error('Canvas rendering failed - content may not be visible', {
+        width: canvas?.width,
+        height: canvas?.height
+      });
+      throw new Error('Failed to render content to canvas - canvas is empty');
     }
 
-    // Get canvas dimensions
+    // Get canvas data
     const imgData = canvas.toDataURL('image/png');
     const imgWidth = 210; // A4 width in mm
     const pageHeight = 297; // A4 height in mm
@@ -82,13 +81,15 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
 
     // Download the PDF
     pdf.save(filename);
-
-    // Clean up
-    if (document.body.contains(wrapper)) {
-      document.body.removeChild(wrapper);
-    }
   } catch (error) {
     console.error('Error generating PDF:', error);
+    // Re-throw to be handled by caller
+    throw error;
+  } finally {
+    // Clean up
+    if (wrapper && document.body.contains(wrapper)) {
+      document.body.removeChild(wrapper);
+    }
   }
 };
 
