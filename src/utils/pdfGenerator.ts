@@ -1347,10 +1347,6 @@ export const generatePDF = (data: DocumentData) => {
           text-align: left;
         }
 
-        .company-info {
-          flex: 1;
-        }
-
         .logo {
           display: none;
         }
@@ -1359,26 +1355,6 @@ export const generatePDF = (data: DocumentData) => {
           width: 100%;
           height: 100%;
           object-fit: contain;
-        }
-
-        .company-name {
-          font-size: 16px;
-          font-weight: bold;
-          margin-bottom: 8px;
-          color: #000;
-        }
-
-        .company-details {
-          font-size: 10px;
-          line-height: 1.6;
-          color: #666;
-          margin-bottom: 0;
-        }
-
-        .document-info {
-          text-align: left;
-          flex: 1;
-          max-width: 100%;
         }
         
         .document-title {
