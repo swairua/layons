@@ -11,13 +11,13 @@ export async function fixInvoiceColumns(companyId: string) {
     console.log('Starting invoice column fix for company:', companyId);
 
     // Step 1: Get all invoices for the company
-    // Note: The database schema uses amount_paid and amount_due, not paid_amount and balance_due
+    // Note: The database schema uses paid_amount and balance_due
     let invoices: any[] = [];
 
     try {
       const { data, error } = await supabase
         .from('invoices')
-        .select('id, company_id, total_amount, amount_paid, amount_due, status, due_date')
+        .select('id, company_id, total_amount, paid_amount, balance_due, status, due_date')
         .eq('company_id', companyId);
 
       if (error) {
@@ -55,15 +55,15 @@ export async function fixInvoiceColumns(companyId: string) {
     for (const invoice of invoices) {
       const totalAmount = Number(invoice.total_amount) || 0;
 
-      // Determine paid amount: use amount_paid (the actual database column)
+      // Determine paid amount: use paid_amount (the actual database column)
       let paidAmount: number;
-      if (invoice.amount_paid !== null && invoice.amount_paid !== undefined) {
-        paidAmount = Number(invoice.amount_paid) || 0;
+      if (invoice.paid_amount !== null && invoice.paid_amount !== undefined) {
+        paidAmount = Number(invoice.paid_amount) || 0;
       } else {
         paidAmount = 0;
       }
 
-      // Calculate balance due (amount_due should match this)
+      // Calculate balance due (balance_due should match this)
       const balanceDue = Math.max(0, totalAmount - paidAmount);
 
       // Determine correct status based on payment and due date
@@ -85,12 +85,12 @@ export async function fixInvoiceColumns(companyId: string) {
       }
 
       // Check if update is needed (only if the calculated values differ significantly)
-      const currentPaidAmount = invoice.amount_paid !== null && invoice.amount_paid !== undefined
-        ? Number(invoice.amount_paid)
+      const currentPaidAmount = invoice.paid_amount !== null && invoice.paid_amount !== undefined
+        ? Number(invoice.paid_amount)
         : null;
 
-      const currentBalance = invoice.amount_due !== null && invoice.amount_due !== undefined
-        ? Number(invoice.amount_due)
+      const currentBalance = invoice.balance_due !== null && invoice.balance_due !== undefined
+        ? Number(invoice.balance_due)
         : null;
 
       const needsUpdate =
@@ -122,8 +122,8 @@ export async function fixInvoiceColumns(companyId: string) {
           const { error: updateError } = await supabase
             .from('invoices')
             .update({
-              amount_paid: update.paid_amount,
-              amount_due: update.balance_due,
+              paid_amount: update.paid_amount,
+              balance_due: update.balance_due,
               status: update.status,
               updated_at: new Date().toISOString()
             })
