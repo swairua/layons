@@ -950,16 +950,34 @@ export const generatePDF = (data: DocumentData) => {
           }
 
           .page {
-            width: 210mm;
+            width: 100%;
             min-height: 297mm;
-            margin: 0 auto;
+            margin: 0;
             background: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            padding: 0 20mm 20mm 20mm;
+            padding: 0;
             position: relative;
             /* Ensure each .page begins on a new printed page */
             page-break-after: always;
             break-after: page;
+          }
+
+          @media print {
+            .page {
+              box-shadow: none;
+              width: 100%;
+              margin: 0;
+              padding: 0;
+              min-height: auto;
+            }
+          }
+
+          @media screen {
+            .page {
+              width: 210mm;
+              padding: 20mm;
+              margin: 0 auto;
+            }
           }
 
           .header {
