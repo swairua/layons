@@ -826,7 +826,7 @@ export const generatePDF = async (data: DocumentData) => {
 
           ${preliminariesHtml}
 
-          <div style="height: 15mm;"></div>
+          <div style="height: 15mm; margin-left: 15mm; margin-right: 15mm;"></div>
 
           <table class="items">
             <thead>
@@ -845,7 +845,7 @@ export const generatePDF = async (data: DocumentData) => {
           </table>
 
           <div class="totals">
-            <table style="width:100%; margin-top:8px;">
+            <table style="width:100%; margin-top:8px; margin-left: 0; margin-right: 0;">
               <tr>
                 <td class="label" style="text-align:right; font-weight:700;">TOTAL:</td>
                 <td style="width:150px; text-align:right; font-weight:700;">${formatCurrency(grandTotalForBOQ)}</td>
