@@ -1957,11 +1957,11 @@ export const generatePDF = (data: DocumentData) => {
       <!-- Last Page for Invoices and Quotations -->
       ${(data.type === 'invoice' || data.type === 'quotation') ? `
       <div class="page" style="page-break-before: always; position: relative;">
-        <div style="padding: 20mm;">
+        <div style="padding: 10mm;">
 
           <!-- Terms Section -->
-          <div style="margin-bottom: 25px;">
-            <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Terms;</h3>
+          <div style="margin-bottom: 15px;">
+            <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
             <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
               <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
                 <ul style="font-size: 11px; line-height: 1.6; margin: 6px 0 6px 20px; padding-left: 20px; color: #333; list-style-type: lower-alpha;">
