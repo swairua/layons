@@ -99,19 +99,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Fetch user profile from database with error handling and retry logic
   const fetchProfile = useCallback(async (userId: string): Promise<UserProfile | null> => {
-    try {
-      // Add a timeout to prevent hanging requests
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    const maxRetries = 2;
+    let lastError: any = null;
 
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
         const { data: profileData, error } = await supabase
           .from('profiles')
           .select('id, email, full_name, avatar_url, phone, company_id, department, position, role, status, last_login, created_at, updated_at')
           .eq('id', userId)
           .maybeSingle(); // Use maybeSingle to handle 0 results gracefully
-
-        clearTimeout(timeoutId);
 
         if (error) {
           throw error;
@@ -123,65 +120,82 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         return profileData;
       } catch (fetchError) {
-        clearTimeout(timeoutId);
-        throw fetchError;
-      }
-    } catch (error) {
-      // Format error message properly to avoid [object Object]
-      let errorMessage = 'Unknown error';
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error && typeof error === 'object') {
-        const errObj = error as any;
-        errorMessage = errObj.message || errObj.error_description || errObj.details || String(error);
-      }
-      console.error(`Profile fetch error for user ${userId}: ${errorMessage}`);
+        lastError = fetchError;
 
-      // Handle specific error types using the error type checker
-      if (isErrorType(error, 'auth')) {
-        console.warn('Profile fetch failed due to expired token - user may need to re-authenticate');
-        return null; // Don't show error toast for auth issues
-      }
+        // Check if it's a network error
+        const errorMsg = (fetchError instanceof Error) ? fetchError.message : String(fetchError);
+        const isNetworkError = errorMsg.includes('Failed to fetch') ||
+                              errorMsg.includes('Network') ||
+                              errorMsg.includes('timeout') ||
+                              errorMsg.includes('ECONNREFUSED') ||
+                              errorMsg.includes('ENOTFOUND');
 
-      if (isErrorType(error, 'network')) {
-        console.warn('Profile fetch failed due to network issue - app will continue without full profile');
-        // Don't show toast for network errors on profile fetch - it's not critical
-        // The app can work with just the auth user info
-        return null;
-      }
+        if (isNetworkError && attempt < maxRetries - 1) {
+          // Wait before retrying (exponential backoff: 500ms, then 1s)
+          const delayMs = 500 * Math.pow(2, attempt);
+          console.warn(`Profile fetch network error (attempt ${attempt + 1}/${maxRetries}). Retrying in ${delayMs}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+          continue;
+        }
 
-      if (isErrorType(error, 'permission')) {
-        console.warn('Profile fetch failed due to permissions');
+        // Format error message properly to avoid [object Object]
+        let errorMessage = 'Unknown error';
+        if (fetchError instanceof Error) {
+          errorMessage = fetchError.message;
+        } else if (typeof fetchError === 'string') {
+          errorMessage = fetchError;
+        } else if (fetchError && typeof fetchError === 'object') {
+          const errObj = fetchError as any;
+          errorMessage = errObj.message || errObj.error_description || errObj.details || String(fetchError);
+        }
+        console.error(`Profile fetch error for user ${userId}: ${errorMessage}`);
 
-        // Prevent toast spam - only show permission error toast every 10 seconds
+        // Handle specific error types using the error type checker
+        if (isErrorType(fetchError, 'auth')) {
+          console.warn('Profile fetch failed due to expired token - user may need to re-authenticate');
+          return null; // Don't show error toast for auth issues
+        }
+
+        if (isErrorType(fetchError, 'network')) {
+          console.warn('Profile fetch failed due to network issue - app will continue without full profile');
+          // Don't show toast for network errors on profile fetch - it's not critical
+          // The app can work with just the auth user info
+          return null;
+        }
+
+        if (isErrorType(fetchError, 'permission')) {
+          console.warn('Profile fetch failed due to permissions');
+
+          // Prevent toast spam - only show permission error toast every 10 seconds
+          const now = Date.now();
+          if (now - lastPermissionErrorToast.current > TOAST_COOLDOWN) {
+            lastPermissionErrorToast.current = now;
+            setTimeout(() => toast.error(
+              'Permission error accessing profile. Please sign in again.',
+              { duration: 4000 }
+            ), 0);
+          }
+          return null;
+        }
+
+        // Show general error message for other cases
+        const friendlyMessage = getUserFriendlyErrorMessage(fetchError);
+
+        // Prevent toast spam - only show general error toast every 10 seconds
         const now = Date.now();
-        if (now - lastPermissionErrorToast.current > TOAST_COOLDOWN) {
-          lastPermissionErrorToast.current = now;
+        if (now - lastGeneralErrorToast.current > TOAST_COOLDOWN) {
+          lastGeneralErrorToast.current = now;
           setTimeout(() => toast.error(
-            'Permission error accessing profile. Please sign in again.',
+            `Failed to load user profile: ${friendlyMessage}`,
             { duration: 4000 }
           ), 0);
         }
+
         return null;
       }
-
-      // Show general error message for other cases
-      const friendlyMessage = getUserFriendlyErrorMessage(error);
-
-      // Prevent toast spam - only show general error toast every 10 seconds
-      const now = Date.now();
-      if (now - lastGeneralErrorToast.current > TOAST_COOLDOWN) {
-        lastGeneralErrorToast.current = now;
-        setTimeout(() => toast.error(
-          `Failed to load user profile: ${friendlyMessage}`,
-          { duration: 4000 }
-        ), 0);
-      }
-
-      return null;
     }
+
+    return null;
   }, []);
 
   // Update last login timestamp silently
