@@ -159,7 +159,7 @@ export async function fixInvoiceColumns(companyId: string) {
       console.log('No invoices needed updating');
     }
 
-    console.log(`Invoice column fix complete: ${fixedCount} invoices updated`);
+    console.log(`Invoice column fix complete: ${fixedCount} invoices updated out of ${invoices.length}`);
     return {
       success: true,
       message: `Fixed ${fixedCount} invoices`,
@@ -168,8 +168,17 @@ export async function fixInvoiceColumns(companyId: string) {
     };
 
   } catch (error) {
-    console.error('Error in fixInvoiceColumns:', error);
-    throw error;
+    const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
+    console.error('Error in fixInvoiceColumns:', errorMsg);
+    // Return success anyway - don't crash the app, just log the error
+    // The invoices will still display with calculated values
+    return {
+      success: false,
+      message: `Fix operation failed: ${errorMsg}`,
+      updatedCount: 0,
+      totalInvoices: 0,
+      error: errorMsg
+    };
   }
 }
 
