@@ -1,33 +1,64 @@
-// PDF Generation utility using html2pdf for auto-download
-import html2pdf from 'html2pdf.js';
+// PDF Generation utility using jsPDF + html2canvas for auto-download
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 // Helper function to convert HTML to PDF and auto-download
-const convertHTMLToPDFAndDownload = (htmlContent: string, filename: string) => {
-  const element = document.createElement('div');
-  element.innerHTML = htmlContent;
-  element.style.display = 'none';
-  document.body.appendChild(element);
-
-  const options = {
-    margin: 0,
-    filename: filename,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, backgroundColor: '#ffffff' },
-    jsPDF: { format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: 'avoid' }
-  };
-
+const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string) => {
   try {
-    (html2pdf() as any).set(options).from(element).save().finally(() => {
-      if (document.body.contains(element)) {
-        document.body.removeChild(element);
-      }
+    // Create a temporary container for the HTML
+    const container = document.createElement('div');
+    container.innerHTML = htmlContent;
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '-9999px';
+    container.style.width = '210mm';
+    container.style.height = 'auto';
+    document.body.appendChild(container);
+
+    // Wait a bit for images to load
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Convert HTML to canvas
+    const canvas = await html2canvas(container, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      logging: false,
+      allowTaint: true,
+      useCORS: true
     });
+
+    // Get canvas dimensions
+    const imgData = canvas.toDataURL('image/png');
+    const imgWidth = 210; // A4 width in mm
+    const pageHeight = 297; // A4 height in mm
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // Create PDF
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeightPdf = pdf.internal.pageSize.getHeight();
+
+    // Add images to PDF pages
+    while (heightLeft >= 0) {
+      const heightToPrint = Math.min(pageHeight, heightLeft);
+      pdf.addImage(imgData, 'PNG', 0, -position, pageWidth, imgHeight);
+      heightLeft -= pageHeight;
+      position += pageHeight;
+
+      if (heightLeft > 0) {
+        pdf.addPage();
+      }
+    }
+
+    // Download the PDF
+    pdf.save(filename);
+
+    // Clean up
+    document.body.removeChild(container);
   } catch (error) {
     console.error('Error generating PDF:', error);
-    if (document.body.contains(element)) {
-      document.body.removeChild(element);
-    }
   }
 };
 
