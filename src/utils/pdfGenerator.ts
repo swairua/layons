@@ -1137,49 +1137,7 @@ export const generatePDF = async (data: DocumentData) => {
 
       pagesHtml += `
         <div class="page" style="page-break-after: always;">
-          ${showHeader ? `
-          <!-- Header Section (only on first page) -->
-          <div class="header">
-            <!-- Full-width header image -->
-            <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
-
-            <!-- Header content below image -->
-            <div class="header-content" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
-              <!-- Top row: Services (left) and Company details (right) -->
-              <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: calc(100% + 12mm); margin-right: -12mm; box-sizing: border-box; min-width: 0;">
-                <!-- Services Section -->
-                <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; box-sizing: border-box; min-width: 0;">
-                  ${(() => {
-                    const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-                    const itemsPerLine = Math.ceil(services.length / 3);
-                    const line1 = services.slice(0, itemsPerLine).join(' • ');
-                    const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
-                    const line3 = services.slice(itemsPerLine * 2).join(' • ');
-                    return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
-                  })()}
-                </div>
-
-                <!-- Company details (right-aligned) -->
-                <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box; padding-right: 12mm;">
-                  ${company.address ? `<div>${company.address}</div>` : ''}
-                  ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-                  ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
-                  ${company.email ? `<div>${company.email}</div>` : ''}
-                  ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
-                </div>
-              </div>
-
-              <!-- Bottom row: Client Details -->
-              <div style="display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left;">
-                <div><strong>Client:</strong> ${data.customer?.name || ''}</div>
-                ${data.project_title ? `<div><strong>Project:</strong> ${data.project_title}</div>` : ''}
-                <div><strong>Subject:</strong> ${data.type === 'boq' ? 'Bill of Quantities' : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
-                <div><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
-                <div><strong>Qtn No:</strong> ${data.number || ''}</div>
-              </div>
-            </div>
-          </div>
-          ` : ''}
+          ${showHeader ? generatePDFHeader(headerImage, company, companyServices, data, formatDateLong, data.type === 'invoice' ? 'Invoice' : 'Quotation') : ''}
 
           <!-- Section Title with alphabetical letter -->
           <div class="section-title" style="margin: ${showHeader ? '25px 0 15px 0' : '20px 0 15px 0'}; padding: 12px; background: #fff; border-left: 4px solid #000; font-size: 14px; font-weight: bold; text-transform: uppercase;">${sectionTitleWithLetter}</div>
