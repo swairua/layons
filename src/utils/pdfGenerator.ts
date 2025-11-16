@@ -629,20 +629,17 @@ export const generatePDF = async (data: DocumentData) => {
         /* Header image styling - matching quotations */
         .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; max-width: 100%; }
 
-        /* Header content styling - matching quotation layout */
-        .header-content { display: flex; justify-content: space-between; align-items: flex-start; gap: 30px; padding: 20px 0; margin: 0; width: 100%; border-bottom: 2px solid #000; box-sizing: border-box; }
-        .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 10px; font-weight: bold; line-height: 1.4; text-align: left; width: 100%; box-sizing: border-box; padding: 0; margin: 0; }
-        .header-company-info { flex: 1; display: flex; flex-direction: column; gap: 12px; }
-        .header-logo { width: 100px; height: 100px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 4px; overflow: hidden; }
+        /* Header content styling - matching quotation layout exactly */
+        .header-content { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; padding: 20px 0; margin: 0; width: 100%; border-bottom: 2px solid #000; box-sizing: border-box; }
+        .header-company-info { flex: 0 1 auto; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+        .header-logo { width: 120px; height: 120px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 4px; overflow: hidden; flex-shrink: 0; }
         .header-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .company-name { font-size: 14px; font-weight: bold; color: #212529; margin: 0; }
-        .company-details { font-size: 9px; color: #666; line-height: 1.6; }
-        .header-document-info { text-align: right; flex: 1; }
-        .document-title { font-size: 18px; font-weight: bold; margin-bottom: 12px; color: #000; text-transform: uppercase; }
-        .document-details { font-size: 10px; font-weight: bold; color: #333; line-height: 1.4; }
-        .document-details-row { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 4px; }
-        .document-details-label { width: 80px; text-align: right; }
-        .document-details-value { text-align: left; }
+        .company-name { font-size: 18px; font-weight: bold; color: #212529; margin: 0 0 8px 0; }
+        .company-details { font-size: 10px; color: #666; line-height: 1.6; }
+        .header-document-info { text-align: right; flex: 0 1 auto; min-width: 0; }
+        .document-title { font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #000; text-transform: uppercase; }
+        .document-details { font-size: 10px; font-weight: bold; color: #333; line-height: 1.6; }
+        .document-details div { margin-bottom: 4px; }
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; margin-bottom: 6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
