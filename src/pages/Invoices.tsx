@@ -175,8 +175,9 @@ export default function Invoices() {
       invoice.customers?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       invoice.customers?.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    // Status filter
-    const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
+    // Status filter - use calculated status
+    const calculatedStatus = calculateInvoiceStatus(invoice);
+    const matchesStatus = statusFilter === 'all' || calculatedStatus === statusFilter;
 
     // Date filter
     const invoiceDate = new Date(invoice.invoice_date);
