@@ -358,13 +358,13 @@ export const generatePDF = (data: DocumentData) => {
         .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; }
 
         /* Header content styling */
-        .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-        .header-top { display: flex; align-items: flex-start; gap: 20px; width: 100%; margin-bottom: 12px; width: 100%; }
+        .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; overflow: hidden; }
+        .header-top { display: flex; align-items: flex-start; gap: 20px; width: 100%; margin-bottom: 12px; box-sizing: border-box; min-width: 0; }
         .header-left { display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; }
-        .header-right { text-align: right; font-size: 12px; line-height: 1.6; flex-shrink: 0; margin-left: auto; }
+        .header-right { text-align: right; font-size: 12px; line-height: 1.6; flex: 0 0 auto; box-sizing: border-box; }
         .header-right .company-name { font-weight: bold; margin-bottom: 6px; font-size: 12px; }
         .header-right > div { font-weight: bold; }
-        .services-section { font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; max-width: 50%; }
+        .services-section { font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0; }
 
         .items { width:100%; border-collapse:collapse; margin-top:6px; }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; }
@@ -408,11 +408,11 @@ export const generatePDF = (data: DocumentData) => {
           <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
           <!-- Header content below image -->
-          <div class="header-content" style="margin-top: 8px;">
+          <div class="header-content" style="margin-top: 8px; display: flex; flex-direction: column; gap: 12px;">
             <!-- Top row: Services (left) and Company details (right) -->
-            <div class="header-top">
+            <div class="header-top" style="display: flex; align-items: flex-start; gap: 20px; width: 100%; box-sizing: border-box; min-width: 0;">
               <!-- Services Section -->
-              <div class="services-section">
+              <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0;">
                 ${(() => {
                   const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                   const itemsPerLine = Math.ceil(services.length / 3);
@@ -424,12 +424,12 @@ export const generatePDF = (data: DocumentData) => {
               </div>
 
               <!-- Company details (right-aligned) -->
-              <div class="header-right" style="font-size: 12px;">
-                ${company.address ? `<div style="font-weight: bold;">${company.address}</div>` : ''}
-                ${company.city ? `<div style="font-weight: bold;">${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-                ${company.phone ? `<div style="font-weight: bold;">Telephone: ${company.phone}</div>` : ''}
-                ${company.email ? `<div style="font-weight: bold;">${company.email}</div>` : ''}
-                ${company.tax_number ? `<div style="font-weight: bold;">PIN: ${company.tax_number}</div>` : ''}
+              <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box;">
+                ${company.address ? `<div>${company.address}</div>` : ''}
+                ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+                ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
+                ${company.email ? `<div>${company.email}</div>` : ''}
+                ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
               </div>
             </div>
 
@@ -630,9 +630,9 @@ export const generatePDF = (data: DocumentData) => {
             <!-- Header content below image -->
             <div class="header-content" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
               <!-- Top row: Services (left) and Company details (right) -->
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+              <div class="header-top" style="display: flex; align-items: flex-start; gap: 20px; width: 100%; box-sizing: border-box; min-width: 0;">
                 <!-- Services Section -->
-                <div style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; max-width: 50%;">
+                <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0;">
                   ${(() => {
                     const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                     const itemsPerLine = Math.ceil(services.length / 3);
@@ -643,8 +643,8 @@ export const generatePDF = (data: DocumentData) => {
                   })()}
                 </div>
 
-                <!-- Company details (right-aligned, no flex growth) -->
-                <div style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex-shrink: 0; margin-left: auto;">
+                <!-- Company details (right-aligned) -->
+                <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; box-sizing: border-box;">
                   ${company.address ? `<div>${company.address}</div>` : ''}
                   ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
                   ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
@@ -950,16 +950,34 @@ export const generatePDF = (data: DocumentData) => {
           }
 
           .page {
-            width: 210mm;
+            width: 100%;
             min-height: 297mm;
-            margin: 0 auto;
+            margin: 0;
             background: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            padding: 0 20mm 20mm 20mm;
+            padding: 0;
             position: relative;
             /* Ensure each .page begins on a new printed page */
             page-break-after: always;
             break-after: page;
+          }
+
+          @media print {
+            .page {
+              box-shadow: none;
+              width: 100%;
+              margin: 0;
+              padding: 0;
+              min-height: auto;
+            }
+          }
+
+          @media screen {
+            .page {
+              width: 210mm;
+              padding: 20mm;
+              margin: 0 auto;
+            }
           }
 
           .header {
@@ -988,9 +1006,9 @@ export const generatePDF = (data: DocumentData) => {
             justify-content: space-between;
             align-items: flex-start;
             gap: 30px;
-            padding: 20px 20mm 20px 20px;
-            margin: 0 -20mm 0 0;
-            width: calc(100% + 20mm);
+            padding: 20px 0;
+            margin: 0;
+            width: 100%;
             border-bottom: 2px solid #000;
             box-sizing: border-box;
           }
@@ -1284,23 +1302,31 @@ export const generatePDF = (data: DocumentData) => {
         }
 
         .page {
-          width: 210mm;
+          width: 100%;
           min-height: 297mm;
-          margin: 0 auto;
+          margin: 0;
           background: white;
           box-shadow: 0 0 10px rgba(0,0,0,0.1);
-          padding: 20mm;
+          padding: 0;
           position: relative;
+        }
+
+        @media print {
+          .page {
+            box-shadow: none;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: auto;
+          }
         }
 
         .header {
           display: block;
-          margin-bottom: 15px;
-          padding-bottom: 15px;
+          margin: 0 0 15px 0;
+          padding: 0 0 15px 0;
           border-bottom: 1px solid #000;
-          margin: 0 -20mm 0 -20mm;
-          padding: 0 20mm 15px 20mm;
-          width: calc(100% + 40mm);
+          width: 100%;
           box-sizing: border-box;
         }
 
@@ -1319,6 +1345,7 @@ export const generatePDF = (data: DocumentData) => {
           padding: 0;
           width: 100%;
           box-sizing: border-box;
+          overflow: hidden;
         }
 
         .header-top {
@@ -1329,6 +1356,7 @@ export const generatePDF = (data: DocumentData) => {
           padding: 0;
           gap: 20px;
           box-sizing: border-box;
+          min-width: 0;
         }
 
         .services-section {
@@ -1338,9 +1366,9 @@ export const generatePDF = (data: DocumentData) => {
           color: #333;
           line-height: 1.6;
           text-align: left;
-          flex: 0 1 auto;
-          max-width: 50%;
+          flex: 0 1 50%;
           box-sizing: border-box;
+          min-width: 0;
         }
 
         .services-section > div {
@@ -1356,9 +1384,9 @@ export const generatePDF = (data: DocumentData) => {
           text-align: right;
           font-size: 12px;
           line-height: 1.6;
-          flex-shrink: 0;
+          flex: 0 0 auto;
           padding: 0;
-          margin: 0 0 0 auto;
+          margin: 0;
           box-sizing: border-box;
         }
 
@@ -1697,14 +1725,18 @@ export const generatePDF = (data: DocumentData) => {
         @media print {
           body {
             background: white;
+            margin: 0;
+            padding: 0;
           }
-          
+
           .page {
             box-shadow: none;
             margin: 0;
             padding: 0;
+            width: 100%;
+            min-height: auto;
           }
-          
+
           .watermark {
             display: ${data.type === 'proforma' ? 'block' : 'none'};
           }
@@ -1714,6 +1746,11 @@ export const generatePDF = (data: DocumentData) => {
           body {
             background: #f5f5f5;
             padding: 20px;
+          }
+
+          .page {
+            padding: 20mm;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
           }
         }
         \n        .payment-banner {\n          background: #f8f9fa;\n          padding: 8px 15px;\n          margin-bottom: 20px;\n          border-left: 4px solid hsl(var(--primary));\n          font-size: 10px;\n          color: #333;\n          text-align: center;\n          border-radius: 4px;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          background: #f8f9fa;\n          padding: 10px;\n          margin: 15px 0;\n          border-left: 4px solid hsl(var(--primary));\n          font-size: 10px;\n          color: #333;\n          text-align: center;\n          border-radius: 4px;\n          font-weight: 600;\n        }\n      </style>
