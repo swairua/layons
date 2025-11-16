@@ -10,38 +10,40 @@ export async function fixInvoiceColumns(companyId: string) {
   try {
     console.log('Starting invoice column fix for company:', companyId);
 
-    // Step 1: Get all invoices for the company
-    // Note: Try to get both column name variants to handle different schema versions
+    // Step 1: Get all invoices for the company with basic columns that should always exist
     let invoices: any[] = [];
-    let fetchError: any = null;
 
     try {
-      const result = await supabase
+      // Try with the expected columns first
+      const { data, error } = await supabase
         .from('invoices')
-        .select('id, total_amount, paid_amount, balance_due, amount_paid, amount_due, status, due_date')
+        .select('id, company_id, total_amount, paid_amount, balance_due, status, due_date')
         .eq('company_id', companyId);
 
-      invoices = result.data || [];
-      fetchError = result.error;
-    } catch (err) {
-      // Fallback: try with just the expected columns
+      if (error) {
+        console.error('Query error details:', error?.code, error?.message);
+        throw error;
+      }
+
+      invoices = data || [];
+    } catch (err: any) {
+      // Try fallback with fewer columns if the above fails
+      console.warn('Primary query failed, trying fallback:', err?.message);
+
       try {
-        const result = await supabase
+        const { data, error } = await supabase
           .from('invoices')
-          .select('id, total_amount, paid_amount, balance_due, status, due_date')
+          .select('id, total_amount, status, due_date')
           .eq('company_id', companyId);
 
-        invoices = result.data || [];
-        fetchError = result.error;
-      } catch (innerErr) {
-        console.error('Failed to fetch invoices with both attempts:', innerErr);
-        fetchError = innerErr;
+        if (error) throw error;
+        invoices = data || [];
+        console.log('Using fallback query - some columns may be missing');
+      } catch (fallbackErr: any) {
+        const errorMsg = fallbackErr?.message || JSON.stringify(fallbackErr);
+        console.error('Both invoice fetch attempts failed:', errorMsg);
+        throw new Error(`Failed to fetch invoices: ${errorMsg}`);
       }
-    }
-
-    if (fetchError) {
-      console.error('Error fetching invoices:', fetchError?.message || JSON.stringify(fetchError));
-      throw new Error(`Failed to fetch invoices: ${fetchError?.message || 'Unknown error'}`);
     }
 
     if (!invoices || invoices.length === 0) {
