@@ -399,7 +399,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
       const totalLabor = calculateTotalLabor();
       const totalTax = getTotalTax();
       const grandTotal = calculateGrandTotal();
-      const balanceDue = grandTotal - (invoice?.paid_amount || 0);
+      const balanceDue = grandTotal - ((invoice?.paid_amount || invoice?.amount_paid) || 0);
 
       const invoiceData = {
         customer_id: selectedCustomerId,
@@ -409,7 +409,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
         subtotal: totalMaterials,
         tax_amount: totalTax,
         total_amount: grandTotal,
-        balance_due: balanceDue,
+        amount_due: balanceDue,
         terms_and_conditions: termsAndConditions,
         notes: notes,
       };
