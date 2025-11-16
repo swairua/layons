@@ -408,11 +408,11 @@ export const generatePDF = (data: DocumentData) => {
           <img src="https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800" alt="Layons Construction Limited" class="header-image" />
 
           <!-- Header content below image -->
-          <div class="header-content" style="margin-top: 8px;">
+          <div class="header-content" style="margin-top: 8px; display: flex; flex-direction: column; gap: 12px;">
             <!-- Top row: Services (left) and Company details (right) -->
-            <div class="header-top">
+            <div class="header-top" style="display: flex; align-items: flex-start; gap: 20px; width: 100%; box-sizing: border-box; min-width: 0;">
               <!-- Services Section -->
-              <div class="services-section">
+              <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0;">
                 ${(() => {
                   const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
                   const itemsPerLine = Math.ceil(services.length / 3);
@@ -423,13 +423,13 @@ export const generatePDF = (data: DocumentData) => {
                 })()}
               </div>
 
-              <!-- Company details (right-aligned) -->
-              <div class="header-right" style="font-size: 12px;">
-                ${company.address ? `<div style="font-weight: bold;">${company.address}</div>` : ''}
-                ${company.city ? `<div style="font-weight: bold;">${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-                ${company.phone ? `<div style="font-weight: bold;">Telephone: ${company.phone}</div>` : ''}
-                ${company.email ? `<div style="font-weight: bold;">${company.email}</div>` : ''}
-                ${company.tax_number ? `<div style="font-weight: bold;">PIN: ${company.tax_number}</div>` : ''}
+              <!-- Company details (right-aligned, constrained width) -->
+              <div class="header-right" style="text-align: right; font-size: 12px; line-height: 1.6; font-weight: bold; flex: 0 0 auto; max-width: 40%; box-sizing: border-box;">
+                ${company.address ? `<div>${company.address}</div>` : ''}
+                ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
+                ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
+                ${company.email ? `<div>${company.email}</div>` : ''}
+                ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
               </div>
             </div>
 
