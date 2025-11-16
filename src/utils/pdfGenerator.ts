@@ -1317,7 +1317,7 @@ export const generatePDF = (data: DocumentData) => {
           display: table;
           width: 100%;
           margin-bottom: 10px;
-          table-layout: auto;
+          table-layout: fixed;
         }
 
         .services-section {
