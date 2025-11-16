@@ -11,10 +11,33 @@ export async function fixInvoiceColumns(companyId: string) {
     console.log('Starting invoice column fix for company:', companyId);
 
     // Step 1: Get all invoices for the company
-    const { data: invoices, error: fetchError } = await supabase
-      .from('invoices')
-      .select('id, total_amount, paid_amount, balance_due, amount_paid, amount_due, status, due_date')
-      .eq('company_id', companyId);
+    // Note: Try to get both column name variants to handle different schema versions
+    let invoices: any[] = [];
+    let fetchError: any = null;
+
+    try {
+      const result = await supabase
+        .from('invoices')
+        .select('id, total_amount, paid_amount, balance_due, amount_paid, amount_due, status, due_date')
+        .eq('company_id', companyId);
+
+      invoices = result.data || [];
+      fetchError = result.error;
+    } catch (err) {
+      // Fallback: try with just the expected columns
+      try {
+        const result = await supabase
+          .from('invoices')
+          .select('id, total_amount, paid_amount, balance_due, status, due_date')
+          .eq('company_id', companyId);
+
+        invoices = result.data || [];
+        fetchError = result.error;
+      } catch (innerErr) {
+        console.error('Failed to fetch invoices with both attempts:', innerErr);
+        fetchError = innerErr;
+      }
+    }
 
     if (fetchError) {
       console.error('Error fetching invoices:', fetchError);
