@@ -40,8 +40,8 @@ export async function fixInvoiceColumns(companyId: string) {
     }
 
     if (fetchError) {
-      console.error('Error fetching invoices:', fetchError);
-      throw fetchError;
+      console.error('Error fetching invoices:', fetchError?.message || JSON.stringify(fetchError));
+      throw new Error(`Failed to fetch invoices: ${fetchError?.message || 'Unknown error'}`);
     }
 
     if (!invoices || invoices.length === 0) {
