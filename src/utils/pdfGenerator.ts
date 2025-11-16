@@ -398,6 +398,30 @@ export const generatePDF = (data: DocumentData) => {
         .terms-page table tr { border: none; }
         .terms-page table td { border: none; padding: 4px 0; }
         .stamp-image { width: 100px; height: 100px; }
+
+        @media screen {
+          .container {
+            padding: 0;
+            margin: 0 auto;
+          }
+
+          .header {
+            margin: 0;
+            padding: 12mm;
+            width: 100%;
+          }
+        }
+
+        @media print {
+          .container {
+            padding: 12mm;
+          }
+
+          .header {
+            margin: 0;
+            padding: 0;
+          }
+        }
       </style>
     </head>
     <body>
