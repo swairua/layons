@@ -276,6 +276,36 @@ export function EditCashReceiptModal({ open, onOpenChange, onSuccess, receipt }:
       const existingItems = items.filter(item => !item.id.startsWith('temp-'));
       const newItems = items.filter(item => item.id.startsWith('temp-'));
 
+      // Get all current item IDs in the database for this receipt
+      const { data: currentDbItems, error: fetchError } = await supabase
+        .from('cash_receipt_items')
+        .select('id')
+        .eq('cash_receipt_id', receipt.id);
+
+      if (fetchError) {
+        console.error('Fetch items error:', fetchError);
+        throw fetchError;
+      }
+
+      const currentDbItemIds = (currentDbItems || []).map(item => item.id);
+      const itemIdsToKeep = existingItems.map(item => item.id);
+      const itemIdsToDelete = currentDbItemIds.filter(id => !itemIdsToKeep.includes(id));
+
+      // Delete items that were removed
+      if (itemIdsToDelete.length > 0) {
+        for (const itemId of itemIdsToDelete) {
+          const { error: deleteError } = await supabase
+            .from('cash_receipt_items')
+            .delete()
+            .eq('id', itemId);
+
+          if (deleteError) {
+            console.error('Delete item error:', deleteError);
+            throw deleteError;
+          }
+        }
+      }
+
       // Update existing items
       for (const item of existingItems) {
         const { error: updateError } = await supabase
