@@ -47,10 +47,19 @@ export function ViewQuotationModal({
 
   if (!quotation) return null;
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-KE', {
+  const formatCurrency = (amount: number, currency: string = 'KES') => {
+    const localeMap: { [key: string]: string } = {
+      'KES': 'en-KE',
+      'USD': 'en-US',
+      'EUR': 'en-GB',
+      'GBP': 'en-GB',
+      'JPY': 'ja-JP',
+      'INR': 'en-IN',
+    };
+
+    return new Intl.NumberFormat(localeMap[currency] || 'en-KE', {
       style: 'currency',
-      currency: 'KES',
+      currency: currency,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount);
