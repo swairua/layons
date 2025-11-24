@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Layers, Plus, Eye, Download, Trash2, Copy, Pencil } from 'lucide-react';
+import { Layers, Plus, Eye, Download, Trash2, Copy, Pencil, FileText } from 'lucide-react';
 import { CreateBOQModal } from '@/components/boq/CreateBOQModal';
 import { CreatePercentageCopyModal } from '@/components/boq/CreatePercentageCopyModal';
 import { EditBOQModal } from '@/components/boq/EditBOQModal';
@@ -11,8 +11,10 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@
 import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { useBOQs, useDeleteBOQ, useUnits } from '@/hooks/useDatabase';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { useConvertBoqToInvoice } from '@/hooks/useBOQ';
 import { downloadBOQPDF } from '@/utils/boqPdfGenerator';
 import { toast } from 'sonner';
+import { useState } from 'react';
 
 export default function BOQs() {
   const [open, setOpen] = useState(false);
