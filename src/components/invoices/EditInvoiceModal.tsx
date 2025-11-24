@@ -523,6 +523,20 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="currency">Currency *</Label>
+                  <Select value={currency} onValueChange={setCurrency}>
+                    <SelectTrigger id="currency">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="KES">Ksh - Kenyan Shilling</SelectItem>
+                      <SelectItem value="USD">$ - US Dollar</SelectItem>
+                      <SelectItem value="GBP">£ - British Pound</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="lpo_number">LPO Number (Optional)</Label>
                   <Input
                     id="lpo_number"
