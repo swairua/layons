@@ -153,7 +153,18 @@ export default function BOQs() {
 
       <CreateBOQModal open={open} onOpenChange={setOpen} />
 
-      {viewing && (
+      {viewing && (() => {
+        const getLocaleForCurrency = (curr: string) => {
+          const mapping: { [key: string]: { locale: string; code: string } } = {
+            KES: { locale: 'en-KE', code: 'KES' },
+            USD: { locale: 'en-US', code: 'USD' },
+            EUR: { locale: 'en-GB', code: 'EUR' }
+          };
+          return mapping[curr] || mapping.KES;
+        };
+        const currencyLocale = getLocaleForCurrency(viewing.currency || 'KES');
+        const formatViewingCurrency = (amount: number) => new Intl.NumberFormat(currencyLocale.locale, { style: 'currency', currency: currencyLocale.code, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
+        return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-lg max-w-3xl w-full p-6">
             <div className="flex items-start justify-between">
@@ -190,7 +201,7 @@ export default function BOQs() {
                             <div key={subIdx} className="bg-muted/30 rounded p-3 border border-border/50">
                               <div className="flex justify-between items-center mb-2">
                                 <div className="font-semibold text-sm">Subsection {sub.name}: {sub.label}</div>
-                                <div className="text-sm font-semibold">{new Intl.NumberFormat('en-KE', { style: 'currency', currency: viewing.currency || 'KES' }).format(subsectionTotal)}</div>
+                                <div className="text-sm font-semibold">{formatViewingCurrency(subsectionTotal)}</div>
                               </div>
                               <table className="w-full text-xs">
                                 <thead>
@@ -214,8 +225,8 @@ export default function BOQs() {
                                           return '-';
                                         })()
                                       }</td>
-                                      <td>{new Intl.NumberFormat('en-KE', { style: 'currency', currency: viewing.currency || 'KES' }).format(Number(it.rate || 0))}</td>
-                                      <td className="text-right">{new Intl.NumberFormat('en-KE', { style: 'currency', currency: viewing.currency || 'KES' }).format(Number((it.quantity || 0) * (it.rate || 0)))}</td>
+                                      <td>{formatViewingCurrency(Number(it.rate || 0))}</td>
+                                      <td className="text-right">{formatViewingCurrency(Number((it.quantity || 0) * (it.rate || 0)))}</td>
                                     </tr>
                                   ))}
                                 </tbody>
@@ -232,7 +243,7 @@ export default function BOQs() {
                           }, 0);
                           return (
                             <div className="flex justify-end font-semibold text-sm pt-2 border-t border-border">
-                              <div>Section Total: {new Intl.NumberFormat('en-KE', { style: 'currency', currency: viewing.currency || 'KES' }).format(sectionTotal)}</div>
+                              <div>Section Total: {formatViewingCurrency(sectionTotal)}</div>
                             </div>
                           );
                         })()}
@@ -261,8 +272,8 @@ export default function BOQs() {
                                     return '-';
                                   })()
                                 }</td>
-                                <td>{new Intl.NumberFormat('en-KE', { style: 'currency', currency: viewing.currency || 'KES' }).format(Number(it.rate || 0))}</td>
-                                <td>{new Intl.NumberFormat('en-KE', { style: 'currency', currency: viewing.currency || 'KES' }).format(Number((it.quantity || 0) * (it.rate || 0)))}</td>
+                                <td>{formatViewingCurrency(Number(it.rate || 0))}</td>
+                                <td>{formatViewingCurrency(Number((it.quantity || 0) * (it.rate || 0)))}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -275,7 +286,8 @@ export default function BOQs() {
             </div>
           </div>
         </div>
-      )}
+      );
+      })()}
 
       <ConfirmationDialog
         open={deleteDialog.open}
