@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
       host: "::",
       port: 8080,
       middlewareMode: false,
-      hmr: true,
+      hmr: mode === 'development' ? true : false,
     },
     plugins: [
       react(),
