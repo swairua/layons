@@ -1075,57 +1075,57 @@ export const generatePDF = async (data: DocumentData) => {
         }
       }
 
-      // Render Page 2: Terms and Conditions (on a fresh page)
-      console.log('Rendering terms and conditions...');
+      // Render Page 2: Terms and Conditions (on a fresh page) - only if terms section exists
       const termsElement = boqWrapper.querySelector('.terms-page') as HTMLElement;
-      if (!termsElement) {
-        throw new Error('Terms page section not found');
-      }
+      if (termsElement) {
+        console.log('Rendering terms and conditions...');
+        const termsCanvas = await html2canvas(termsElement, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          logging: false,
+          allowTaint: true,
+          useCORS: true,
+          imageTimeout: 15000,
+          timeout: 45000,
+          windowHeight: Math.max(termsElement.scrollHeight, termsElement.offsetHeight) || 1000,
+          windowWidth: pageWidth * 3.779527559, // 210mm to pixels
+          proxy: undefined,
+          foreignObjectRendering: false,
+          onclone: (clonedDocument) => {
+            // Ensure CSS page breaks are respected during rendering
+            const style = clonedDocument.createElement('style');
+            style.textContent = '@media print { * { page-break-inside: avoid !important; } }';
+            clonedDocument.head.appendChild(style);
+          }
+        });
 
-      const termsCanvas = await html2canvas(termsElement, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false,
-        allowTaint: true,
-        useCORS: true,
-        imageTimeout: 15000,
-        timeout: 45000,
-        windowHeight: Math.max(termsElement.scrollHeight, termsElement.offsetHeight) || 1000,
-        windowWidth: pageWidth * 3.779527559, // 210mm to pixels
-        proxy: undefined,
-        foreignObjectRendering: false,
-        onclone: (clonedDocument) => {
-          // Ensure CSS page breaks are respected during rendering
-          const style = clonedDocument.createElement('style');
-          style.textContent = '@media print { * { page-break-inside: avoid !important; } }';
-          clonedDocument.head.appendChild(style);
+        // Add a fresh page for terms (always add new page)
+        pdf.addPage();
+
+        // Add terms to the new page
+        const imgTermsData = termsCanvas.toDataURL('image/png');
+        const imgTermsWidth = pageWidth; // Full width 210mm, margins handled in CSS
+        const imgTermsHeight = (termsCanvas.height * imgTermsWidth) / termsCanvas.width;
+        let termsHeightLeft = imgTermsHeight;
+        let termsPosition = 0;
+        let firstTermsPage = true;
+
+        // Add terms content to PDF
+        while (termsHeightLeft >= 0) {
+          if (!firstTermsPage) {
+            pdf.addPage();
+          }
+          pdf.addImage(imgTermsData, 'PNG', 0, -termsPosition, imgTermsWidth, imgTermsHeight);
+          termsHeightLeft -= (pageHeight - 8); // Account for margins and spacing
+          termsPosition += pageHeight;
+          firstTermsPage = false;
+
+          if (termsHeightLeft > 0) {
+            // Proper spacing before next page
+          }
         }
-      });
-
-      // Add a fresh page for terms (always add new page)
-      pdf.addPage();
-
-      // Add terms to the new page
-      const imgTermsData = termsCanvas.toDataURL('image/png');
-      const imgTermsWidth = pageWidth; // Full width 210mm, margins handled in CSS
-      const imgTermsHeight = (termsCanvas.height * imgTermsWidth) / termsCanvas.width;
-      let termsHeightLeft = imgTermsHeight;
-      let termsPosition = 0;
-      let firstTermsPage = true;
-
-      // Add terms content to PDF
-      while (termsHeightLeft >= 0) {
-        if (!firstTermsPage) {
-          pdf.addPage();
-        }
-        pdf.addImage(imgTermsData, 'PNG', 0, -termsPosition, imgTermsWidth, imgTermsHeight);
-        termsHeightLeft -= (pageHeight - 8); // Account for margins and spacing
-        termsPosition += pageHeight;
-        firstTermsPage = false;
-
-        if (termsHeightLeft > 0) {
-          // Proper spacing before next page
-        }
+      } else {
+        console.log('Terms page section not included (customTitle may be set)');
       }
 
       // Download PDF
