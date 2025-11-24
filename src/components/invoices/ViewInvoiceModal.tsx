@@ -313,7 +313,7 @@ export function ViewInvoiceModal({
                         </Badge>
                       </div>
                       <div className="font-semibold">
-                        {formatCurrency(calculateSectionTotal(section))}
+                        {formatCurrency(calculateSectionTotal(section), invoice.currency || 'KES')}
                       </div>
                     </div>
 
