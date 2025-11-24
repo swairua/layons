@@ -507,23 +507,16 @@ const generatePDFHeader = (
           </div>
         </div>
 
-        <!-- Bottom row: Client Details (left) and Document Info (right) -->
-        <div style="display: flex; gap: 20px; justify-content: space-between; align-items: flex-start; width: 100%; box-sizing: border-box;">
-          <!-- Client Details (left) -->
-          <div style="font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; flex: 1;">
-            <div><strong>Client;</strong></div>
-            <div>${data.customer?.name || ''}</div>
-            ${data.customer?.address ? `<div>${data.customer.address}</div>` : ''}
-            ${data.customer?.city ? `<div>${data.customer.city}</div>` : ''}
-            ${data.customer?.country ? `<div>${data.customer.country}</div>` : ''}
-          </div>
-          <!-- Document Info (right) -->
-          <div style="font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; flex: 0 0 auto;">
-            ${data.project_title ? `<div><strong>Project:</strong> ${data.project_title}</div>` : ''}
-            <div><strong>Subject:</strong> ${documentType}</div>
-            <div><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
-            <div><strong>${documentNumber}:</strong> ${data.number || ''}</div>
-          </div>
+        <!-- Bottom row: All details in single column -->
+        <div style="display: flex; flex-direction: column; gap: 0; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; width: 100%; box-sizing: border-box;">
+          <div><strong>Client;</strong> ${data.customer?.name || ''}</div>
+          ${data.customer?.address ? `<div>${data.customer.address}</div>` : ''}
+          ${data.customer?.city ? `<div>${data.customer.city}</div>` : ''}
+          ${data.customer?.country ? `<div>${data.customer.country}</div>` : ''}
+          ${data.project_title ? `<div style="margin-top: 6px;"><strong>Project;</strong> ${data.project_title}</div>` : ''}
+          <div style="margin-top: 6px;"><strong>Subject;</strong> ${documentType}</div>
+          <div><strong>Date;</strong> ${formatDateLong(data.date || '')}</div>
+          <div><strong>${documentNumber};</strong> ${data.number || ''}</div>
         </div>
       </div>
     </div>
@@ -2523,7 +2516,7 @@ export const generatePDF = async (data: DocumentData) => {
                   const itemsPerLine = Math.ceil(services.length / 3);
                   const line1 = services.slice(0, itemsPerLine).join(' • ');
                   const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
-                  const line3 = services.slice(itemsPerLine * 2).join(' ��� ');
+                  const line3 = services.slice(itemsPerLine * 2).join(' • ');
                   return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
                 })()}
               </div>
