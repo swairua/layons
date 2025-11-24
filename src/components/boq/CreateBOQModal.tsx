@@ -160,7 +160,15 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
     } : s));
   };
 
-  const formatCurrency = (amount: number) => new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
+  const formatCurrency = (amount: number) => {
+    const currencyLocales: { [key: string]: { locale: string; code: string } } = {
+      KES: { locale: 'en-KE', code: 'KES' },
+      USD: { locale: 'en-US', code: 'USD' },
+      EUR: { locale: 'en-GB', code: 'EUR' }
+    };
+    const curr = currencyLocales[currency] || currencyLocales.KES;
+    return new Intl.NumberFormat(curr.locale, { style: 'currency', currency: curr.code, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
+  };
 
   const calculateSubsectionTotal = (subsection: BOQSubsectionRow): number => {
     return subsection.items.reduce((sum, item) => sum + ((item.quantity || 0) * (item.rate || 0)), 0);
