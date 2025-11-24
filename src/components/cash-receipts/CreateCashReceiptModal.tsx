@@ -293,7 +293,14 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
       setSearchProduct('');
     } catch (err) {
       console.error('Error creating cash receipt:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create cash receipt';
+      let errorMessage = 'Failed to create cash receipt';
+
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === 'object' && err !== null) {
+        errorMessage = JSON.stringify(err, null, 2);
+      }
+
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
