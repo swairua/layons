@@ -536,7 +536,7 @@ const generatePDFHeader = (
           </div>
           <div style="display: flex; align-items: baseline; gap: 0;">
             <span style="width: 80px; white-space: nowrap;"><strong>${documentNumber};</strong></span>
-            <span style="flex: 1;">${data.number || ''}</span>
+            <span style="flex: 1;">${displayNumber}</span>
           </div>
         </div>
       </div>
