@@ -37,7 +37,15 @@ export interface BoqDocument {
 // Helper
 const safeN = (v: number | undefined) => (typeof v === 'number' && !isNaN(v) ? v : 0);
 
-export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string; logo_url?: string; address?: string; city?: string; country?: string; phone?: string; email?: string }) {
+export interface BoqPdfOptions {
+  customTitle?: string;
+  amountMultiplier?: number;
+  forceCurrency?: string;
+  customClient?: { name: string; email?: string; phone?: string; address?: string; city?: string; country?: string };
+  stampImageUrl?: string;
+}
+
+export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string; logo_url?: string; address?: string; city?: string; country?: string; phone?: string; email?: string }, options?: BoqPdfOptions) {
   // Flatten items and auto-calc amounts; prefix section titles and subsection titles as bold rows
   const flatItems: Array<{ description: string; quantity: number; unit_price: number; line_total: number; unit_of_measure?: string; _isSectionHeader?: boolean }> = [];
 
@@ -135,18 +143,32 @@ export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string;
 
   const subtotal = flatItems.reduce((s, r) => s + (r.line_total || 0), 0);
 
+  // Apply customizations if provided
+  const multiplier = options?.amountMultiplier ?? 1;
+  const customizedItems = flatItems.map(item => ({
+    ...item,
+    unit_price: item.unit_price * multiplier,
+    line_total: item.line_total * multiplier
+  }));
+
+  const customizedSubtotal = subtotal * multiplier;
+  const currency = options?.forceCurrency || doc.currency || 'KES';
+  const customer = options?.customClient || doc.client;
+
   return await generatePDF({
     type: 'boq',
     number: doc.number,
     date: doc.date,
     company,
-    customer: doc.client,
-    items: flatItems,
-    subtotal,
-    total_amount: subtotal,
+    customer: customer,
+    items: customizedItems,
+    subtotal: customizedSubtotal,
+    total_amount: customizedSubtotal,
     project_title: doc.project_title,
     contractor: doc.contractor,
     notes: doc.notes || '',
-    currency: doc.currency || 'KES'
+    currency: currency,
+    customTitle: options?.customTitle,
+    stampImageUrl: options?.stampImageUrl
   });
 }

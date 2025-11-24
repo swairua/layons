@@ -26,7 +26,7 @@ export default function BOQs() {
   const [viewing, setViewing] = useState<any | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; boqId?: string; boqNumber?: string }>({ open: false });
 
-  const handleDownloadPDF = async (boq: any) => {
+  const handleDownloadPDF = async (boq: any, options?: { customTitle?: string; amountMultiplier?: number; forceCurrency?: string }) => {
     try {
       if (!boq || !boq.data) {
         toast.error('BOQ data is not available');
@@ -40,8 +40,9 @@ export default function BOQs() {
         country: currentCompany.country || undefined,
         phone: currentCompany.phone || undefined,
         email: currentCompany.email || undefined,
-      } : undefined);
-      toast.success(`BOQ ${boq.number} PDF downloaded`);
+      } : undefined, options);
+      const suffix = options?.customTitle ? ` (${options.customTitle})` : '';
+      toast.success(`BOQ ${boq.number} PDF downloaded${suffix}`);
     } catch (err) {
       console.error('Download failed', err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
@@ -152,6 +153,28 @@ export default function BOQs() {
                       <Button size="icon" variant="ghost" onClick={() => handleDownloadPDF(b)} title="Download PDF">
                         <Download className="h-4 w-4" />
                       </Button>
+                      {b.number === 'BOQ-20251124-1441' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs"
+                          onClick={() => handleDownloadPDF(b, {
+                            customTitle: 'INVOICE',
+                            amountMultiplier: 0.4,
+                            forceCurrency: 'EUR',
+                            customClient: {
+                              name: 'Global Crop Diversity Trust',
+                              address: 'Platz der Vereinten Nationen 7',
+                              city: 'Bonn',
+                              country: 'Germany'
+                            },
+                            stampImageUrl: 'https://cdn.builder.io/api/v1/image/assets%2F325027ccf5da4f42b462ae016f6d2769%2F2078b0d4690b4a5fbb44780ee77831c6?format=webp&width=800'
+                          })}
+                          title="Download Special Invoice PDF (40% of amount)"
+                        >
+                          Invoice PDF
+                        </Button>
+                      )}
                       <Button size="icon" variant="destructive" onClick={() => handleDeleteClick(b.id, b.number)} title="Delete">
                         <Trash2 className="h-4 w-4" />
                       </Button>

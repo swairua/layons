@@ -327,6 +327,8 @@ export interface DocumentData {
   date: string;
   lpo_number?: string;
   currency?: string; // Currency code: 'KES', 'USD', 'EUR'
+  customTitle?: string; // Optional custom title for BOQ PDFs
+  stampImageUrl?: string; // Optional stamp image URL for special PDFs
   customer: {
     name: string;
     email?: string;
@@ -565,14 +567,15 @@ export const generatePDF = async (data: DocumentData) => {
     }
   };
 
-  const documentTitle = data.type === 'proforma' ? 'Proforma Invoice' :
+  const documentTitle = data.customTitle ||
+                       (data.type === 'proforma' ? 'Proforma Invoice' :
                        data.type === 'delivery' ? 'Delivery Note' :
                        data.type === 'statement' ? 'Customer Statement' :
                        data.type === 'receipt' ? 'Payment Receipt' :
                        data.type === 'remittance' ? 'Remittance Advice' :
                        data.type === 'lpo' ? 'Purchase Order' :
                        data.type === 'boq' ? 'Bill of Quantities' :
-                       data.type.charAt(0).toUpperCase() + data.type.slice(1);
+                       data.type.charAt(0).toUpperCase() + data.type.slice(1));
   
   // Prefer structured fields if present, otherwise fall back to parsing notes
   let boqProject = data.project_title || '';
@@ -599,7 +602,7 @@ export const generatePDF = async (data: DocumentData) => {
               <tr>
                 <th style="width:8%; font-weight: bold;">ITEM</th>
                 <th style="width:72%; text-align:left; font-weight: bold;">DESCRIPTION</th>
-                <th style="width:20%; font-weight: bold;">AMOUNT (KSHS)</th>
+                <th style="width:20%; font-weight: bold;">AMOUNT (${data.currency || 'KES'})</th>
               </tr>
             </thead>
             <tbody>
@@ -820,7 +823,7 @@ export const generatePDF = async (data: DocumentData) => {
       <!-- Page 1: BOQ Details -->
       <div class="boq-main">
         <div class="container">
-          ${generatePDFHeader(headerImage, company, companyServices, { ...data, project_title: boqProject }, formatDateLong, 'Bill of Quantities')}
+          ${generatePDFHeader(headerImage, company, companyServices, { ...data, project_title: boqProject }, formatDateLong, documentTitle)}
 
           ${preliminariesHtml}
 
@@ -834,7 +837,7 @@ export const generatePDF = async (data: DocumentData) => {
                 <th style="width:8%; text-align:center;">QTY</th>
                 <th style="width:9%; text-align:center;">UNIT</th>
                 <th style="width:11%; text-align:right;">RATE</th>
-                <th style="width:12%; text-align:right;">AMOUNT (KSHS)</th>
+                <th style="width:12%; text-align:right;">AMOUNT (${data.currency || 'KES'})</th>
               </tr>
             </thead>
             <tbody>
@@ -854,6 +857,7 @@ export const generatePDF = async (data: DocumentData) => {
       </div>
 
       <!-- Page 2: Terms and Conditions -->
+      ${data.customTitle === 'INVOICE' ? '' : `
       <div class="terms-page">
         <!-- Terms Section -->
         <div style="margin-bottom: 15px; page-break-inside: avoid;">
@@ -903,15 +907,15 @@ export const generatePDF = async (data: DocumentData) => {
           <table style="font-size: 10px; width: 72%; line-height: 1.6; color: #333; border: none;">
             <tr style="border: none;">
               <td style="width: 40%; border: none;"><strong>Client;</strong></td>
-              <td style="width: 60%; border: none;">________________________</td>
+              <td style="width: 60%; border: none;">${data.customer.name}${data.customer.address ? ' <br/> ' + data.customer.address : ''}${data.customer.city ? ' <br/> ' + data.customer.city : ''}${data.customer.country ? ', ' + data.customer.country : ''}</td>
             </tr>
             <tr style="border: none;">
               <td style="border: none;"><strong>Tel No;</strong></td>
-              <td style="border: none;">________________________</td>
+              <td style="border: none;">${data.customer.phone || '________________________'}</td>
             </tr>
           </table>
           <div style="text-align: center; flex-shrink: 0; width: 100px;">
-            <img src="${stampImage}" alt="Layons Construction Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
+            <img src="${data.stampImageUrl || stampImage}" alt="Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
           </div>
         </div>
 
@@ -968,6 +972,7 @@ export const generatePDF = async (data: DocumentData) => {
           </table>
         </div>
       </div>
+      `}
     </body>
     </html>
     `;
@@ -2500,8 +2505,11 @@ export const generatePDF = async (data: DocumentData) => {
             <!-- Bottom row: Client Details -->
             <div class="header-left">
               <div><strong>${data.type === 'lpo' ? 'Supplier' : 'Client'}:</strong> ${data.customer?.name || ''}</div>
+              <div style="margin-left: 0; font-size: 10px; color: #555; line-height: 1.4;">
+                ${data.customTitle === 'INVOICE' ? 'Platz der Vereinten Nationen 7<br/>53113 Bonn, Germany' : (data.customer?.address || '') + (data.customer?.address && data.customer?.city ? '<br/>' : '') + (data.customer?.city || '') + (data.customer?.city && data.customer?.country ? ', ' : '') + (data.customer?.country || '')}
+              </div>
               ${data.project_title ? `<div><strong>Project:</strong> ${data.project_title}</div>` : ''}
-              <div><strong>Subject:</strong> ${data.type === 'boq' ? 'Bill of Quantities' : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
+              <div><strong>Subject:</strong> ${data.type === 'boq' ? (data.customTitle || 'Bill of Quantities') : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
               <div><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
               <div><strong>${data.type === 'boq' ? 'BOQ No' : 'Qtn No'}:</strong> ${data.number || ''}</div>
             </div>
