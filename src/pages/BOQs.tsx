@@ -337,6 +337,15 @@ export default function BOQs() {
       );
       })()}
 
+      {editing && (
+        <EditBOQModal
+          open={!!editing}
+          onOpenChange={(isOpen) => setEditing(isOpen ? editing : null)}
+          boq={editing}
+          onSuccess={() => refetchBOQs()}
+        />
+      )}
+
       <ConfirmationDialog
         open={deleteDialog.open}
         title="Delete BOQ"
