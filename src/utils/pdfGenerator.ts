@@ -904,16 +904,13 @@ export const generatePDF = async (data: DocumentData) => {
 
         <!-- Client Section with Stamp -->
         <div style="margin-bottom: 10px; padding-top: 6px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; page-break-inside: avoid;">
-          <table style="font-size: 10px; width: 72%; line-height: 1.6; color: #333; border: none;">
-            <tr style="border: none;">
-              <td style="width: 40%; border: none;"><strong>Client;</strong></td>
-              <td style="width: 60%; border: none;">${data.customer.name}${data.customer.address ? ' <br/> ' + data.customer.address : ''}${data.customer.city ? ' <br/> ' + data.customer.city : ''}${data.customer.country ? ', ' + data.customer.country : ''}</td>
-            </tr>
-            <tr style="border: none;">
-              <td style="border: none;"><strong>Tel No;</strong></td>
-              <td style="border: none;">${data.customer.phone || '________________________'}</td>
-            </tr>
-          </table>
+          <div style="flex: 1; font-size: 10px; color: #333; line-height: 1.6;">
+            <div style="margin-bottom: 8px;">
+              <strong>Client;</strong><br/>
+              ${data.customer.name}${data.customer.address ? '<br/>' + data.customer.address : ''}${data.customer.city ? '<br/>' + data.customer.city : ''}${data.customer.country ? '<br/>' + data.customer.country : ''}
+            </div>
+            ${data.customer.phone ? `<div><strong>Tel No;</strong><br/>${data.customer.phone}</div>` : ''}
+          </div>
           <div style="text-align: center; flex-shrink: 0; width: 100px;">
             <img src="${data.stampImageUrl || stampImage}" alt="Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
           </div>
