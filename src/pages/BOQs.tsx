@@ -202,6 +202,15 @@ export default function BOQs() {
                           Invoice PDF
                         </Button>
                       )}
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => handleConvertClick(b.id, b.number)}
+                        title="Convert to Invoice"
+                        disabled={b.converted_to_invoice_id !== null && b.converted_to_invoice_id !== undefined}
+                      >
+                        <FileText className="h-4 w-4" />
+                      </Button>
                       <Button size="icon" variant="destructive" onClick={() => handleDeleteClick(b.id, b.number)} title="Delete">
                         <Trash2 className="h-4 w-4" />
                       </Button>
