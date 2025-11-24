@@ -313,7 +313,7 @@ export default function CashReceipts() {
                           {new Date(receipt.receipt_date).toLocaleDateString()}
                         </TableCell>
                         <TableCell>
-                          <Badge>{(receipt.cash_receipt_items || []).length} item{(receipt.cash_receipt_items || []).length !== 1 ? 's' : ''}</Badge>
+                          <Badge>-</Badge>
                         </TableCell>
                         <TableCell>{formatCurrency(receipt.total_amount)}</TableCell>
                         <TableCell>
