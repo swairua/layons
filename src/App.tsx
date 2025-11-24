@@ -29,6 +29,7 @@ const LPOs = lazy(() => import("./pages/LPOs"));
 const BOQs = lazy(() => import("./pages/BOQs"));
 const FixedBOQ = lazy(() => import("./pages/FixedBOQ"));
 const CreditNotes = lazy(() => import("./pages/CreditNotes"));
+const CashReceipts = lazy(() => import("./pages/CashReceipts"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PaymentSynchronizationPage = lazy(() => import("./pages/PaymentSynchronization"));
 const OptimizedInventory = lazy(() => import("./pages/OptimizedInventory"));
@@ -107,15 +108,31 @@ const App = () => {
               </ProtectedRoute>
             } 
           />
-          <Route 
-            path="/invoices/new" 
+          <Route
+            path="/invoices/new"
             element={
               <ProtectedRoute>
                 <Invoices />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
+          <Route
+            path="/cash-receipts"
+            element={
+              <ProtectedRoute>
+                <CashReceipts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cash-receipts/new"
+            element={
+              <ProtectedRoute>
+                <CashReceipts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/payments" 
             element={
               <ProtectedRoute>

@@ -48,7 +48,8 @@ const sidebarItems: SidebarItem[] = [
     icon: ShoppingCart,
     children: [
       { title: 'Quotations', icon: FileText, href: '/quotations' },
-      { title: 'Invoices', icon: Receipt, href: '/invoices' }
+      { title: 'Invoices', icon: Receipt, href: '/invoices' },
+      { title: 'Cash Receipts', icon: Receipt, href: '/cash-receipts' }
     ]
   },
   {
