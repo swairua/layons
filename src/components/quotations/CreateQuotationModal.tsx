@@ -783,6 +783,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                         onChange={(e) => updateItemQuantity(section.id, item.id, parseInt(e.target.value) || 0)}
                                         className="w-16 h-8"
                                         min="1"
+                                        placeholder="1"
                                       />
                                     </TableCell>
                                     <TableCell>
@@ -792,6 +793,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                         onChange={(e) => updateItemPrice(section.id, item.id, parseFloat(e.target.value) || 0)}
                                         className="w-24 h-8"
                                         step="0.01"
+                                        placeholder="0.00"
                                       />
                                     </TableCell>
                                     <TableCell>
@@ -804,6 +806,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                         max="100"
                                         step="0.1"
                                         disabled={item.vat_inclusive}
+                                        placeholder="0"
                                       />
                                     </TableCell>
                                     <TableCell>
