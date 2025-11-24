@@ -74,6 +74,16 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
   const defaultTax = taxSettings?.find(tax => tax.is_default && tax.is_active);
   const defaultTaxRate = defaultTax?.rate || 16;
 
+  // Recalculate all items when applyTax changes
+  useEffect(() => {
+    setItems(prevItems => prevItems.map(item => {
+      const newTaxPercentage = applyTax ? defaultTaxRate : 0;
+      const taxAmount = calculateTaxAmount(item.quantity, item.unit_price, newTaxPercentage, applyTax);
+      const lineTotal = calculateLineTotal(item.quantity, item.unit_price, newTaxPercentage, applyTax);
+      return { ...item, tax_percentage: newTaxPercentage, tax_amount: taxAmount, line_total: lineTotal };
+    }));
+  }, [applyTax, defaultTaxRate]);
+
   const filteredProducts = products?.filter(product =>
     product.name.toLowerCase().includes(searchProduct.toLowerCase()) ||
     product.product_code.toLowerCase().includes(searchProduct.toLowerCase())
