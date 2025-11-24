@@ -21,8 +21,9 @@ import {
 } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Loader2, Plus, Trash2, Search } from 'lucide-react';
-import { useCustomers, useCompanies, useProducts, useTaxSettings } from '@/hooks/useDatabase';
+import { useCustomers, useProducts, useTaxSettings } from '@/hooks/useDatabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
