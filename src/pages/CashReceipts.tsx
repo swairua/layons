@@ -107,7 +107,12 @@ export default function CashReceipts() {
         .range(from, to - 1);
 
       if (error) {
-        console.error('Supabase error details:', error);
+        console.error('Supabase error details:', {
+          message: error.message,
+          code: (error as any).code,
+          status: (error as any).status,
+          details: error
+        });
         throw error;
       }
 
@@ -122,8 +127,12 @@ export default function CashReceipts() {
       setHasMore(hasMoreRecords);
       setPageNumber(page);
     } catch (err) {
-      console.error('Error fetching receipts:', err);
-      toast.error('Failed to load cash receipts');
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error('Error fetching receipts:', {
+        message: errorMessage,
+        error: err
+      });
+      toast.error(`Failed to load cash receipts: ${errorMessage}`);
     } finally {
       if (page === 0) setIsLoading(false);
     }
