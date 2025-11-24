@@ -18,13 +18,15 @@ import {
   Eye,
   Download,
   Trash2,
-  Loader2
+  Loader2,
+  Edit
 } from 'lucide-react';
 import { useCompanies } from '@/hooks/useDatabase';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { CreateCashReceiptModal } from '@/components/cash-receipts/CreateCashReceiptModal';
+import { EditCashReceiptModal } from '@/components/cash-receipts/EditCashReceiptModal';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { downloadCashReceiptPDF } from '@/utils/pdfGenerator';
 
@@ -57,6 +59,8 @@ interface CashReceipt {
 export default function CashReceipts() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedReceiptForEdit, setSelectedReceiptForEdit] = useState<CashReceipt | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; receipt?: CashReceipt }>({ open: false });
   const [isLoading, setIsLoading] = useState(true);
   const [receipts, setReceipts] = useState<CashReceipt[]>([]);
@@ -239,6 +243,16 @@ export default function CashReceipts() {
     toast.success('Cash receipt created successfully!');
   };
 
+  const handleEditClick = (receipt: CashReceipt) => {
+    setSelectedReceiptForEdit(receipt);
+    setShowEditModal(true);
+  };
+
+  const handleEditSuccess = () => {
+    fetchReceipts();
+    toast.success('Cash receipt updated successfully!');
+  };
+
   return (
     <div className="flex-1 space-y-6 p-8">
       <div className="flex items-center justify-between">
@@ -324,6 +338,13 @@ export default function CashReceipts() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            onClick={() => handleEditClick(receipt)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => handleDownloadReceipt(receipt)}
                           >
                             <Download className="h-4 w-4" />
@@ -350,6 +371,13 @@ export default function CashReceipts() {
         open={showCreateModal}
         onOpenChange={setShowCreateModal}
         onSuccess={handleCreateSuccess}
+      />
+
+      <EditCashReceiptModal
+        open={showEditModal}
+        onOpenChange={setShowEditModal}
+        onSuccess={handleEditSuccess}
+        receipt={selectedReceiptForEdit}
       />
 
       <ConfirmationDialog
