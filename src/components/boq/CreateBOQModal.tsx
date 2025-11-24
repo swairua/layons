@@ -203,6 +203,7 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
       const doc: BoqDocument = {
         number: boqNumber,
         date: boqDate,
+        currency: currency,
         client: {
           name: selectedClient.name,
           email: selectedClient.email || undefined,
