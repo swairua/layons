@@ -4,84 +4,87 @@ import { BoqDocument, BoqSection } from '@/utils/boqPdfGenerator';
 
 const safeN = (v: number | undefined) => (typeof v === 'number' && !isNaN(v) ? v : 0);
 
-// Flatten BOQ sections and subsections into items for invoice
-const flattenBoqItems = (boqData: BoqDocument) => {
-  const flatItems: Array<{
-    description: string;
-    quantity: number;
-    unit_price: number;
-    line_total: number;
-    unit_of_measure: string;
-    section_name?: string;
-  }> = [];
+interface BoqItemForInvoice {
+  description: string;
+  quantity: number;
+  unit_price: number;
+  line_total: number;
+  unit_of_measure: string;
+  section_name?: string;
+  is_header?: boolean;
+}
 
-  boqData.sections.forEach((section, sectionIndex) => {
-    // Add section header if title exists
-    if (section.title) {
-      flatItems.push({
-        description: `SECTION: ${section.title}`,
-        quantity: 1,
-        unit_price: 0,
-        line_total: 0,
-        unit_of_measure: 'Item',
-        section_name: section.title
-      });
-    }
+/**
+ * Generates a unique customer code based on customer name
+ * Format: First 3 letters of name + random 4-digit number
+ */
+function generateCustomerCode(name: string): string {
+  const prefix = name.substring(0, 3).toUpperCase().replace(/[^A-Z]/g, 'A');
+  const randomNum = Math.floor(1000 + Math.random() * 9000);
+  return `${prefix}${randomNum}`;
+}
 
-    // Handle subsections
+/**
+ * Flatten BOQ sections and subsections into items for invoice
+ * Properly filters out header/section rows that shouldn't be invoice items
+ */
+const flattenBoqItems = (boqData: BoqDocument): { invoiceItems: BoqItemForInvoice[]; subtotal: number } => {
+  const flatItems: BoqItemForInvoice[] = [];
+
+  boqData.sections.forEach((section) => {
+    // Handle subsections (new structure)
     if (section.subsections && section.subsections.length > 0) {
       section.subsections.forEach((subsection) => {
-        // Add subsection header
-        flatItems.push({
-          description: `${subsection.name}: ${subsection.label}`,
-          quantity: 1,
-          unit_price: 0,
-          line_total: 0,
-          unit_of_measure: 'Item',
-          section_name: `${section.title || 'General'} - ${subsection.label}`
-        });
+        // Add actual items from subsection (skip the header row)
+        if (subsection.items && subsection.items.length > 0) {
+          subsection.items.forEach((item) => {
+            const qty = safeN(item.quantity ?? 1);
+            const rate = safeN(item.rate ?? 0);
+            const amount = safeN(item.amount ?? qty * rate);
 
-        // Add items from subsection
-        subsection.items.forEach((item) => {
-          const qty = safeN(item.quantity ?? 1);
-          const rate = safeN(item.rate ?? 0);
-          const amount = safeN(item.amount ?? qty * rate);
+            // Only add if it has quantity and price (filters out lump sum headers)
+            if (qty > 0 || rate > 0) {
+              flatItems.push({
+                description: item.description,
+                quantity: qty,
+                unit_price: rate,
+                line_total: amount,
+                unit_of_measure: item.unit_name || item.unit || 'Item',
+                section_name: section.title ? `${section.title} - ${subsection.label}` : subsection.label,
+                is_header: false
+              });
+            }
+          });
+        }
+      });
+    }
+    // Handle legacy items (non-subsection format)
+    else if (section.items && section.items.length > 0) {
+      section.items.forEach((item) => {
+        const qty = safeN(item.quantity ?? 1);
+        const rate = safeN(item.rate ?? 0);
+        const amount = safeN(item.amount ?? qty * rate);
 
+        // Only add if it has quantity and price
+        if (qty > 0 || rate > 0) {
           flatItems.push({
             description: item.description,
             quantity: qty,
             unit_price: rate,
             line_total: amount,
             unit_of_measure: item.unit_name || item.unit || 'Item',
-            section_name: `${section.title || 'General'} - ${subsection.label}`
+            section_name: section.title || 'General',
+            is_header: false
           });
-        });
-      });
-    } else if (section.items && section.items.length > 0) {
-      // Handle legacy items (non-subsection format)
-      section.items.forEach((item) => {
-        const qty = safeN(item.quantity ?? 1);
-        const rate = safeN(item.rate ?? 0);
-        const amount = safeN(item.amount ?? qty * rate);
-
-        flatItems.push({
-          description: item.description,
-          quantity: qty,
-          unit_price: rate,
-          line_total: amount,
-          unit_of_measure: item.unit_name || item.unit || 'Item',
-          section_name: section.title || 'General'
-        });
+        }
       });
     }
   });
 
-  // Filter out header items (quantity 0, unit_price 0) and calculate totals
-  const invoiceItems = flatItems.filter(item => !(item.quantity === 1 && item.unit_price === 0 && item.line_total === 0 && item.description.includes(':') && item.description.includes('SECTION')));
-  
-  const subtotal = invoiceItems.reduce((sum, item) => sum + item.line_total, 0);
+  // Calculate subtotal from actual items only (not headers)
+  const subtotal = flatItems.reduce((sum, item) => sum + item.line_total, 0);
 
-  return { invoiceItems, subtotal };
+  return { invoiceItems: flatItems, subtotal };
 };
 
 export const useConvertBoqToInvoice = () => {
@@ -100,15 +103,22 @@ export const useConvertBoqToInvoice = () => {
       if (!boq) throw new Error('BOQ not found');
 
       const boqData = boq.data as BoqDocument;
+      if (!boqData) throw new Error('BOQ data is invalid or missing');
+
+      // Validate BOQ has sections and items
+      if (!boqData.sections || boqData.sections.length === 0) {
+        throw new Error('BOQ has no sections. Cannot convert empty BOQ.');
+      }
 
       // Get customer data from BOQ if available
       const customerData = boqData.client;
 
-      // Check if customer exists by email or create a new one
-      let customerId = null;
+      // Check if customer exists or create a new one
+      let customerId: string | null = null;
 
       if (customerData?.name) {
-        const { data: existingCustomer } = await supabase
+        // Try to find existing customer by name and company
+        const { data: existingCustomer, error: searchError } = await supabase
           .from('customers')
           .select('id')
           .eq('company_id', boq.company_id)
@@ -118,50 +128,70 @@ export const useConvertBoqToInvoice = () => {
 
         if (existingCustomer) {
           customerId = existingCustomer.id;
-        } else {
-          // Create new customer from BOQ client data
+        } else if (!searchError || searchError.code === 'PGRST116') {
+          // PGRST116 = no rows returned (expected)
+          // Create new customer from BOQ client data with proper validation
+          const customerPayload = {
+            company_id: boq.company_id,
+            name: customerData.name,
+            customer_code: generateCustomerCode(customerData.name),
+            email: customerData.email || null,
+            phone: customerData.phone || null,
+            address: customerData.address || null,
+            city: customerData.city || null,
+            country: customerData.country || null,
+            is_active: true
+          };
+
           const { data: newCustomer, error: customerError } = await supabase
             .from('customers')
-            .insert([
-              {
-                company_id: boq.company_id,
-                name: customerData.name,
-                email: customerData.email || null,
-                phone: customerData.phone || null,
-                address: customerData.address || null,
-                city: customerData.city || null,
-                country: customerData.country || null
-              }
-            ])
+            .insert([customerPayload])
             .select()
             .single();
 
           if (customerError) {
-            console.warn('Could not create customer, continuing without customer_id:', customerError);
-          } else {
+            // Log but continue - invoice can be created without customer
+            console.warn('Could not create customer from BOQ data:', customerError);
+          } else if (newCustomer) {
             customerId = newCustomer.id;
           }
+        } else {
+          // Unexpected error
+          console.warn('Error searching for existing customer:', searchError);
         }
       }
 
       // Generate invoice number
-      const { data: invoiceNumber } = await supabase.rpc('generate_invoice_number', {
+      const { data: invoiceNumber, error: invoiceNumberError } = await supabase.rpc('generate_invoice_number', {
         company_uuid: boq.company_id
       });
 
-      if (!invoiceNumber) throw new Error('Failed to generate invoice number');
+      if (invoiceNumberError) {
+        throw new Error(`Failed to generate invoice number: ${invoiceNumberError.message}`);
+      }
+
+      if (!invoiceNumber) throw new Error('Failed to generate invoice number: empty response');
 
       // Get current user
       let createdBy: string | null = null;
       try {
         const { data: userData } = await supabase.auth.getUser();
         createdBy = userData?.user?.id || null;
-      } catch {
+      } catch (err) {
+        console.warn('Could not get current user:', err);
         createdBy = null;
       }
 
       // Flatten BOQ items and calculate subtotal
       const { invoiceItems, subtotal } = flattenBoqItems(boqData);
+
+      if (invoiceItems.length === 0) {
+        throw new Error('BOQ conversion resulted in no items. Please check BOQ structure.');
+      }
+
+      // Calculate tax if available from BOQ
+      const taxAmount = boq.tax_amount || 0;
+      const totalAmount = subtotal + taxAmount;
 
       // Create invoice
       const invoiceData = {
@@ -172,11 +202,14 @@ export const useConvertBoqToInvoice = () => {
         due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         status: 'draft',
         subtotal: subtotal,
-        tax_amount: 0,
-        total_amount: subtotal,
-        notes: boqData.notes || `Converted from BOQ ${boq.number}`,
+        tax_amount: taxAmount,
+        total_amount: totalAmount,
+        notes: boqData.notes ? `Converted from BOQ ${boq.number}\n\n${boqData.notes}` : `Converted from BOQ ${boq.number}`,
+        terms_and_conditions: null,
         created_by: createdBy,
-        source_boq_id: boqId
+        source_boq_id: boqId,
+        balance_due: totalAmount,
+        paid_amount: 0
       };
 
       const { data: invoice, error: invoiceError } = await supabase
@@ -185,39 +218,62 @@ export const useConvertBoqToInvoice = () => {
         .select()
         .single();
 
-      if (invoiceError) throw invoiceError;
+      if (invoiceError) {
+        throw new Error(`Failed to create invoice: ${invoiceError.message}`);
+      }
 
-      // Create invoice items
+      if (!invoice) throw new Error('Invoice creation returned empty result');
+
+      // Create invoice items with proper validation
       if (invoiceItems.length > 0) {
-        const itemsToInsert = invoiceItems.map((item, index) => ({
-          invoice_id: invoice.id,
-          description: item.description,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          line_total: item.line_total,
-          unit_of_measure: item.unit_of_measure,
-          section_name: item.section_name,
-          sort_order: index,
-          tax_percentage: 0,
-          tax_amount: 0,
-          tax_inclusive: false
-        }));
+        const itemsToInsert = invoiceItems.map((item, index) => {
+          // Validate item data
+          if (!item.description || item.description.trim() === '') {
+            throw new Error(`Item ${index + 1} has missing description`);
+          }
+
+          return {
+            invoice_id: invoice.id,
+            product_id: null, // BOQ items don't map to products
+            description: item.description,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            line_total: item.line_total,
+            unit_of_measure: item.unit_of_measure,
+            section_name: item.section_name || 'General',
+            sort_order: index,
+            tax_percentage: 0,
+            tax_amount: 0,
+            tax_inclusive: false,
+            discount_percentage: 0,
+            discount_before_vat: false
+          };
+        });
 
         const { error: itemsError } = await supabase
           .from('invoice_items')
           .insert(itemsToInsert);
 
-        if (itemsError) throw itemsError;
+        if (itemsError) {
+          // Try to clean up the invoice if items insertion fails
+          await supabase.from('invoices').delete().eq('id', invoice.id).catch(() => {});
+          throw new Error(`Failed to create invoice items: ${itemsError.message}`);
+        }
       }
 
       // Update BOQ to mark as converted
-      await supabase
+      const { error: updateError } = await supabase
         .from('boqs')
-        .update({ 
+        .update({
           converted_to_invoice_id: invoice.id,
           converted_at: new Date().toISOString()
         })
         .eq('id', boqId);
+
+      if (updateError) {
+        console.warn('Warning: Failed to mark BOQ as converted:', updateError);
+        // This is not critical, invoice was created successfully
+      }
 
       return invoice;
     },
