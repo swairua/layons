@@ -193,7 +193,7 @@ export const useConvertBoqToInvoice = () => {
       const taxAmount = boq.tax_amount || 0;
       const totalAmount = subtotal + taxAmount;
 
-      // Create invoice
+      // Create invoice with BOQ's currency preserved
       const invoiceData = {
         company_id: boq.company_id,
         customer_id: customerId,
@@ -204,6 +204,7 @@ export const useConvertBoqToInvoice = () => {
         subtotal: subtotal,
         tax_amount: taxAmount,
         total_amount: totalAmount,
+        currency: boq.currency || 'KES', // Preserve BOQ currency
         notes: boqData.notes ? `Converted from BOQ ${boq.number}\n\n${boqData.notes}` : `Converted from BOQ ${boq.number}`,
         terms_and_conditions: null,
         created_by: createdBy,
