@@ -88,6 +88,14 @@ export default function CashReceipts() {
             id,
             name,
             email
+          ),
+          cash_receipt_items (
+            id,
+            description,
+            quantity,
+            unit_price,
+            tax_percentage,
+            line_total
           )
         `)
         .eq('company_id', currentCompany.id)
