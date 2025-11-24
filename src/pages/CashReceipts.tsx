@@ -349,6 +349,17 @@ export default function CashReceipts() {
                   )}
                 </TableBody>
               </Table>
+              {hasMore && (
+                <div className="flex justify-center mt-6 pb-6">
+                  <Button
+                    onClick={loadMore}
+                    variant="outline"
+                    className="bg-white"
+                  >
+                    Load More Receipts
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
