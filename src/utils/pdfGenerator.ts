@@ -830,9 +830,10 @@ export const generatePDF = async (data: DocumentData) => {
         .terms-page {
           display: block;
           width: 100%;
-          padding: 0 15mm;
+          padding: 0;
           page-break-before: always;
           box-sizing: border-box;
+          margin: 0;
         }
 
         .terms-page table { border-collapse: collapse; width: 100%; }
