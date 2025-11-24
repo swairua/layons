@@ -161,7 +161,13 @@ export default function BOQs() {
                           onClick={() => handleDownloadPDF(b, {
                             customTitle: 'INVOICE',
                             amountMultiplier: 0.4,
-                            forceCurrency: 'EUR'
+                            forceCurrency: 'EUR',
+                            customClient: {
+                              name: 'Global Crop Diversity Trust',
+                              address: 'Platz der Vereinten Nationen 7',
+                              city: 'Bonn',
+                              country: 'Germany'
+                            }
                           })}
                           title="Download Special Invoice PDF (40% of amount)"
                         >
