@@ -313,9 +313,9 @@ export default function Invoices() {
 Please find attached your invoice ${invoiceData.invoice_number} dated ${new Date(invoiceData.invoice_date).toLocaleDateString()}.
 
 Invoice Summary:
-- Invoice Amount: ${formatCurrency(invoiceData.total_amount || 0)}
+- Invoice Amount: ${formatCurrency(invoiceData.total_amount || 0, invoiceData.currency || 'KES')}
 - Due Date: ${new Date(invoiceData.due_date).toLocaleDateString()}
-- Balance Due: ${formatCurrency(invoiceData.balance_due || 0)}
+- Balance Due: ${formatCurrency(invoiceData.balance_due || 0, invoiceData.currency || 'KES')}
 
 Payment can be made via:
 - Bank Transfer
