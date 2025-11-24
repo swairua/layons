@@ -2638,7 +2638,7 @@ export const generatePDF = async (data: DocumentData) => {
                 ` : ''}
                 <tr>
                   <td class="label">Subject:</td>
-                  <td class="value">${data.type === 'boq' ? (data.customTitle || 'Bill of Quantities') : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</td>
+                  <td class="value">${data.type === 'boq' ? (data.customTitle || 'Bill of Quantities') : (data.subject || (data.type === 'invoice' ? 'Invoice' : data.type === 'receipt' ? 'Payment Receipt' : data.type === 'delivery' ? 'Delivery Note' : data.type === 'proforma' ? 'Proforma Invoice' : data.type === 'remittance' ? 'Remittance Advice' : data.type === 'lpo' ? 'Purchase Order' : 'Quotation'))}</td>
                 </tr>
                 <tr>
                   <td class="label">Date:</td>
