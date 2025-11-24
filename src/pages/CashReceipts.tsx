@@ -65,19 +65,25 @@ export default function CashReceipts() {
   const [isLoading, setIsLoading] = useState(true);
   const [receipts, setReceipts] = useState<CashReceipt[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [pageNumber, setPageNumber] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const PAGE_SIZE = 50;
 
   const { data: companies } = useCompanies();
   const currentCompany = companies?.[0];
   const { logDelete } = useAuditLog();
 
-  // Fetch cash receipts
-  const fetchReceipts = async () => {
+  // Fetch cash receipts with pagination
+  const fetchReceipts = async (page = 0) => {
     if (!currentCompany?.id) return;
     try {
-      setIsLoading(true);
+      if (page === 0) setIsLoading(true);
 
-      // Try fetching with items first, fallback to without items if items table doesn't exist
-      let query = supabase
+      const from = page * PAGE_SIZE;
+      const to = from + PAGE_SIZE;
+
+      // Fetch receipts without items for faster loading
+      const { data, error } = await supabase
         .from('cash_receipts')
         .select(`
           id,
@@ -94,62 +100,53 @@ export default function CashReceipts() {
             id,
             name,
             email
-          ),
-          cash_receipt_items (
-            id,
-            description,
-            quantity,
-            unit_price,
-            tax_percentage,
-            line_total
           )
         `)
         .eq('company_id', currentCompany.id)
-        .order('receipt_date', { ascending: false });
+        .order('receipt_date', { ascending: false })
+        .range(from, to - 1);
 
-      let { data, error } = await query;
-
-      // If items table doesn't exist, fetch without items
-      if (error && error.message?.includes('cash_receipt_items')) {
-        const { data: receiptsOnly, error: fallbackError } = await supabase
-          .from('cash_receipts')
-          .select(`
-            id,
-            receipt_number,
-            customer_id,
-            receipt_date,
-            total_amount,
-            payment_method,
-            value_tendered,
-            change,
-            notes,
-            created_at,
-            customers (
-              id,
-              name,
-              email
-            )
-          `)
-          .eq('company_id', currentCompany.id)
-          .order('receipt_date', { ascending: false });
-
-        if (fallbackError) throw fallbackError;
-        data = receiptsOnly;
-      } else if (error) {
+      if (error) {
+        console.error('Supabase error details:', {
+          message: error.message,
+          code: (error as any).code,
+          status: (error as any).status,
+          details: error
+        });
         throw error;
       }
 
-      setReceipts(data || []);
+      if (page === 0) {
+        setReceipts(data || []);
+      } else {
+        setReceipts(prev => [...prev, ...(data || [])]);
+      }
+
+      // Check if there are more records (if we got fewer than PAGE_SIZE items, there's no more data)
+      const hasMoreRecords = (data?.length || 0) === PAGE_SIZE;
+      setHasMore(hasMoreRecords);
+      setPageNumber(page);
     } catch (err) {
-      console.error('Error fetching receipts:', err);
-      toast.error('Failed to load cash receipts');
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error('Error fetching receipts:', {
+        message: errorMessage,
+        error: err
+      });
+      toast.error(`Failed to load cash receipts: ${errorMessage}`);
     } finally {
-      setIsLoading(false);
+      if (page === 0) setIsLoading(false);
     }
   };
 
+  // Load more receipts
+  const loadMore = () => {
+    fetchReceipts(pageNumber + 1);
+  };
+
   useEffect(() => {
-    fetchReceipts();
+    setPageNumber(0);
+    setHasMore(true);
+    fetchReceipts(0);
   }, [currentCompany?.id]);
 
   const handleDeleteClick = (receipt: CashReceipt) => {
@@ -181,7 +178,9 @@ export default function CashReceipts() {
       );
 
       toast.success('Cash receipt deleted successfully');
-      fetchReceipts();
+      setPageNumber(0);
+      setHasMore(true);
+      fetchReceipts(0);
       setDeleteDialog({ open: false });
     } catch (err) {
       console.error('Delete failed', err);
@@ -228,6 +227,8 @@ export default function CashReceipts() {
           city: currentCompany?.city,
           country: currentCompany?.country,
           logo_url: currentCompany?.logo_url,
+          header_image: currentCompany?.header_image,
+          stamp_image: currentCompany?.stamp_image,
         }
       };
       await downloadCashReceiptPDF(enrichedReceipt);
@@ -239,7 +240,9 @@ export default function CashReceipts() {
   };
 
   const handleCreateSuccess = () => {
-    fetchReceipts();
+    setPageNumber(0);
+    setHasMore(true);
+    fetchReceipts(0);
     toast.success('Cash receipt created successfully!');
   };
 
@@ -249,7 +252,9 @@ export default function CashReceipts() {
   };
 
   const handleEditSuccess = () => {
-    fetchReceipts();
+    setPageNumber(0);
+    setHasMore(true);
+    fetchReceipts(0);
     toast.success('Cash receipt updated successfully!');
   };
 
@@ -326,7 +331,7 @@ export default function CashReceipts() {
                           {new Date(receipt.receipt_date).toLocaleDateString()}
                         </TableCell>
                         <TableCell>
-                          <Badge>{(receipt.cash_receipt_items || []).length} item{(receipt.cash_receipt_items || []).length !== 1 ? 's' : ''}</Badge>
+                          <Badge>-</Badge>
                         </TableCell>
                         <TableCell>{formatCurrency(receipt.total_amount)}</TableCell>
                         <TableCell>
@@ -362,6 +367,17 @@ export default function CashReceipts() {
                   )}
                 </TableBody>
               </Table>
+              {hasMore && (
+                <div className="flex justify-center mt-6 pb-6">
+                  <Button
+                    onClick={loadMore}
+                    variant="outline"
+                    className="bg-white"
+                  >
+                    Load More Receipts
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </CardContent>

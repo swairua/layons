@@ -1442,7 +1442,19 @@ export const useQuotations = (companyId?: string) => {
         }));
 
       } catch (error) {
-        console.error('Error in useQuotations:', error);
+        const errorDetails = error instanceof Error
+          ? { message: error.message, stack: error.stack }
+          : (error as any)?.message
+          ? { message: (error as any).message }
+          : { details: String(error) };
+
+        console.error('Error in useQuotations:', {
+          ...errorDetails,
+          code: (error as any)?.code,
+          status: (error as any)?.status,
+          details: error
+        });
+
         const errorMessage = typeof error === 'string' ? error :
                             (error as any)?.message ||
                             'Failed to load quotations';

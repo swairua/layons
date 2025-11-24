@@ -379,6 +379,10 @@ export interface DocumentData {
   terms_and_conditions?: string;
   valid_until?: string; // For proforma invoices
   due_date?: string; // For invoices
+  // Receipt specific fields
+  value_tendered?: number;
+  change?: number;
+  payment_method?: string;
   // Delivery note specific fields
   delivery_date?: string;
   delivery_address?: string;
@@ -2204,6 +2208,44 @@ export const generatePDF = async (data: DocumentData) => {
 
         .header-left > div {
           margin-bottom: 4px;
+          display: flex;
+          align-items: baseline;
+          gap: 4px;
+          flex-wrap: wrap;
+        }
+
+        .header-left > div strong {
+          display: inline;
+          white-space: nowrap;
+        }
+
+        .client-details-table {
+          width: 100%;
+          border-collapse: collapse;
+          border: none;
+          font-size: 12px;
+          line-height: 1.6;
+        }
+
+        .client-details-table tr {
+          border: none;
+        }
+
+        .client-details-table td {
+          border: none;
+          padding: 4px 0;
+          vertical-align: top;
+        }
+
+        .client-details-table td.label {
+          font-weight: bold;
+          width: 25%;
+          padding-right: 12px;
+        }
+
+        .client-details-table td.value {
+          width: 75%;
+          color: #212529;
         }
 
         .logo {
@@ -2575,16 +2617,38 @@ export const generatePDF = async (data: DocumentData) => {
               </div>
             </div>
 
-            <!-- Bottom row: Client Details -->
+            <!-- Bottom row: Client Details - Two Column Table -->
             <div class="header-left">
-              <div><strong>${data.type === 'lpo' ? 'Supplier' : 'Client'}:</strong> ${data.customer?.name || ''}</div>
-              <div style="margin-left: 0; font-size: 10px; color: #555; line-height: 1.4;">
-                ${data.customTitle === 'INVOICE' ? 'Platz der Vereinten Nationen 7<br/>53113 Bonn, Germany' : (data.customer?.address || '') + (data.customer?.address && data.customer?.city ? '<br/>' : '') + (data.customer?.city || '') + (data.customer?.city && data.customer?.country ? ', ' : '') + (data.customer?.country || '')}
-              </div>
-              ${data.project_title ? `<div><strong>Project:</strong> ${data.project_title}</div>` : ''}
-              <div><strong>Subject:</strong> ${data.type === 'boq' ? (data.customTitle || 'Bill of Quantities') : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
-              <div><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
-              <div><strong>${data.type === 'boq' ? 'BOQ No' : 'Qtn No'}:</strong> ${data.number || ''}</div>
+              <table class="client-details-table">
+                <tr>
+                  <td class="label">${data.type === 'lpo' ? 'Supplier' : 'Client'}:</td>
+                  <td class="value">${data.customer?.name || ''}</td>
+                </tr>
+                ${(data.customer?.address || data.customer?.city || data.customer?.country) ? `
+                <tr>
+                  <td class="label">Address:</td>
+                  <td class="value">${data.customTitle === 'INVOICE' ? 'Platz der Vereinten Nationen 7<br/>53113 Bonn, Germany' : (data.customer?.address || '') + (data.customer?.address && data.customer?.city ? '<br/>' : '') + (data.customer?.city || '') + (data.customer?.city && data.customer?.country ? ', ' : '') + (data.customer?.country || '')}</td>
+                </tr>
+                ` : ''}
+                ${data.project_title ? `
+                <tr>
+                  <td class="label">Project:</td>
+                  <td class="value">${data.project_title}</td>
+                </tr>
+                ` : ''}
+                <tr>
+                  <td class="label">Subject:</td>
+                  <td class="value">${data.type === 'boq' ? (data.customTitle || 'Bill of Quantities') : (data.subject || (data.type === 'invoice' ? 'Invoice' : data.type === 'receipt' ? 'Payment Receipt' : data.type === 'delivery' ? 'Delivery Note' : data.type === 'proforma' ? 'Proforma Invoice' : data.type === 'remittance' ? 'Remittance Advice' : data.type === 'lpo' ? 'Purchase Order' : 'Quotation'))}</td>
+                </tr>
+                <tr>
+                  <td class="label">Date:</td>
+                  <td class="value">${formatDateLong(data.date || '')}</td>
+                </tr>
+                <tr>
+                  <td class="label">${data.type === 'boq' ? 'BOQ No' : 'Qtn No'}:</td>
+                  <td class="value">${data.number || ''}</td>
+                </tr>
+              </table>
             </div>
           </div>
         </div>
@@ -2772,6 +2836,24 @@ export const generatePDF = async (data: DocumentData) => {
             <tr class="balance-info">
               <td class="label" style="font-weight: bold;">Balance Due:</td>
               <td class="amount" style="font-weight: bold; color: ${(data.balance_due || 0) > 0 ? '#DC2626' : 'hsl(var(--primary))'};">${formatCurrency(data.balance_due || 0)}</td>
+            </tr>
+            ` : ''}
+          </table>
+        </div>
+        ` : ''}
+
+        <!-- Payment Details Section (for receipts) -->
+        ${data.type === 'receipt' ? `
+        <div class="payment-section" style="margin-top: 25px; border-top: 2px solid #000; padding-top: 15px;">
+          <table class="payment-details-table" style="width: 100%; border-collapse: collapse;">
+            <tr style="border-bottom: 1px solid #e9ecef;">
+              <td style="padding: 10px 0; font-weight: 600; width: 50%;">Amount Tendered:</td>
+              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${formatCurrency((data as any).value_tendered || 0)}</td>
+            </tr>
+            ${(data as any).change !== undefined && (data as any).change > 0 ? `
+            <tr style="border-bottom: 1px solid #e9ecef;">
+              <td style="padding: 10px 0; font-weight: 600; width: 50%;">Change:</td>
+              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${formatCurrency((data as any).change)}</td>
             </tr>
             ` : ''}
           </table>
@@ -3495,7 +3577,10 @@ export const downloadCashReceiptPDF = async (receipt: any, company?: CompanyDeta
     total_amount: receipt.total_amount || subtotal + totalTax,
     subtotal: subtotal || receipt.total_amount || 0,
     tax_amount: totalTax,
-    notes: `Payment Method: ${receipt.payment_method || 'Cash'}\nValue Tendered: ${formatCurrencyUtil(receipt.value_tendered || 0, 'KES')}\nChange: ${formatCurrencyUtil(receipt.change || 0, 'KES')}${receipt.notes ? `\n\nNotes:\n${receipt.notes}` : ''}`,
+    value_tendered: receipt.value_tendered || 0,
+    change: receipt.change || 0,
+    payment_method: receipt.payment_method || 'Cash',
+    notes: receipt.notes ? `${receipt.notes}` : '',
     terms_and_conditions: 'Thank you for your payment. This receipt confirms payment has been received.',
   };
 
