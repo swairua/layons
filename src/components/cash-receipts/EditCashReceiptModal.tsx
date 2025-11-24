@@ -272,31 +272,46 @@ export function EditCashReceiptModal({ open, onOpenChange, onSuccess, receipt }:
         throw receiptError;
       }
 
-      // Delete all old items for this receipt
-      const { error: deleteError } = await supabase
-        .from('cash_receipt_items')
-        .delete()
-        .eq('cash_receipt_id', receipt.id);
+      // Separate existing items from new items
+      const existingItems = items.filter(item => !item.id.startsWith('temp-'));
+      const newItems = items.filter(item => item.id.startsWith('temp-'));
 
-      if (deleteError) {
-        console.error('Delete items error:', deleteError);
-        throw deleteError;
+      // Update existing items
+      for (const item of existingItems) {
+        const { error: updateError } = await supabase
+          .from('cash_receipt_items')
+          .update({
+            product_id: item.product_id || null,
+            description: item.description,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            tax_percentage: item.tax_percentage,
+            tax_amount: item.tax_amount,
+            line_total: item.line_total,
+            unit_of_measure: item.unit_of_measure || 'pcs',
+          })
+          .eq('id', item.id);
+
+        if (updateError) {
+          console.error('Update item error:', updateError);
+          throw updateError;
+        }
       }
 
-      // Prepare and insert all new items
-      const itemsToInsert = items.map(item => ({
-        cash_receipt_id: receipt.id,
-        product_id: item.product_id || null,
-        description: item.description,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-        tax_percentage: item.tax_percentage,
-        tax_amount: item.tax_amount,
-        line_total: item.line_total,
-        unit_of_measure: item.unit_of_measure || 'pcs',
-      }));
+      // Insert new items
+      if (newItems.length > 0) {
+        const itemsToInsert = newItems.map(item => ({
+          cash_receipt_id: receipt.id,
+          product_id: item.product_id || null,
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          tax_percentage: item.tax_percentage,
+          tax_amount: item.tax_amount,
+          line_total: item.line_total,
+          unit_of_measure: item.unit_of_measure || 'pcs',
+        }));
 
-      if (itemsToInsert.length > 0) {
         const { error: itemsError } = await supabase
           .from('cash_receipt_items')
           .insert(itemsToInsert);
