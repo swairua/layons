@@ -786,6 +786,9 @@ export const generatePDF = async (data: DocumentData) => {
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; font-size: 11px; }
         .items thead th { background:#f8f9fa; color:#000; font-weight:bold; text-transform: uppercase; }
         .items thead { display: table-header-group; }
+
+        body.special-invoice .items { margin-top: 3px; margin-bottom: 3px; }
+        body.special-invoice .preliminaries-section { margin-bottom: 6px; }
         .spacer-row { height: 15mm; page-break-inside: avoid; }
         .spacer-row td { border: none !important; background: none !important; padding: 0 !important; height: 15mm; }
         .section-row { page-break-inside: avoid; page-break-before: always; page-break-after: avoid; }
