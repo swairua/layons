@@ -166,6 +166,13 @@ export default function BOQs() {
 
       <CreateBOQModal open={open} onOpenChange={setOpen} />
 
+      <CreatePercentageCopyModal
+        open={percentageCopyOpen}
+        onOpenChange={setPercentageCopyOpen}
+        companyId={companyId || ''}
+        onSuccess={() => refetchBOQs()}
+      />
+
       {viewing && (() => {
         const getLocaleForCurrency = (curr: string) => {
           const mapping: { [key: string]: { locale: string; code: string } } = {
