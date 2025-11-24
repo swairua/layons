@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Layers, Plus, Eye, Download, Trash2, Copy } from 'lucide-react';
+import { Layers, Plus, Eye, Download, Trash2, Copy, Pencil } from 'lucide-react';
 import { CreateBOQModal } from '@/components/boq/CreateBOQModal';
 import { CreatePercentageCopyModal } from '@/components/boq/CreatePercentageCopyModal';
+import { EditBOQModal } from '@/components/boq/EditBOQModal';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
@@ -24,6 +25,7 @@ export default function BOQs() {
   const { logDelete } = useAuditLog();
 
   const [viewing, setViewing] = useState<any | null>(null);
+  const [editing, setEditing] = useState<any | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; boqId?: string; boqNumber?: string }>({ open: false });
 
   const handleDownloadPDF = async (boq: any, options?: { customTitle?: string; amountMultiplier?: number; forceCurrency?: string }) => {
@@ -150,6 +152,9 @@ export default function BOQs() {
                       <Button size="icon" variant="ghost" onClick={() => setViewing(b)} title="View">
                         <Eye className="h-4 w-4" />
                       </Button>
+                      <Button size="icon" variant="ghost" onClick={() => setEditing(b)} title="Edit">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
                       <Button size="icon" variant="ghost" onClick={() => handleDownloadPDF(b)} title="Download PDF">
                         <Download className="h-4 w-4" />
                       </Button>
@@ -168,7 +173,7 @@ export default function BOQs() {
                               city: 'Bonn',
                               country: 'Germany'
                             },
-                            stampImageUrl: 'https://cdn.builder.io/api/v1/image/assets%2F325027ccf5da4f42b462ae016f6d2769%2F2078b0d4690b4a5fbb44780ee77831c6?format=webp&width=800'
+                            stampImageUrl: 'https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2Fd301f7401e654be39b50f49bc704c240?format=webp&width=800'
                           })}
                           title="Download Special Invoice PDF (40% of amount)"
                         >
@@ -331,6 +336,15 @@ export default function BOQs() {
         </div>
       );
       })()}
+
+      {editing && (
+        <EditBOQModal
+          open={!!editing}
+          onOpenChange={(isOpen) => setEditing(isOpen ? editing : null)}
+          boq={editing}
+          onSuccess={() => refetchBOQs()}
+        />
+      )}
 
       <ConfirmationDialog
         open={deleteDialog.open}

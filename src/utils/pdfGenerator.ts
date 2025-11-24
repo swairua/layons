@@ -507,13 +507,28 @@ const generatePDFHeader = (
           </div>
         </div>
 
-        <!-- Bottom row: Client Details -->
-        <div style="display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left;">
-          <div><strong>Client:</strong> ${data.customer?.name || ''}</div>
-          ${data.project_title ? `<div><strong>Project:</strong> ${data.project_title}</div>` : ''}
-          <div><strong>Subject:</strong> ${documentType}</div>
-          <div><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
-          <div><strong>${documentNumber}:</strong> ${data.number || ''}</div>
+        <!-- Bottom row: All details with proper alignment -->
+        <div style="font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; width: 100%; box-sizing: border-box;">
+          <div style="display: flex; align-items: baseline; gap: 0;">
+            <span style="width: 50px;"><strong>Client;</strong></span>
+            <span style="flex: 1;">${data.customer?.name || ''}</span>
+          </div>
+          ${data.customer?.address ? `<div style="padding-left: 50px;">${data.customer.address}</div>` : ''}
+          ${data.customer?.city ? `<div style="padding-left: 50px;">${data.customer.city}</div>` : ''}
+          ${data.customer?.country ? `<div style="padding-left: 50px;">${data.customer.country}</div>` : ''}
+          ${data.project_title ? `<div style="margin-top: 6px; display: flex; align-items: baseline; gap: 0;"><span style="width: 50px;"><strong>Project;</strong></span><span style="flex: 1;">${data.project_title}</span></div>` : ''}
+          <div style="margin-top: 6px; display: flex; align-items: baseline; gap: 0;">
+            <span style="width: 50px;"><strong>Subject;</strong></span>
+            <span style="flex: 1;">${documentType}</span>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 0;">
+            <span style="width: 50px;"><strong>Date;</strong></span>
+            <span style="flex: 1;">${formatDateLong(data.date || '')}</span>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 0;">
+            <span style="width: 50px;"><strong>${documentNumber};</strong></span>
+            <span style="flex: 1;">${data.number || ''}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -797,14 +812,43 @@ export const generatePDF = async (data: DocumentData) => {
           box-sizing: border-box;
           max-width: 100%;
           overflow: hidden;
+          margin: 0;
+        }
+
+        .boq-main .items {
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          width: 100% !important;
+        }
+
+        .boq-main .preliminaries-section {
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+        }
+
+        .boq-main .totals {
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          width: 100% !important;
+        }
+
+        .boq-main .header-content {
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+        }
+
+        .boq-main .pagefoot {
+          left: 0 !important;
+          right: 0 !important;
         }
 
         .terms-page {
           display: block;
           width: 100%;
-          padding: 0 15mm;
+          padding: 0;
           page-break-before: always;
           box-sizing: border-box;
+          margin: 0;
         }
 
         .terms-page table { border-collapse: collapse; width: 100%; }
@@ -904,16 +948,13 @@ export const generatePDF = async (data: DocumentData) => {
 
         <!-- Client Section with Stamp -->
         <div style="margin-bottom: 10px; padding-top: 6px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; page-break-inside: avoid;">
-          <table style="font-size: 10px; width: 72%; line-height: 1.6; color: #333; border: none;">
-            <tr style="border: none;">
-              <td style="width: 40%; border: none;"><strong>Client;</strong></td>
-              <td style="width: 60%; border: none;">${data.customer.name}${data.customer.address ? ' <br/> ' + data.customer.address : ''}${data.customer.city ? ' <br/> ' + data.customer.city : ''}${data.customer.country ? ', ' + data.customer.country : ''}</td>
-            </tr>
-            <tr style="border: none;">
-              <td style="border: none;"><strong>Tel No;</strong></td>
-              <td style="border: none;">${data.customer.phone || '________________________'}</td>
-            </tr>
-          </table>
+          <div style="flex: 1; font-size: 10px; color: #333; line-height: 1.6;">
+            <div style="margin-bottom: 8px;">
+              <strong>Client;</strong><br/>
+              ${data.customer.name}${data.customer.address ? '<br/>' + data.customer.address : ''}${data.customer.city ? '<br/>' + data.customer.city : ''}${data.customer.country ? '<br/>' + data.customer.country : ''}
+            </div>
+            ${data.customer.phone ? `<div><strong>Tel No;</strong><br/>${data.customer.phone}</div>` : ''}
+          </div>
           <div style="text-align: center; flex-shrink: 0; width: 100px;">
             <img src="${data.stampImageUrl || stampImage}" alt="Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
           </div>
@@ -995,7 +1036,7 @@ export const generatePDF = async (data: DocumentData) => {
       boqWrapper.style.position = 'absolute';
       boqWrapper.style.left = '0';
       boqWrapper.style.top = '0';
-      boqWrapper.style.width = `${pageWidth}mm`;
+      boqWrapper.style.width = `${contentWidth}mm`;
       boqWrapper.style.height = 'auto';
       boqWrapper.style.backgroundColor = '#ffffff';
       boqWrapper.style.zIndex = '-999999';
@@ -1041,7 +1082,7 @@ export const generatePDF = async (data: DocumentData) => {
         imageTimeout: 15000,
         timeout: 45000,
         windowHeight: Math.max(boqMainElement.scrollHeight, boqMainElement.offsetHeight) || 1000,
-        windowWidth: pageWidth * 3.779527559, // 210mm to pixels (96 DPI * 210/25.4)
+        windowWidth: contentWidth * 3.779527559, // 180mm to pixels (96 DPI * 180/25.4)
         proxy: undefined,
         foreignObjectRendering: false,
         onclone: (clonedDocument) => {
@@ -1054,7 +1095,7 @@ export const generatePDF = async (data: DocumentData) => {
 
       // Add BOQ pages to PDF with proper margin handling
       const imgBoqData = boqCanvas.toDataURL('image/png');
-      const imgBoqWidth = pageWidth; // Full width 210mm, margins handled in CSS
+      const imgBoqWidth = contentWidth; // Content width 180mm (210mm - 30mm margins)
       const imgBoqHeight = (boqCanvas.height * imgBoqWidth) / boqCanvas.width;
       let boqHeightLeft = imgBoqHeight;
       let boqPosition = 0;
@@ -1065,8 +1106,8 @@ export const generatePDF = async (data: DocumentData) => {
         if (!firstPage) {
           pdf.addPage();
         }
-        pdf.addImage(imgBoqData, 'PNG', 0, -boqPosition, imgBoqWidth, imgBoqHeight);
-        boqHeightLeft -= (pageHeight - 8); // Account for margins and spacing
+        pdf.addImage(imgBoqData, 'PNG', margin, margin - boqPosition, imgBoqWidth, imgBoqHeight);
+        boqHeightLeft -= (pageHeight - (margin * 2) - 8); // Account for margins and spacing
         boqPosition += pageHeight;
         firstPage = false;
 
@@ -1075,57 +1116,57 @@ export const generatePDF = async (data: DocumentData) => {
         }
       }
 
-      // Render Page 2: Terms and Conditions (on a fresh page)
-      console.log('Rendering terms and conditions...');
+      // Render Page 2: Terms and Conditions (on a fresh page) - only if terms section exists
       const termsElement = boqWrapper.querySelector('.terms-page') as HTMLElement;
-      if (!termsElement) {
-        throw new Error('Terms page section not found');
-      }
+      if (termsElement) {
+        console.log('Rendering terms and conditions...');
+        const termsCanvas = await html2canvas(termsElement, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          logging: false,
+          allowTaint: true,
+          useCORS: true,
+          imageTimeout: 15000,
+          timeout: 45000,
+          windowHeight: Math.max(termsElement.scrollHeight, termsElement.offsetHeight) || 1000,
+          windowWidth: contentWidth * 3.779527559, // 180mm to pixels
+          proxy: undefined,
+          foreignObjectRendering: false,
+          onclone: (clonedDocument) => {
+            // Ensure CSS page breaks are respected during rendering
+            const style = clonedDocument.createElement('style');
+            style.textContent = '@media print { * { page-break-inside: avoid !important; } }';
+            clonedDocument.head.appendChild(style);
+          }
+        });
 
-      const termsCanvas = await html2canvas(termsElement, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false,
-        allowTaint: true,
-        useCORS: true,
-        imageTimeout: 15000,
-        timeout: 45000,
-        windowHeight: Math.max(termsElement.scrollHeight, termsElement.offsetHeight) || 1000,
-        windowWidth: pageWidth * 3.779527559, // 210mm to pixels
-        proxy: undefined,
-        foreignObjectRendering: false,
-        onclone: (clonedDocument) => {
-          // Ensure CSS page breaks are respected during rendering
-          const style = clonedDocument.createElement('style');
-          style.textContent = '@media print { * { page-break-inside: avoid !important; } }';
-          clonedDocument.head.appendChild(style);
+        // Add a fresh page for terms (always add new page)
+        pdf.addPage();
+
+        // Add terms to the new page
+        const imgTermsData = termsCanvas.toDataURL('image/png');
+        const imgTermsWidth = contentWidth; // Content width 180mm (210mm - 30mm margins)
+        const imgTermsHeight = (termsCanvas.height * imgTermsWidth) / termsCanvas.width;
+        let termsHeightLeft = imgTermsHeight;
+        let termsPosition = 0;
+        let firstTermsPage = true;
+
+        // Add terms content to PDF
+        while (termsHeightLeft >= 0) {
+          if (!firstTermsPage) {
+            pdf.addPage();
+          }
+          pdf.addImage(imgTermsData, 'PNG', margin, margin - termsPosition, imgTermsWidth, imgTermsHeight);
+          termsHeightLeft -= (pageHeight - (margin * 2) - 8); // Account for margins and spacing
+          termsPosition += pageHeight;
+          firstTermsPage = false;
+
+          if (termsHeightLeft > 0) {
+            // Proper spacing before next page
+          }
         }
-      });
-
-      // Add a fresh page for terms (always add new page)
-      pdf.addPage();
-
-      // Add terms to the new page
-      const imgTermsData = termsCanvas.toDataURL('image/png');
-      const imgTermsWidth = pageWidth; // Full width 210mm, margins handled in CSS
-      const imgTermsHeight = (termsCanvas.height * imgTermsWidth) / termsCanvas.width;
-      let termsHeightLeft = imgTermsHeight;
-      let termsPosition = 0;
-      let firstTermsPage = true;
-
-      // Add terms content to PDF
-      while (termsHeightLeft >= 0) {
-        if (!firstTermsPage) {
-          pdf.addPage();
-        }
-        pdf.addImage(imgTermsData, 'PNG', 0, -termsPosition, imgTermsWidth, imgTermsHeight);
-        termsHeightLeft -= (pageHeight - 8); // Account for margins and spacing
-        termsPosition += pageHeight;
-        firstTermsPage = false;
-
-        if (termsHeightLeft > 0) {
-          // Proper spacing before next page
-        }
+      } else {
+        console.log('Terms page section not included (customTitle may be set)');
       }
 
       // Download PDF
