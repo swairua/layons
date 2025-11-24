@@ -25,6 +25,7 @@ import { useAuditLog } from '@/hooks/useAuditLog';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { CreateCashReceiptModal } from '@/components/cash-receipts/CreateCashReceiptModal';
+import { EditCashReceiptModal } from '@/components/cash-receipts/EditCashReceiptModal';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { downloadCashReceiptPDF } from '@/utils/pdfGenerator';
 
