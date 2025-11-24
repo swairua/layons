@@ -166,7 +166,9 @@ export default function CashReceipts() {
       );
 
       toast.success('Cash receipt deleted successfully');
-      fetchReceipts();
+      setPageNumber(0);
+      setHasMore(true);
+      fetchReceipts(0);
       setDeleteDialog({ open: false });
     } catch (err) {
       console.error('Delete failed', err);
