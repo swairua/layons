@@ -168,6 +168,7 @@ export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string;
     contractor: doc.contractor,
     notes: doc.notes || '',
     currency: currency,
-    customTitle: options?.customTitle
+    customTitle: options?.customTitle,
+    stampImageUrl: options?.stampImageUrl
   });
 }
