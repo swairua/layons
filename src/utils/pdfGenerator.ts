@@ -797,6 +797,34 @@ export const generatePDF = async (data: DocumentData) => {
           box-sizing: border-box;
           max-width: 100%;
           overflow: hidden;
+          margin: 0;
+        }
+
+        .boq-main .items {
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          width: 100% !important;
+        }
+
+        .boq-main .preliminaries-section {
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+        }
+
+        .boq-main .totals {
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          width: 100% !important;
+        }
+
+        .boq-main .header-content {
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+        }
+
+        .boq-main .pagefoot {
+          left: 0 !important;
+          right: 0 !important;
         }
 
         .terms-page {
