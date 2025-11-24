@@ -509,11 +509,11 @@ const generatePDFHeader = (
 
         <!-- Bottom row: Client Details -->
         <div style="display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left;">
-          <div><strong>Client:</strong> ${data.customer?.name || ''}</div>
-          ${data.project_title ? `<div><strong>Project:</strong> ${data.project_title}</div>` : ''}
-          <div><strong>Subject:</strong> ${documentType}</div>
-          <div><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
-          <div><strong>${documentNumber}:</strong> ${data.number || ''}</div>
+          <div><strong>Client;</strong><br/>${data.customer?.name || ''}${data.customer?.address ? '<br/>' + data.customer.address : ''}${data.customer?.city ? '<br/>' + data.customer.city : ''}${data.customer?.country ? '<br/>' + data.customer.country : ''}</div>
+          ${data.project_title ? `<div style="margin-top: 4px;"><strong>Project:</strong> ${data.project_title}</div>` : ''}
+          <div style="margin-top: 4px;"><strong>Subject:</strong> ${documentType}</div>
+          <div style="margin-top: 4px;"><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
+          <div style="margin-top: 4px;"><strong>${documentNumber}:</strong> ${data.number || ''}</div>
         </div>
       </div>
     </div>
