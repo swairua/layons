@@ -476,15 +476,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       }, 1500);
 
-      // Aggressive fallback - never stay in loading state more than 3 seconds
+      // Aggressive fallback - never stay in loading state more than 2 seconds
       setTimeout(() => {
         if (mountedRef.current && loading) {
-          console.log('⚡ Aggressive fallback: forcing loading to false after 3s');
+          console.log('⚡ Aggressive fallback: forcing loading to false after 2s');
           setLoading(false);
           setInitialized(true);
           initializingRef.current = false;
         }
-      }, 3000);
+      }, 2000);
     };
 
     initializeAuthState();
