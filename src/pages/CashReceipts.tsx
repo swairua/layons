@@ -71,7 +71,9 @@ export default function CashReceipts() {
     if (!currentCompany?.id) return;
     try {
       setIsLoading(true);
-      const { data, error } = await supabase
+
+      // Try fetching with items first, fallback to without items if items table doesn't exist
+      let query = supabase
         .from('cash_receipts')
         .select(`
           id,
@@ -101,7 +103,38 @@ export default function CashReceipts() {
         .eq('company_id', currentCompany.id)
         .order('receipt_date', { ascending: false });
 
-      if (error) throw error;
+      let { data, error } = await query;
+
+      // If items table doesn't exist, fetch without items
+      if (error && error.message?.includes('cash_receipt_items')) {
+        const { data: receiptsOnly, error: fallbackError } = await supabase
+          .from('cash_receipts')
+          .select(`
+            id,
+            receipt_number,
+            customer_id,
+            receipt_date,
+            total_amount,
+            payment_method,
+            value_tendered,
+            change,
+            notes,
+            created_at,
+            customers (
+              id,
+              name,
+              email
+            )
+          `)
+          .eq('company_id', currentCompany.id)
+          .order('receipt_date', { ascending: false });
+
+        if (fallbackError) throw fallbackError;
+        data = receiptsOnly;
+      } else if (error) {
+        throw error;
+      }
+
       setReceipts(data || []);
     } catch (err) {
       console.error('Error fetching receipts:', err);
