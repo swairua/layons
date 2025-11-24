@@ -210,8 +210,12 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
     try {
       setIsSubmitting(true);
 
-      if (!currentCompany?.id || !profile?.id) {
-        throw new Error('Missing company or user information');
+      if (!currentCompany?.id) {
+        throw new Error('No company is associated with your account. Please contact your administrator.');
+      }
+
+      if (!profile?.id) {
+        throw new Error('User information not loaded. Please refresh the page and try again.');
       }
 
       // Generate receipt number based on the count of existing receipts
