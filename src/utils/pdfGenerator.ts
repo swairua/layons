@@ -3127,6 +3127,7 @@ export const downloadQuotationPDF = async (quotation: any, company?: CompanyDeta
       number: quotation.quotation_number,
       date: quotation.quotation_date,
       valid_until: quotation.valid_until,
+      currency: quotation.currency || 'KES',
       company: company,
       customer: {
         name: quotation.customers?.name || 'Unknown Customer',
@@ -3150,6 +3151,7 @@ export const downloadQuotationPDF = async (quotation: any, company?: CompanyDeta
       number: quotation.quotation_number,
       date: quotation.quotation_date,
       valid_until: quotation.valid_until,
+      currency: quotation.currency || 'KES',
       company: company,
       customer: {
         name: quotation.customers?.name || 'Unknown Customer',
