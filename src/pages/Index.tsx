@@ -18,11 +18,26 @@ const Index = () => {
 
   const handleTestPDF = async () => {
     try {
+      // Get company details for PDF
+      const companyDetails = currentCompany ? {
+        name: currentCompany.name,
+        address: currentCompany.address,
+        city: currentCompany.city,
+        country: currentCompany.country,
+        phone: currentCompany.phone,
+        email: currentCompany.email,
+        tax_number: currentCompany.tax_number,
+        logo_url: currentCompany.logo_url,
+        header_image: currentCompany.header_image,
+        stamp_image: currentCompany.stamp_image,
+        company_services: currentCompany.company_services
+      } : undefined;
+
       // Use real quotation data if available, otherwise use test data
       const realQuotation = quotations?.[0];
 
       if (realQuotation) {
-        await downloadQuotationPDF(realQuotation);
+        await downloadQuotationPDF(realQuotation, companyDetails);
         toast.success('PDF generated.');
         return;
       }
@@ -75,7 +90,7 @@ const Index = () => {
         ]
       };
 
-      await downloadQuotationPDF(testQuotation);
+      await downloadQuotationPDF(testQuotation, companyDetails);
       toast.success('Test PDF generated using sample data');
     } catch (error) {
       console.error('Error generating PDF:', error);
