@@ -325,6 +325,7 @@ export interface DocumentData {
   number: string;
   date: string;
   lpo_number?: string;
+  currency?: string; // Currency code: 'KES', 'USD', 'EUR'
   customer: {
     name: string;
     email?: string;
