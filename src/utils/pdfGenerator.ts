@@ -813,6 +813,14 @@ export const generatePDF = async (data: DocumentData) => {
         .subsection-total td { font-weight:600; background:#fdfdfd; }
         .subsection-total .label { text-align:right; padding-right:12px; }
         .totals { margin-top:12px; width: calc(100% - 30mm); margin-left: 15mm; margin-right: 15mm; page-break-inside: avoid; padding-bottom: 30mm; }
+
+        body.special-invoice .section-total { margin-bottom: 4mm; }
+        body.special-invoice .subsection-total { margin-bottom: 3mm; }
+        body.special-invoice .totals { margin-top: 6px; padding-bottom: 20mm; }
+        body.special-invoice .footer { margin-top: 12px; gap: 10px; }
+        body.special-invoice .sig-block { gap: 4px; }
+        body.special-invoice .sigline { height: 12px; }
+        body.special-invoice .field-row { gap: 4px; }
         .totals .label { text-align:right; padding-right:12px; }
         .footer { margin-top:24px; display:flex; flex-direction:column; gap:18px; }
         .sig-block { display:flex; flex-direction:column; gap:8px; }
