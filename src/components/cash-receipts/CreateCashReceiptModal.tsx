@@ -327,6 +327,24 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
           </DialogDescription>
         </DialogHeader>
 
+        {companyLoading && (
+          <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-sm text-blue-700">
+            Loading company information...
+          </div>
+        )}
+
+        {!currentCompany && !companyLoading && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-3 text-sm text-red-700">
+            Error: No company associated with your account. Please contact your administrator.
+          </div>
+        )}
+
+        {!profile && !authLoading && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-3 text-sm text-red-700">
+            Error: User information not loaded. Please refresh the page.
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Customer Selection */}
           <div className="grid grid-cols-2 gap-4">
