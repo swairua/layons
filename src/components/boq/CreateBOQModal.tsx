@@ -248,7 +248,7 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
         client_country: selectedClient.country || null,
         contractor: contractor || null,
         project_title: projectTitle || null,
-        currency: currentCompany?.currency || 'KES',
+        currency: currency,
         subtotal: totals.subtotal,
         tax_amount: 0,
         total_amount: totals.subtotal,
