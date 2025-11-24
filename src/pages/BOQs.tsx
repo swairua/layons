@@ -85,14 +85,25 @@ export default function BOQs() {
             Create and manage bill of quantities
           </p>
         </div>
-        <Button
-          className="gradient-primary text-primary-foreground hover:opacity-90 shadow-card"
-          size="lg"
-          onClick={() => setOpen(true)}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          New BOQ
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            className="gradient-primary text-primary-foreground hover:opacity-90 shadow-card"
+            size="lg"
+            onClick={() => setPercentageCopyOpen(true)}
+            variant="outline"
+          >
+            <Copy className="h-4 w-4 mr-2" />
+            Copy with %
+          </Button>
+          <Button
+            className="gradient-primary text-primary-foreground hover:opacity-90 shadow-card"
+            size="lg"
+            onClick={() => setOpen(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            New BOQ
+          </Button>
+        </div>
       </div>
 
       <Card className="shadow-card">
