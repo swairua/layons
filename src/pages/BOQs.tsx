@@ -15,9 +15,10 @@ import { toast } from 'sonner';
 
 export default function BOQs() {
   const [open, setOpen] = useState(false);
+  const [percentageCopyOpen, setPercentageCopyOpen] = useState(false);
   const { currentCompany } = useCurrentCompany();
   const companyId = currentCompany?.id;
-  const { data: boqs = [], isLoading } = useBOQs(companyId);
+  const { data: boqs = [], isLoading, refetch: refetchBOQs } = useBOQs(companyId);
   const deleteBOQ = useDeleteBOQ();
   const { data: units = [] } = useUnits(companyId);
   const { logDelete } = useAuditLog();
