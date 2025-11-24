@@ -355,7 +355,7 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
 
           {/* Items Section */}
           <div className="space-y-4">
-            <div className="flex items-end gap-2">
+            <div className="flex items-end justify-between gap-4">
               <div className="flex-1 space-y-2">
                 <Label htmlFor="searchProduct">Add Items</Label>
                 <div className="flex gap-2">
@@ -387,6 +387,14 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
                     </div>
                   )}
                 </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="applyTax"
+                  checked={applyTax}
+                  onCheckedChange={(checked) => setApplyTax(checked as boolean)}
+                />
+                <Label htmlFor="applyTax" className="cursor-pointer font-normal">Apply Tax</Label>
               </div>
             </div>
 
