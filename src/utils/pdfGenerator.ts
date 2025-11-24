@@ -880,7 +880,7 @@ export const generatePDF = async (data: DocumentData) => {
         }
       </style>
     </head>
-    <body>
+    <body${data.customTitle === 'INVOICE' ? ' class="special-invoice"' : ''}>
       <!-- Page 1: BOQ Details -->
       <div class="boq-main">
         <div class="container">
@@ -888,7 +888,7 @@ export const generatePDF = async (data: DocumentData) => {
 
           ${preliminariesHtml}
 
-          <div style="height: 15mm; margin-left: 15mm; margin-right: 15mm;"></div>
+          <div style="height: ${data.customTitle === 'INVOICE' ? '8mm' : '15mm'}; margin-left: 15mm; margin-right: 15mm;"></div>
 
           <table class="items">
             <thead>
