@@ -272,50 +272,29 @@ export function EditCashReceiptModal({ open, onOpenChange, onSuccess, receipt }:
         throw receiptError;
       }
 
-      // Separate existing items (with real IDs) from new items
-      const existingItemIds = items
-        .filter(item => !item.id.startsWith('temp-'))
-        .map(item => item.id);
+      // Delete all old items for this receipt
+      const { error: deleteError } = await supabase
+        .from('cash_receipt_items')
+        .delete()
+        .eq('cash_receipt_id', receipt.id);
 
-      // Delete old items that are not in the updated list
-      if (existingItemIds.length > 0) {
-        const { error: deleteError } = await supabase
-          .from('cash_receipt_items')
-          .delete()
-          .eq('cash_receipt_id', receipt.id)
-          .not('id', 'in', `(${existingItemIds.join(',')})`);
-
-        if (deleteError) {
-          console.error('Delete old items error:', deleteError);
-          throw deleteError;
-        }
-      } else {
-        // Delete all items if none are preserved
-        const { error: deleteError } = await supabase
-          .from('cash_receipt_items')
-          .delete()
-          .eq('cash_receipt_id', receipt.id);
-
-        if (deleteError) {
-          console.error('Delete all items error:', deleteError);
-          throw deleteError;
-        }
+      if (deleteError) {
+        console.error('Delete items error:', deleteError);
+        throw deleteError;
       }
 
-      // Prepare items to insert (only new items with temp IDs)
-      const itemsToInsert = items
-        .filter(item => item.id.startsWith('temp-'))
-        .map(item => ({
-          cash_receipt_id: receipt.id,
-          product_id: item.product_id || null,
-          description: item.description,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          tax_percentage: item.tax_percentage,
-          tax_amount: item.tax_amount,
-          line_total: item.line_total,
-          unit_of_measure: item.unit_of_measure || 'pcs',
-        }));
+      // Prepare and insert all new items
+      const itemsToInsert = items.map(item => ({
+        cash_receipt_id: receipt.id,
+        product_id: item.product_id || null,
+        description: item.description,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        tax_percentage: item.tax_percentage,
+        tax_amount: item.tax_amount,
+        line_total: item.line_total,
+        unit_of_measure: item.unit_of_measure || 'pcs',
+      }));
 
       if (itemsToInsert.length > 0) {
         const { error: itemsError } = await supabase
@@ -323,7 +302,7 @@ export function EditCashReceiptModal({ open, onOpenChange, onSuccess, receipt }:
           .insert(itemsToInsert);
 
         if (itemsError) {
-          console.error('Insert new items error:', itemsError);
+          console.error('Insert items error:', itemsError);
           throw itemsError;
         }
       }
