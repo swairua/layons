@@ -510,23 +510,23 @@ const generatePDFHeader = (
         <!-- Bottom row: All details with proper alignment -->
         <div style="font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; width: 100%; box-sizing: border-box;">
           <div style="display: flex; align-items: baseline; gap: 0;">
-            <span style="width: 50px;"><strong>Client;</strong></span>
+            <span style="width: 80px; white-space: nowrap;"><strong>Client;</strong></span>
             <span style="flex: 1;">${data.customer?.name || ''}</span>
           </div>
-          ${data.customer?.address ? `<div style="padding-left: 50px;">${data.customer.address}</div>` : ''}
-          ${data.customer?.city ? `<div style="padding-left: 50px;">${data.customer.city}</div>` : ''}
-          ${data.customer?.country ? `<div style="padding-left: 50px;">${data.customer.country}</div>` : ''}
-          ${data.project_title ? `<div style="margin-top: 6px; display: flex; align-items: baseline; gap: 0;"><span style="width: 50px;"><strong>Project;</strong></span><span style="flex: 1;">${data.project_title}</span></div>` : ''}
+          ${data.customer?.address ? `<div style="padding-left: 80px;">${data.customer.address}</div>` : ''}
+          ${data.customer?.city ? `<div style="padding-left: 80px;">${data.customer.city}</div>` : ''}
+          ${data.customer?.country ? `<div style="padding-left: 80px;">${data.customer.country}</div>` : ''}
+          ${data.project_title ? `<div style="margin-top: 6px; display: flex; align-items: baseline; gap: 0;"><span style="width: 80px; white-space: nowrap;"><strong>Project;</strong></span><span style="flex: 1;">${data.project_title}</span></div>` : ''}
           <div style="margin-top: 6px; display: flex; align-items: baseline; gap: 0;">
-            <span style="width: 50px;"><strong>Subject;</strong></span>
+            <span style="width: 80px; white-space: nowrap;"><strong>Subject;</strong></span>
             <span style="flex: 1;">${documentType}</span>
           </div>
           <div style="display: flex; align-items: baseline; gap: 0;">
-            <span style="width: 50px;"><strong>Date;</strong></span>
+            <span style="width: 80px; white-space: nowrap;"><strong>Date;</strong></span>
             <span style="flex: 1;">${formatDateLong(data.date || '')}</span>
           </div>
           <div style="display: flex; align-items: baseline; gap: 0;">
-            <span style="width: 50px;"><strong>${documentNumber};</strong></span>
+            <span style="width: 80px; white-space: nowrap;"><strong>${documentNumber};</strong></span>
             <span style="flex: 1;">${data.number || ''}</span>
           </div>
         </div>
