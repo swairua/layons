@@ -26,7 +26,7 @@ export default function BOQs() {
   const [viewing, setViewing] = useState<any | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; boqId?: string; boqNumber?: string }>({ open: false });
 
-  const handleDownloadPDF = async (boq: any) => {
+  const handleDownloadPDF = async (boq: any, options?: { customTitle?: string; amountMultiplier?: number; forceCurrency?: string }) => {
     try {
       if (!boq || !boq.data) {
         toast.error('BOQ data is not available');
@@ -40,8 +40,9 @@ export default function BOQs() {
         country: currentCompany.country || undefined,
         phone: currentCompany.phone || undefined,
         email: currentCompany.email || undefined,
-      } : undefined);
-      toast.success(`BOQ ${boq.number} PDF downloaded`);
+      } : undefined, options);
+      const suffix = options?.customTitle ? ` (${options.customTitle})` : '';
+      toast.success(`BOQ ${boq.number} PDF downloaded${suffix}`);
     } catch (err) {
       console.error('Download failed', err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
