@@ -132,7 +132,9 @@ export default function CashReceipts() {
   };
 
   useEffect(() => {
-    fetchReceipts();
+    setPageNumber(0);
+    setHasMore(true);
+    fetchReceipts(0);
   }, [currentCompany?.id]);
 
   const handleDeleteClick = (receipt: CashReceipt) => {
