@@ -252,7 +252,7 @@ export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: E
                   type="number"
                   value={formData.payment_terms}
                   onChange={(e) => handleInputChange('payment_terms', parseInt(e.target.value) || 0)}
-                  placeholder="e.g., 30 for Net 30, 0 for immediate"
+                  placeholder="e.g., 0 for cash, 30 for Net 30"
                   min="0"
                   step="1"
                 />
