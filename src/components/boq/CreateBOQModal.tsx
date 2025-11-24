@@ -105,6 +105,7 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
   const [projectTitle, setProjectTitle] = useState('');
   const [contractor, setContractor] = useState('');
   const [notes, setNotes] = useState('');
+  const [currency, setCurrency] = useState(currentCompany?.currency || 'KES');
   const [sections, setSections] = useState<BOQSectionRow[]>([defaultSection()]);
   const [submitting, setSubmitting] = useState(false);
 
