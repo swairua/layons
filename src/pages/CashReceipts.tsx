@@ -28,6 +28,15 @@ import { CreateCashReceiptModal } from '@/components/cash-receipts/CreateCashRec
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { downloadCashReceiptPDF } from '@/utils/pdfGenerator';
 
+interface CashReceiptItem {
+  id: string;
+  description: string;
+  quantity: number;
+  unit_price: number;
+  tax_percentage: number;
+  line_total: number;
+}
+
 interface CashReceipt {
   id: string;
   receipt_number: string;
@@ -42,6 +51,7 @@ interface CashReceipt {
   change: number;
   notes?: string;
   created_at?: string;
+  cash_receipt_items?: CashReceiptItem[];
 }
 
 export default function CashReceipts() {
