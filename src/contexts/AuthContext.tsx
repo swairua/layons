@@ -285,18 +285,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const initializeAuthState = async () => {
       console.log('🚀 Starting fast auth initialization...');
 
-      // Check Supabase health in background to diagnose any connectivity issues
-      try {
-        const { checkSupabaseHealth } = await import('@/utils/supabaseHealthCheck');
-        const health = await checkSupabaseHealth();
-        if (!health.isHealthy) {
-          console.warn('⚠️ Supabase health check detected issues:', health.issues);
-        } else {
-          console.log('✅ Supabase connectivity OK');
-        }
-      } catch (healthCheckError) {
-        console.warn('⚠️ Could not perform Supabase health check:', healthCheckError);
-      }
+      // Skip health check - it can hang if Supabase is unreachable
+      console.log('⏭️  Skipping health check to avoid startup delays');
+      // try {
+      //   const { checkSupabaseHealth } = await import('@/utils/supabaseHealthCheck');
+      //   const health = await checkSupabaseHealth();
+      //   if (!health.isHealthy) {
+      //     console.warn('⚠️ Supabase health check detected issues:', health.issues);
+      //   } else {
+      //     console.log('✅ Supabase connectivity OK');
+      //   }
+      // } catch (healthCheckError) {
+      //   console.warn('⚠️ Could not perform Supabase health check:', healthCheckError);
+      // }
 
       // Start app after initial session check completes (max 2 seconds)
       let appStarted = false;
