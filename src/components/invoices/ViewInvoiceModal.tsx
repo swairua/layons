@@ -155,7 +155,7 @@ export function ViewInvoiceModal({
                   </Badge>
                 </div>
                 <div className="text-sm text-muted-foreground font-normal">
-                  {formatCurrency(invoice.total_amount || 0)}
+                  {formatCurrency(invoice.total_amount || 0, invoice.currency || 'KES')}
                 </div>
               </div>
             </div>
