@@ -338,6 +338,13 @@ export default function CashReceipts() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            onClick={() => handleEditClick(receipt)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => handleDownloadReceipt(receipt)}
                           >
                             <Download className="h-4 w-4" />
