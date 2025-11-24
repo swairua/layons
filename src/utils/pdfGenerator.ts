@@ -566,14 +566,15 @@ export const generatePDF = async (data: DocumentData) => {
     }
   };
 
-  const documentTitle = data.type === 'proforma' ? 'Proforma Invoice' :
+  const documentTitle = data.customTitle ||
+                       (data.type === 'proforma' ? 'Proforma Invoice' :
                        data.type === 'delivery' ? 'Delivery Note' :
                        data.type === 'statement' ? 'Customer Statement' :
                        data.type === 'receipt' ? 'Payment Receipt' :
                        data.type === 'remittance' ? 'Remittance Advice' :
                        data.type === 'lpo' ? 'Purchase Order' :
                        data.type === 'boq' ? 'Bill of Quantities' :
-                       data.type.charAt(0).toUpperCase() + data.type.slice(1);
+                       data.type.charAt(0).toUpperCase() + data.type.slice(1));
   
   // Prefer structured fields if present, otherwise fall back to parsing notes
   let boqProject = data.project_title || '';
