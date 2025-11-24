@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -20,8 +21,9 @@ import {
 } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Loader2, Plus, Trash2, Search } from 'lucide-react';
-import { useCustomers, useCompanies, useProducts, useTaxSettings } from '@/hooks/useDatabase';
+import { useCustomers, useProducts, useTaxSettings } from '@/hooks/useDatabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -64,8 +66,7 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
   const [applyTax, setApplyTax] = useState(false);
 
   const { profile, loading: authLoading } = useAuth();
-  const { data: companies } = useCompanies();
-  const currentCompany = companies?.[0];
+  const { currentCompany, isLoading: companyLoading } = useCurrentCompany();
   const { data: customers, isLoading: loadingCustomers } = useCustomers(currentCompany?.id);
   const { data: products, isLoading: loadingProducts } = useProducts(currentCompany?.id);
   const { data: taxSettings } = useTaxSettings(currentCompany?.id);
@@ -209,8 +210,12 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
     try {
       setIsSubmitting(true);
 
-      if (!currentCompany?.id || !profile?.id) {
-        throw new Error('Missing company or user information');
+      if (!currentCompany?.id) {
+        throw new Error('No company is associated with your account. Please contact your administrator.');
+      }
+
+      if (!profile?.id) {
+        throw new Error('User information not loaded. Please refresh the page and try again.');
       }
 
       // Generate receipt number based on the count of existing receipts
@@ -292,7 +297,39 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
       setSearchProduct('');
     } catch (err) {
       console.error('Error creating cash receipt:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create cash receipt';
+      let errorMessage = 'Failed to create cash receipt';
+
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === 'object' && err !== null) {
+        const errorObj = err as any;
+
+        // Handle Supabase errors
+        if (errorObj.message && typeof errorObj.message === 'string') {
+          errorMessage = errorObj.message;
+        } else if (errorObj.error_description && typeof errorObj.error_description === 'string') {
+          errorMessage = errorObj.error_description;
+        } else if (errorObj.error && typeof errorObj.error === 'string') {
+          errorMessage = errorObj.error;
+        } else if (errorObj.details && typeof errorObj.details === 'string') {
+          errorMessage = errorObj.details;
+        } else {
+          // Last resort - try to stringify with circular reference handling
+          try {
+            const seen: any[] = [];
+            errorMessage = JSON.stringify(err, (key, value) => {
+              if (typeof value === 'object' && value !== null) {
+                if (seen.includes(value)) return '[Circular]';
+                seen.push(value);
+              }
+              return value;
+            }, 2).slice(0, 500); // Limit to 500 chars
+          } catch {
+            errorMessage = String(err).slice(0, 500);
+          }
+        }
+      }
+
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -315,6 +352,24 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
           </DialogDescription>
         </DialogHeader>
 
+        {companyLoading && (
+          <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-sm text-blue-700">
+            Loading company information...
+          </div>
+        )}
+
+        {!currentCompany && !companyLoading && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-3 text-sm text-red-700">
+            Error: No company associated with your account. Please contact your administrator.
+          </div>
+        )}
+
+        {!profile && !authLoading && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-3 text-sm text-red-700">
+            Error: User information not loaded. Please refresh the page.
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Customer Selection */}
           <div className="grid grid-cols-2 gap-4">
@@ -326,7 +381,7 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
                 </SelectTrigger>
                 <SelectContent>
                   {loadingCustomers ? (
-                    <SelectItem disabled value="">Loading customers...</SelectItem>
+                    <SelectItem disabled value="loading">Loading customers...</SelectItem>
                   ) : customers && customers.length > 0 ? (
                     customers.map((customer) => (
                       <SelectItem key={customer.id} value={customer.id}>
@@ -334,7 +389,7 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem disabled value="">No customers found</SelectItem>
+                    <SelectItem disabled value="no-customers">No customers found</SelectItem>
                   )}
                 </SelectContent>
               </Select>
@@ -354,7 +409,7 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
 
           {/* Items Section */}
           <div className="space-y-4">
-            <div className="flex items-end gap-2">
+            <div className="flex items-end justify-between gap-4">
               <div className="flex-1 space-y-2">
                 <Label htmlFor="searchProduct">Add Items</Label>
                 <div className="flex gap-2">
@@ -386,6 +441,14 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
                     </div>
                   )}
                 </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="applyTax"
+                  checked={applyTax}
+                  onCheckedChange={(checked) => setApplyTax(checked as boolean)}
+                />
+                <Label htmlFor="applyTax" className="cursor-pointer font-normal">Apply Tax</Label>
               </div>
             </div>
 
@@ -538,7 +601,7 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting || authLoading || loadingCustomers || items.length === 0}>
+            <Button type="submit" disabled={isSubmitting || authLoading || companyLoading || loadingCustomers || items.length === 0}>
               {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {isSubmitting ? 'Creating...' : 'Create Receipt'}
             </Button>
