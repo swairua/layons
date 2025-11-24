@@ -29,6 +29,7 @@ const LPOs = lazy(() => import("./pages/LPOs"));
 const BOQs = lazy(() => import("./pages/BOQs"));
 const FixedBOQ = lazy(() => import("./pages/FixedBOQ"));
 const CreditNotes = lazy(() => import("./pages/CreditNotes"));
+const CashReceipts = lazy(() => import("./pages/CashReceipts"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PaymentSynchronizationPage = lazy(() => import("./pages/PaymentSynchronization"));
 const OptimizedInventory = lazy(() => import("./pages/OptimizedInventory"));
