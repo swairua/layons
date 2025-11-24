@@ -575,6 +575,7 @@ export const CreateProformaModalFixed = ({
                             max="100"
                             step="0.01"
                             className="w-20"
+                            placeholder="0"
                           />
                         </TableCell>
                         <TableCell>
