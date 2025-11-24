@@ -906,15 +906,15 @@ export const generatePDF = async (data: DocumentData) => {
           <table style="font-size: 10px; width: 72%; line-height: 1.6; color: #333; border: none;">
             <tr style="border: none;">
               <td style="width: 40%; border: none;"><strong>Client;</strong></td>
-              <td style="width: 60%; border: none;">________________________</td>
+              <td style="width: 60%; border: none;">${data.customer.name}${data.customer.address ? ' <br/> ' + data.customer.address : ''}${data.customer.city ? ' <br/> ' + data.customer.city : ''}${data.customer.country ? ', ' + data.customer.country : ''}</td>
             </tr>
             <tr style="border: none;">
               <td style="border: none;"><strong>Tel No;</strong></td>
-              <td style="border: none;">________________________</td>
+              <td style="border: none;">${data.customer.phone || '________________________'}</td>
             </tr>
           </table>
           <div style="text-align: center; flex-shrink: 0; width: 100px;">
-            <img src="${stampImage}" alt="Layons Construction Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
+            <img src="${data.stampImageUrl || stampImage}" alt="Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
           </div>
         </div>
 
