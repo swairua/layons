@@ -558,7 +558,7 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting || authLoading || loadingCustomers || items.length === 0}>
+            <Button type="submit" disabled={isSubmitting || authLoading || companyLoading || loadingCustomers || items.length === 0}>
               {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {isSubmitting ? 'Creating...' : 'Create Receipt'}
             </Button>
