@@ -52,7 +52,6 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
   const { data: companies } = useCompanies();
   const currentCompany = companies?.[0];
   const { data: customers, isLoading: loadingCustomers } = useCustomers(currentCompany?.id);
-  const generateDocNumber = useGenerateDocumentNumber();
 
   // Calculate change automatically
   const change = valueTendered && totalAmount 
