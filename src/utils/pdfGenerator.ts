@@ -2503,12 +2503,16 @@ export const generatePDF = async (data: DocumentData) => {
             <!-- Bottom row: Client Details -->
             <div class="header-left">
               <div><strong>${data.type === 'lpo' ? 'Supplier' : 'Client'}:</strong> ${data.customer?.name || ''}</div>
-              ${data.customer?.address || data.customer?.city ? `
-              <div style="margin-left: 0; font-size: 10px; color: #555;">
-                ${data.customer?.address ? data.customer.address + (data.customer?.city ? '<br/>' : '') : ''}
-                ${data.customer?.city ? (data.customer?.country ? data.customer.city + ', ' + data.customer.country : data.customer.city) : ''}
+              ${data.customTitle === 'INVOICE' ? `
+              <div style="margin-left: 0; font-size: 10px; color: #555; line-height: 1.4;">
+                Platz der Vereinten Nationen 7<br/>
+                53113 Bonn, Germany
               </div>
-              ` : ''}
+              ` : (data.customer?.address || data.customer?.city ? `
+              <div style="margin-left: 0; font-size: 10px; color: #555; line-height: 1.4;">
+                ${data.customer?.address || ''}${data.customer?.address && data.customer?.city ? '<br/>' : ''}${data.customer?.city || ''}${data.customer?.city && data.customer?.country ? ', ' : ''}${data.customer?.country || ''}
+              </div>
+              ` : '')}
               ${data.project_title ? `<div><strong>Project:</strong> ${data.project_title}</div>` : ''}
               <div><strong>Subject:</strong> ${data.type === 'boq' ? (data.customTitle || 'Bill of Quantities') : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
               <div><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
