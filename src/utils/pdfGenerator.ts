@@ -2,6 +2,7 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { PDF_PAGE_CSS } from './pdfMarginConstants';
+import { formatCurrency as formatCurrencyUtil } from './currencyFormatter';
 
 // Helper function to render HTML content to canvas
 const renderHTMLToCanvas = async (htmlContent: string, pageSelector: string) => {
@@ -325,6 +326,7 @@ export interface DocumentData {
   number: string;
   date: string;
   lpo_number?: string;
+  currency?: string; // Currency code: 'KES', 'USD', 'EUR'
   customer: {
     name: string;
     email?: string;
@@ -541,12 +543,7 @@ export const generatePDF = async (data: DocumentData) => {
   // Analyze which columns have values
   const visibleColumns = analyzeColumns(data.items);
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-KE', {
-      style: 'currency',
-      currency: 'KES',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(amount);
+    return formatCurrencyUtil(amount, data.currency || 'KES');
   };
 
   const formatDate = (date: string) => {

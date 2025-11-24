@@ -65,7 +65,7 @@ export function ViewRemittanceModal({
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     try {
       // Use the same download function from the parent component
       const remittanceData = {

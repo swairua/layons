@@ -31,6 +31,7 @@ export interface BoqDocument {
   project_title?: string; // e.g., Proposed Development - House Renovations
   sections: BoqSection[];
   notes?: string;
+  currency?: string; // Currency code: 'KES', 'USD', 'EUR'
 }
 
 // Helper
@@ -145,6 +146,7 @@ export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string;
     total_amount: subtotal,
     project_title: doc.project_title,
     contractor: doc.contractor,
-    notes: doc.notes || ''
+    notes: doc.notes || '',
+    currency: doc.currency || 'KES'
   });
 }

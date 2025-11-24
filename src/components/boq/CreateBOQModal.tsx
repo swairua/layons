@@ -105,6 +105,7 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
   const [projectTitle, setProjectTitle] = useState('');
   const [contractor, setContractor] = useState('');
   const [notes, setNotes] = useState('');
+  const [currency, setCurrency] = useState(currentCompany?.currency || 'KES');
   const [sections, setSections] = useState<BOQSectionRow[]>([defaultSection()]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -159,7 +160,15 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
     } : s));
   };
 
-  const formatCurrency = (amount: number) => new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
+  const formatCurrency = (amount: number) => {
+    const currencyLocales: { [key: string]: { locale: string; code: string } } = {
+      KES: { locale: 'en-KE', code: 'KES' },
+      USD: { locale: 'en-US', code: 'USD' },
+      EUR: { locale: 'en-GB', code: 'EUR' }
+    };
+    const curr = currencyLocales[currency] || currencyLocales.KES;
+    return new Intl.NumberFormat(curr.locale, { style: 'currency', currency: curr.code, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
+  };
 
   const calculateSubsectionTotal = (subsection: BOQSubsectionRow): number => {
     return subsection.items.reduce((sum, item) => sum + ((item.quantity || 0) * (item.rate || 0)), 0);
@@ -194,6 +203,7 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
       const doc: BoqDocument = {
         number: boqNumber,
         date: boqDate,
+        currency: currency,
         client: {
           name: selectedClient.name,
           email: selectedClient.email || undefined,
@@ -238,7 +248,7 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
         client_country: selectedClient.country || null,
         contractor: contractor || null,
         project_title: projectTitle || null,
-        currency: currentCompany?.currency || 'KES',
+        currency: currency,
         subtotal: totals.subtotal,
         tax_amount: 0,
         total_amount: totals.subtotal,
@@ -289,7 +299,7 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
         </DialogHeader>
 
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <Label>BOQ Number</Label>
               <Input value={boqNumber} onChange={e => setBoqNumber(e.target.value)} />
@@ -297,6 +307,19 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
             <div>
               <Label>Date</Label>
               <Input type="date" value={boqDate} onChange={e => setBoqDate(e.target.value)} />
+            </div>
+            <div>
+              <Label>Currency</Label>
+              <Select value={currency} onValueChange={setCurrency}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="KES">KES - Kenyan Shilling</SelectItem>
+                  <SelectItem value="USD">USD - US Dollar</SelectItem>
+                  <SelectItem value="EUR">EUR - Euro</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Client</Label>
