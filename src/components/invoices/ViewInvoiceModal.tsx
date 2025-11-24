@@ -56,10 +56,19 @@ export function ViewInvoiceModal({
 
   if (!invoice) return null;
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-KE', {
+  const formatCurrency = (amount: number, currency: string = 'KES') => {
+    const localeMap: { [key: string]: string } = {
+      'KES': 'en-KE',
+      'USD': 'en-US',
+      'EUR': 'en-GB',
+      'GBP': 'en-GB',
+      'JPY': 'ja-JP',
+      'INR': 'en-IN',
+    };
+
+    return new Intl.NumberFormat(localeMap[currency] || 'en-KE', {
       style: 'currency',
-      currency: 'KES',
+      currency: currency,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount);
@@ -146,7 +155,7 @@ export function ViewInvoiceModal({
                   </Badge>
                 </div>
                 <div className="text-sm text-muted-foreground font-normal">
-                  {formatCurrency(invoice.total_amount || 0)}
+                  {formatCurrency(invoice.total_amount || 0, invoice.currency || 'KES')}
                 </div>
               </div>
             </div>
@@ -304,7 +313,7 @@ export function ViewInvoiceModal({
                         </Badge>
                       </div>
                       <div className="font-semibold">
-                        {formatCurrency(calculateSectionTotal(section))}
+                        {formatCurrency(calculateSectionTotal(section), invoice.currency || 'KES')}
                       </div>
                     </div>
 
@@ -336,10 +345,10 @@ export function ViewInvoiceModal({
                                   </div>
                                 </TableCell>
                                 <TableCell>{item.quantity}</TableCell>
-                                <TableCell>{formatCurrency(item.unit_price)}</TableCell>
+                                <TableCell>{formatCurrency(item.unit_price, invoice.currency || 'KES')}</TableCell>
                                 <TableCell>{item.tax_percentage || 0}%</TableCell>
                                 <TableCell className="text-right font-semibold">
-                                  {formatCurrency(item.line_total)}
+                                  {formatCurrency(item.line_total, invoice.currency || 'KES')}
                                 </TableCell>
                               </TableRow>
                             ))}
@@ -360,7 +369,7 @@ export function ViewInvoiceModal({
                               <TableBody>
                                 <TableRow>
                                   <TableCell>Labour for {section.name}</TableCell>
-                                  <TableCell className="text-right font-semibold">{formatCurrency(section.labor_cost)}</TableCell>
+                                  <TableCell className="text-right font-semibold">{formatCurrency(section.labor_cost, invoice.currency || 'KES')}</TableCell>
                                 </TableRow>
                               </TableBody>
                             </Table>
@@ -373,17 +382,17 @@ export function ViewInvoiceModal({
                             <div className="w-80 space-y-1 text-sm">
                               <div className="flex justify-between">
                                 <span>Total {section.name} Materials:</span>
-                                <span className="font-semibold">{formatCurrency(calculateSectionMaterials(section))}</span>
+                                <span className="font-semibold">{formatCurrency(calculateSectionMaterials(section), invoice.currency || 'KES')}</span>
                               </div>
                               {section.labor_cost > 0 && (
                                 <div className="flex justify-between">
                                   <span>{section.name} Labour:</span>
-                                  <span className="font-semibold">{formatCurrency(section.labor_cost)}</span>
+                                  <span className="font-semibold">{formatCurrency(section.labor_cost, invoice.currency || 'KES')}</span>
                                 </div>
                               )}
                               <div className="flex justify-between border-t pt-1 font-semibold">
                                 <span>Section Total:</span>
-                                <span>{formatCurrency(calculateSectionTotal(section))}</span>
+                                <span>{formatCurrency(calculateSectionTotal(section), invoice.currency || 'KES')}</span>
                               </div>
                             </div>
                           </div>

@@ -20,6 +20,7 @@ interface ConfirmationDialogProps {
   confirmText?: string;
   cancelText?: string;
   isDangerous?: boolean;
+  loadingText?: string;
 }
 
 export function ConfirmationDialog({
@@ -32,6 +33,7 @@ export function ConfirmationDialog({
   confirmText = 'Delete',
   cancelText = 'Cancel',
   isDangerous = true,
+  loadingText = 'Processing...',
 }: ConfirmationDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={(isOpen) => {
@@ -53,7 +55,7 @@ export function ConfirmationDialog({
             disabled={isLoading}
             className={isDangerous ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''}
           >
-            {isLoading ? 'Deleting...' : confirmText}
+            {isLoading ? loadingText : confirmText}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

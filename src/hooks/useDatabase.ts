@@ -103,6 +103,7 @@ export interface Invoice {
   notes?: string;
   terms_and_conditions?: string;
   affects_inventory?: boolean;
+  currency?: string; // Currency code: 'KES', 'USD', 'EUR', etc.
   created_at?: string;
   updated_at?: string;
 }

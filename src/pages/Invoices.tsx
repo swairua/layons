@@ -195,10 +195,19 @@ export default function Invoices() {
     return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo && matchesAmountFrom && matchesAmountTo;
   }) || [];
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-KE', {
+  const formatCurrency = (amount: number, currency: string = 'KES') => {
+    const localeMap: { [key: string]: string } = {
+      'KES': 'en-KE',
+      'USD': 'en-US',
+      'EUR': 'en-GB',
+      'GBP': 'en-GB',
+      'JPY': 'ja-JP',
+      'INR': 'en-IN',
+    };
+
+    return new Intl.NumberFormat(localeMap[currency] || 'en-KE', {
       style: 'currency',
-      currency: 'KES',
+      currency: currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
@@ -304,9 +313,9 @@ export default function Invoices() {
 Please find attached your invoice ${invoiceData.invoice_number} dated ${new Date(invoiceData.invoice_date).toLocaleDateString()}.
 
 Invoice Summary:
-- Invoice Amount: ${formatCurrency(invoiceData.total_amount || 0)}
+- Invoice Amount: ${formatCurrency(invoiceData.total_amount || 0, invoiceData.currency || 'KES')}
 - Due Date: ${new Date(invoiceData.due_date).toLocaleDateString()}
-- Balance Due: ${formatCurrency(invoiceData.balance_due || 0)}
+- Balance Due: ${formatCurrency(invoiceData.balance_due || 0, invoiceData.currency || 'KES')}
 
 Payment can be made via:
 - Bank Transfer
@@ -606,13 +615,13 @@ Website:`;
                       {new Date(invoice.due_date).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="font-semibold">
-                      {formatCurrency(invoice.total_amount || 0)}
+                      {formatCurrency(invoice.total_amount || 0, invoice.currency || 'KES')}
                     </TableCell>
                     <TableCell className="text-success">
-                      {formatCurrency(invoice.paid_amount ?? 0)}
+                      {formatCurrency(invoice.paid_amount ?? 0, invoice.currency || 'KES')}
                     </TableCell>
                     <TableCell className={`font-medium ${((invoice.balance_due ?? (invoice.total_amount || 0) - (invoice.paid_amount ?? 0)) || 0) > 0 ? 'text-destructive' : 'text-success'}`}>
-                      {formatCurrency(invoice.balance_due ?? (invoice.total_amount || 0) - (invoice.paid_amount ?? 0))}
+                      {formatCurrency(invoice.balance_due ?? (invoice.total_amount || 0) - (invoice.paid_amount ?? 0), invoice.currency || 'KES')}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={getStatusColor(calculateInvoiceStatus(invoice))}>

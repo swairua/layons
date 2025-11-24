@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useState } from 'react';
 import { Layers, Plus, Eye, Download, Trash2, Copy, Pencil, FileText } from 'lucide-react';
 import { CreateBOQModal } from '@/components/boq/CreateBOQModal';
 import { CreatePercentageCopyModal } from '@/components/boq/CreatePercentageCopyModal';
@@ -90,14 +89,53 @@ export default function BOQs() {
   const handleConvertConfirm = async () => {
     if (!convertDialog.boqId) return;
     try {
+      toast.loading(`Converting BOQ ${convertDialog.boqNumber} to invoice...`);
       const invoice = await convertToInvoice.mutateAsync(convertDialog.boqId);
-      toast.success(`BOQ ${convertDialog.boqNumber} converted to Invoice ${invoice.invoice_number}`);
+
+      toast.dismiss();
+      toast.success(
+        `✅ BOQ ${convertDialog.boqNumber} successfully converted to Invoice ${invoice.invoice_number}`,
+        {
+          description: `Invoice created with ${invoice.total_amount ? `total amount ${new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES' }).format(invoice.total_amount)}` : 'amount from BOQ'}`,
+          duration: 5000
+        }
+      );
+
       setConvertDialog({ open: false });
-      await refetchBOQs();
+      // Refetch to update the BOQ list and show converted status
+      setTimeout(() => refetchBOQs(), 500);
     } catch (err) {
-      console.error('Conversion failed', err);
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      toast.error(`Failed to convert BOQ: ${errorMessage}`);
+      console.error('BOQ conversion failed:', err);
+
+      let errorMessage = 'Unknown error occurred';
+      let errorTitle = 'Conversion Failed';
+
+      if (err instanceof Error) {
+        errorMessage = err.message;
+
+        // Provide specific guidance based on error type
+        if (errorMessage.includes('BOQ has no sections')) {
+          errorTitle = 'Empty BOQ';
+          errorMessage = 'This BOQ has no sections or items. Please add sections and items before converting.';
+        } else if (errorMessage.includes('invalid or missing')) {
+          errorTitle = 'Invalid BOQ Data';
+          errorMessage = 'The BOQ data appears to be corrupted or incomplete. Please recreate the BOQ.';
+        } else if (errorMessage.includes('no items')) {
+          errorTitle = 'No Invoice Items';
+          errorMessage = 'The BOQ conversion resulted in no items. Please verify the BOQ structure.';
+        } else if (errorMessage.includes('invoice number')) {
+          errorTitle = 'Invoice Number Error';
+          errorMessage = 'Failed to generate a unique invoice number. Please try again or contact support.';
+        } else if (errorMessage.includes('customer')) {
+          errorTitle = 'Customer Setup Issue';
+          errorMessage = 'There was an issue with the customer data. The invoice was created without a customer. Please assign one manually.';
+        }
+      }
+
+      toast.error(errorTitle, {
+        description: errorMessage,
+        duration: 6000
+      });
     }
   };
 
@@ -384,6 +422,18 @@ export default function BOQs() {
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteDialog({ open: false })}
         confirmText="Delete"
+      />
+
+      <ConfirmationDialog
+        open={convertDialog.open}
+        title="Convert BOQ to Invoice"
+        description={`Convert BOQ ${convertDialog.boqNumber} to an invoice? This will create a new draft invoice with all items from this BOQ. The BOQ will be marked as converted.`}
+        onConfirm={handleConvertConfirm}
+        onCancel={() => setConvertDialog({ open: false })}
+        confirmText="Convert to Invoice"
+        isLoading={convertToInvoice.isPending}
+        loadingText="Converting..."
+        isDangerous={false}
       />
     </div>
   );
