@@ -992,7 +992,7 @@ export const generatePDF = async (data: DocumentData) => {
       boqWrapper.style.position = 'absolute';
       boqWrapper.style.left = '0';
       boqWrapper.style.top = '0';
-      boqWrapper.style.width = `${pageWidth}mm`;
+      boqWrapper.style.width = `${contentWidth}mm`;
       boqWrapper.style.height = 'auto';
       boqWrapper.style.backgroundColor = '#ffffff';
       boqWrapper.style.zIndex = '-999999';
