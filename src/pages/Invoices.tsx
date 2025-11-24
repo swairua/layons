@@ -615,13 +615,13 @@ Website:`;
                       {new Date(invoice.due_date).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="font-semibold">
-                      {formatCurrency(invoice.total_amount || 0)}
+                      {formatCurrency(invoice.total_amount || 0, invoice.currency || 'KES')}
                     </TableCell>
                     <TableCell className="text-success">
-                      {formatCurrency(invoice.paid_amount ?? 0)}
+                      {formatCurrency(invoice.paid_amount ?? 0, invoice.currency || 'KES')}
                     </TableCell>
                     <TableCell className={`font-medium ${((invoice.balance_due ?? (invoice.total_amount || 0) - (invoice.paid_amount ?? 0)) || 0) > 0 ? 'text-destructive' : 'text-success'}`}>
-                      {formatCurrency(invoice.balance_due ?? (invoice.total_amount || 0) - (invoice.paid_amount ?? 0))}
+                      {formatCurrency(invoice.balance_due ?? (invoice.total_amount || 0) - (invoice.paid_amount ?? 0), invoice.currency || 'KES')}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={getStatusColor(calculateInvoiceStatus(invoice))}>
