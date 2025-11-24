@@ -424,6 +424,16 @@ export default function BOQs() {
         onCancel={() => setDeleteDialog({ open: false })}
         confirmText="Delete"
       />
+
+      <ConfirmationDialog
+        open={convertDialog.open}
+        title="Convert BOQ to Invoice"
+        description={`Convert BOQ ${convertDialog.boqNumber} to an invoice? This will create a new draft invoice with all items from this BOQ. The BOQ will be marked as converted.`}
+        onConfirm={handleConvertConfirm}
+        onCancel={() => setConvertDialog({ open: false })}
+        confirmText="Convert to Invoice"
+        isLoading={convertToInvoice.isPending}
+      />
     </div>
   );
 }
