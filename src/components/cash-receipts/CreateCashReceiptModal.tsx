@@ -94,8 +94,19 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
         throw new Error('Missing company or user information');
       }
 
-      // Generate receipt number
-      const receiptNumber = await generateDocNumber('CASH_RECEIPT', currentCompany.id);
+      // Generate receipt number - try using the hook, fallback to manual generation
+      let receiptNumber: string;
+      try {
+        const result = await generateDocNumber.mutateAsync({
+          companyId: currentCompany.id,
+          type: 'remittance' // Use remittance as a fallback type
+        });
+        receiptNumber = result?.replace(/REM/, 'RCP') || `RCP-${Date.now()}`;
+      } catch (err) {
+        // Fallback: generate receipt number manually
+        const timestamp = Date.now().toString().slice(-6);
+        receiptNumber = `RCP-${timestamp}`;
+      }
 
       // Create the cash receipt
       const { error } = await supabase
