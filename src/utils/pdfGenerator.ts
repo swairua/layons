@@ -2,6 +2,7 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { PDF_PAGE_CSS } from './pdfMarginConstants';
+import { formatCurrency as formatCurrencyUtil } from './currencyFormatter';
 
 // Helper function to render HTML content to canvas
 const renderHTMLToCanvas = async (htmlContent: string, pageSelector: string) => {
