@@ -59,6 +59,8 @@ interface CashReceipt {
 export default function CashReceipts() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedReceiptForEdit, setSelectedReceiptForEdit] = useState<CashReceipt | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; receipt?: CashReceipt }>({ open: false });
   const [isLoading, setIsLoading] = useState(true);
   const [receipts, setReceipts] = useState<CashReceipt[]>([]);
