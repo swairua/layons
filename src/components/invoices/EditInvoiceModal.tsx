@@ -69,6 +69,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [invoiceDate, setInvoiceDate] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [currency, setCurrency] = useState('KES');
   const [lpoNumber, setLpoNumber] = useState('');
   const [notes, setNotes] = useState('');
   const [termsAndConditions, setTermsAndConditions] = useState('');
@@ -94,6 +95,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
       setSelectedCustomerId(invoice.customer_id || '');
       setInvoiceDate(invoice.invoice_date || '');
       setDueDate(invoice.due_date || '');
+      setCurrency(invoice.currency || 'KES');
       setLpoNumber(invoice.lpo_number || '');
       setNotes(invoice.notes || '');
       setTermsAndConditions(invoice.terms_and_conditions || '');
@@ -346,10 +348,20 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
     }));
   };
 
+  const getCurrencyLocale = (curr: string) => {
+    const mapping: { [key: string]: { locale: string; code: string } } = {
+      KES: { locale: 'en-KE', code: 'KES' },
+      USD: { locale: 'en-US', code: 'USD' },
+      GBP: { locale: 'en-GB', code: 'GBP' }
+    };
+    return mapping[curr] || mapping.KES;
+  };
+
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-KE', {
+    const currencyLocale = getCurrencyLocale(currency);
+    return new Intl.NumberFormat(currencyLocale.locale, {
       style: 'currency',
-      currency: 'KES',
+      currency: currencyLocale.code,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount);
@@ -406,6 +418,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
         invoice_date: invoiceDate,
         due_date: dueDate,
         lpo_number: lpoNumber || null,
+        currency,
         subtotal: totalMaterials,
         tax_amount: totalTax,
         total_amount: grandTotal,
