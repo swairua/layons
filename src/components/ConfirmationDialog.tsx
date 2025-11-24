@@ -55,7 +55,7 @@ export function ConfirmationDialog({
             disabled={isLoading}
             className={isDangerous ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''}
           >
-            {isLoading ? 'Deleting...' : confirmText}
+            {isLoading ? loadingText : confirmText}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
