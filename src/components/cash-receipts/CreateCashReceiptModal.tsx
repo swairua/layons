@@ -334,7 +334,7 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
                 </SelectTrigger>
                 <SelectContent>
                   {loadingCustomers ? (
-                    <SelectItem disabled value="">Loading customers...</SelectItem>
+                    <SelectItem disabled value="loading">Loading customers...</SelectItem>
                   ) : customers && customers.length > 0 ? (
                     customers.map((customer) => (
                       <SelectItem key={customer.id} value={customer.id}>
@@ -342,7 +342,7 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem disabled value="">No customers found</SelectItem>
+                    <SelectItem disabled value="no-customers">No customers found</SelectItem>
                   )}
                 </SelectContent>
               </Select>
