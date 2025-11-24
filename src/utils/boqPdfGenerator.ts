@@ -152,13 +152,14 @@ export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string;
 
   const customizedSubtotal = subtotal * multiplier;
   const currency = options?.forceCurrency || doc.currency || 'KES';
+  const customer = options?.customClient || doc.client;
 
   return await generatePDF({
     type: 'boq',
     number: doc.number,
     date: doc.date,
     company,
-    customer: doc.client,
+    customer: customer,
     items: customizedItems,
     subtotal: customizedSubtotal,
     total_amount: customizedSubtotal,
