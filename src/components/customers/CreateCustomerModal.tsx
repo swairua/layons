@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { CountrySelect } from '@/components/ui/country-select';
 import { 
   User,
   Mail,
@@ -47,7 +48,7 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
     city: '',
     country: 'Kenya',
     credit_limit: 100000,
-    payment_terms: 30,
+    payment_terms: 0,
     is_active: true,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -96,7 +97,7 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
         city: '',
         country: 'Kenya',
         credit_limit: 100000,
-        payment_terms: 30,
+        payment_terms: 0,
         is_active: true,
       });
     } catch (error) {
@@ -124,7 +125,7 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
       city: '',
       country: 'Kenya',
       credit_limit: 100000,
-      payment_terms: 30,
+      payment_terms: 0,
       is_active: true,
     });
     onOpenChange(false);
@@ -222,18 +223,11 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
 
                 <div className="space-y-2">
                   <Label htmlFor="country">Country</Label>
-                  <Select value={formData.country} onValueChange={(value) => handleInputChange('country', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Kenya">Kenya</SelectItem>
-                      <SelectItem value="Uganda">Uganda</SelectItem>
-                      <SelectItem value="Tanzania">Tanzania</SelectItem>
-                      <SelectItem value="Rwanda">Rwanda</SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <CountrySelect
+                    value={formData.country}
+                    onValueChange={(value) => handleInputChange('country', value)}
+                    placeholder="Search countries..."
+                  />
                 </div>
               </div>
             </CardContent>
@@ -263,21 +257,15 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
 
               <div className="space-y-2">
                 <Label htmlFor="payment_terms">Payment Terms (Days)</Label>
-                <Select 
-                  value={formData.payment_terms.toString()} 
-                  onValueChange={(value) => handleInputChange('payment_terms', parseInt(value))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select payment terms" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7">7 days</SelectItem>
-                    <SelectItem value="14">14 days</SelectItem>
-                    <SelectItem value="30">30 days</SelectItem>
-                    <SelectItem value="60">60 days</SelectItem>
-                    <SelectItem value="90">90 days</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="payment_terms"
+                  type="number"
+                  value={formData.payment_terms}
+                  onChange={(e) => handleInputChange('payment_terms', parseInt(e.target.value) || 0)}
+                  placeholder="Enter payment terms in days (0 for no terms)"
+                  min="0"
+                  step="1"
+                />
               </div>
 
               <div className="flex items-center justify-between">

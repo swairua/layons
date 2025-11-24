@@ -113,10 +113,19 @@ export default function Quotations() {
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-KE', {
+  const formatCurrency = (amount: number, currency: string = 'KES') => {
+    const localeMap: { [key: string]: string } = {
+      'KES': 'en-KE',
+      'USD': 'en-US',
+      'EUR': 'en-GB',
+      'GBP': 'en-GB',
+      'JPY': 'ja-JP',
+      'INR': 'en-IN',
+    };
+
+    return new Intl.NumberFormat(localeMap[currency] || 'en-KE', {
       style: 'currency',
-      currency: 'KES',
+      currency: currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
@@ -216,7 +225,7 @@ export default function Quotations() {
 Please find attached your quotation ${quotation.quotation_number} dated ${new Date(quotation.quotation_date).toLocaleDateString()}.
 
 Quotation Summary:
-- Total Amount: KES ${quotation.total_amount?.toLocaleString() || '0'}
+- Total Amount: ${formatCurrency(quotation.total_amount || 0, quotation.currency || 'KES')}
 - Valid Until: ${quotation.valid_until ? new Date(quotation.valid_until).toLocaleDateString() : 'No expiry'}
 
 If you have any questions about this quotation, please don't hesitate to contact us.
@@ -458,7 +467,7 @@ Website: www.biolegendscientific.co.ke`;
                       </div>
                     </TableCell>
                     <TableCell className="font-semibold">
-                      {formatCurrency(quotation.total_amount || 0)}
+                      {formatCurrency(quotation.total_amount || 0, quotation.currency || 'KES')}
                     </TableCell>
                     <TableCell>
                       {quotation.valid_until 

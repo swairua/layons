@@ -47,10 +47,19 @@ export function ViewQuotationModal({
 
   if (!quotation) return null;
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-KE', {
+  const formatCurrency = (amount: number, currency: string = 'KES') => {
+    const localeMap: { [key: string]: string } = {
+      'KES': 'en-KE',
+      'USD': 'en-US',
+      'EUR': 'en-GB',
+      'GBP': 'en-GB',
+      'JPY': 'ja-JP',
+      'INR': 'en-IN',
+    };
+
+    return new Intl.NumberFormat(localeMap[currency] || 'en-KE', {
       style: 'currency',
-      currency: 'KES',
+      currency: currency,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount);
@@ -263,7 +272,7 @@ export function ViewQuotationModal({
                 )}
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Total Amount:</span>
-                  <span className="font-semibold text-primary">{formatCurrency(quotation.total_amount || 0)}</span>
+                  <span className="font-semibold text-primary">{formatCurrency(quotation.total_amount || 0, quotation.currency || 'KES')}</span>
                 </div>
               </CardContent>
             </Card>
@@ -309,8 +318,8 @@ export function ViewQuotationModal({
                               </TableCell>
                               <TableCell className="text-center">{item.quantity}</TableCell>
                               <TableCell className="text-center">{item.unit_of_measure || item.products?.unit_of_measure || 'Each'}</TableCell>
-                              <TableCell className="text-right">{formatCurrency(item.unit_price)}</TableCell>
-                              <TableCell className="text-right font-semibold">{formatCurrency(item.line_total)}</TableCell>
+                              <TableCell className="text-right">{formatCurrency(item.unit_price, quotation.currency || 'KES')}</TableCell>
+                              <TableCell className="text-right font-semibold">{formatCurrency(item.line_total, quotation.currency || 'KES')}</TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
@@ -330,7 +339,7 @@ export function ViewQuotationModal({
                             <TableBody>
                               <TableRow>
                                 <TableCell>Labour for {sectionName}</TableCell>
-                                <TableCell className="text-right font-semibold">{formatCurrency(laborCost)}</TableCell>
+                                <TableCell className="text-right font-semibold">{formatCurrency(laborCost, quotation.currency || 'KES')}</TableCell>
                               </TableRow>
                             </TableBody>
                           </Table>
@@ -343,17 +352,17 @@ export function ViewQuotationModal({
                           <div className="w-80 space-y-2">
                             <div className="flex justify-between text-sm">
                               <span className="text-muted-foreground">Total {sectionName} Materials:</span>
-                              <span className="font-semibold">{formatCurrency(materialsCost)}</span>
+                              <span className="font-semibold">{formatCurrency(materialsCost, quotation.currency || 'KES')}</span>
                             </div>
                             {laborCost > 0 && (
                               <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">{sectionName} Labour:</span>
-                                <span className="font-semibold">{formatCurrency(laborCost)}</span>
+                                <span className="font-semibold">{formatCurrency(laborCost, quotation.currency || 'KES')}</span>
                               </div>
                             )}
                             <div className="flex justify-between border-t pt-2">
                               <span className="font-semibold">Section Total:</span>
-                              <span className="font-bold text-primary">{formatCurrency(sectionTotal)}</span>
+                              <span className="font-bold text-primary">{formatCurrency(sectionTotal, quotation.currency || 'KES')}</span>
                             </div>
                           </div>
                         </div>
@@ -373,15 +382,15 @@ export function ViewQuotationModal({
                     <div className="w-80 space-y-2">
                       <div className="flex justify-between">
                         <span>Total Materials:</span>
-                        <span className="font-semibold">{formatCurrency(quotation.subtotal || 0)}</span>
+                        <span className="font-semibold">{formatCurrency(quotation.subtotal || 0, quotation.currency || 'KES')}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Tax:</span>
-                        <span className="font-semibold">{formatCurrency(quotation.tax_amount || 0)}</span>
+                        <span className="font-semibold">{formatCurrency(quotation.tax_amount || 0, quotation.currency || 'KES')}</span>
                       </div>
                       <div className="flex justify-between text-lg border-t pt-2">
                         <span className="font-bold">Grand Total:</span>
-                        <span className="font-bold text-primary">{formatCurrency(quotation.total_amount || 0)}</span>
+                        <span className="font-bold text-primary">{formatCurrency(quotation.total_amount || 0, quotation.currency || 'KES')}</span>
                       </div>
                     </div>
                   </div>
