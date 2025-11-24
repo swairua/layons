@@ -473,7 +473,12 @@ const generatePDFHeader = (
   formatDateLong: (date: string) => string,
   documentType: string = 'Quotation'
 ): string => {
-  const documentNumber = documentType === 'Bill of Quantities' ? 'BOQ No' : 'Qtn No';
+  let documentNumber = 'Qtn No';
+  if (documentType === 'Bill of Quantities') {
+    documentNumber = 'BOQ No';
+  } else if (data.customTitle === 'INVOICE') {
+    documentNumber = 'Invoice No';
+  }
 
   return `
     <!-- Header Section -->
