@@ -299,7 +299,7 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
         </DialogHeader>
 
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <Label>BOQ Number</Label>
               <Input value={boqNumber} onChange={e => setBoqNumber(e.target.value)} />
@@ -307,6 +307,19 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
             <div>
               <Label>Date</Label>
               <Input type="date" value={boqDate} onChange={e => setBoqDate(e.target.value)} />
+            </div>
+            <div>
+              <Label>Currency</Label>
+              <Select value={currency} onValueChange={setCurrency}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="KES">KES - Kenyan Shilling</SelectItem>
+                  <SelectItem value="USD">USD - US Dollar</SelectItem>
+                  <SelectItem value="EUR">EUR - Euro</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Client</Label>
