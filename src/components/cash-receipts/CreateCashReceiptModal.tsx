@@ -66,8 +66,7 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
   const [applyTax, setApplyTax] = useState(false);
 
   const { profile, loading: authLoading } = useAuth();
-  const { data: companies } = useCompanies();
-  const currentCompany = companies?.[0];
+  const { currentCompany, isLoading: companyLoading } = useCurrentCompany();
   const { data: customers, isLoading: loadingCustomers } = useCustomers(currentCompany?.id);
   const { data: products, isLoading: loadingProducts } = useProducts(currentCompany?.id);
   const { data: taxSettings } = useTaxSettings(currentCompany?.id);
