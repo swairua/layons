@@ -379,6 +379,10 @@ export interface DocumentData {
   terms_and_conditions?: string;
   valid_until?: string; // For proforma invoices
   due_date?: string; // For invoices
+  // Receipt specific fields
+  value_tendered?: number;
+  change?: number;
+  payment_method?: string;
   // Delivery note specific fields
   delivery_date?: string;
   delivery_address?: string;
