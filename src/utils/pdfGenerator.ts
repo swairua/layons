@@ -822,7 +822,7 @@ export const generatePDF = async (data: DocumentData) => {
       <!-- Page 1: BOQ Details -->
       <div class="boq-main">
         <div class="container">
-          ${generatePDFHeader(headerImage, company, companyServices, { ...data, project_title: boqProject }, formatDateLong, 'Bill of Quantities')}
+          ${generatePDFHeader(headerImage, company, companyServices, { ...data, project_title: boqProject }, formatDateLong, documentTitle)}
 
           ${preliminariesHtml}
 
