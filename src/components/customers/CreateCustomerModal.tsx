@@ -48,7 +48,7 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
     city: '',
     country: 'Kenya',
     credit_limit: 100000,
-    payment_terms: 0,
+    payment_terms: '',
     is_active: true,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,7 +81,8 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
       await createCustomer.mutateAsync({
         company_id: currentCompany.id,
         customer_code: customerCode,
-        ...formData
+        ...formData,
+        payment_terms: formData.payment_terms === '' ? 0 : parseInt(formData.payment_terms)
       });
       
       toast.success(`Customer ${formData.name} created successfully!`);
@@ -97,7 +98,7 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
         city: '',
         country: 'Kenya',
         credit_limit: 100000,
-        payment_terms: 0,
+        payment_terms: '',
         is_active: true,
       });
     } catch (error) {
@@ -125,7 +126,7 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
       city: '',
       country: 'Kenya',
       credit_limit: 100000,
-      payment_terms: 0,
+      payment_terms: '',
       is_active: true,
     });
     onOpenChange(false);
@@ -287,7 +288,7 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
                 <div className="space-y-1 text-sm text-muted-foreground">
                   <p>Code: {generateCustomerCode()}</p>
                   <p>Credit Limit: KES {formData.credit_limit.toLocaleString()}</p>
-                  <p>Payment Terms: {formData.payment_terms} days</p>
+                  <p>Payment Terms: {formData.payment_terms === '' ? '0 (cash)' : `${formData.payment_terms} days`}</p>
                   <p>Status: {formData.is_active ? 'Active' : 'Inactive'}</p>
                 </div>
               </div>
