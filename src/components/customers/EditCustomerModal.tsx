@@ -213,18 +213,11 @@ export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: E
 
                 <div className="space-y-2">
                   <Label htmlFor="country">Country</Label>
-                  <Select value={formData.country} onValueChange={(value) => handleInputChange('country', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Kenya">Kenya</SelectItem>
-                      <SelectItem value="Uganda">Uganda</SelectItem>
-                      <SelectItem value="Tanzania">Tanzania</SelectItem>
-                      <SelectItem value="Rwanda">Rwanda</SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <CountrySelect
+                    value={formData.country}
+                    onValueChange={(value) => handleInputChange('country', value)}
+                    placeholder="Search countries..."
+                  />
                 </div>
               </div>
             </CardContent>
