@@ -225,7 +225,7 @@ export default function Quotations() {
 Please find attached your quotation ${quotation.quotation_number} dated ${new Date(quotation.quotation_date).toLocaleDateString()}.
 
 Quotation Summary:
-- Total Amount: KES ${quotation.total_amount?.toLocaleString() || '0'}
+- Total Amount: ${formatCurrency(quotation.total_amount || 0, quotation.currency || 'KES')}
 - Valid Until: ${quotation.valid_until ? new Date(quotation.valid_until).toLocaleDateString() : 'No expiry'}
 
 If you have any questions about this quotation, please don't hesitate to contact us.
