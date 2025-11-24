@@ -130,8 +130,8 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
 
     setItems(items.map(item => {
       if (item.id === itemId) {
-        const taxAmount = calculateTaxAmount(quantity, item.unit_price, item.tax_percentage);
-        const lineTotal = calculateLineTotal(quantity, item.unit_price, item.tax_percentage);
+        const taxAmount = calculateTaxAmount(quantity, item.unit_price, item.tax_percentage, applyTax);
+        const lineTotal = calculateLineTotal(quantity, item.unit_price, item.tax_percentage, applyTax);
         return { ...item, quantity, tax_amount: taxAmount, line_total: lineTotal };
       }
       return item;
@@ -141,8 +141,8 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
   const updateItemPrice = (itemId: string, unitPrice: number) => {
     setItems(items.map(item => {
       if (item.id === itemId) {
-        const taxAmount = calculateTaxAmount(item.quantity, unitPrice, item.tax_percentage);
-        const lineTotal = calculateLineTotal(item.quantity, unitPrice, item.tax_percentage);
+        const taxAmount = calculateTaxAmount(item.quantity, unitPrice, item.tax_percentage, applyTax);
+        const lineTotal = calculateLineTotal(item.quantity, unitPrice, item.tax_percentage, applyTax);
         return { ...item, unit_price: unitPrice, tax_amount: taxAmount, line_total: lineTotal };
       }
       return item;
