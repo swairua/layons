@@ -79,13 +79,15 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
     product.product_code.toLowerCase().includes(searchProduct.toLowerCase())
   ) || [];
 
-  const calculateLineTotal = (quantity: number, unitPrice: number, taxPercentage: number) => {
+  const calculateLineTotal = (quantity: number, unitPrice: number, taxPercentage: number, includeTax: boolean) => {
     const baseAmount = quantity * unitPrice;
+    if (!includeTax) return baseAmount;
     const taxAmount = baseAmount * (taxPercentage / 100);
     return baseAmount + taxAmount;
   };
 
-  const calculateTaxAmount = (quantity: number, unitPrice: number, taxPercentage: number) => {
+  const calculateTaxAmount = (quantity: number, unitPrice: number, taxPercentage: number, includeTax: boolean) => {
+    if (!includeTax) return 0;
     const baseAmount = quantity * unitPrice;
     return baseAmount * (taxPercentage / 100);
   };
