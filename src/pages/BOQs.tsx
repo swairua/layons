@@ -433,6 +433,8 @@ export default function BOQs() {
         onCancel={() => setConvertDialog({ open: false })}
         confirmText="Convert to Invoice"
         isLoading={convertToInvoice.isPending}
+        loadingText="Converting..."
+        isDangerous={false}
       />
     </div>
   );
