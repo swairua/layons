@@ -3529,7 +3529,10 @@ export const downloadCashReceiptPDF = async (receipt: any, company?: CompanyDeta
     total_amount: receipt.total_amount || subtotal + totalTax,
     subtotal: subtotal || receipt.total_amount || 0,
     tax_amount: totalTax,
-    notes: `Payment Method: ${receipt.payment_method || 'Cash'}\nValue Tendered: ${formatCurrencyUtil(receipt.value_tendered || 0, 'KES')}\nChange: ${formatCurrencyUtil(receipt.change || 0, 'KES')}${receipt.notes ? `\n\nNotes:\n${receipt.notes}` : ''}`,
+    value_tendered: receipt.value_tendered || 0,
+    change: receipt.change || 0,
+    payment_method: receipt.payment_method || 'Cash',
+    notes: receipt.notes ? `${receipt.notes}` : '',
     terms_and_conditions: 'Thank you for your payment. This receipt confirms payment has been received.',
   };
 
