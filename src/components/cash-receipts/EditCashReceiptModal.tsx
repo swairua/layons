@@ -318,6 +318,7 @@ export function EditCashReceiptModal({ open, onOpenChange, onSuccess, receipt }:
       setApplyTax(false);
     } catch (err) {
       console.error('Error updating cash receipt:', err);
+      console.error('Full error object:', JSON.stringify(err, null, 2));
       let errorMessage = 'Failed to update cash receipt';
 
       if (err instanceof Error) {
@@ -333,16 +334,23 @@ export function EditCashReceiptModal({ open, onOpenChange, onSuccess, receipt }:
           errorMessage = errorObj.error;
         } else if (errorObj.details && typeof errorObj.details === 'string') {
           errorMessage = errorObj.details;
+        } else if (errorObj.hint && typeof errorObj.hint === 'string') {
+          errorMessage = errorObj.hint;
+        } else if (errorObj.statusText) {
+          errorMessage = `Error: ${errorObj.statusText}`;
         } else {
           try {
             const seen: any[] = [];
-            errorMessage = JSON.stringify(err, (key, value) => {
+            const stringified = JSON.stringify(err, (key, value) => {
               if (typeof value === 'object' && value !== null) {
                 if (seen.includes(value)) return '[Circular]';
                 seen.push(value);
               }
               return value;
             }, 2).slice(0, 500);
+            if (stringified && stringified !== '{}') {
+              errorMessage = `Error: ${stringified}`;
+            }
           } catch {
             errorMessage = String(err).slice(0, 500);
           }
