@@ -467,7 +467,7 @@ Website: www.biolegendscientific.co.ke`;
                       </div>
                     </TableCell>
                     <TableCell className="font-semibold">
-                      {formatCurrency(quotation.total_amount || 0)}
+                      {formatCurrency(quotation.total_amount || 0, quotation.currency || 'KES')}
                     </TableCell>
                     <TableCell>
                       {quotation.valid_until 
