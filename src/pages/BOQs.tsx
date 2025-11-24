@@ -168,7 +168,7 @@ export default function BOQs() {
                               city: 'Bonn',
                               country: 'Germany'
                             },
-                            stampImageUrl: 'https://cdn.builder.io/api/v1/image/assets%2F325027ccf5da4f42b462ae016f6d2769%2F2078b0d4690b4a5fbb44780ee77831c6?format=webp&width=800'
+                            stampImageUrl: 'https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2Fd301f7401e654be39b50f49bc704c240?format=webp&width=800'
                           })}
                           title="Download Special Invoice PDF (40% of amount)"
                         >
