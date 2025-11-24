@@ -217,21 +217,21 @@ export default function CashReceipts() {
 
   const handleDownloadReceipt = async (receipt: CashReceipt) => {
     try {
-      const enrichedReceipt = {
-        ...receipt,
-        company: {
-          name: currentCompany?.name || 'Company',
-          email: currentCompany?.email,
-          phone: currentCompany?.phone,
-          address: currentCompany?.address,
-          city: currentCompany?.city,
-          country: currentCompany?.country,
-          logo_url: currentCompany?.logo_url,
-          header_image: currentCompany?.header_image,
-          stamp_image: currentCompany?.stamp_image,
-        }
-      };
-      await downloadCashReceiptPDF(enrichedReceipt);
+      const companyDetails = currentCompany ? {
+        name: currentCompany.name,
+        address: currentCompany.address,
+        city: currentCompany.city,
+        country: currentCompany.country,
+        phone: currentCompany.phone,
+        email: currentCompany.email,
+        tax_number: currentCompany.tax_number,
+        logo_url: currentCompany.logo_url,
+        header_image: currentCompany.header_image,
+        stamp_image: currentCompany.stamp_image,
+        company_services: currentCompany.company_services
+      } : undefined;
+
+      await downloadCashReceiptPDF(receipt, companyDetails);
       toast.success('Receipt downloaded successfully');
     } catch (err) {
       console.error('Error downloading receipt:', err);

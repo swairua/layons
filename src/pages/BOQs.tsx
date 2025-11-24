@@ -39,12 +39,16 @@ export default function BOQs() {
       }
       await downloadBOQPDF(boq.data, currentCompany ? {
         name: currentCompany.name,
-        logo_url: currentCompany.logo_url || undefined,
         address: currentCompany.address || undefined,
         city: currentCompany.city || undefined,
         country: currentCompany.country || undefined,
         phone: currentCompany.phone || undefined,
         email: currentCompany.email || undefined,
+        tax_number: currentCompany.tax_number || undefined,
+        logo_url: currentCompany.logo_url || undefined,
+        header_image: currentCompany.header_image || undefined,
+        stamp_image: currentCompany.stamp_image || undefined,
+        company_services: currentCompany.company_services || undefined,
       } : undefined, options);
       const suffix = options?.customTitle ? ` (${options.customTitle})` : '';
       toast.success(`BOQ ${boq.number} PDF downloaded${suffix}`);

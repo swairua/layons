@@ -107,6 +107,8 @@ export default function DeliveryNotes() {
         email: currentCompany.email,
         tax_number: currentCompany.tax_number,
         logo_url: currentCompany.logo_url,
+        header_image: currentCompany.header_image,
+        stamp_image: currentCompany.stamp_image,
         company_services: currentCompany.company_services
       } : undefined;
 
