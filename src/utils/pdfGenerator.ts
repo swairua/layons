@@ -2219,6 +2219,35 @@ export const generatePDF = async (data: DocumentData) => {
           white-space: nowrap;
         }
 
+        .client-details-table {
+          width: 100%;
+          border-collapse: collapse;
+          border: none;
+          font-size: 12px;
+          line-height: 1.6;
+        }
+
+        .client-details-table tr {
+          border: none;
+        }
+
+        .client-details-table td {
+          border: none;
+          padding: 4px 0;
+          vertical-align: top;
+        }
+
+        .client-details-table td.label {
+          font-weight: bold;
+          width: 25%;
+          padding-right: 12px;
+        }
+
+        .client-details-table td.value {
+          width: 75%;
+          color: #212529;
+        }
+
         .logo {
           display: none;
         }
