@@ -20,6 +20,7 @@ interface ConfirmationDialogProps {
   confirmText?: string;
   cancelText?: string;
   isDangerous?: boolean;
+  loadingText?: string;
 }
 
 export function ConfirmationDialog({
