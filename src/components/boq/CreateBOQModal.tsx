@@ -160,6 +160,27 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
     } : s));
   };
 
+  const addSubsection = (sectionId: string) => {
+    setSections(prev => prev.map(s => {
+      if (s.id !== sectionId) return s;
+      const nextLetter = String.fromCharCode(65 + s.subsections.length);
+      return {
+        ...s,
+        subsections: [...s.subsections, defaultSubsection(nextLetter, `Subsection ${nextLetter}`)]
+      };
+    }));
+  };
+
+  const removeSubsection = (sectionId: string, subsectionId: string) => {
+    setSections(prev => prev.map(s => {
+      if (s.id !== sectionId) return s;
+      return {
+        ...s,
+        subsections: s.subsections.filter(sub => sub.id !== subsectionId)
+      };
+    }));
+  };
+
   const formatCurrency = (amount: number) => {
     const currencyLocales: { [key: string]: { locale: string; code: string } } = {
       KES: { locale: 'en-KE', code: 'KES' },
