@@ -857,7 +857,7 @@ export const generatePDF = async (data: DocumentData) => {
       </div>
 
       <!-- Page 2: Terms and Conditions -->
-      <div class="terms-page">
+      ${data.customTitle !== 'INVOICE' ? `<div class="terms-page">` : ''}
         <!-- Terms Section -->
         <div style="margin-bottom: 15px; page-break-inside: avoid;">
           <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
