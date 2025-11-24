@@ -601,7 +601,7 @@ export const generatePDF = async (data: DocumentData) => {
               <tr>
                 <th style="width:8%; font-weight: bold;">ITEM</th>
                 <th style="width:72%; text-align:left; font-weight: bold;">DESCRIPTION</th>
-                <th style="width:20%; font-weight: bold;">AMOUNT (KSHS)</th>
+                <th style="width:20%; font-weight: bold;">AMOUNT (${data.currency || 'KES'})</th>
               </tr>
             </thead>
             <tbody>
