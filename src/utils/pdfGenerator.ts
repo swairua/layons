@@ -2208,6 +2208,15 @@ export const generatePDF = async (data: DocumentData) => {
 
         .header-left > div {
           margin-bottom: 4px;
+          display: flex;
+          align-items: baseline;
+          gap: 4px;
+          flex-wrap: wrap;
+        }
+
+        .header-left > div strong {
+          display: inline;
+          white-space: nowrap;
         }
 
         .logo {
