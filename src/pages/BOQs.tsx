@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Layers, Plus, Eye, Download, Trash2 } from 'lucide-react';
+import { Layers, Plus, Eye, Download, Trash2, Copy } from 'lucide-react';
 import { CreateBOQModal } from '@/components/boq/CreateBOQModal';
+import { CreatePercentageCopyModal } from '@/components/boq/CreatePercentageCopyModal';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
@@ -14,9 +15,10 @@ import { toast } from 'sonner';
 
 export default function BOQs() {
   const [open, setOpen] = useState(false);
+  const [percentageCopyOpen, setPercentageCopyOpen] = useState(false);
   const { currentCompany } = useCurrentCompany();
   const companyId = currentCompany?.id;
-  const { data: boqs = [], isLoading } = useBOQs(companyId);
+  const { data: boqs = [], isLoading, refetch: refetchBOQs } = useBOQs(companyId);
   const deleteBOQ = useDeleteBOQ();
   const { data: units = [] } = useUnits(companyId);
   const { logDelete } = useAuditLog();
@@ -83,14 +85,25 @@ export default function BOQs() {
             Create and manage bill of quantities
           </p>
         </div>
-        <Button
-          className="gradient-primary text-primary-foreground hover:opacity-90 shadow-card"
-          size="lg"
-          onClick={() => setOpen(true)}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          New BOQ
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            className="gradient-primary text-primary-foreground hover:opacity-90 shadow-card"
+            size="lg"
+            onClick={() => setPercentageCopyOpen(true)}
+            variant="outline"
+          >
+            <Copy className="h-4 w-4 mr-2" />
+            Copy with %
+          </Button>
+          <Button
+            className="gradient-primary text-primary-foreground hover:opacity-90 shadow-card"
+            size="lg"
+            onClick={() => setOpen(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            New BOQ
+          </Button>
+        </div>
       </div>
 
       <Card className="shadow-card">
@@ -152,6 +165,13 @@ export default function BOQs() {
       </Card>
 
       <CreateBOQModal open={open} onOpenChange={setOpen} />
+
+      <CreatePercentageCopyModal
+        open={percentageCopyOpen}
+        onOpenChange={setPercentageCopyOpen}
+        companyId={companyId || ''}
+        onSuccess={() => refetchBOQs()}
+      />
 
       {viewing && (() => {
         const getLocaleForCurrency = (curr: string) => {
