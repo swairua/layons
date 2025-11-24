@@ -104,6 +104,7 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
     }
 
     const price = Number(product.selling_price || product.unit_price || 0);
+    const taxPercentage = applyTax ? defaultTaxRate : 0;
     const newItem: CashReceiptItem = {
       id: `temp-${Date.now()}`,
       product_id: product.id,
@@ -111,9 +112,9 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
       description: product.description || product.name,
       quantity: 1,
       unit_price: price,
-      tax_percentage: defaultTaxRate,
-      tax_amount: calculateTaxAmount(1, price, defaultTaxRate),
-      line_total: calculateLineTotal(1, price, defaultTaxRate),
+      tax_percentage: taxPercentage,
+      tax_amount: calculateTaxAmount(1, price, taxPercentage, applyTax),
+      line_total: calculateLineTotal(1, price, taxPercentage, applyTax),
       unit_of_measure: product.unit_of_measure || 'pcs'
     };
 
