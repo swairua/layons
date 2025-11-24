@@ -167,7 +167,8 @@ export default function BOQs() {
                               address: 'Platz der Vereinten Nationen 7',
                               city: 'Bonn',
                               country: 'Germany'
-                            }
+                            },
+                            stampImageUrl: 'https://cdn.builder.io/api/v1/image/assets%2F325027ccf5da4f42b462ae016f6d2769%2F2078b0d4690b4a5fbb44780ee77831c6?format=webp&width=800'
                           })}
                           title="Download Special Invoice PDF (40% of amount)"
                         >
