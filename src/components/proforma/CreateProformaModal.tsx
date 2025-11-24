@@ -497,6 +497,7 @@ export const CreateProformaModal = ({
                             min="0"
                             step="0.01"
                             className="w-20"
+                            placeholder="1"
                           />
                         </TableCell>
                         <TableCell>
@@ -507,6 +508,7 @@ export const CreateProformaModal = ({
                             min="0"
                             step="0.01"
                             className="w-24"
+                            placeholder="0.00"
                           />
                         </TableCell>
                         <TableCell>
@@ -519,6 +521,7 @@ export const CreateProformaModal = ({
                             step="0.01"
                             className="w-20"
                             disabled={item.tax_inclusive}
+                            placeholder="0"
                           />
                         </TableCell>
                         <TableCell>
