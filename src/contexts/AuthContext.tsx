@@ -319,8 +319,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         const quickAuthPromise = new Promise<any>(async (resolve, reject) => {
           try {
-            // Quick session check
-            const { data: sessionData, error } = await supabase.auth.getSession();
+            // Quick session check with aggressive timeout
+            const sessionTimeoutPromise = new Promise((_, rejectTimeout) => {
+              setTimeout(() => rejectTimeout(new Error('Session check timeout')), 1500);
+            });
+
+            const sessionCheckPromise = supabase.auth.getSession();
+            const { data: sessionData, error } = await Promise.race([sessionCheckPromise, sessionTimeoutPromise]) as any;
 
             if (error) {
               console.warn('⚠️ Quick session check error:', error.message);
@@ -329,7 +334,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             }
 
             console.log('✅ Quick session check completed');
-            resolve({ session: sessionData.session, error: null });
+            resolve({ session: sessionData?.session, error: null });
           } catch (fetchError) {
             const fetchErrorMsg = fetchError instanceof Error ? fetchError.message : String(fetchError);
             console.warn('⚠️ Quick session fetch error:', fetchErrorMsg);
@@ -337,9 +342,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
         });
 
-        // 3-second timeout for quick check
+        // 2-second timeout for quick check
         const quickTimeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Quick auth timeout after 3000ms')), 3000);
+          setTimeout(() => reject(new Error('Quick auth timeout after 2000ms')), 2000);
         });
 
         // Race quick auth against timeout
