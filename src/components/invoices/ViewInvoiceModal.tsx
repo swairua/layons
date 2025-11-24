@@ -427,10 +427,10 @@ export function ViewInvoiceModal({
                         </div>
                       </TableCell>
                       <TableCell>{item.quantity}</TableCell>
-                      <TableCell>{formatCurrency(item.unit_price)}</TableCell>
+                      <TableCell>{formatCurrency(item.unit_price, invoice.currency || 'KES')}</TableCell>
                       <TableCell>{item.tax_percentage || 0}%</TableCell>
                       <TableCell className="text-right font-semibold">
-                        {formatCurrency(item.line_total)}
+                        {formatCurrency(item.line_total, invoice.currency || 'KES')}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -444,24 +444,24 @@ export function ViewInvoiceModal({
                 <div className="w-80 space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal:</span>
-                    <span className="font-semibold">{formatCurrency(invoice.subtotal || 0)}</span>
+                    <span className="font-semibold">{formatCurrency(invoice.subtotal || 0, invoice.currency || 'KES')}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Tax:</span>
-                    <span className="font-semibold">{formatCurrency(invoice.tax_amount || 0)}</span>
+                    <span className="font-semibold">{formatCurrency(invoice.tax_amount || 0, invoice.currency || 'KES')}</span>
                   </div>
                   <div className="flex justify-between text-lg border-t pt-2">
                     <span className="font-bold">Total:</span>
-                    <span className="font-bold text-primary">{formatCurrency(invoice.total_amount || 0)}</span>
+                    <span className="font-bold text-primary">{formatCurrency(invoice.total_amount || 0, invoice.currency || 'KES')}</span>
                   </div>
                   <div className="flex justify-between text-sm text-muted-foreground">
                     <span>Paid:</span>
-                    <span>{formatCurrency(invoice.paid_amount || 0)}</span>
+                    <span>{formatCurrency(invoice.paid_amount || 0, invoice.currency || 'KES')}</span>
                   </div>
                   <div className="flex justify-between text-lg border-t pt-2">
                     <span className="font-bold">Balance Due:</span>
                     <span className={`font-bold ${(invoice.balance_due || 0) > 0 ? 'text-destructive' : 'text-success'}`}>
-                      {formatCurrency(invoice.balance_due || 0)}
+                      {formatCurrency(invoice.balance_due || 0, invoice.currency || 'KES')}
                     </span>
                   </div>
                 </div>
