@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Layers, Plus, Eye, Download, Trash2, Copy, Pencil } from 'lucide-react';
+import { useState } from 'react';
+import { Layers, Plus, Eye, Download, Trash2, Copy, Pencil, FileText } from 'lucide-react';
 import { CreateBOQModal } from '@/components/boq/CreateBOQModal';
 import { CreatePercentageCopyModal } from '@/components/boq/CreatePercentageCopyModal';
 import { EditBOQModal } from '@/components/boq/EditBOQModal';
@@ -11,6 +12,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@
 import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { useBOQs, useDeleteBOQ, useUnits } from '@/hooks/useDatabase';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { useConvertBoqToInvoice } from '@/hooks/useBOQ';
 import { downloadBOQPDF } from '@/utils/boqPdfGenerator';
 import { toast } from 'sonner';
 
@@ -27,6 +29,8 @@ export default function BOQs() {
   const [viewing, setViewing] = useState<any | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; boqId?: string; boqNumber?: string }>({ open: false });
+  const [convertDialog, setConvertDialog] = useState<{ open: boolean; boqId?: string; boqNumber?: string }>({ open: false });
+  const convertToInvoice = useConvertBoqToInvoice();
 
   const handleDownloadPDF = async (boq: any, options?: { customTitle?: string; amountMultiplier?: number; forceCurrency?: string }) => {
     try {
@@ -76,6 +80,24 @@ export default function BOQs() {
     } catch (err) {
       console.error('Delete failed', err);
       toast.error('Failed to delete BOQ');
+    }
+  };
+
+  const handleConvertClick = (id: string, number: string) => {
+    setConvertDialog({ open: true, boqId: id, boqNumber: number });
+  };
+
+  const handleConvertConfirm = async () => {
+    if (!convertDialog.boqId) return;
+    try {
+      const invoice = await convertToInvoice.mutateAsync(convertDialog.boqId);
+      toast.success(`BOQ ${convertDialog.boqNumber} converted to Invoice ${invoice.invoice_number}`);
+      setConvertDialog({ open: false });
+      await refetchBOQs();
+    } catch (err) {
+      console.error('Conversion failed', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      toast.error(`Failed to convert BOQ: ${errorMessage}`);
     }
   };
 
@@ -180,6 +202,15 @@ export default function BOQs() {
                           Invoice PDF
                         </Button>
                       )}
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => handleConvertClick(b.id, b.number)}
+                        title="Convert to Invoice"
+                        disabled={b.converted_to_invoice_id !== null && b.converted_to_invoice_id !== undefined}
+                      >
+                        <FileText className="h-4 w-4" />
+                      </Button>
                       <Button size="icon" variant="destructive" onClick={() => handleDeleteClick(b.id, b.number)} title="Delete">
                         <Trash2 className="h-4 w-4" />
                       </Button>

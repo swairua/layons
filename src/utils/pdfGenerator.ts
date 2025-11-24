@@ -473,7 +473,16 @@ const generatePDFHeader = (
   formatDateLong: (date: string) => string,
   documentType: string = 'Quotation'
 ): string => {
-  const documentNumber = documentType === 'Bill of Quantities' ? 'BOQ No' : 'Qtn No';
+  let documentNumber = 'Qtn No';
+  if (documentType === 'Bill of Quantities') {
+    documentNumber = 'BOQ No';
+  } else if (data.customTitle === 'INVOICE') {
+    documentNumber = 'Invoice No';
+  }
+
+  const displayNumber = data.customTitle === 'INVOICE'
+    ? (data.number?.replace(/^BOQ-/, '') || '')
+    : (data.number || '');
 
   return `
     <!-- Header Section -->
@@ -510,24 +519,24 @@ const generatePDFHeader = (
         <!-- Bottom row: All details with proper alignment -->
         <div style="font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; width: 100%; box-sizing: border-box;">
           <div style="display: flex; align-items: baseline; gap: 0;">
-            <span style="width: 50px;"><strong>Client;</strong></span>
+            <span style="width: 80px; white-space: nowrap;"><strong>Client;</strong></span>
             <span style="flex: 1;">${data.customer?.name || ''}</span>
           </div>
-          ${data.customer?.address ? `<div style="padding-left: 50px;">${data.customer.address}</div>` : ''}
-          ${data.customer?.city ? `<div style="padding-left: 50px;">${data.customer.city}</div>` : ''}
-          ${data.customer?.country ? `<div style="padding-left: 50px;">${data.customer.country}</div>` : ''}
-          ${data.project_title ? `<div style="margin-top: 6px; display: flex; align-items: baseline; gap: 0;"><span style="width: 50px;"><strong>Project;</strong></span><span style="flex: 1;">${data.project_title}</span></div>` : ''}
+          ${data.customer?.address ? `<div style="padding-left: 80px;">${data.customer.address}</div>` : ''}
+          ${data.customer?.city ? `<div style="padding-left: 80px;">${data.customer.city}</div>` : ''}
+          ${data.customer?.country ? `<div style="padding-left: 80px;">${data.customer.country}</div>` : ''}
+          ${data.project_title ? `<div style="margin-top: 6px; display: flex; align-items: baseline; gap: 0;"><span style="width: 80px; white-space: nowrap;"><strong>Project;</strong></span><span style="flex: 1;">${data.project_title}</span></div>` : ''}
           <div style="margin-top: 6px; display: flex; align-items: baseline; gap: 0;">
-            <span style="width: 50px;"><strong>Subject;</strong></span>
+            <span style="width: 80px; white-space: nowrap;"><strong>Subject;</strong></span>
             <span style="flex: 1;">${documentType}</span>
           </div>
           <div style="display: flex; align-items: baseline; gap: 0;">
-            <span style="width: 50px;"><strong>Date;</strong></span>
+            <span style="width: 80px; white-space: nowrap;"><strong>Date;</strong></span>
             <span style="flex: 1;">${formatDateLong(data.date || '')}</span>
           </div>
           <div style="display: flex; align-items: baseline; gap: 0;">
-            <span style="width: 50px;"><strong>${documentNumber};</strong></span>
-            <span style="flex: 1;">${data.number || ''}</span>
+            <span style="width: 80px; white-space: nowrap;"><strong>${documentNumber};</strong></span>
+            <span style="flex: 1;">${displayNumber}</span>
           </div>
         </div>
       </div>
@@ -750,6 +759,14 @@ export const generatePDF = async (data: DocumentData) => {
         * { box-sizing: border-box; }
         body { font-family: 'Arial', sans-serif; margin:0; padding:0; color:#222; font-size:12px; }
         body { counter-reset: page; }
+
+        /* Compact styles for special invoice */
+        body.special-invoice { font-size: 11px; }
+        body.special-invoice .boq-main { padding: 0; }
+        body.special-invoice .items th, body.special-invoice .items td { padding: 4px 6px; font-size: 10px; }
+        body.special-invoice .header-content { gap: 8px; margin-top: 4px; }
+        body.special-invoice .header-right > div { margin-bottom: 2px; }
+        body.special-invoice .services-section > div { margin: 0 0 2px 0; }
         .pagefoot::after { content: "Page " counter(page) ""; }
         .container { width: 100%; box-sizing: border-box; max-width: 100%; margin: 0; padding: 0; }
 
@@ -765,10 +782,17 @@ export const generatePDF = async (data: DocumentData) => {
         .header-right > div { font-weight: bold; text-align: right; margin-bottom: 4px; word-wrap: break-word; overflow-wrap: break-word; }
         .header-right > div:last-child { margin-bottom: 0; }
 
+        body.special-invoice .header-top { margin-bottom: 6px; gap: 15px; }
+        body.special-invoice .services-section { font-size: 11px; line-height: 1.4; }
+        body.special-invoice .header-right { font-size: 11px; line-height: 1.4; }
+
         .items { width:100%; border-collapse:collapse; margin-top:6px; margin-bottom: 6px; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm); }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; font-size: 11px; }
         .items thead th { background:#f8f9fa; color:#000; font-weight:bold; text-transform: uppercase; }
         .items thead { display: table-header-group; }
+
+        body.special-invoice .items { margin-top: 3px; margin-bottom: 3px; }
+        body.special-invoice .preliminaries-section { margin-bottom: 6px; }
         .spacer-row { height: 15mm; page-break-inside: avoid; }
         .spacer-row td { border: none !important; background: none !important; padding: 0 !important; height: 15mm; }
         .section-row { page-break-inside: avoid; page-break-before: always; page-break-after: avoid; }
@@ -793,6 +817,14 @@ export const generatePDF = async (data: DocumentData) => {
         .subsection-total td { font-weight:600; background:#fdfdfd; }
         .subsection-total .label { text-align:right; padding-right:12px; }
         .totals { margin-top:12px; width: calc(100% - 30mm); margin-left: 15mm; margin-right: 15mm; page-break-inside: avoid; padding-bottom: 30mm; }
+
+        body.special-invoice .section-total { margin-bottom: 4mm; }
+        body.special-invoice .subsection-total { margin-bottom: 3mm; }
+        body.special-invoice .totals { margin-top: 6px; padding-bottom: 20mm; }
+        body.special-invoice .footer { margin-top: 12px; gap: 10px; }
+        body.special-invoice .sig-block { gap: 4px; }
+        body.special-invoice .sigline { height: 12px; }
+        body.special-invoice .field-row { gap: 4px; }
         .totals .label { text-align:right; padding-right:12px; }
         .footer { margin-top:24px; display:flex; flex-direction:column; gap:18px; }
         .sig-block { display:flex; flex-direction:column; gap:8px; }
@@ -863,7 +895,7 @@ export const generatePDF = async (data: DocumentData) => {
         }
       </style>
     </head>
-    <body>
+    <body${data.customTitle === 'INVOICE' ? ' class="special-invoice"' : ''}>
       <!-- Page 1: BOQ Details -->
       <div class="boq-main">
         <div class="container">
@@ -871,7 +903,7 @@ export const generatePDF = async (data: DocumentData) => {
 
           ${preliminariesHtml}
 
-          <div style="height: 15mm; margin-left: 15mm; margin-right: 15mm;"></div>
+          <div style="height: ${data.customTitle === 'INVOICE' ? '8mm' : '15mm'}; margin-left: 15mm; margin-right: 15mm;"></div>
 
           <table class="items">
             <thead>

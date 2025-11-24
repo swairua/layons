@@ -190,6 +190,27 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
     } : s));
   };
 
+  const addSubsection = (sectionId: string) => {
+    setSections(prev => prev.map(s => {
+      if (s.id !== sectionId) return s;
+      const nextLetter = String.fromCharCode(65 + s.subsections.length);
+      return {
+        ...s,
+        subsections: [...s.subsections, defaultSubsection(nextLetter, `Subsection ${nextLetter}`)]
+      };
+    }));
+  };
+
+  const removeSubsection = (sectionId: string, subsectionId: string) => {
+    setSections(prev => prev.map(s => {
+      if (s.id !== sectionId) return s;
+      return {
+        ...s,
+        subsections: s.subsections.filter(sub => sub.id !== subsectionId)
+      };
+    }));
+  };
+
   const formatCurrency = (amount: number) => {
     const currencyLocales: { [key: string]: { locale: string; code: string } } = {
       KES: { locale: 'en-KE', code: 'KES' },
@@ -381,28 +402,30 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
                     <div className="ml-auto text-sm text-muted-foreground">Section {sIdx + 1}</div>
                   </div>
 
-                  {section.subsections.map((subsection) => (
+                  {section.subsections.map((subsection, subIdx) => (
                     <div key={subsection.id} className="space-y-3 bg-muted/30 rounded-lg p-3 border border-border/50">
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2">
                           <div className="text-sm font-semibold">Subsection {subsection.name}:</div>
-                          {subsection.name === 'A' ? (
-                            <Select value={subsection.label} onValueChange={(val) => updateSubsectionLabel(section.id, subsection.id, val)}>
-                              <SelectTrigger className="w-48">
-                                <SelectValue placeholder="Select label" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Materials">Materials</SelectItem>
-                                <SelectItem value="Services">Services</SelectItem>
-                                <SelectItem value="Equipment">Equipment</SelectItem>
-                                <SelectItem value="Other">Other</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            <div className="text-sm font-semibold">{subsection.label}</div>
-                          )}
+                          <Input
+                            value={subsection.label}
+                            onChange={e => updateSubsectionLabel(section.id, subsection.id, e.target.value)}
+                            placeholder="Enter subsection name"
+                            className="w-48"
+                          />
                         </div>
-                        <div className="text-sm text-muted-foreground">Subtotal: {formatCurrency(calculateSubsectionTotal(subsection))}</div>
+                        <div className="flex items-center gap-2">
+                          <div className="text-sm text-muted-foreground">Subtotal: {formatCurrency(calculateSubsectionTotal(subsection))}</div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeSubsection(section.id, subsection.id)}
+                            disabled={section.subsections.length === 1}
+                            title={section.subsections.length === 1 ? "Cannot remove the last subsection" : "Remove this subsection"}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
 
                       <Table>
@@ -476,6 +499,15 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
                       </Table>
                     </div>
                   ))}
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => addSubsection(section.id)}
+                    className="mb-3"
+                  >
+                    <Plus className="h-4 w-4 mr-2" /> Add Subsection
+                  </Button>
 
                   <div className="flex items-center justify-end gap-6 pt-2 border-t border-border">
                     <div className="text-sm font-semibold">Section Total: {formatCurrency(calculateSectionTotal(section))}</div>
