@@ -3453,11 +3453,26 @@ export const downloadLPOPDF = async (lpo: any, company?: CompanyDetails) => {
 
 // Function for generating cash receipt PDF
 export const downloadCashReceiptPDF = async (receipt: any, company?: CompanyDetails) => {
+  // Format items from receipt
+  const items = (receipt.cash_receipt_items || []).map((item: any) => ({
+    description: item.description,
+    quantity: item.quantity,
+    unit_price: item.unit_price,
+    tax_percentage: item.tax_percentage || 0,
+    tax_amount: item.tax_amount || 0,
+    tax_inclusive: false,
+    line_total: item.line_total,
+  }));
+
+  // Calculate totals
+  const subtotal = items.reduce((sum: number, item: any) => sum + (item.quantity * item.unit_price), 0);
+  const totalTax = items.reduce((sum: number, item: any) => sum + (item.tax_amount || 0), 0);
+
   const documentData: DocumentData = {
     type: 'receipt',
     number: receipt.receipt_number || `RCP-${Date.now()}`,
     date: receipt.receipt_date || new Date().toISOString().split('T')[0],
-    company: company || receipt.company, // Pass company details
+    company: company || receipt.company,
     customer: {
       name: receipt.customers?.name || 'Unknown Customer',
       email: receipt.customers?.email,
@@ -3466,7 +3481,7 @@ export const downloadCashReceiptPDF = async (receipt: any, company?: CompanyDeta
       city: receipt.customers?.city,
       country: receipt.customers?.country,
     },
-    items: [
+    items: items.length > 0 ? items : [
       {
         description: 'Payment Received',
         quantity: 1,
@@ -3477,10 +3492,10 @@ export const downloadCashReceiptPDF = async (receipt: any, company?: CompanyDeta
         line_total: receipt.total_amount || 0,
       }
     ],
-    total_amount: receipt.total_amount || 0,
-    subtotal: receipt.total_amount || 0,
-    tax_amount: 0,
-    notes: `Payment Method: ${receipt.payment_method || 'Cash'}\nValue Tendered: ${formatCurrencyUtil(receipt.value_tendered || 0, 'KES')}\nChange: ${formatCurrencyUtil(receipt.change || 0, 'KES')}\n\n${receipt.notes ? receipt.notes : ''}`,
+    total_amount: receipt.total_amount || subtotal + totalTax,
+    subtotal: subtotal || receipt.total_amount || 0,
+    tax_amount: totalTax,
+    notes: `Payment Method: ${receipt.payment_method || 'Cash'}\nValue Tendered: ${formatCurrencyUtil(receipt.value_tendered || 0, 'KES')}\nChange: ${formatCurrencyUtil(receipt.change || 0, 'KES')}${receipt.notes ? `\n\nNotes:\n${receipt.notes}` : ''}`,
     terms_and_conditions: 'Thank you for your payment. This receipt confirms payment has been received.',
   };
 
