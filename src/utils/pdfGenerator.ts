@@ -2503,8 +2503,14 @@ export const generatePDF = async (data: DocumentData) => {
             <!-- Bottom row: Client Details -->
             <div class="header-left">
               <div><strong>${data.type === 'lpo' ? 'Supplier' : 'Client'}:</strong> ${data.customer?.name || ''}</div>
+              ${data.customer?.address || data.customer?.city ? `
+              <div style="margin-left: 0; font-size: 10px; color: #555;">
+                ${data.customer?.address ? data.customer.address + (data.customer?.city ? '<br/>' : '') : ''}
+                ${data.customer?.city ? (data.customer?.country ? data.customer.city + ', ' + data.customer.country : data.customer.city) : ''}
+              </div>
+              ` : ''}
               ${data.project_title ? `<div><strong>Project:</strong> ${data.project_title}</div>` : ''}
-              <div><strong>Subject:</strong> ${data.type === 'boq' ? 'Bill of Quantities' : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
+              <div><strong>Subject:</strong> ${data.type === 'boq' ? (data.customTitle || 'Bill of Quantities') : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
               <div><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
               <div><strong>${data.type === 'boq' ? 'BOQ No' : 'Qtn No'}:</strong> ${data.number || ''}</div>
             </div>
