@@ -228,6 +228,8 @@ export default function CashReceipts() {
           city: currentCompany?.city,
           country: currentCompany?.country,
           logo_url: currentCompany?.logo_url,
+          header_image: currentCompany?.header_image,
+          stamp_image: currentCompany?.stamp_image,
         }
       };
       await downloadCashReceiptPDF(enrichedReceipt);
