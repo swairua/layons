@@ -3011,6 +3011,7 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
       date: invoice.invoice_date,
       due_date: invoice.due_date,
       lpo_number: invoice.lpo_number,
+      currency: invoice.currency || 'KES',
       company: company,
       customer: {
         name: invoice.customers?.name || 'Unknown Customer',
