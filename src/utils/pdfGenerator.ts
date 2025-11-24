@@ -2503,16 +2503,19 @@ export const generatePDF = async (data: DocumentData) => {
             <!-- Bottom row: Client Details -->
             <div class="header-left">
               <div><strong>${data.type === 'lpo' ? 'Supplier' : 'Client'}:</strong> ${data.customer?.name || ''}</div>
-              ${data.customTitle === 'INVOICE' ? `
-              <div style="margin-left: 0; font-size: 10px; color: #555; line-height: 1.4;">
-                Platz der Vereinten Nationen 7<br/>
-                53113 Bonn, Germany
-              </div>
-              ` : (data.customer?.address || data.customer?.city ? `
-              <div style="margin-left: 0; font-size: 10px; color: #555; line-height: 1.4;">
-                ${data.customer?.address || ''}${data.customer?.address && data.customer?.city ? '<br/>' : ''}${data.customer?.city || ''}${data.customer?.city && data.customer?.country ? ', ' : ''}${data.customer?.country || ''}
-              </div>
-              ` : '')}
+              ${(() => {
+                if (data.customTitle === 'INVOICE') {
+                  return '<div style="margin-left: 0; font-size: 10px; color: #555; line-height: 1.4;">Platz der Vereinten Nationen 7<br/>53113 Bonn, Germany</div>';
+                } else if (data.customer?.address || data.customer?.city) {
+                  const addr = data.customer?.address || '';
+                  const city = data.customer?.city || '';
+                  const country = data.customer?.country || '';
+                  const cityCountry = city && country ? city + ', ' + country : city;
+                  const fullAddr = addr && cityCountry ? addr + '<br/>' + cityCountry : (addr || cityCountry);
+                  return fullAddr ? '<div style="margin-left: 0; font-size: 10px; color: #555; line-height: 1.4;">' + fullAddr + '</div>' : '';
+                }
+                return '';
+              })()}
               ${data.project_title ? `<div><strong>Project:</strong> ${data.project_title}</div>` : ''}
               <div><strong>Subject:</strong> ${data.type === 'boq' ? (data.customTitle || 'Bill of Quantities') : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
               <div><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
