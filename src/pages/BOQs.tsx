@@ -83,6 +83,24 @@ export default function BOQs() {
     }
   };
 
+  const handleConvertClick = (id: string, number: string) => {
+    setConvertDialog({ open: true, boqId: id, boqNumber: number });
+  };
+
+  const handleConvertConfirm = async () => {
+    if (!convertDialog.boqId) return;
+    try {
+      const invoice = await convertToInvoice.mutateAsync(convertDialog.boqId);
+      toast.success(`BOQ ${convertDialog.boqNumber} converted to Invoice ${invoice.invoice_number}`);
+      setConvertDialog({ open: false });
+      await refetchBOQs();
+    } catch (err) {
+      console.error('Conversion failed', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      toast.error(`Failed to convert BOQ: ${errorMessage}`);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
