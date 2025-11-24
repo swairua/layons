@@ -31,6 +31,7 @@ export interface BoqDocument {
   project_title?: string; // e.g., Proposed Development - House Renovations
   sections: BoqSection[];
   notes?: string;
+  currency?: string; // Currency code: 'KES', 'USD', 'EUR'
 }
 
 // Helper
