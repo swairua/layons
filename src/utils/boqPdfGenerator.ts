@@ -146,6 +146,7 @@ export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string;
     total_amount: subtotal,
     project_title: doc.project_title,
     contractor: doc.contractor,
-    notes: doc.notes || ''
+    notes: doc.notes || '',
+    currency: doc.currency || 'KES'
   });
 }
