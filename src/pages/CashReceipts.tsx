@@ -80,10 +80,10 @@ export default function CashReceipts() {
       if (page === 0) setIsLoading(true);
 
       const from = page * PAGE_SIZE;
-      const to = from + PAGE_SIZE - 1;
+      const to = from + PAGE_SIZE;
 
       // Fetch receipts without items for faster loading
-      const { data, error, count } = await supabase
+      const { data, error } = await supabase
         .from('cash_receipts')
         .select(`
           id,
@@ -101,12 +101,15 @@ export default function CashReceipts() {
             name,
             email
           )
-        `, { count: 'exact' })
+        `)
         .eq('company_id', currentCompany.id)
         .order('receipt_date', { ascending: false })
-        .range(from, to);
+        .range(from, to - 1);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error details:', error);
+        throw error;
+      }
 
       if (page === 0) {
         setReceipts(data || []);
@@ -114,9 +117,9 @@ export default function CashReceipts() {
         setReceipts(prev => [...prev, ...(data || [])]);
       }
 
-      // Check if there are more records
-      const totalCount = count || 0;
-      setHasMore((page + 1) * PAGE_SIZE < totalCount);
+      // Check if there are more records (if we got fewer than PAGE_SIZE items, there's no more data)
+      const hasMoreRecords = (data?.length || 0) === PAGE_SIZE;
+      setHasMore(hasMoreRecords);
       setPageNumber(page);
     } catch (err) {
       console.error('Error fetching receipts:', err);
