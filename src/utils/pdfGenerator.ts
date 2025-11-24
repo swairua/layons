@@ -782,6 +782,10 @@ export const generatePDF = async (data: DocumentData) => {
         .header-right > div { font-weight: bold; text-align: right; margin-bottom: 4px; word-wrap: break-word; overflow-wrap: break-word; }
         .header-right > div:last-child { margin-bottom: 0; }
 
+        body.special-invoice .header-top { margin-bottom: 6px; gap: 15px; }
+        body.special-invoice .services-section { font-size: 11px; line-height: 1.4; }
+        body.special-invoice .header-right { font-size: 11px; line-height: 1.4; }
+
         .items { width:100%; border-collapse:collapse; margin-top:6px; margin-bottom: 6px; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm); }
         .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; font-size: 11px; }
         .items thead th { background:#f8f9fa; color:#000; font-weight:bold; text-transform: uppercase; }
