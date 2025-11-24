@@ -141,18 +141,30 @@ export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string;
 
   const subtotal = flatItems.reduce((s, r) => s + (r.line_total || 0), 0);
 
+  // Apply customizations if provided
+  const multiplier = options?.amountMultiplier ?? 1;
+  const customizedItems = flatItems.map(item => ({
+    ...item,
+    unit_price: item.unit_price * multiplier,
+    line_total: item.line_total * multiplier
+  }));
+
+  const customizedSubtotal = subtotal * multiplier;
+  const currency = options?.forceCurrency || doc.currency || 'KES';
+
   return await generatePDF({
     type: 'boq',
     number: doc.number,
     date: doc.date,
     company,
     customer: doc.client,
-    items: flatItems,
-    subtotal,
-    total_amount: subtotal,
+    items: customizedItems,
+    subtotal: customizedSubtotal,
+    total_amount: customizedSubtotal,
     project_title: doc.project_title,
     contractor: doc.contractor,
     notes: doc.notes || '',
-    currency: doc.currency || 'KES'
+    currency: currency,
+    customTitle: options?.customTitle
   });
 }
