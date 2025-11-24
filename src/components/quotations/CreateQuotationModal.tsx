@@ -68,6 +68,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
   const [validUntil, setValidUntil] = useState(
     new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   );
+  const [currency, setCurrency] = useState('KES');
   const [notes, setNotes] = useState('');
   const [termsAndConditions, setTermsAndConditions] = useState('Payment due within 30 days of invoice date.');
   
@@ -292,10 +293,20 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
     }));
   };
 
+  const getCurrencyLocale = (curr: string) => {
+    const mapping: { [key: string]: { locale: string; code: string } } = {
+      KES: { locale: 'en-KE', code: 'KES' },
+      USD: { locale: 'en-US', code: 'USD' },
+      GBP: { locale: 'en-GB', code: 'GBP' }
+    };
+    return mapping[curr] || mapping.KES;
+  };
+
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-KE', {
+    const currencyLocale = getCurrencyLocale(currency);
+    return new Intl.NumberFormat(currencyLocale.locale, {
       style: 'currency',
-      currency: 'KES',
+      currency: currencyLocale.code,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount);
@@ -391,6 +402,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
         subtotal: totalMaterials,
         tax_amount: totalTax,
         total_amount: grandTotal,
+        currency: currency,
         terms_and_conditions: termsAndConditions,
         notes: notes,
         created_by: profile.id
@@ -494,6 +506,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
     setSelectedCustomerId('');
     setQuotationDate(new Date().toISOString().split('T')[0]);
     setValidUntil(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+    setCurrency('KES');
     setNotes('');
     setTermsAndConditions('Payment due within 30 days of invoice date.');
     setSections([]);
@@ -564,6 +577,20 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                       onChange={(e) => setValidUntil(e.target.value)}
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="currency">Currency *</Label>
+                  <Select value={currency} onValueChange={setCurrency}>
+                    <SelectTrigger id="currency">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="KES">Ksh - Kenyan Shilling</SelectItem>
+                      <SelectItem value="USD">$ - US Dollar</SelectItem>
+                      <SelectItem value="GBP">£ - British Pound</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
