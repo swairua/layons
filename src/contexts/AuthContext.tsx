@@ -285,18 +285,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const initializeAuthState = async () => {
       console.log('🚀 Starting fast auth initialization...');
 
-      // Check Supabase health in background to diagnose any connectivity issues
-      try {
-        const { checkSupabaseHealth } = await import('@/utils/supabaseHealthCheck');
-        const health = await checkSupabaseHealth();
-        if (!health.isHealthy) {
-          console.warn('⚠️ Supabase health check detected issues:', health.issues);
-        } else {
-          console.log('✅ Supabase connectivity OK');
-        }
-      } catch (healthCheckError) {
-        console.warn('⚠️ Could not perform Supabase health check:', healthCheckError);
-      }
+      // Skip health check - it can hang if Supabase is unreachable
+      console.log('⏭️  Skipping health check to avoid startup delays');
+      // try {
+      //   const { checkSupabaseHealth } = await import('@/utils/supabaseHealthCheck');
+      //   const health = await checkSupabaseHealth();
+      //   if (!health.isHealthy) {
+      //     console.warn('⚠️ Supabase health check detected issues:', health.issues);
+      //   } else {
+      //     console.log('✅ Supabase connectivity OK');
+      //   }
+      // } catch (healthCheckError) {
+      //   console.warn('⚠️ Could not perform Supabase health check:', healthCheckError);
+      // }
 
       // Start app after initial session check completes (max 2 seconds)
       let appStarted = false;
@@ -309,8 +310,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       };
 
-      // Give session check 2 seconds before forcing app start
-      const sessionCheckTimer = setTimeout(startAppAfterCheck, 2000);
+      // Give session check 1 second before forcing app start
+      const sessionCheckTimer = setTimeout(startAppAfterCheck, 1000);
 
       try {
         // Very fast auth check with 3-second timeout
@@ -318,8 +319,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         const quickAuthPromise = new Promise<any>(async (resolve, reject) => {
           try {
-            // Quick session check
-            const { data: sessionData, error } = await supabase.auth.getSession();
+            // Quick session check with aggressive timeout
+            const sessionTimeoutPromise = new Promise((_, rejectTimeout) => {
+              setTimeout(() => rejectTimeout(new Error('Session check timeout')), 1500);
+            });
+
+            const sessionCheckPromise = supabase.auth.getSession();
+            const { data: sessionData, error } = await Promise.race([sessionCheckPromise, sessionTimeoutPromise]) as any;
 
             if (error) {
               console.warn('⚠️ Quick session check error:', error.message);
@@ -328,7 +334,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             }
 
             console.log('✅ Quick session check completed');
-            resolve({ session: sessionData.session, error: null });
+            resolve({ session: sessionData?.session, error: null });
           } catch (fetchError) {
             const fetchErrorMsg = fetchError instanceof Error ? fetchError.message : String(fetchError);
             console.warn('⚠️ Quick session fetch error:', fetchErrorMsg);
@@ -336,9 +342,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
         });
 
-        // 3-second timeout for quick check
+        // 2-second timeout for quick check
         const quickTimeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Quick auth timeout after 3000ms')), 3000);
+          setTimeout(() => reject(new Error('Quick auth timeout after 2000ms')), 2000);
         });
 
         // Race quick auth against timeout
@@ -470,15 +476,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       }, 1500);
 
-      // Aggressive fallback - never stay in loading state more than 3 seconds
+      // Aggressive fallback - never stay in loading state more than 2 seconds
       setTimeout(() => {
         if (mountedRef.current && loading) {
-          console.log('⚡ Aggressive fallback: forcing loading to false after 3s');
+          console.log('⚡ Aggressive fallback: forcing loading to false after 2s');
           setLoading(false);
           setInitialized(true);
           initializingRef.current = false;
         }
-      }, 3000);
+      }, 2000);
     };
 
     initializeAuthState();

@@ -476,6 +476,7 @@ export const EditLPOModal = ({
                               min="0"
                               step="0.01"
                               className="w-20"
+                              placeholder="1"
                             />
                           </TableCell>
                           <TableCell>
@@ -486,6 +487,7 @@ export const EditLPOModal = ({
                               min="0"
                               step="0.01"
                               className="w-24"
+                              placeholder="0.00"
                             />
                           </TableCell>
                           <TableCell>
@@ -497,6 +499,7 @@ export const EditLPOModal = ({
                               max="100"
                               step="0.01"
                               className="w-16"
+                              placeholder="0"
                             />
                           </TableCell>
                           <TableCell className="font-medium">

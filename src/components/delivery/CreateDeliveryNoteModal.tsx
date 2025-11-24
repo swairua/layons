@@ -531,6 +531,7 @@ export const CreateDeliveryNoteModal = ({
                             step="0.01"
                             className="w-20"
                             disabled={!!formData.invoice_id} // Disable if from invoice
+                            placeholder="1"
                           />
                         </TableCell>
                         <TableCell>
@@ -545,6 +546,7 @@ export const CreateDeliveryNoteModal = ({
                             max={item.quantity_ordered}
                             step="0.01"
                             className="w-20"
+                            placeholder="1"
                           />
                         </TableCell>
                         <TableCell>{item.unit_of_measure}</TableCell>

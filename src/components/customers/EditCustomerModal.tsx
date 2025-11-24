@@ -79,7 +79,7 @@ export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: E
         city: customer.city || '',
         country: customer.country || 'Kenya',
         credit_limit: customer.credit_limit || 0,
-        payment_terms: customer.payment_terms || 0,
+        payment_terms: customer.payment_terms ? String(customer.payment_terms) : '',
         is_active: customer.is_active !== false,
       });
     }
@@ -100,7 +100,8 @@ export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: E
     try {
       await updateCustomer.mutateAsync({
         id: customer.id,
-        ...formData
+        ...formData,
+        payment_terms: formData.payment_terms === '' ? 0 : parseInt(formData.payment_terms)
       });
 
       toast.success(`Customer ${formData.name} updated successfully!`);
@@ -252,7 +253,7 @@ export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: E
                   type="number"
                   value={formData.payment_terms}
                   onChange={(e) => handleInputChange('payment_terms', parseInt(e.target.value) || 0)}
-                  placeholder="Enter payment terms in days (0 for no terms)"
+                  placeholder="e.g., 0 for cash, 30 for Net 30"
                   min="0"
                   step="1"
                 />
@@ -277,7 +278,7 @@ export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: E
                 <div className="space-y-1 text-sm text-muted-foreground">
                   <p>Code: {customer?.customer_code}</p>
                   <p>Credit Limit: KES {formData.credit_limit.toLocaleString()}</p>
-                  <p>Payment Terms: {formData.payment_terms} days</p>
+                  <p>Payment Terms: {formData.payment_terms === '' ? '0 (cash)' : `${formData.payment_terms} days`}</p>
                   <p>Status: {formData.is_active ? 'Active' : 'Inactive'}</p>
                 </div>
               </div>
