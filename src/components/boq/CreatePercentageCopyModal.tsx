@@ -36,6 +36,7 @@ export function CreatePercentageCopyModal({
   onSuccess,
 }: CreatePercentageCopyModalProps) {
   const { profile } = useAuth();
+  const { data: availableBOQs = [] } = useBOQs(companyId);
   const [boqNumber, setBoqNumber] = useState('BOQ-20251124-1441');
   const [percentage, setPercentage] = useState(40);
   const [newBoqNumber, setNewBoqNumber] = useState('');
