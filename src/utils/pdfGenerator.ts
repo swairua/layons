@@ -759,6 +759,14 @@ export const generatePDF = async (data: DocumentData) => {
         * { box-sizing: border-box; }
         body { font-family: 'Arial', sans-serif; margin:0; padding:0; color:#222; font-size:12px; }
         body { counter-reset: page; }
+
+        /* Compact styles for special invoice */
+        body.special-invoice { font-size: 11px; }
+        body.special-invoice .boq-main { padding: 0; }
+        body.special-invoice .items th, body.special-invoice .items td { padding: 4px 6px; font-size: 10px; }
+        body.special-invoice .header-content { gap: 8px; margin-top: 4px; }
+        body.special-invoice .header-right > div { margin-bottom: 2px; }
+        body.special-invoice .services-section > div { margin: 0 0 2px 0; }
         .pagefoot::after { content: "Page " counter(page) ""; }
         .container { width: 100%; box-sizing: border-box; max-width: 100%; margin: 0; padding: 0; }
 
