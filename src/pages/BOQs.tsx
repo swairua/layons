@@ -93,10 +93,30 @@ export default function BOQs() {
       const invoice = await convertToInvoice.mutateAsync(convertDialog.boqId);
 
       toast.dismiss();
+
+      // Format the total amount with the correct currency from the invoice
+      const getLocaleForCurrency = (curr: string) => {
+        const mapping: { [key: string]: { locale: string; code: string } } = {
+          KES: { locale: 'en-KE', code: 'KES' },
+          USD: { locale: 'en-US', code: 'USD' },
+          EUR: { locale: 'en-GB', code: 'EUR' }
+        };
+        return mapping[curr] || mapping.KES;
+      };
+      const currencyLocale = getLocaleForCurrency(invoice.currency || 'KES');
+      const formattedAmount = invoice.total_amount
+        ? new Intl.NumberFormat(currencyLocale.locale, {
+            style: 'currency',
+            currency: currencyLocale.code,
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          }).format(invoice.total_amount)
+        : 'amount from BOQ';
+
       toast.success(
         `✅ BOQ ${convertDialog.boqNumber} successfully converted to Invoice ${invoice.invoice_number}`,
         {
-          description: `Invoice created with ${invoice.total_amount ? `total amount ${new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES' }).format(invoice.total_amount)}` : 'amount from BOQ'}`,
+          description: `Invoice created with total amount ${formattedAmount}`,
           duration: 5000
         }
       );

@@ -71,6 +71,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [quotationDate, setQuotationDate] = useState('');
   const [validUntil, setValidUntil] = useState('');
+  const [currency, setCurrency] = useState('KES');
   const [notes, setNotes] = useState('');
   const [termsAndConditions, setTermsAndConditions] = useState('');
   
@@ -94,6 +95,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
       setSelectedCustomerId(quotation.customers?.id || '');
       setQuotationDate(quotation.quotation_date || '');
       setValidUntil(quotation.valid_until || '');
+      setCurrency(quotation.currency || 'KES');
       setNotes(quotation.notes || '');
       setTermsAndConditions(quotation.terms_and_conditions || '');
 
@@ -370,10 +372,20 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
     setSearchProduct('');
   };
 
+  const getCurrencyLocale = (curr: string) => {
+    const mapping: { [key: string]: { locale: string; code: string } } = {
+      KES: { locale: 'en-KE', code: 'KES' },
+      USD: { locale: 'en-US', code: 'USD' },
+      GBP: { locale: 'en-GB', code: 'GBP' }
+    };
+    return mapping[curr] || mapping.KES;
+  };
+
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-KE', {
+    const currencyLocale = getCurrencyLocale(currency);
+    return new Intl.NumberFormat(currencyLocale.locale, {
       style: 'currency',
-      currency: 'KES',
+      currency: currencyLocale.code,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount);
@@ -430,6 +442,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
         customer_id: selectedCustomerId,
         quotation_date: quotationDate,
         valid_until: validUntil || null,
+        currency,
         notes,
         terms_and_conditions: termsAndConditions,
         subtotal: totalMaterials,
@@ -577,6 +590,20 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                       onChange={(e) => setValidUntil(e.target.value)}
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="currency">Currency *</Label>
+                  <Select value={currency} onValueChange={setCurrency}>
+                    <SelectTrigger id="currency">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="KES">Ksh - Kenyan Shilling</SelectItem>
+                      <SelectItem value="USD">$ - US Dollar</SelectItem>
+                      <SelectItem value="GBP">£ - British Pound</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">

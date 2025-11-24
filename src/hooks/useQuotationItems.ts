@@ -259,9 +259,12 @@ export const useConvertQuotationToInvoice = () => {
         subtotal: quotation.subtotal,
         tax_amount: quotation.tax_amount,
         total_amount: quotation.total_amount,
+        currency: quotation.currency || 'KES',
         notes: quotation.notes,
         terms_and_conditions: quotation.terms_and_conditions,
-        created_by: createdBy
+        created_by: createdBy,
+        balance_due: quotation.total_amount,
+        paid_amount: 0
       };
 
       const { data: invoice, error: invoiceError } = await supabase
