@@ -1038,7 +1038,7 @@ export const generatePDF = async (data: DocumentData) => {
         imageTimeout: 15000,
         timeout: 45000,
         windowHeight: Math.max(boqMainElement.scrollHeight, boqMainElement.offsetHeight) || 1000,
-        windowWidth: pageWidth * 3.779527559, // 210mm to pixels (96 DPI * 210/25.4)
+        windowWidth: contentWidth * 3.779527559, // 180mm to pixels (96 DPI * 180/25.4)
         proxy: undefined,
         foreignObjectRendering: false,
         onclone: (clonedDocument) => {
