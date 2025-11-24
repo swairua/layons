@@ -328,6 +328,7 @@ export interface DocumentData {
   lpo_number?: string;
   currency?: string; // Currency code: 'KES', 'USD', 'EUR'
   customTitle?: string; // Optional custom title for BOQ PDFs
+  stampImageUrl?: string; // Optional stamp image URL for special PDFs
   customer: {
     name: string;
     email?: string;
