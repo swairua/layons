@@ -480,6 +480,10 @@ const generatePDFHeader = (
     documentNumber = 'Invoice No';
   }
 
+  const displayNumber = data.customTitle === 'INVOICE'
+    ? (data.number?.replace(/^BOQ-/, '') || '')
+    : (data.number || '');
+
   return `
     <!-- Header Section -->
     <div class="header">
