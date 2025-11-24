@@ -10,8 +10,16 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { useBOQs } from '@/hooks/useDatabase';
 import { fetchBOQByNumber, createPercentageCopy, saveBOQCopy } from '@/utils/boqHelper';
 
 interface CreatePercentageCopyModalProps {
