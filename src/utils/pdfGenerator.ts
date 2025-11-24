@@ -1051,7 +1051,7 @@ export const generatePDF = async (data: DocumentData) => {
 
       // Add BOQ pages to PDF with proper margin handling
       const imgBoqData = boqCanvas.toDataURL('image/png');
-      const imgBoqWidth = pageWidth; // Full width 210mm, margins handled in CSS
+      const imgBoqWidth = contentWidth; // Content width 180mm (210mm - 30mm margins)
       const imgBoqHeight = (boqCanvas.height * imgBoqWidth) / boqCanvas.width;
       let boqHeightLeft = imgBoqHeight;
       let boqPosition = 0;
@@ -1062,8 +1062,8 @@ export const generatePDF = async (data: DocumentData) => {
         if (!firstPage) {
           pdf.addPage();
         }
-        pdf.addImage(imgBoqData, 'PNG', 0, -boqPosition, imgBoqWidth, imgBoqHeight);
-        boqHeightLeft -= (pageHeight - 8); // Account for margins and spacing
+        pdf.addImage(imgBoqData, 'PNG', margin, margin - boqPosition, imgBoqWidth, imgBoqHeight);
+        boqHeightLeft -= (pageHeight - (margin * 2) - 8); // Account for margins and spacing
         boqPosition += pageHeight;
         firstPage = false;
 
