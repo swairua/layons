@@ -345,10 +345,10 @@ export function ViewInvoiceModal({
                                   </div>
                                 </TableCell>
                                 <TableCell>{item.quantity}</TableCell>
-                                <TableCell>{formatCurrency(item.unit_price)}</TableCell>
+                                <TableCell>{formatCurrency(item.unit_price, invoice.currency || 'KES')}</TableCell>
                                 <TableCell>{item.tax_percentage || 0}%</TableCell>
                                 <TableCell className="text-right font-semibold">
-                                  {formatCurrency(item.line_total)}
+                                  {formatCurrency(item.line_total, invoice.currency || 'KES')}
                                 </TableCell>
                               </TableRow>
                             ))}
