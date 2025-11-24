@@ -1085,7 +1085,7 @@ export const generatePDF = async (data: DocumentData) => {
           imageTimeout: 15000,
           timeout: 45000,
           windowHeight: Math.max(termsElement.scrollHeight, termsElement.offsetHeight) || 1000,
-          windowWidth: pageWidth * 3.779527559, // 210mm to pixels
+          windowWidth: contentWidth * 3.779527559, // 180mm to pixels
           proxy: undefined,
           foreignObjectRendering: false,
           onclone: (clonedDocument) => {
@@ -1101,7 +1101,7 @@ export const generatePDF = async (data: DocumentData) => {
 
         // Add terms to the new page
         const imgTermsData = termsCanvas.toDataURL('image/png');
-        const imgTermsWidth = pageWidth; // Full width 210mm, margins handled in CSS
+        const imgTermsWidth = contentWidth; // Content width 180mm (210mm - 30mm margins)
         const imgTermsHeight = (termsCanvas.height * imgTermsWidth) / termsCanvas.width;
         let termsHeightLeft = imgTermsHeight;
         let termsPosition = 0;
@@ -1112,8 +1112,8 @@ export const generatePDF = async (data: DocumentData) => {
           if (!firstTermsPage) {
             pdf.addPage();
           }
-          pdf.addImage(imgTermsData, 'PNG', 0, -termsPosition, imgTermsWidth, imgTermsHeight);
-          termsHeightLeft -= (pageHeight - 8); // Account for margins and spacing
+          pdf.addImage(imgTermsData, 'PNG', margin, margin - termsPosition, imgTermsWidth, imgTermsHeight);
+          termsHeightLeft -= (pageHeight - (margin * 2) - 8); // Account for margins and spacing
           termsPosition += pageHeight;
           firstTermsPage = false;
 
