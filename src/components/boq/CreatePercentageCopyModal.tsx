@@ -137,13 +137,28 @@ export function CreatePercentageCopyModal({
 
         <div className="space-y-4">
           <div>
-            <Label htmlFor="source-boq">Source BOQ Number</Label>
-            <Input
-              id="source-boq"
-              value={boqNumber}
-              onChange={(e) => setBoqNumber(e.target.value)}
-              placeholder="e.g., BOQ-20251124-1441"
-            />
+            <Label htmlFor="source-boq">Source BOQ</Label>
+            {availableBOQs.length > 0 ? (
+              <Select value={boqNumber} onValueChange={setBoqNumber}>
+                <SelectTrigger id="source-boq">
+                  <SelectValue placeholder="Select a BOQ" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableBOQs.map((boq: any) => (
+                    <SelectItem key={boq.id} value={boq.number}>
+                      {boq.number} - {boq.client_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input
+                id="source-boq"
+                value={boqNumber}
+                onChange={(e) => setBoqNumber(e.target.value)}
+                placeholder="e.g., BOQ-20251124-1441"
+              />
+            )}
           </div>
 
           <div>
