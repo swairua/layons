@@ -3450,3 +3450,39 @@ export const downloadLPOPDF = async (lpo: any, company?: CompanyDetails) => {
 
   return generatePDF(documentData);
 };
+
+// Function for generating cash receipt PDF
+export const downloadCashReceiptPDF = async (receipt: any, company?: CompanyDetails) => {
+  const documentData: DocumentData = {
+    type: 'receipt',
+    number: receipt.receipt_number || `RCP-${Date.now()}`,
+    date: receipt.receipt_date || new Date().toISOString().split('T')[0],
+    company: company || receipt.company, // Pass company details
+    customer: {
+      name: receipt.customers?.name || 'Unknown Customer',
+      email: receipt.customers?.email,
+      phone: receipt.customers?.phone,
+      address: receipt.customers?.address,
+      city: receipt.customers?.city,
+      country: receipt.customers?.country,
+    },
+    items: [
+      {
+        description: 'Payment Received',
+        quantity: 1,
+        unit_price: receipt.total_amount || 0,
+        tax_percentage: 0,
+        tax_amount: 0,
+        tax_inclusive: false,
+        line_total: receipt.total_amount || 0,
+      }
+    ],
+    total_amount: receipt.total_amount || 0,
+    subtotal: receipt.total_amount || 0,
+    tax_amount: 0,
+    notes: `Payment Method: ${receipt.payment_method || 'Cash'}\nValue Tendered: ${formatCurrencyUtil(receipt.value_tendered || 0, 'KES')}\nChange: ${formatCurrencyUtil(receipt.change || 0, 'KES')}\n\n${receipt.notes ? receipt.notes : ''}`,
+    terms_and_conditions: 'Thank you for your payment. This receipt confirms payment has been received.',
+  };
+
+  return generatePDF(documentData);
+};
