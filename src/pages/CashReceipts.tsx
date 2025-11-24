@@ -243,6 +243,16 @@ export default function CashReceipts() {
     toast.success('Cash receipt created successfully!');
   };
 
+  const handleEditClick = (receipt: CashReceipt) => {
+    setSelectedReceiptForEdit(receipt);
+    setShowEditModal(true);
+  };
+
+  const handleEditSuccess = () => {
+    fetchReceipts();
+    toast.success('Cash receipt updated successfully!');
+  };
+
   return (
     <div className="flex-1 space-y-6 p-8">
       <div className="flex items-center justify-between">
