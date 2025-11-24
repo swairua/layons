@@ -168,6 +168,7 @@ export default function BOQs() {
 
             <div className="mt-4 space-y-2 text-sm">
               <div><strong>Date:</strong> {new Date(viewing.boq_date).toLocaleDateString()}</div>
+              <div><strong>Currency:</strong> <Badge variant="outline">{viewing.currency || 'KES'}</Badge></div>
               <div><strong>Client:</strong> {viewing.client_name} {viewing.client_email ? `(${viewing.client_email})` : ''}</div>
               <div><strong>Project:</strong> {viewing.project_title || '-'}</div>
               <div><strong>Contractor:</strong> {viewing.contractor || '-'}</div>
