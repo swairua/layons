@@ -310,8 +310,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       };
 
-      // Give session check 2 seconds before forcing app start
-      const sessionCheckTimer = setTimeout(startAppAfterCheck, 2000);
+      // Give session check 1 second before forcing app start
+      const sessionCheckTimer = setTimeout(startAppAfterCheck, 1000);
 
       try {
         // Very fast auth check with 3-second timeout
