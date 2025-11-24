@@ -49,6 +49,7 @@ interface Quotation {
   quotation_date: string;
   valid_until?: string;
   total_amount: number;
+  currency?: string;
   status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired' | 'processed';
   quotation_items?: any[];
   subtotal?: number;
