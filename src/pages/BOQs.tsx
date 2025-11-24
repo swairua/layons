@@ -152,6 +152,9 @@ export default function BOQs() {
                       <Button size="icon" variant="ghost" onClick={() => setViewing(b)} title="View">
                         <Eye className="h-4 w-4" />
                       </Button>
+                      <Button size="icon" variant="ghost" onClick={() => setEditing(b)} title="Edit">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
                       <Button size="icon" variant="ghost" onClick={() => handleDownloadPDF(b)} title="Download PDF">
                         <Download className="h-4 w-4" />
                       </Button>
