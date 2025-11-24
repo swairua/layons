@@ -484,6 +484,15 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
                     </div>
                   ))}
 
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => addSubsection(section.id)}
+                    className="mb-3"
+                  >
+                    <Plus className="h-4 w-4 mr-2" /> Add Subsection
+                  </Button>
+
                   <div className="flex items-center justify-end gap-6 pt-2 border-t border-border">
                     <div className="text-sm font-semibold">Section Total: {formatCurrency(calculateSectionTotal(section))}</div>
                   </div>
