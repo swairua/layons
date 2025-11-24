@@ -262,7 +262,7 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
                   type="number"
                   value={formData.payment_terms}
                   onChange={(e) => handleInputChange('payment_terms', parseInt(e.target.value) || 0)}
-                  placeholder="Enter payment terms in days (0 for no terms)"
+                  placeholder="0 = immediate payment, or days until due"
                   min="0"
                   step="1"
                 />
