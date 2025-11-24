@@ -62,7 +62,7 @@ export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: E
     city: '',
     country: 'Kenya',
     credit_limit: 0,
-    payment_terms: 30,
+    payment_terms: 0,
     is_active: true,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -79,7 +79,7 @@ export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: E
         city: customer.city || '',
         country: customer.country || 'Kenya',
         credit_limit: customer.credit_limit || 0,
-        payment_terms: customer.payment_terms || 30,
+        payment_terms: customer.payment_terms || 0,
         is_active: customer.is_active !== false,
       });
     }
@@ -247,21 +247,15 @@ export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: E
 
               <div className="space-y-2">
                 <Label htmlFor="payment_terms">Payment Terms (Days)</Label>
-                <Select 
-                  value={formData.payment_terms.toString()} 
-                  onValueChange={(value) => handleInputChange('payment_terms', parseInt(value))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select payment terms" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7">7 days</SelectItem>
-                    <SelectItem value="14">14 days</SelectItem>
-                    <SelectItem value="30">30 days</SelectItem>
-                    <SelectItem value="60">60 days</SelectItem>
-                    <SelectItem value="90">90 days</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="payment_terms"
+                  type="number"
+                  value={formData.payment_terms}
+                  onChange={(e) => handleInputChange('payment_terms', parseInt(e.target.value) || 0)}
+                  placeholder="Enter payment terms in days (0 for no terms)"
+                  min="0"
+                  step="1"
+                />
               </div>
 
               <div className="flex items-center justify-between">
