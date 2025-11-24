@@ -18,7 +18,8 @@ import {
   Eye,
   Download,
   Trash2,
-  Loader2
+  Loader2,
+  Edit
 } from 'lucide-react';
 import { useCompanies } from '@/hooks/useDatabase';
 import { useAuditLog } from '@/hooks/useAuditLog';
