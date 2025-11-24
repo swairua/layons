@@ -2788,26 +2788,14 @@ export const generatePDF = async (data: DocumentData) => {
           <table class="payment-details-table" style="width: 100%; border-collapse: collapse;">
             <tr style="border-bottom: 1px solid #e9ecef;">
               <td style="padding: 10px 0; font-weight: 600; width: 50%;">Amount Tendered:</td>
-              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${(() => {
-                // Extract amount tendered from the notes or from a dedicated field
-                const amountTenderedMatch = data.notes?.match(/Value Tendered:\s*([\w\s,\.]+)/);
-                if (amountTenderedMatch && amountTenderedMatch[1]) {
-                  return amountTenderedMatch[1].trim();
-                }
-                return 'Not specified';
-              })()}</td>
+              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${formatCurrency((data as any).value_tendered || 0)}</td>
             </tr>
+            ${(data as any).change !== undefined && (data as any).change > 0 ? `
             <tr style="border-bottom: 1px solid #e9ecef;">
               <td style="padding: 10px 0; font-weight: 600; width: 50%;">Change:</td>
-              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${(() => {
-                // Extract change from the notes or from a dedicated field
-                const changeMatch = data.notes?.match(/Change:\s*([\w\s,\.]+?)(?:\n|$)/);
-                if (changeMatch && changeMatch[1]) {
-                  return changeMatch[1].trim();
-                }
-                return 'No change';
-              })()}</td>
+              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${formatCurrency((data as any).change)}</td>
             </tr>
+            ` : ''}
           </table>
         </div>
         ` : ''}
