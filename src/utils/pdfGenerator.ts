@@ -970,7 +970,7 @@ export const generatePDF = async (data: DocumentData) => {
             </tr>
           </table>
         </div>
-      </div>
+      ${data.customTitle !== 'INVOICE' ? `</div>` : ''}
     </body>
     </html>
     `;
