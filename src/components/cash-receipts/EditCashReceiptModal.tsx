@@ -254,6 +254,8 @@ export function EditCashReceiptModal({ open, onOpenChange, onSuccess, receipt }:
         throw new Error('Receipt ID not found');
       }
 
+      console.log('Starting receipt update...', { receiptId: receipt.id, totalAmount, items: items.length });
+
       // Update the cash receipt
       const { error: receiptError } = await supabase
         .from('cash_receipts')
@@ -269,8 +271,11 @@ export function EditCashReceiptModal({ open, onOpenChange, onSuccess, receipt }:
         .eq('id', receipt.id);
 
       if (receiptError) {
+        console.error('Receipt update error:', receiptError);
         throw receiptError;
       }
+
+      console.log('Receipt updated successfully');
 
       // Delete all existing items first
       console.log('Deleting items for receipt:', receipt.id);
