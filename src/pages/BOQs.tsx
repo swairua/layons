@@ -113,21 +113,23 @@ export default function BOQs() {
                 <TableHead>Date</TableHead>
                 <TableHead>Client</TableHead>
                 <TableHead>Project</TableHead>
+                <TableHead>Currency</TableHead>
                 <TableHead className="text-right">Total</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow><TableCell colSpan={6}>Loading...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7}>Loading...</TableCell></TableRow>
               ) : boqs.length === 0 ? (
-                <TableRow><TableCell colSpan={6}>No BOQs found</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7}>No BOQs found</TableCell></TableRow>
               ) : boqs.map((b: any) => (
                 <TableRow key={b.id}>
                   <TableCell>{b.number}</TableCell>
                   <TableCell>{new Date(b.boq_date).toLocaleDateString()}</TableCell>
                   <TableCell>{b.client_name}</TableCell>
                   <TableCell>{b.project_title || '-'}</TableCell>
+                  <TableCell><Badge variant="outline">{b.currency || 'KES'}</Badge></TableCell>
                   <TableCell className="text-right">{new Intl.NumberFormat('en-KE', { style: 'currency', currency: b.currency || 'KES' }).format(Number(b.total_amount || b.subtotal || 0))}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
