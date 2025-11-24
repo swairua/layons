@@ -2588,16 +2588,38 @@ export const generatePDF = async (data: DocumentData) => {
               </div>
             </div>
 
-            <!-- Bottom row: Client Details -->
+            <!-- Bottom row: Client Details - Two Column Table -->
             <div class="header-left">
-              <div><strong>${data.type === 'lpo' ? 'Supplier' : 'Client'}:</strong> ${data.customer?.name || ''}</div>
-              <div style="margin-left: 0; font-size: 10px; color: #555; line-height: 1.4;">
-                ${data.customTitle === 'INVOICE' ? 'Platz der Vereinten Nationen 7<br/>53113 Bonn, Germany' : (data.customer?.address || '') + (data.customer?.address && data.customer?.city ? '<br/>' : '') + (data.customer?.city || '') + (data.customer?.city && data.customer?.country ? ', ' : '') + (data.customer?.country || '')}
-              </div>
-              ${data.project_title ? `<div><strong>Project:</strong> ${data.project_title}</div>` : ''}
-              <div><strong>Subject:</strong> ${data.type === 'boq' ? (data.customTitle || 'Bill of Quantities') : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</div>
-              <div><strong>Date:</strong> ${formatDateLong(data.date || '')}</div>
-              <div><strong>${data.type === 'boq' ? 'BOQ No' : 'Qtn No'}:</strong> ${data.number || ''}</div>
+              <table class="client-details-table">
+                <tr>
+                  <td class="label">${data.type === 'lpo' ? 'Supplier' : 'Client'}:</td>
+                  <td class="value">${data.customer?.name || ''}</td>
+                </tr>
+                ${(data.customer?.address || data.customer?.city || data.customer?.country) ? `
+                <tr>
+                  <td class="label">Address:</td>
+                  <td class="value">${data.customTitle === 'INVOICE' ? 'Platz der Vereinten Nationen 7<br/>53113 Bonn, Germany' : (data.customer?.address || '') + (data.customer?.address && data.customer?.city ? '<br/>' : '') + (data.customer?.city || '') + (data.customer?.city && data.customer?.country ? ', ' : '') + (data.customer?.country || '')}</td>
+                </tr>
+                ` : ''}
+                ${data.project_title ? `
+                <tr>
+                  <td class="label">Project:</td>
+                  <td class="value">${data.project_title}</td>
+                </tr>
+                ` : ''}
+                <tr>
+                  <td class="label">Subject:</td>
+                  <td class="value">${data.type === 'boq' ? (data.customTitle || 'Bill of Quantities') : (data.subject || (data.type === 'invoice' ? 'Invoice' : 'Quotation'))}</td>
+                </tr>
+                <tr>
+                  <td class="label">Date:</td>
+                  <td class="value">${formatDateLong(data.date || '')}</td>
+                </tr>
+                <tr>
+                  <td class="label">${data.type === 'boq' ? 'BOQ No' : 'Qtn No'}:</td>
+                  <td class="value">${data.number || ''}</td>
+                </tr>
+              </table>
             </div>
           </div>
         </div>
