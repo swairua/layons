@@ -542,7 +542,6 @@ export const generatePDF = async (data: DocumentData) => {
 
   // Analyze which columns have values
   const visibleColumns = analyzeColumns(data.items);
-  const { formatCurrency: formatCurrencyUtil } = await import('./currencyFormatter');
   const formatCurrency = (amount: number) => {
     return formatCurrencyUtil(amount, data.currency || 'KES');
   };
