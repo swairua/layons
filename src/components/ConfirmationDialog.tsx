@@ -33,6 +33,7 @@ export function ConfirmationDialog({
   confirmText = 'Delete',
   cancelText = 'Cancel',
   isDangerous = true,
+  loadingText = 'Processing...',
 }: ConfirmationDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={(isOpen) => {
