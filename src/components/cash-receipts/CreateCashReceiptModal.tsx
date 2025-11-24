@@ -302,7 +302,32 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
       if (err instanceof Error) {
         errorMessage = err.message;
       } else if (typeof err === 'object' && err !== null) {
-        errorMessage = JSON.stringify(err, null, 2);
+        const errorObj = err as any;
+
+        // Handle Supabase errors
+        if (errorObj.message && typeof errorObj.message === 'string') {
+          errorMessage = errorObj.message;
+        } else if (errorObj.error_description && typeof errorObj.error_description === 'string') {
+          errorMessage = errorObj.error_description;
+        } else if (errorObj.error && typeof errorObj.error === 'string') {
+          errorMessage = errorObj.error;
+        } else if (errorObj.details && typeof errorObj.details === 'string') {
+          errorMessage = errorObj.details;
+        } else {
+          // Last resort - try to stringify with circular reference handling
+          try {
+            const seen: any[] = [];
+            errorMessage = JSON.stringify(err, (key, value) => {
+              if (typeof value === 'object' && value !== null) {
+                if (seen.includes(value)) return '[Circular]';
+                seen.push(value);
+              }
+              return value;
+            }, 2).slice(0, 500); // Limit to 500 chars
+          } catch {
+            errorMessage = String(err).slice(0, 500);
+          }
+        }
       }
 
       toast.error(errorMessage);
