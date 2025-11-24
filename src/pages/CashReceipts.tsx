@@ -226,7 +226,9 @@ export default function CashReceipts() {
   };
 
   const handleCreateSuccess = () => {
-    fetchReceipts();
+    setPageNumber(0);
+    setHasMore(true);
+    fetchReceipts(0);
     toast.success('Cash receipt created successfully!');
   };
 
@@ -236,7 +238,9 @@ export default function CashReceipts() {
   };
 
   const handleEditSuccess = () => {
-    fetchReceipts();
+    setPageNumber(0);
+    setHasMore(true);
+    fetchReceipts(0);
     toast.success('Cash receipt updated successfully!');
   };
 
