@@ -255,6 +255,7 @@ export default function CashReceipts() {
                     <TableHead>Receipt Number</TableHead>
                     <TableHead>Customer</TableHead>
                     <TableHead>Date</TableHead>
+                    <TableHead>Items</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Payment Method</TableHead>
                     <TableHead>Value Tendered</TableHead>
@@ -265,7 +266,7 @@ export default function CashReceipts() {
                 <TableBody>
                   {filteredReceipts.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                      <TableCell colSpan={9} className="text-center py-8 text-gray-500">
                         No cash receipts found
                       </TableCell>
                     </TableRow>
@@ -276,6 +277,9 @@ export default function CashReceipts() {
                         <TableCell>{receipt.customers?.name || 'Unknown'}</TableCell>
                         <TableCell>
                           {new Date(receipt.receipt_date).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <Badge>{(receipt.cash_receipt_items || []).length} item{(receipt.cash_receipt_items || []).length !== 1 ? 's' : ''}</Badge>
                         </TableCell>
                         <TableCell>{formatCurrency(receipt.total_amount)}</TableCell>
                         <TableCell>
