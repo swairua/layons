@@ -153,6 +153,21 @@ export default function BOQs() {
                       <Button size="icon" variant="ghost" onClick={() => handleDownloadPDF(b)} title="Download PDF">
                         <Download className="h-4 w-4" />
                       </Button>
+                      {b.number === 'BOQ-20251124-1441' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs"
+                          onClick={() => handleDownloadPDF(b, {
+                            customTitle: 'INVOICE',
+                            amountMultiplier: 0.4,
+                            forceCurrency: 'EUR'
+                          })}
+                          title="Download Special Invoice PDF (40% of amount)"
+                        >
+                          Invoice PDF
+                        </Button>
+                      )}
                       <Button size="icon" variant="destructive" onClick={() => handleDeleteClick(b.id, b.number)} title="Delete">
                         <Trash2 className="h-4 w-4" />
                       </Button>
