@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { CountrySelect } from '@/components/ui/country-select';
 import { 
   User,
   Mail,
