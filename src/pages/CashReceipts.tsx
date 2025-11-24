@@ -373,6 +373,13 @@ export default function CashReceipts() {
         onSuccess={handleCreateSuccess}
       />
 
+      <EditCashReceiptModal
+        open={showEditModal}
+        onOpenChange={setShowEditModal}
+        onSuccess={handleEditSuccess}
+        receipt={selectedReceiptForEdit}
+      />
+
       <ConfirmationDialog
         open={deleteDialog.open}
         onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
