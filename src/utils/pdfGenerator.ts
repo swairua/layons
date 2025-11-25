@@ -1847,13 +1847,14 @@ export const generatePDF = async (data: DocumentData) => {
           .subsection {
             page-break-inside: avoid;
             break-inside: avoid;
-            margin-bottom: 12px;
-            padding: 8px;
+            margin-bottom: 4px;
+            padding: 4px 0;
           }
 
           .subsection > div:first-child {
             font-weight: 600;
-            margin-bottom: 6px;
+            margin-bottom: 3px;
+            font-size: 10px;
             page-break-after: avoid;
           }
 
