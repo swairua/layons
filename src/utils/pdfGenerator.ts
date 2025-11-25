@@ -1,11 +1,25 @@
 // PDF Generation utility using jsPDF + html2canvas for auto-download
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { PDF_PAGE_CSS } from './pdfMarginConstants';
 import { formatCurrency as formatCurrencyUtil } from './currencyFormatter';
 
+// Browser-only imports (only loaded when actually used)
+let jsPDF: any;
+let html2canvas: any;
+
+const ensureImports = async () => {
+  if (!jsPDF) {
+    const mod = await import('jspdf');
+    jsPDF = mod.default;
+  }
+  if (!html2canvas) {
+    const mod = await import('html2canvas');
+    html2canvas = mod.default;
+  }
+};
+
 // Helper function to render HTML content to canvas
 const renderHTMLToCanvas = async (htmlContent: string, pageSelector: string) => {
+  await ensureImports();
   let wrapper: HTMLElement | null = null;
   try {
     // Create a temporary wrapper for proper rendering
@@ -129,6 +143,7 @@ const addCanvasToPDF = async (pdf: jsPDF, canvas: HTMLCanvasElement, pageWidth: 
 
 // Helper function to convert HTML to PDF and auto-download
 const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string) => {
+  await ensureImports();
   let wrapper: HTMLElement | null = null;
   try {
     // Create a temporary wrapper for proper rendering
@@ -549,6 +564,9 @@ const generatePDFHeader = (
 };
 
 export const generatePDF = async (data: DocumentData) => {
+  // Ensure browser-only libraries are loaded
+  await ensureImports();
+
   // Extract theme color variables from the main document so PDFs match the app theme
   const computed = typeof window !== 'undefined' ? getComputedStyle(document.documentElement) : null;
   const primaryVar = computed ? (computed.getPropertyValue('--primary') || '46 65% 53%').trim() : '46 65% 53%';
@@ -933,6 +951,13 @@ export const generatePDF = async (data: DocumentData) => {
               </tr>
             </table>
           </div>
+
+          ${data.customTitle === 'INVOICE' && data.stampImageUrl ? `
+          <!-- Stamp Section for Invoice (floated to avoid extra pages) -->
+          <div class="stamp-section" style="float: right; margin: 0 0 12px 12px; page-break-inside: avoid;">
+            <img src="${data.stampImageUrl}" alt="Company Stamp" style="width: 80px; height: 80px; object-fit: contain; display: block;" />
+          </div>
+          ` : ''}
         </div>
       </div>
 
