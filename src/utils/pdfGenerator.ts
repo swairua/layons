@@ -938,6 +938,13 @@ export const generatePDF = async (data: DocumentData) => {
               </tr>
             </table>
           </div>
+
+          ${data.customTitle === 'INVOICE' && data.stampImageUrl ? `
+          <!-- Stamp Section for Invoice -->
+          <div class="stamp-section" style="display:flex; justify-content:center; margin:40px 0 24px 0;">
+            <img src="${data.stampImageUrl}" alt="Company Stamp" style="width: 100px; height: 100px; object-fit:contain;" />
+          </div>
+          ` : ''}
         </div>
       </div>
 
