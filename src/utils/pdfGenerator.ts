@@ -2300,10 +2300,10 @@ export const generatePDF = async (data: DocumentData) => {
         
         
         .section-title {
-          font-size: 14px;
+          font-size: 12px;
           font-weight: bold;
           color: #000;
-          margin: 0 0 15px 0;
+          margin: 6px 0 6px 0;
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
