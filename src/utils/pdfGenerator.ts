@@ -547,6 +547,10 @@ const generatePDFHeader = (
 };
 
 export const generatePDF = async (data: DocumentData) => {
+  // Dynamically import browser-only libraries
+  const { default: jsPDF } = await import('jspdf');
+  const html2canvas = (await import('html2canvas')).default;
+
   // Extract theme color variables from the main document so PDFs match the app theme
   const computed = typeof window !== 'undefined' ? getComputedStyle(document.documentElement) : null;
   const primaryVar = computed ? (computed.getPropertyValue('--primary') || '46 65% 53%').trim() : '46 65% 53%';
