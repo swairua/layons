@@ -790,8 +790,8 @@ export const generatePDF = async (data: DocumentData) => {
         body.special-invoice .services-section { font-size: 11px; line-height: 1.4; }
         body.special-invoice .header-right { font-size: 11px; line-height: 1.4; }
 
-        .items { width:100%; border-collapse:collapse; margin-top:6px; margin-bottom: 6px; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm); }
-        .items th, .items td { border:1px solid #e6e6e6; padding:6px 8px; font-size: 11px; }
+        .items { width:100%; border-collapse:collapse; margin-top:2px; margin-bottom: 2px; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm); }
+        .items th, .items td { border:1px solid #e6e6e6; padding:3px 4px; font-size: 10px; }
         .items thead th { background:#f8f9fa; color:#000; font-weight:bold; text-transform: uppercase; }
         .items thead { display: table-header-group; }
 
@@ -801,7 +801,7 @@ export const generatePDF = async (data: DocumentData) => {
         .spacer-row td { border: none !important; background: none !important; padding: 0 !important; height: 15mm; }
         .section-row { page-break-inside: avoid; page-break-before: always; page-break-after: avoid; }
         .section-row:first-of-type { page-break-before: avoid; }
-        .section-row td.section-title { background:#f4f4f4; font-weight:700; padding:8px; }
+        .section-row td.section-title { background:#f4f4f4; font-weight:700; padding:2px 4px; }
         .item-row { page-break-inside: avoid; }
         .item-row td.num { text-align:center; width: 5%; }
         .item-row td.desc { width: 55%; }
@@ -809,21 +809,21 @@ export const generatePDF = async (data: DocumentData) => {
         .item-row td.unit { width: 9%; text-align:center; }
         .item-row td.rate { width: 11%; text-align:right; }
         .item-row td.amount { width: 12%; text-align:right; }
-        .section-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 8mm; }
+        .section-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 2mm; }
         .section-total td { font-weight:700; background:#fafafa; }
         .section-total .label { text-align:right; padding-right:12px; }
-        .preliminaries-section { margin-bottom:12px; page-break-inside: avoid; margin-left: 15mm; margin-right: 15mm; }
+        .preliminaries-section { margin-bottom:4px; page-break-inside: avoid; margin-left: 15mm; margin-right: 15mm; }
         .preliminaries-section .items { margin-top:0; margin-left: 0; margin-right: 0; width: 100%; }
-        .subsection-row { page-break-inside: avoid; page-break-after: avoid; }
-        .subsection-row td { background:#fcfcfc; font-weight:600; }
-        .subsection-title { padding:6px 8px; }
-        .subsection-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 6mm; }
+        .subsection-row { page-break-inside: avoid; page-break-after: avoid; margin-bottom: 1px; }
+        .subsection-row td { background:#fcfcfc; font-weight:600; padding: 2px 4px; }
+        .subsection-title { padding:2px 4px; }
+        .subsection-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 2mm; }
         .subsection-total td { font-weight:600; background:#fdfdfd; }
         .subsection-total .label { text-align:right; padding-right:12px; }
         .totals { margin-top:12px; width: calc(100% - 30mm); margin-left: 15mm; margin-right: 15mm; page-break-inside: avoid; padding-bottom: 30mm; }
 
-        body.special-invoice .section-total { margin-bottom: 4mm; }
-        body.special-invoice .subsection-total { margin-bottom: 3mm; }
+        body.special-invoice .section-total { margin-bottom: 2mm; }
+        body.special-invoice .subsection-total { margin-bottom: 2mm; }
         body.special-invoice .totals { margin-top: 6px; padding-bottom: 20mm; }
         body.special-invoice .footer { margin-top: 12px; gap: 10px; }
         body.special-invoice .sig-block { gap: 4px; }
@@ -1633,7 +1633,7 @@ export const generatePDF = async (data: DocumentData) => {
           .page,
           .page-section {
             width: 100%;
-            margin: 15mm 0;
+            margin: 0;
             background: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             padding: 15mm;
@@ -1643,7 +1643,7 @@ export const generatePDF = async (data: DocumentData) => {
             break-after: page;
             break-inside: avoid;
             box-sizing: border-box;
-            min-height: 277mm;
+            min-height: auto;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
@@ -1661,9 +1661,9 @@ export const generatePDF = async (data: DocumentData) => {
             .page-section {
               box-shadow: none;
               width: 100%;
-              margin: 15mm 0;
+              margin: 0;
               padding: 15mm;
-              min-height: 277mm;
+              min-height: auto;
               page-break-after: always;
               page-break-inside: avoid;
               break-after: page;
@@ -1693,7 +1693,7 @@ export const generatePDF = async (data: DocumentData) => {
           .header {
             display: flex;
             flex-direction: column;
-            margin-bottom: 30px;
+            margin-bottom: 12px;
             padding-bottom: 0;
             border-bottom: none;
             margin-left: 0;
@@ -1708,7 +1708,7 @@ export const generatePDF = async (data: DocumentData) => {
           .header-image {
             width: 100%;
             height: auto;
-            margin: 0 0 20px 0;
+            margin: 0 0 8px 0;
             padding: 0;
             display: block;
             border: none;
@@ -1720,8 +1720,8 @@ export const generatePDF = async (data: DocumentData) => {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            gap: 30px;
-            padding: 20px 0;
+            gap: 15px;
+            padding: 8px 0;
             margin: 0;
             width: 100%;
             border-bottom: 2px solid #000;
@@ -1781,9 +1781,9 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .document-title {
-            font-size: 24px;
+            font-size: 16px;
             font-weight: bold;
-            margin-bottom: 15px;
+            margin-bottom: 6px;
             color: #000;
             text-transform: uppercase;
           }
@@ -1809,13 +1809,13 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .section-title {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
             color: #000;
-            margin: 0 0 15px 0;
+            margin: 0 0 2px 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            padding: 12px;
+            padding: 2px 2px 2px 6px;
             background: #fff;
             border-left: 4px solid #000;
             page-break-inside: avoid;
@@ -1837,7 +1837,7 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .items-section {
-            margin: 15px 0 30px 0;
+            margin: 0 0 6px 0;
             page-break-inside: avoid;
             break-inside: avoid;
             display: flex;
@@ -1847,22 +1847,26 @@ export const generatePDF = async (data: DocumentData) => {
           .subsection {
             page-break-inside: avoid;
             break-inside: avoid;
-            margin-bottom: 12px;
-            padding: 8px;
+            margin-bottom: 2px;
+            margin-top: 0;
+            padding: 0;
           }
 
           .subsection > div:first-child {
             font-weight: 600;
-            margin-bottom: 6px;
+            margin-bottom: 1px;
+            margin-top: 0;
+            font-size: 10px;
+            line-height: 1.2;
             page-break-after: avoid;
           }
 
           .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 12px 0;
-            font-size: 11px;
-            border: 2px solid #000;
+            margin: 4px 0;
+            font-size: 10px;
+            border: 1px solid #000;
             border-radius: 0;
             overflow: hidden;
             page-break-inside: avoid;
@@ -1877,10 +1881,10 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .items-table th {
-            padding: 8px 8px;
+            padding: 4px 4px;
             text-align: center;
             font-weight: bold;
-            font-size: 10px;
+            font-size: 9px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             border-right: 1px solid rgba(255,255,255,0.2);
@@ -1898,7 +1902,7 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .items-table td {
-            padding: 8px 8px;
+            padding: 4px 4px;
             border-bottom: 1px solid #e9ecef;
             border-right: 1px solid #e9ecef;
             text-align: center;
@@ -1934,15 +1938,15 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .totals-section {
-            margin-top: 20px;
-            margin-bottom: 15mm;
+            margin-top: 6px;
+            margin-bottom: 8px;
             display: flex;
             justify-content: flex-end;
             page-break-inside: avoid;
             break-inside: avoid;
             page-break-before: avoid;
             break-before: avoid;
-            padding-bottom: 10mm;
+            padding-bottom: 0;
           }
 
           .totals-table {
@@ -1954,9 +1958,10 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .totals-table td {
-            padding: 8px 15px;
+            padding: 4px 8px;
             border: none;
             page-break-inside: avoid;
+            font-size: 10px;
           }
 
           .totals-table .label {
@@ -2104,8 +2109,8 @@ export const generatePDF = async (data: DocumentData) => {
 
         .header {
           display: block;
-          margin: 0 0 15px 0;
-          padding: 0 0 15px 0;
+          margin: 0 0 8px 0;
+          padding: 0 0 8px 0;
           width: 100%;
           box-sizing: border-box;
         }
@@ -2298,12 +2303,13 @@ export const generatePDF = async (data: DocumentData) => {
         
         
         .section-title {
-          font-size: 14px;
+          font-size: 12px;
           font-weight: bold;
           color: #000;
-          margin: 0 0 15px 0;
+          margin: 0 0 2px 0;
           text-transform: uppercase;
           letter-spacing: 0.5px;
+          padding: 2px 2px 2px 6px;
         }
 
         .customer-name {
@@ -2319,16 +2325,16 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         .items-section {
-          margin: 15px 0 30px 0;
+          margin: 0 0 6px 0;
         }
 
         .items-table {
           width: 100%;
           border-collapse: collapse;
-          margin: 20px 0;
-          font-size: 11px;
-          border: 2px solid #000;
-          border-radius: 8px;
+          margin: 4px 0;
+          font-size: 10px;
+          border: 1px solid #000;
+          border-radius: 0;
           overflow: hidden;
         }
 
@@ -2338,21 +2344,21 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         .items-table th {
-          padding: 12px 8px;
+          padding: 4px 4px;
           text-align: center;
           font-weight: bold;
-          font-size: 10px;
+          font-size: 9px;
           text-transform: uppercase;
           letter-spacing: 0.5px;
           border-right: 1px solid rgba(255,255,255,0.2);
         }
-        
+
         .items-table th:last-child {
           border-right: none;
         }
-        
+
         .items-table td {
-          padding: 10px 8px;
+          padding: 4px 4px;
           border-bottom: 1px solid #e9ecef;
           border-right: 1px solid #e9ecef;
           text-align: center;
@@ -2391,19 +2397,19 @@ export const generatePDF = async (data: DocumentData) => {
         }
         
         .totals-section {
-          margin-top: 20px;
+          margin-top: 6px;
           display: flex;
           justify-content: flex-end;
         }
-        
+
         .totals-table {
           width: 100%;
           border-collapse: collapse;
-          font-size: 12px;
+          font-size: 10px;
         }
-        
+
         .totals-table td {
-          padding: 8px 15px;
+          padding: 4px 8px;
           border: none;
         }
         
@@ -2454,15 +2460,15 @@ export const generatePDF = async (data: DocumentData) => {
         }
         
         .delivery-info-section {
-          margin: 25px 0;
-          padding: 20px;
+          margin: 6px 0;
+          padding: 8px;
           background: #f8f9fa;
-          border-radius: 8px;
+          border-radius: 0;
           border: 1px solid #e9ecef;
         }
 
         .delivery-details {
-          margin-top: 15px;
+          margin-top: 4px;
         }
 
         .delivery-row {
@@ -2496,14 +2502,14 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         .signature-section {
-          margin: 30px 0 20px 0;
-          padding: 20px;
+          margin: 6px 0 6px 0;
+          padding: 6px;
           border-top: 1px solid #e9ecef;
         }
 
         .signature-row {
           display: flex;
-          gap: 40px;
+          gap: 20px;
         }
 
         .signature-box {
@@ -2512,21 +2518,21 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         .signature-label {
-          font-size: 11px;
+          font-size: 10px;
           font-weight: bold;
           color: #000;
-          margin-bottom: 20px;
+          margin-bottom: 8px;
           text-transform: uppercase;
         }
 
         .signature-line {
-          font-size: 12px;
+          font-size: 10px;
           font-weight: bold;
           color: #333;
           border-bottom: 1px solid #333;
-          margin-bottom: 10px;
-          padding-bottom: 5px;
-          min-height: 20px;
+          margin-bottom: 4px;
+          padding-bottom: 2px;
+          min-height: 16px;
         }
 
         .signature-date {
