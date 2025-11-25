@@ -2460,15 +2460,15 @@ export const generatePDF = async (data: DocumentData) => {
         }
         
         .delivery-info-section {
-          margin: 25px 0;
-          padding: 20px;
+          margin: 6px 0;
+          padding: 8px;
           background: #f8f9fa;
-          border-radius: 8px;
+          border-radius: 0;
           border: 1px solid #e9ecef;
         }
 
         .delivery-details {
-          margin-top: 15px;
+          margin-top: 4px;
         }
 
         .delivery-row {
