@@ -535,29 +535,36 @@ const generatePDFHeader = (
           </div>
         </div>
 
-        <!-- Bottom row: All details with proper alignment -->
-        <div style="font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; width: 100%; box-sizing: border-box;">
-          <div style="display: flex; align-items: baseline; gap: 0;">
-            <span style="width: 80px; white-space: nowrap;"><strong>Client;</strong></span>
-            <span style="flex: 1;">${data.customer?.name || ''}</span>
-          </div>
-          ${data.customer?.address ? `<div style="padding-left: 80px;">${data.customer.address}</div>` : ''}
-          ${data.customer?.city ? `<div style="padding-left: 80px;">${data.customer.city}</div>` : ''}
-          ${data.customer?.country ? `<div style="padding-left: 80px;">${data.customer.country}</div>` : ''}
-          ${data.project_title ? `<div style="margin-top: 6px; display: flex; align-items: baseline; gap: 0;"><span style="width: 80px; white-space: nowrap;"><strong>Project;</strong></span><span style="flex: 1;">${data.project_title}</span></div>` : ''}
-          <div style="margin-top: 6px; display: flex; align-items: baseline; gap: 0;">
-            <span style="width: 80px; white-space: nowrap;"><strong>Subject;</strong></span>
-            <span style="flex: 1;">${documentType}</span>
-          </div>
-          <div style="display: flex; align-items: baseline; gap: 0;">
-            <span style="width: 80px; white-space: nowrap;"><strong>Date;</strong></span>
-            <span style="flex: 1;">${formatDateLong(data.date || '')}</span>
-          </div>
-          <div style="display: flex; align-items: baseline; gap: 0;">
-            <span style="width: 80px; white-space: nowrap;"><strong>${documentNumber};</strong></span>
-            <span style="flex: 1;">${displayNumber}</span>
-          </div>
-        </div>
+        <!-- Bottom row: All details with borderless two-column table -->
+        <table style="font-size: 12px; font-weight: bold; line-height: 1.6; width: 100%; border-collapse: collapse; border: none;">
+          <tr style="border: none;">
+            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>Client;</strong></td>
+            <td style="border: none; padding: 2px 0;">
+              <div>${data.customer?.name || ''}</div>
+              ${data.customer?.address ? `<div>${data.customer.address}</div>` : ''}
+              ${data.customer?.city ? `<div>${data.customer.city}</div>` : ''}
+              ${data.customer?.country ? `<div>${data.customer.country}</div>` : ''}
+            </td>
+          </tr>
+          ${data.project_title ? `
+          <tr style="border: none;">
+            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>Project;</strong></td>
+            <td style="border: none; padding: 2px 0;">${data.project_title}</td>
+          </tr>
+          ` : ''}
+          <tr style="border: none;">
+            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>Subject;</strong></td>
+            <td style="border: none; padding: 2px 0;">${documentType}</td>
+          </tr>
+          <tr style="border: none;">
+            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>Date;</strong></td>
+            <td style="border: none; padding: 2px 0;">${formatDateLong(data.date || '')}</td>
+          </tr>
+          <tr style="border: none;">
+            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>${documentNumber};</strong></td>
+            <td style="border: none; padding: 2px 0;">${displayNumber}</td>
+          </tr>
+        </table>
       </div>
     </div>
   `;
@@ -952,10 +959,12 @@ export const generatePDF = async (data: DocumentData) => {
             </table>
           </div>
 
-          ${data.customTitle === 'INVOICE' && data.stampImageUrl ? `
-          <!-- Stamp Section for Invoice (floated to avoid extra pages) -->
-          <div class="stamp-section" style="float: right; margin: 0 0 12px 12px; page-break-inside: avoid;">
-            <img src="${data.stampImageUrl}" alt="Company Stamp" style="width: 80px; height: 80px; object-fit: contain; display: block;" />
+          ${data.customTitle === 'INVOICE' ? `
+          <!-- Stamp for Invoice -->
+          <div style="margin-top: 20px; padding-top: 12px; display: flex; justify-content: flex-end; margin-left: 15mm; margin-right: 15mm;">
+            <div style="text-align: center; width: 100px;">
+              <img src="${data.stampImageUrl || stampImage}" alt="Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
+            </div>
           </div>
           ` : ''}
         </div>
@@ -2616,73 +2625,9 @@ export const generatePDF = async (data: DocumentData) => {
       <div class="page">
         <!-- Watermark for proforma invoices -->
         ${data.type === 'proforma' ? '<div class="watermark">Proforma</div>' : ''}
-        
-        <!-- Header Section -->
-        <div class="header">
-          <!-- Full-width header image -->
-          <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
 
-          <!-- Header content below image -->
-          <div class="header-content">
-            <!-- Top row: Services (left) and Company details (right) -->
-            <div class="header-top">
-              <!-- Services Section -->
-              <div class="services-section">
-                ${(() => {
-                  const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
-                  const itemsPerLine = Math.ceil(services.length / 3);
-                  const line1 = services.slice(0, itemsPerLine).join(' • ');
-                  const line2 = services.slice(itemsPerLine, itemsPerLine * 2).join(' • ');
-                  const line3 = services.slice(itemsPerLine * 2).join(' • ');
-                  return `<div>${line1}</div>${line2 ? `<div>${line2}</div>` : ''}${line3 ? `<div>${line3}</div>` : ''}`;
-                })()}
-              </div>
-
-              <!-- Company details (right-aligned) -->
-              <div class="header-right">
-                ${company.address ? `<div>${company.address}</div>` : ''}
-                ${company.city ? `<div>${company.city}${company.country ? ', ' + company.country : ''}</div>` : ''}
-                ${company.phone ? `<div>Telephone: ${company.phone}</div>` : ''}
-                ${company.email ? `<div>${company.email}</div>` : ''}
-                ${company.tax_number ? `<div>PIN: ${company.tax_number}</div>` : ''}
-              </div>
-            </div>
-
-            <!-- Bottom row: Client Details - Two Column Table -->
-            <div class="header-left">
-              <table class="client-details-table">
-                <tr>
-                  <td class="label">${data.type === 'lpo' ? 'Supplier' : 'Client'}:</td>
-                  <td class="value">${data.customer?.name || ''}</td>
-                </tr>
-                ${(data.customer?.address || data.customer?.city || data.customer?.country) ? `
-                <tr>
-                  <td class="label">Address:</td>
-                  <td class="value">${data.customTitle === 'INVOICE' ? 'Platz der Vereinten Nationen 7<br/>53113 Bonn, Germany' : (data.customer?.address || '') + (data.customer?.address && data.customer?.city ? '<br/>' : '') + (data.customer?.city || '') + (data.customer?.city && data.customer?.country ? ', ' : '') + (data.customer?.country || '')}</td>
-                </tr>
-                ` : ''}
-                ${data.project_title ? `
-                <tr>
-                  <td class="label">Project:</td>
-                  <td class="value">${data.project_title}</td>
-                </tr>
-                ` : ''}
-                <tr>
-                  <td class="label">Subject:</td>
-                  <td class="value">${data.type === 'boq' ? (data.customTitle || 'Bill of Quantities') : (data.subject || (data.type === 'invoice' ? 'Invoice' : data.type === 'receipt' ? 'Payment Receipt' : data.type === 'delivery' ? 'Delivery Note' : data.type === 'proforma' ? 'Proforma Invoice' : data.type === 'remittance' ? 'Remittance Advice' : data.type === 'lpo' ? 'Purchase Order' : 'Quotation'))}</td>
-                </tr>
-                <tr>
-                  <td class="label">Date:</td>
-                  <td class="value">${formatDateLong(data.date || '')}</td>
-                </tr>
-                <tr>
-                  <td class="label">${data.type === 'boq' ? 'BOQ No' : 'Qtn No'}:</td>
-                  <td class="value">${data.number || ''}</td>
-                </tr>
-              </table>
-            </div>
-          </div>
-        </div>
+        <!-- Header Section using generatePDFHeader -->
+        ${generatePDFHeader(headerImage, company, companyServices, data, formatDateLong, documentTitle)}
 
         <!-- Delivery Information Section (for delivery notes) -->
         ${data.type === 'delivery' ? `
