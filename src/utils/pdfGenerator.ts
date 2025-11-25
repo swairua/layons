@@ -1955,9 +1955,10 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .totals-table td {
-            padding: 8px 15px;
+            padding: 4px 8px;
             border: none;
             page-break-inside: avoid;
+            font-size: 10px;
           }
 
           .totals-table .label {
