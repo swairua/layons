@@ -2502,14 +2502,14 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         .signature-section {
-          margin: 30px 0 20px 0;
-          padding: 20px;
+          margin: 6px 0 6px 0;
+          padding: 6px;
           border-top: 1px solid #e9ecef;
         }
 
         .signature-row {
           display: flex;
-          gap: 40px;
+          gap: 20px;
         }
 
         .signature-box {
@@ -2518,21 +2518,21 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         .signature-label {
-          font-size: 11px;
+          font-size: 10px;
           font-weight: bold;
           color: #000;
-          margin-bottom: 20px;
+          margin-bottom: 8px;
           text-transform: uppercase;
         }
 
         .signature-line {
-          font-size: 12px;
+          font-size: 10px;
           font-weight: bold;
           color: #333;
           border-bottom: 1px solid #333;
-          margin-bottom: 10px;
-          padding-bottom: 5px;
-          min-height: 20px;
+          margin-bottom: 4px;
+          padding-bottom: 2px;
+          min-height: 16px;
         }
 
         .signature-date {
