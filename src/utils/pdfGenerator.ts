@@ -2106,8 +2106,8 @@ export const generatePDF = async (data: DocumentData) => {
 
         .header {
           display: block;
-          margin: 0 0 15px 0;
-          padding: 0 0 15px 0;
+          margin: 0 0 8px 0;
+          padding: 0 0 8px 0;
           width: 100%;
           box-sizing: border-box;
         }
