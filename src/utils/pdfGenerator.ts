@@ -1633,7 +1633,7 @@ export const generatePDF = async (data: DocumentData) => {
           .page,
           .page-section {
             width: 100%;
-            margin: 15mm 0;
+            margin: 0;
             background: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             padding: 15mm;
@@ -1643,7 +1643,7 @@ export const generatePDF = async (data: DocumentData) => {
             break-after: page;
             break-inside: avoid;
             box-sizing: border-box;
-            min-height: 277mm;
+            min-height: auto;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
