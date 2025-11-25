@@ -1878,10 +1878,10 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .items-table th {
-            padding: 8px 8px;
+            padding: 4px 4px;
             text-align: center;
             font-weight: bold;
-            font-size: 10px;
+            font-size: 9px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             border-right: 1px solid rgba(255,255,255,0.2);
