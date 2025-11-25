@@ -128,6 +128,8 @@ const addCanvasToPDF = async (pdf: jsPDF, canvas: HTMLCanvasElement, pageWidth: 
 
 // Helper function to convert HTML to PDF and auto-download
 const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string) => {
+  const { default: jsPDF } = await import('jspdf');
+  const html2canvas = (await import('html2canvas')).default;
   let wrapper: HTMLElement | null = null;
   try {
     // Create a temporary wrapper for proper rendering
