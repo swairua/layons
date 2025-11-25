@@ -847,6 +847,14 @@ export const generatePDF = async (data: DocumentData) => {
         body.special-invoice .sig-block { gap: 4px; }
         body.special-invoice .sigline { height: 12px; }
         body.special-invoice .field-row { gap: 4px; }
+
+        /* Client section styling for special invoice */
+        .invoice-client-section { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; page-break-inside: avoid; margin-top: 20px; padding-top: 12px; }
+        .invoice-client-section .client-info { flex: 1; font-size: 10px; color: #333; line-height: 1.6; }
+        .invoice-client-section .client-info .client-name { margin-bottom: 8px; }
+        .invoice-client-section .stamp { text-align: center; flex-shrink: 0; width: 100px; }
+        .invoice-client-section .stamp img { width: 100px; height: 100px; object-fit: contain; }
+        body.special-invoice .invoice-client-section { margin-left: 15mm; margin-right: 15mm; }
         .totals .label { text-align:right; padding-right:12px; }
         .footer { margin-top:24px; display:flex; flex-direction:column; gap:18px; }
         .sig-block { display:flex; flex-direction:column; gap:8px; }
