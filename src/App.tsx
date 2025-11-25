@@ -57,6 +57,11 @@ const App = () => {
     setFavicon(currentCompany?.logo_url);
   }, [currentCompany?.logo_url]);
 
+  useEffect(() => {
+    // Update meta tags when company details change
+    updateMetaTags(currentCompany);
+  }, [currentCompany]);
+
   return (
     <TooltipProvider>
       <Toaster />
