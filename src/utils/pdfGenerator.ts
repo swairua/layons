@@ -1781,9 +1781,9 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .document-title {
-            font-size: 24px;
+            font-size: 16px;
             font-weight: bold;
-            margin-bottom: 15px;
+            margin-bottom: 6px;
             color: #000;
             text-transform: uppercase;
           }
