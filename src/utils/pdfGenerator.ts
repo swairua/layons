@@ -1,6 +1,4 @@
 // PDF Generation utility using jsPDF + html2canvas for auto-download
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { PDF_PAGE_CSS } from './pdfMarginConstants';
 import { formatCurrency as formatCurrencyUtil } from './currencyFormatter';
 
