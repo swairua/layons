@@ -564,9 +564,8 @@ const generatePDFHeader = (
 };
 
 export const generatePDF = async (data: DocumentData) => {
-  // Dynamically import browser-only libraries
-  const { default: jsPDF } = await import('jspdf');
-  const html2canvas = (await import('html2canvas')).default;
+  // Ensure browser-only libraries are loaded
+  await ensureImports();
 
   // Extract theme color variables from the main document so PDFs match the app theme
   const computed = typeof window !== 'undefined' ? getComputedStyle(document.documentElement) : null;
