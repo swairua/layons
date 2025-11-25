@@ -1693,7 +1693,7 @@ export const generatePDF = async (data: DocumentData) => {
           .header {
             display: flex;
             flex-direction: column;
-            margin-bottom: 30px;
+            margin-bottom: 12px;
             padding-bottom: 0;
             border-bottom: none;
             margin-left: 0;
