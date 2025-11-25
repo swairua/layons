@@ -1847,8 +1847,9 @@ export const generatePDF = async (data: DocumentData) => {
           .subsection {
             page-break-inside: avoid;
             break-inside: avoid;
-            margin-bottom: 4px;
-            padding: 4px 0;
+            margin-bottom: 2px;
+            margin-top: 0;
+            padding: 0;
           }
 
           .subsection > div:first-child {
