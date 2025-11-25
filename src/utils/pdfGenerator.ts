@@ -535,29 +535,36 @@ const generatePDFHeader = (
           </div>
         </div>
 
-        <!-- Bottom row: All details with proper alignment -->
-        <div style="font-size: 12px; font-weight: bold; line-height: 1.6; text-align: left; width: 100%; box-sizing: border-box;">
-          <div style="display: flex; align-items: baseline; gap: 0;">
-            <span style="width: 80px; white-space: nowrap;"><strong>Client;</strong></span>
-            <span style="flex: 1;">${data.customer?.name || ''}</span>
-          </div>
-          ${data.customer?.address ? `<div style="padding-left: 80px;">${data.customer.address}</div>` : ''}
-          ${data.customer?.city ? `<div style="padding-left: 80px;">${data.customer.city}</div>` : ''}
-          ${data.customer?.country ? `<div style="padding-left: 80px;">${data.customer.country}</div>` : ''}
-          ${data.project_title ? `<div style="margin-top: 6px; display: flex; align-items: baseline; gap: 0;"><span style="width: 80px; white-space: nowrap;"><strong>Project;</strong></span><span style="flex: 1;">${data.project_title}</span></div>` : ''}
-          <div style="margin-top: 6px; display: flex; align-items: baseline; gap: 0;">
-            <span style="width: 80px; white-space: nowrap;"><strong>Subject;</strong></span>
-            <span style="flex: 1;">${documentType}</span>
-          </div>
-          <div style="display: flex; align-items: baseline; gap: 0;">
-            <span style="width: 80px; white-space: nowrap;"><strong>Date;</strong></span>
-            <span style="flex: 1;">${formatDateLong(data.date || '')}</span>
-          </div>
-          <div style="display: flex; align-items: baseline; gap: 0;">
-            <span style="width: 80px; white-space: nowrap;"><strong>${documentNumber};</strong></span>
-            <span style="flex: 1;">${displayNumber}</span>
-          </div>
-        </div>
+        <!-- Bottom row: All details with borderless two-column table -->
+        <table style="font-size: 12px; font-weight: bold; line-height: 1.6; width: 100%; border-collapse: collapse; border: none;">
+          <tr style="border: none;">
+            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>Client;</strong></td>
+            <td style="border: none; padding: 2px 0;">
+              <div>${data.customer?.name || ''}</div>
+              ${data.customer?.address ? `<div>${data.customer.address}</div>` : ''}
+              ${data.customer?.city ? `<div>${data.customer.city}</div>` : ''}
+              ${data.customer?.country ? `<div>${data.customer.country}</div>` : ''}
+            </td>
+          </tr>
+          ${data.project_title ? `
+          <tr style="border: none;">
+            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>Project;</strong></td>
+            <td style="border: none; padding: 2px 0;">${data.project_title}</td>
+          </tr>
+          ` : ''}
+          <tr style="border: none;">
+            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>Subject;</strong></td>
+            <td style="border: none; padding: 2px 0;">${documentType}</td>
+          </tr>
+          <tr style="border: none;">
+            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>Date;</strong></td>
+            <td style="border: none; padding: 2px 0;">${formatDateLong(data.date || '')}</td>
+          </tr>
+          <tr style="border: none;">
+            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>${documentNumber};</strong></td>
+            <td style="border: none; padding: 2px 0;">${displayNumber}</td>
+          </tr>
+        </table>
       </div>
     </div>
   `;
