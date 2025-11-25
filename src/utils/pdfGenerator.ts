@@ -2393,19 +2393,19 @@ export const generatePDF = async (data: DocumentData) => {
         }
         
         .totals-section {
-          margin-top: 20px;
+          margin-top: 6px;
           display: flex;
           justify-content: flex-end;
         }
-        
+
         .totals-table {
           width: 100%;
           border-collapse: collapse;
-          font-size: 12px;
+          font-size: 10px;
         }
-        
+
         .totals-table td {
-          padding: 8px 15px;
+          padding: 4px 8px;
           border: none;
         }
         
