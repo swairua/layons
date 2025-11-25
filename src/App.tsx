@@ -5,6 +5,9 @@ import { Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { useCurrentCompany } from "@/contexts/CompanyContext";
+import { setFavicon } from "@/utils/setFavicon";
+import { updateMetaTags } from "@/utils/updateMetaTags";
 
 // Lazy load the page components to reduce initial bundle size and startup time
 import { lazy, Suspense } from "react";
@@ -42,11 +45,22 @@ const AdminRecreate = lazy(() => import("./pages/AdminRecreate"));
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 
 const App = () => {
+  const { currentCompany } = useCurrentCompany();
 
   useEffect(() => {
     // Initialize on app startup
     // Non-blocking async initialization
   }, []);
+
+  useEffect(() => {
+    // Update favicon when company logo changes
+    setFavicon(currentCompany?.logo_url);
+  }, [currentCompany?.logo_url]);
+
+  useEffect(() => {
+    // Update meta tags when company details change
+    updateMetaTags(currentCompany);
+  }, [currentCompany]);
 
   return (
     <TooltipProvider>
