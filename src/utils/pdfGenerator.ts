@@ -1837,7 +1837,7 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .items-section {
-            margin: 15px 0 30px 0;
+            margin: 6px 0 6px 0;
             page-break-inside: avoid;
             break-inside: avoid;
             display: flex;
