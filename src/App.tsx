@@ -7,6 +7,7 @@ import { Layout } from "@/components/layout/Layout";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useCurrentCompany } from "@/contexts/CompanyContext";
 import { setFavicon } from "@/utils/setFavicon";
+import { updateMetaTags } from "@/utils/updateMetaTags";
 
 // Lazy load the page components to reduce initial bundle size and startup time
 import { lazy, Suspense } from "react";
