@@ -44,11 +44,17 @@ const AdminRecreate = lazy(() => import("./pages/AdminRecreate"));
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 
 const App = () => {
+  const { currentCompany } = useCurrentCompany();
 
   useEffect(() => {
     // Initialize on app startup
     // Non-blocking async initialization
   }, []);
+
+  useEffect(() => {
+    // Update favicon when company logo changes
+    setFavicon(currentCompany?.logo_url);
+  }, [currentCompany?.logo_url]);
 
   return (
     <TooltipProvider>
