@@ -1935,15 +1935,15 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .totals-section {
-            margin-top: 20px;
-            margin-bottom: 15mm;
+            margin-top: 6px;
+            margin-bottom: 8px;
             display: flex;
             justify-content: flex-end;
             page-break-inside: avoid;
             break-inside: avoid;
             page-break-before: avoid;
             break-before: avoid;
-            padding-bottom: 10mm;
+            padding-bottom: 0;
           }
 
           .totals-table {
