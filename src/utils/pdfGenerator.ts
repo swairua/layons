@@ -1853,8 +1853,10 @@ export const generatePDF = async (data: DocumentData) => {
 
           .subsection > div:first-child {
             font-weight: 600;
-            margin-bottom: 3px;
+            margin-bottom: 1px;
+            margin-top: 0;
             font-size: 10px;
+            line-height: 1.2;
             page-break-after: avoid;
           }
 
