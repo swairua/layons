@@ -4,6 +4,7 @@ import { formatCurrency as formatCurrencyUtil } from './currencyFormatter';
 
 // Helper function to render HTML content to canvas
 const renderHTMLToCanvas = async (htmlContent: string, pageSelector: string) => {
+  const html2canvas = (await import('html2canvas')).default;
   let wrapper: HTMLElement | null = null;
   try {
     // Create a temporary wrapper for proper rendering
