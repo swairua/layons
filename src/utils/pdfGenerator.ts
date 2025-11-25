@@ -2321,16 +2321,16 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         .items-section {
-          margin: 15px 0 30px 0;
+          margin: 6px 0 6px 0;
         }
 
         .items-table {
           width: 100%;
           border-collapse: collapse;
-          margin: 20px 0;
-          font-size: 11px;
-          border: 2px solid #000;
-          border-radius: 8px;
+          margin: 4px 0;
+          font-size: 10px;
+          border: 1px solid #000;
+          border-radius: 0;
           overflow: hidden;
         }
 
@@ -2340,21 +2340,21 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         .items-table th {
-          padding: 12px 8px;
+          padding: 4px 4px;
           text-align: center;
           font-weight: bold;
-          font-size: 10px;
+          font-size: 9px;
           text-transform: uppercase;
           letter-spacing: 0.5px;
           border-right: 1px solid rgba(255,255,255,0.2);
         }
-        
+
         .items-table th:last-child {
           border-right: none;
         }
-        
+
         .items-table td {
-          padding: 10px 8px;
+          padding: 4px 4px;
           border-bottom: 1px solid #e9ecef;
           border-right: 1px solid #e9ecef;
           text-align: center;
