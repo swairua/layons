@@ -2,9 +2,24 @@
 import { PDF_PAGE_CSS } from './pdfMarginConstants';
 import { formatCurrency as formatCurrencyUtil } from './currencyFormatter';
 
+// Browser-only imports (only loaded when actually used)
+let jsPDF: any;
+let html2canvas: any;
+
+const ensureImports = async () => {
+  if (!jsPDF) {
+    const mod = await import('jspdf');
+    jsPDF = mod.default;
+  }
+  if (!html2canvas) {
+    const mod = await import('html2canvas');
+    html2canvas = mod.default;
+  }
+};
+
 // Helper function to render HTML content to canvas
 const renderHTMLToCanvas = async (htmlContent: string, pageSelector: string) => {
-  const html2canvas = (await import('html2canvas')).default;
+  await ensureImports();
   let wrapper: HTMLElement | null = null;
   try {
     // Create a temporary wrapper for proper rendering
