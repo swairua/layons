@@ -1861,9 +1861,9 @@ export const generatePDF = async (data: DocumentData) => {
           .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 12px 0;
-            font-size: 11px;
-            border: 2px solid #000;
+            margin: 4px 0;
+            font-size: 10px;
+            border: 1px solid #000;
             border-radius: 0;
             overflow: hidden;
             page-break-inside: avoid;
