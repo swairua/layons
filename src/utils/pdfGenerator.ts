@@ -1720,8 +1720,8 @@ export const generatePDF = async (data: DocumentData) => {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            gap: 30px;
-            padding: 20px 0;
+            gap: 15px;
+            padding: 8px 0;
             margin: 0;
             width: 100%;
             border-bottom: 2px solid #000;
