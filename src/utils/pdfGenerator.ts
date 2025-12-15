@@ -1732,7 +1732,7 @@ export const generatePDF = async (data: DocumentData) => {
             .page-section {
               width: 210mm;
               padding: 15mm;
-              margin: 15mm auto;
+              margin: 15mm auto 25mm auto;
               min-height: auto;
               box-sizing: border-box;
             }
