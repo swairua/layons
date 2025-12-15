@@ -507,7 +507,7 @@ const generatePDFHeader = (
     <!-- Header Section -->
     <div class="header">
       <!-- Full-width header image -->
-      <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" style="height: 85px !important;" />
+      <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" style="height: 110px !important;" />
 
       <!-- Header content below image -->
       <div class="header-content" style="display: flex; flex-direction: column; gap: 6px; margin-top: 2px;">
