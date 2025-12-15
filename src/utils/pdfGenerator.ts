@@ -837,10 +837,10 @@ export const generatePDF = async (data: DocumentData) => {
 
         /* Force page breaks for items to prevent cutting */
         .item-row:nth-child(4n) { page-break-after: auto; }
-        .section-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 2mm; }
+        .section-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 5mm; page-break-after: avoid; }
         .section-total td { font-weight:700; background:#fafafa; padding: 4px 6px; }
         .section-total .label { text-align:right; padding: 4px 12px 4px 6px; }
-        .preliminaries-section { margin-bottom:4px; page-break-inside: avoid; margin-left: 15mm; margin-right: 15mm; }
+        .preliminaries-section { margin-bottom: 8mm; page-break-inside: avoid; margin-left: 15mm; margin-right: 15mm; }
         .preliminaries-section .items { margin-top:0; margin-left: 0; margin-right: 0; width: 100%; }
         .subsection-row { page-break-inside: avoid; page-break-after: avoid; margin: 2mm 0 0 0; }
         .subsection-row td { background:#fcfcfc; font-weight:600; padding: 4px 6px; line-height: 1.3; font-size: 10px; height: auto; vertical-align: middle; }
