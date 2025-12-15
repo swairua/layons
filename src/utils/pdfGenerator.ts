@@ -707,8 +707,8 @@ export const generatePDF = async (data: DocumentData) => {
           itemNo = 0;
           // Add spacer row before section headers (except first section) to force page breaks
           const isFirstSection = !rowsHtml.includes('section-row');
-          const spacerRow = !isFirstSection ? `<tr class=\"spacer-row\"><td colspan=\"6\" style=\"height: 2mm; border: none; background: none;\"></td></tr>` : '';
-          rowsHtml += spacerRow + `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\" style=\"height: 14px; vertical-align: middle;\">${currentSection}</td></tr>`;
+          const spacerRow = !isFirstSection ? `<tr class=\"spacer-row\"><td colspan=\"6\" style=\"height: 8mm; border: none; background: none;\"></td></tr>` : '';
+          rowsHtml += spacerRow + `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\" style=\"height: auto; vertical-align: middle;\">${currentSection}</td></tr>`;
           return;
         }
 
