@@ -507,10 +507,10 @@ const generatePDFHeader = (
     <!-- Header Section -->
     <div class="header">
       <!-- Full-width header image -->
-      <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" style="height: 125px !important;" />
+      <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" style="height: 110px !important;" />
 
       <!-- Header content below image -->
-      <div class="header-content" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
+      <div class="header-content" style="display: flex; flex-direction: column; gap: 6px; margin-top: 2px;">
         <!-- Top row: Services (left) and Company details (right) -->
         <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: calc(100% + 12mm); margin-right: -12mm; box-sizing: border-box; min-width: 0;">
           <!-- Services Section -->
@@ -707,8 +707,8 @@ export const generatePDF = async (data: DocumentData) => {
           itemNo = 0;
           // Add spacer row before section headers (except first section) to force page breaks
           const isFirstSection = !rowsHtml.includes('section-row');
-          const spacerRow = !isFirstSection ? `<tr class=\"spacer-row\"><td colspan=\"6\" style=\"height: 15mm; border: none; background: none;\"></td></tr>` : '';
-          rowsHtml += spacerRow + `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\">${currentSection}</td></tr>`;
+          const spacerRow = !isFirstSection ? `<tr class=\"spacer-row\"><td colspan=\"6\" style=\"height: 2mm; border: none; background: none;\"></td></tr>` : '';
+          rowsHtml += spacerRow + `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\" style=\"height: 14px; vertical-align: middle;\">${currentSection}</td></tr>`;
           return;
         }
 
@@ -750,8 +750,8 @@ export const generatePDF = async (data: DocumentData) => {
           currentSection = it.description;
           // Add spacer row before section headers (except first section) to force page breaks
           const isFirstSection = sectionTotals.length === 0;
-          const spacerRow = !isFirstSection ? `<tr class=\"spacer-row\"><td colspan=\"6\" style=\"height: 15mm; border: none; background: none;\"></td></tr>` : '';
-          rowsHtml += spacerRow + `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\">${currentSection}</td></tr>`;
+          const spacerRow = !isFirstSection ? `<tr class=\"spacer-row\"><td colspan=\"6\" style=\"height: 2mm; border: none; background: none;\"></td></tr>` : '';
+          rowsHtml += spacerRow + `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\" style=\"height: 14px; vertical-align: middle;\">${currentSection}</td></tr>`;
           return;
         }
         itemNo += 1;
@@ -801,7 +801,7 @@ export const generatePDF = async (data: DocumentData) => {
 
         /* Header styling - full page width, no overflow */
         .header { margin: 0; padding: 0; width: 100%; box-sizing: border-box; }
-        .header-image { width: 100%; height: auto; max-height: 60px; object-fit: cover; display: block; margin: 0; padding: 0; }
+        .header-image { width: 100%; height: auto; max-height: none; object-fit: contain; display: block; margin: 0; padding: 0; }
         .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; width: 100%; padding: 0 15mm; box-sizing: border-box; }
         .header-top { display: flex; align-items: flex-start; width: 100%; margin: 0 0 10px 0; padding: 0; gap: 20px; box-sizing: border-box; min-width: 0; }
         .services-section { display: block; font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0; }
@@ -815,19 +815,19 @@ export const generatePDF = async (data: DocumentData) => {
         body.special-invoice .services-section { font-size: 11px; line-height: 1.4; }
         body.special-invoice .header-right { font-size: 11px; line-height: 1.4; }
 
-        .items { width:100%; border-collapse:collapse; margin-top:2px; margin-bottom: 2px; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm); }
-        .items th, .items td { border:1px solid #e6e6e6; padding:3px 4px; font-size: 10px; }
-        .items thead th { background:#f8f9fa; color:#000; font-weight:bold; text-transform: uppercase; }
+        .items { width:100%; border-collapse:collapse; margin-top:0; margin-bottom: 2px; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm); }
+        .items th, .items td { border:1px solid #e6e6e6; padding: 2px 4px; font-size: 10px; vertical-align: middle; } .items tbody { margin-top: -1px; }
+        .items thead th { background:#f8f9fa; color:#000; font-weight:bold; text-transform: uppercase; padding: 2px 4px 0px 4px; }
         .items thead { display: table-header-group; }
 
         body.special-invoice .items { margin-top: 3px; margin-bottom: 3px; }
         body.special-invoice .preliminaries-section { margin-bottom: 6px; }
-        .spacer-row { height: 15mm; page-break-inside: avoid; }
-        .spacer-row td { border: none !important; background: none !important; padding: 0 !important; height: 15mm; }
-        .section-row { page-break-inside: avoid; page-break-before: always; page-break-after: avoid; }
-        .section-row:first-of-type { page-break-before: avoid; }
-        .section-row td.section-title { background:#f4f4f4; font-weight:700; padding:2px 4px; }
-        .item-row { page-break-inside: avoid; }
+        .spacer-row { height: 3mm; page-break-inside: avoid; }
+        .spacer-row td { border: none !important; background: none !important; padding: 0 !important; height: 3mm; }
+        .section-row { page-break-inside: avoid; page-break-before: avoid; page-break-after: avoid; margin: 0; height: auto; } .section-row td { height: auto; vertical-align: middle; }
+        .section-row:first-of-type { page-break-before: avoid; margin-top: -2px; }
+        .section-row td.section-title { background:#f4f4f4; font-weight:700; padding: 1px 4px 3px 4px; line-height: 1; font-size: 10px; text-align: left; vertical-align: middle; }
+        .item-row { page-break-inside: avoid; } .item-row td { padding: 1px 4px; }
         .item-row td.num { text-align:center; width: 5%; }
         .item-row td.desc { width: 55%; }
         .item-row td.qty { width: 8%; text-align:center; }
@@ -839,9 +839,9 @@ export const generatePDF = async (data: DocumentData) => {
         .section-total .label { text-align:right; padding-right:12px; }
         .preliminaries-section { margin-bottom:4px; page-break-inside: avoid; margin-left: 15mm; margin-right: 15mm; }
         .preliminaries-section .items { margin-top:0; margin-left: 0; margin-right: 0; width: 100%; }
-        .subsection-row { page-break-inside: avoid; page-break-after: avoid; margin-bottom: 1px; }
-        .subsection-row td { background:#fcfcfc; font-weight:600; padding: 2px 4px; }
-        .subsection-title { padding:2px 4px; }
+        .subsection-row { page-break-inside: avoid; page-break-after: avoid; margin: 0; }
+        .subsection-row td { background:#fcfcfc; font-weight:600; padding: 1px 4px; line-height: 1.2; font-size: 10px; height: 14px; vertical-align: middle; }
+        .subsection-title { padding: 2px 4px; vertical-align: middle; text-align: left; }
         .subsection-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 2mm; }
         .subsection-total td { font-weight:600; background:#fdfdfd; }
         .subsection-total .label { text-align:right; padding-right:12px; }
@@ -932,7 +932,7 @@ export const generatePDF = async (data: DocumentData) => {
 
           ${preliminariesHtml}
 
-          <div style="height: ${data.customTitle === 'INVOICE' ? '8mm' : '15mm'}; margin-left: 15mm; margin-right: 15mm;"></div>
+          <div style="height: ${data.customTitle === 'INVOICE' ? '4mm' : '8mm'}; margin-left: 15mm; margin-right: 15mm;"></div>
 
           <table class="items">
             <thead>
