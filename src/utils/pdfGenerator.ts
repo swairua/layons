@@ -1709,7 +1709,7 @@ export const generatePDF = async (data: DocumentData) => {
             .page-section {
               box-shadow: none;
               width: 100%;
-              margin: 0;
+              margin: 0 0 10mm 0;
               padding: 15mm;
               min-height: auto;
               page-break-after: always;
