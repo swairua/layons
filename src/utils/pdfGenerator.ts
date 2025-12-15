@@ -536,33 +536,33 @@ const generatePDFHeader = (
         </div>
 
         <!-- Bottom row: All details with borderless two-column table -->
-        <table style="font-size: 12px; font-weight: bold; line-height: 1.6; width: 100%; border-collapse: collapse; border: none;">
+        <table style="font-size: 12px; line-height: 1.3; width: 100%; border-collapse: collapse; border: none;">
           <tr style="border: none;">
-            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>Client;</strong></td>
-            <td style="border: none; padding: 2px 0;">
-              <div>${data.customer?.name || ''}</div>
-              ${data.customer?.address ? `<div>${data.customer.address}</div>` : ''}
-              ${data.customer?.city ? `<div>${data.customer.city}</div>` : ''}
-              ${data.customer?.country ? `<div>${data.customer.country}</div>` : ''}
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">Client</td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">
+              <div style="line-height: 1.2;">${data.customer?.name || ''}</div>
+              ${data.customer?.address ? `<div style="line-height: 1.2;">${data.customer.address}</div>` : ''}
+              ${data.customer?.city ? `<div style="line-height: 1.2;">${data.customer.city}</div>` : ''}
+              ${data.customer?.country ? `<div style="line-height: 1.2;">${data.customer.country}</div>` : ''}
             </td>
           </tr>
           ${data.project_title ? `
           <tr style="border: none;">
-            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>Project;</strong></td>
-            <td style="border: none; padding: 2px 0;">${data.project_title}</td>
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">Project</td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">${data.project_title}</td>
           </tr>
           ` : ''}
           <tr style="border: none;">
-            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>Subject;</strong></td>
-            <td style="border: none; padding: 2px 0;">${documentType}</td>
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">Subject</td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">${documentType}</td>
           </tr>
           <tr style="border: none;">
-            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>Date;</strong></td>
-            <td style="border: none; padding: 2px 0;">${formatDateLong(data.date || '')}</td>
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">Date</td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">${formatDateLong(data.date || '')}</td>
           </tr>
           <tr style="border: none;">
-            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>${documentNumber};</strong></td>
-            <td style="border: none; padding: 2px 0;">${displayNumber}</td>
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">${documentNumber}</td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">${displayNumber}</td>
           </tr>
         </table>
       </div>
@@ -588,7 +588,7 @@ export const generatePDF = async (data: DocumentData) => {
   const company = data.company || DEFAULT_COMPANY;
 
   // Default services fallback
-  const DEFAULT_SERVICES = 'BUILDING WORKS, RENOVATIONS, ROADWORKS, LANDSCAPING, ELECTRICAL WORKS, WATER WORKS';
+  const DEFAULT_SERVICES = 'BUILDING WORKS, RENOVATIONS, ROADWORKS, LANDSCAPING, ELECTRICAL WORKS, WATER WORKS, MECHANICAL WORKS';
   const companyServices = company.company_services || DEFAULT_SERVICES;
 
   // Get header and stamp images with fallbacks
@@ -801,7 +801,7 @@ export const generatePDF = async (data: DocumentData) => {
 
         /* Header styling - full page width, no overflow */
         .header { margin: 0; padding: 0; width: 100%; box-sizing: border-box; }
-        .header-image { width: 100%; height: auto; display: block; margin: 0; padding: 0; }
+        .header-image { width: 100%; height: auto; max-height: 60px; object-fit: cover; display: block; margin: 0; padding: 0; }
         .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; width: 100%; padding: 0 15mm; box-sizing: border-box; }
         .header-top { display: flex; align-items: flex-start; width: 100%; margin: 0 0 10px 0; padding: 0; gap: 20px; box-sizing: border-box; min-width: 0; }
         .services-section { display: block; font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0; }
@@ -1741,6 +1741,8 @@ export const generatePDF = async (data: DocumentData) => {
 
           .header-image {
             width: 100%;
+            max-height: 60px;
+            object-fit: cover;
             height: auto;
             margin: 0 0 8px 0;
             padding: 0;
@@ -2159,6 +2161,8 @@ export const generatePDF = async (data: DocumentData) => {
 
         .header-image {
           width: 100%;
+          max-height: 60px;
+          object-fit: cover;
           height: auto;
           margin: 0 0 12px 0;
           padding: 0;
@@ -2359,13 +2363,13 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         .items-section {
-          margin: 0 0 6px 0;
+          margin: 0 0 4px 0;
         }
 
         .items-table {
           width: 100%;
           border-collapse: collapse;
-          margin: 4px 0;
+          margin: 2px 0;
           font-size: 10px;
           border: 1px solid #000;
           border-radius: 0;
@@ -2375,16 +2379,19 @@ export const generatePDF = async (data: DocumentData) => {
         .items-table thead {
           background: #f8f9fa;
           color: #000;
+          display: table-header-group;
         }
 
         .items-table th {
-          padding: 4px 4px;
+          padding: 2px 4px;
           text-align: center;
           font-weight: bold;
           font-size: 9px;
           text-transform: uppercase;
           letter-spacing: 0.5px;
           border-right: 1px solid rgba(255,255,255,0.2);
+          line-height: 1;
+          height: auto;
         }
 
         .items-table th:last-child {
@@ -2392,21 +2399,26 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         .items-table td {
-          padding: 4px 4px;
+          padding: 3px 4px;
           border-bottom: 1px solid #e9ecef;
           border-right: 1px solid #e9ecef;
           text-align: center;
           vertical-align: top;
+          line-height: 1.2;
         }
-        
+
         .items-table td:last-child {
           border-right: none;
         }
-        
+
+        .items-table tbody tr:first-child td {
+          padding-top: 1px;
+        }
+
         .items-table tbody tr:last-child td {
           border-bottom: none;
         }
-        
+
         .items-table tbody tr:nth-child(even) {
           background: #f8f9fa;
         }
