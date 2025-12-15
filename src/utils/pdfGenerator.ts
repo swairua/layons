@@ -588,7 +588,7 @@ export const generatePDF = async (data: DocumentData) => {
   const company = data.company || DEFAULT_COMPANY;
 
   // Default services fallback
-  const DEFAULT_SERVICES = 'BUILDING WORKS, RENOVATIONS, ROADWORKS, LANDSCAPING, ELECTRICAL WORKS, WATER WORKS';
+  const DEFAULT_SERVICES = 'BUILDING WORKS, RENOVATIONS, ROADWORKS, LANDSCAPING, ELECTRICAL WORKS, WATER WORKS, MECHANICAL WORKS';
   const companyServices = company.company_services || DEFAULT_SERVICES;
 
   // Get header and stamp images with fallbacks
