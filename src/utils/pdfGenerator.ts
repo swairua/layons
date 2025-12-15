@@ -507,7 +507,7 @@ const generatePDFHeader = (
     <!-- Header Section -->
     <div class="header">
       <!-- Full-width header image -->
-      <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
+      <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" style="height: 125px !important;" />
 
       <!-- Header content below image -->
       <div class="header-content" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
@@ -1917,10 +1917,11 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .items-table th {
-            padding: 4px 4px;
+            padding: 1px 4px;
             text-align: center;
             font-weight: bold;
             font-size: 9px;
+            line-height: 1;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             border-right: 1px solid rgba(255,255,255,0.2);
@@ -2160,14 +2161,13 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         .header-image {
-          width: 100%;
-          max-height: 60px;
-          object-fit: cover;
-          height: auto;
-          margin: 0 0 12px 0;
-          padding: 0;
-          display: block;
-          border: none;
+          width: 100% !important;
+          height: 125px !important;
+          object-fit: fill !important;
+          margin: 0 0 12px 0 !important;
+          padding: 0 !important;
+          display: block !important;
+          border: none !important;
         }
 
         .header-content {
