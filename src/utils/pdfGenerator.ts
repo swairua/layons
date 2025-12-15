@@ -1917,10 +1917,11 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .items-table th {
-            padding: 2px 4px;
+            padding: 1px 4px;
             text-align: center;
             font-weight: bold;
             font-size: 9px;
+            line-height: 1;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             border-right: 1px solid rgba(255,255,255,0.2);
