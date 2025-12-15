@@ -843,8 +843,8 @@ export const generatePDF = async (data: DocumentData) => {
         .subsection-row td { background:#fcfcfc; font-weight:600; padding: 4px 6px; line-height: 1.3; font-size: 10px; height: auto; vertical-align: middle; }
         .subsection-title { padding: 4px 6px; vertical-align: middle; text-align: left; }
         .subsection-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 2mm; }
-        .subsection-total td { font-weight:600; background:#fdfdfd; }
-        .subsection-total .label { text-align:right; padding-right:12px; }
+        .subsection-total td { font-weight:600; background:#fdfdfd; padding: 4px 6px; }
+        .subsection-total .label { text-align:right; padding: 4px 12px 4px 6px; }
         .totals { margin-top:12px; width: calc(100% - 30mm); margin-left: 15mm; margin-right: 15mm; page-break-inside: avoid; padding-bottom: 30mm; }
 
         body.special-invoice .section-total { margin-bottom: 2mm; }
