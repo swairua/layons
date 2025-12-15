@@ -2161,13 +2161,13 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         .header-image {
-          width: 100%;
-          height: 125px;
-          object-fit: fill;
-          margin: 0 0 12px 0;
-          padding: 0;
-          display: block;
-          border: none;
+          width: 100% !important;
+          height: 125px !important;
+          object-fit: fill !important;
+          margin: 0 0 12px 0 !important;
+          padding: 0 !important;
+          display: block !important;
+          border: none !important;
         }
 
         .header-content {
