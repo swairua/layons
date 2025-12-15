@@ -705,10 +705,7 @@ export const generatePDF = async (data: DocumentData) => {
         if (isSectionHeader(desc)) {
           currentSection = desc;
           itemNo = 0;
-          // Add spacer row before section headers (except first section) to force page breaks
-          const isFirstSection = !rowsHtml.includes('section-row');
-          const spacerRow = !isFirstSection ? `<tr class=\"spacer-row\"><td colspan=\"6\" style=\"height: 250mm; border: none; background: none;\"></td></tr>` : '';
-          rowsHtml += spacerRow + `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\" style=\"height: auto; vertical-align: middle;\">${currentSection}</td></tr>`;
+          rowsHtml += `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\" style=\"height: auto; vertical-align: middle;\">${currentSection}</td></tr>`;
           return;
         }
 
@@ -748,10 +745,7 @@ export const generatePDF = async (data: DocumentData) => {
           runningSectionTotal = 0;
           itemNo = 0;
           currentSection = it.description;
-          // Add spacer row before section headers (except first section) to force page breaks
-          const isFirstSection = sectionTotals.length === 0;
-          const spacerRow = !isFirstSection ? `<tr class=\"spacer-row\"><td colspan=\"6\" style=\"height: 250mm; border: none; background: none;\"></td></tr>` : '';
-          rowsHtml += spacerRow + `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\" style=\"height: auto; vertical-align: middle;\">${currentSection}</td></tr>`;
+          rowsHtml += `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\" style=\"height: auto; vertical-align: middle;\">${currentSection}</td></tr>`;
           return;
         }
         itemNo += 1;
@@ -821,11 +815,9 @@ export const generatePDF = async (data: DocumentData) => {
 
         body.special-invoice .items { margin-top: 3px; margin-bottom: 3px; }
         body.special-invoice .preliminaries-section { margin-bottom: 6px; }
-        .spacer-row { height: 250mm; page-break-inside: avoid; page-break-before: avoid; page-break-after: avoid; }
-        .spacer-row td { border: none !important; background: none !important; padding: 0 !important; height: 250mm; }
-        .section-row { page-break-inside: avoid; page-break-before: auto; page-break-after: auto; margin: 10mm 0 0 0; height: auto; } .section-row td { height: auto; vertical-align: middle; padding: 7px 8px; }
+        .section-row { page-break-inside: avoid; page-break-before: auto; page-break-after: avoid; margin: 10mm 0 0 0; height: auto; } .section-row td { height: auto; vertical-align: middle; padding: 7px 8px; }
         .section-row:first-of-type { page-break-before: avoid; margin-top: 0; margin-bottom: 3mm; }
-        .section-row:not(:first-of-type) { margin-top: 12mm; page-break-before: always; }
+        .section-row:not(:first-of-type) { page-break-before: always; margin-top: 0; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding: 8px 10px; line-height: 1.4; font-size: 9px; text-align: left; vertical-align: middle; letter-spacing: 0.3px; }
         .item-row { page-break-inside: avoid; margin-bottom: 0; page-break-after: auto; } .item-row td { padding: 4px 7px; line-height: 1.3; }
         .item-row td.num { text-align:center; width: 5%; font-weight: 500; }
