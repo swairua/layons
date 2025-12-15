@@ -329,8 +329,8 @@ export default function BOQs() {
               <div className="pt-4 space-y-2">
                 {viewing.data?.sections?.map((sec: any, idx: number) => (
                   <div key={idx}>
-                    <div className="bg-muted/40 border-l-4 border-primary px-4 py-3 mb-4 rounded-r">
-                      <h3 className="font-bold text-base uppercase tracking-wide text-foreground">{sec.title}</h3>
+                    <div className="bg-muted/40 border-l-4 border-primary px-4 py-2 mb-1 rounded-r">
+                      <h3 className="font-bold text-sm uppercase tracking-wide text-foreground">{sec.title}</h3>
                     </div>
 
                     {sec.subsections && sec.subsections.length > 0 ? (
