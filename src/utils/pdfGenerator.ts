@@ -801,7 +801,7 @@ export const generatePDF = async (data: DocumentData) => {
 
         /* Header styling - full page width, no overflow */
         .header { margin: 0; padding: 0; width: 100%; box-sizing: border-box; }
-        .header-image { width: 100%; height: auto; max-height: 60px; object-fit: cover; display: block; margin: 0; padding: 0; }
+        .header-image { width: 100%; height: auto; max-height: none; object-fit: contain; display: block; margin: 0; padding: 0; }
         .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; width: 100%; padding: 0 15mm; box-sizing: border-box; }
         .header-top { display: flex; align-items: flex-start; width: 100%; margin: 0 0 10px 0; padding: 0; gap: 20px; box-sizing: border-box; min-width: 0; }
         .services-section { display: block; font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0; }
