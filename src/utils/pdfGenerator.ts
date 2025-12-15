@@ -702,7 +702,7 @@ export const generatePDF = async (data: DocumentData) => {
     // Helper to create a table block for a section
     const createSectionTable = (sectionTitle: string, sectionRows: string): string => {
       return `
-        <table class="items" style="margin-left: 0 !important; margin-right: 0 !important; width: 100% !important;">
+        <table class="items" style="margin-bottom: 12mm; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm);">
           <thead>
             <tr>
               <th style="width:5%; font-weight: bold;">No</th>
@@ -941,11 +941,6 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         .sections-container > table {
-          margin-bottom: 0 !important;
-          margin-top: 0 !important;
-          margin-left: 0 !important;
-          margin-right: 0 !important;
-          width: 100% !important;
           page-break-after: always;
           page-break-inside: avoid;
           break-inside: avoid;
@@ -1004,9 +999,9 @@ export const generatePDF = async (data: DocumentData) => {
 
           ${preliminariesHtml}
 
-          <div style="height: ${data.customTitle === 'INVOICE' ? '4mm' : '8mm'}; margin-left: 15mm; margin-right: 15mm;"></div>
+          <div style="height: ${data.customTitle === 'INVOICE' ? '4mm' : '8mm'};"></div>
 
-          <div class="sections-container" style="margin-left: 15mm; margin-right: 15mm;">
+          <div class="sections-container">
             ${tablesHtml}
           </div>
 
