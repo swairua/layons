@@ -507,10 +507,10 @@ const generatePDFHeader = (
     <!-- Header Section -->
     <div class="header">
       <!-- Full-width header image -->
-      <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" style="height: 125px !important;" />
+      <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" style="height: 85px !important;" />
 
       <!-- Header content below image -->
-      <div class="header-content" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
+      <div class="header-content" style="display: flex; flex-direction: column; gap: 6px; margin-top: 2px;">
         <!-- Top row: Services (left) and Company details (right) -->
         <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: calc(100% + 12mm); margin-right: -12mm; box-sizing: border-box; min-width: 0;">
           <!-- Services Section -->
@@ -932,7 +932,7 @@ export const generatePDF = async (data: DocumentData) => {
 
           ${preliminariesHtml}
 
-          <div style="height: ${data.customTitle === 'INVOICE' ? '8mm' : '15mm'}; margin-left: 15mm; margin-right: 15mm;"></div>
+          <div style="height: ${data.customTitle === 'INVOICE' ? '4mm' : '8mm'}; margin-left: 15mm; margin-right: 15mm;"></div>
 
           <table class="items">
             <thead>
