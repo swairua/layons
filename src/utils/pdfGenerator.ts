@@ -2378,13 +2378,14 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         .items-table th {
-          padding: 4px 4px;
+          padding: 3px 4px;
           text-align: center;
           font-weight: bold;
           font-size: 9px;
           text-transform: uppercase;
           letter-spacing: 0.5px;
           border-right: 1px solid rgba(255,255,255,0.2);
+          line-height: 1;
         }
 
         .items-table th:last-child {
