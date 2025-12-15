@@ -102,9 +102,23 @@ export const PDF_PAGE_CSS = `
   }
 
   /* Ensure proper page footer spacing */
-  .boq-main,
+  .boq-main {
+    margin-bottom: 15mm;
+  }
+
   .items {
-    margin-bottom: 10mm;
+    margin-bottom: 15mm;
+    page-break-after: auto;
+  }
+
+  /* Add spacing at page breaks */
+  .items tbody tr:last-child {
+    page-break-after: avoid;
+  }
+
+  /* Ensure new pages have proper top margin */
+  .section-row:first-of-type {
+    margin-top: 5mm;
   }
 `;
 
