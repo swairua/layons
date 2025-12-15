@@ -816,7 +816,7 @@ export const generatePDF = async (data: DocumentData) => {
         body.special-invoice .header-right { font-size: 11px; line-height: 1.4; }
 
         .items { width:100%; border-collapse:collapse; margin-top:0; margin-bottom: 2px; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm); }
-        .items th, .items td { border:1px solid #e6e6e6; padding:3px 4px; font-size: 10px; }
+        .items th, .items td { border:1px solid #e6e6e6; padding: 2px 4px; font-size: 10px; vertical-align: middle; }
         .items thead th { background:#f8f9fa; color:#000; font-weight:bold; text-transform: uppercase; }
         .items thead { display: table-header-group; }
 
