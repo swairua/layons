@@ -2365,11 +2365,12 @@ export const generatePDF = async (data: DocumentData) => {
         .items-table {
           width: 100%;
           border-collapse: collapse;
-          margin: 4px 0;
+          margin: 2px 0;
           font-size: 10px;
           border: 1px solid #000;
           border-radius: 0;
           overflow: hidden;
+          line-height: 1;
         }
 
         .items-table thead {
