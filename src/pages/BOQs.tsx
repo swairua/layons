@@ -326,13 +326,15 @@ export default function BOQs() {
               <div><strong>Contractor:</strong> {viewing.contractor || '-'}</div>
               <div className="pt-2"><strong>Notes:</strong><div className="whitespace-pre-wrap">{viewing.data?.notes || '-'}</div></div>
 
-              <div className="pt-4 space-y-4">
+              <div className="pt-4 space-y-6">
                 {viewing.data?.sections?.map((sec: any, idx: number) => (
-                  <div key={idx} className="border border-border rounded-lg p-4">
-                    <div className="font-medium text-lg mb-3">{sec.title}</div>
+                  <div key={idx}>
+                    <div className="bg-muted/40 border-l-4 border-primary px-4 py-3 mb-4 rounded-r">
+                      <h3 className="font-bold text-base uppercase tracking-wide text-foreground">{sec.title}</h3>
+                    </div>
 
                     {sec.subsections && sec.subsections.length > 0 ? (
-                      <div className="space-y-3">
+                      <div className="space-y-3 ml-2">
                         {sec.subsections.map((sub: any, subIdx: number) => {
                           const subsectionTotal = (sub.items || []).reduce((sum: number, it: any) => {
                             return sum + ((it.quantity || 0) * (it.rate || 0));
