@@ -826,7 +826,7 @@ export const generatePDF = async (data: DocumentData) => {
         .spacer-row td { border: none !important; background: none !important; padding: 0 !important; height: 3mm; }
         .section-row { page-break-inside: avoid; page-break-before: avoid; page-break-after: avoid; margin: 0; height: auto; } .section-row td { height: 14px; vertical-align: middle; }
         .section-row:first-of-type { page-break-before: avoid; }
-        .section-row td.section-title { background:#f4f4f4; font-weight:700; padding: 1px 4px; line-height: 1; font-size: 10px; text-align: left; vertical-align: middle; }
+        .section-row td.section-title { background:#f4f4f4; font-weight:700; padding: 1px 4px 3px 4px; line-height: 1; font-size: 10px; text-align: left; vertical-align: middle; }
         .item-row { page-break-inside: avoid; }
         .item-row td.num { text-align:center; width: 5%; }
         .item-row td.desc { width: 55%; }
