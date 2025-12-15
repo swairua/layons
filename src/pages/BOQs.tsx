@@ -326,7 +326,7 @@ export default function BOQs() {
               <div><strong>Contractor:</strong> {viewing.contractor || '-'}</div>
               <div className="pt-2"><strong>Notes:</strong><div className="whitespace-pre-wrap">{viewing.data?.notes || '-'}</div></div>
 
-              <div className="pt-4 space-y-6">
+              <div className="pt-4 space-y-2">
                 {viewing.data?.sections?.map((sec: any, idx: number) => (
                   <div key={idx}>
                     <div className="bg-muted/40 border-l-4 border-primary px-4 py-3 mb-4 rounded-r">
