@@ -822,33 +822,31 @@ export const generatePDF = async (data: DocumentData) => {
 
         body.special-invoice .items { margin-top: 3px; margin-bottom: 3px; }
         body.special-invoice .preliminaries-section { margin-bottom: 6px; }
-        .spacer-row { height: 8mm; page-break-inside: avoid; page-break-before: avoid; }
-        .spacer-row td { border: none !important; background: none !important; padding: 0 !important; height: 8mm; }
-        .section-row { page-break-inside: avoid; page-break-before: auto; page-break-after: avoid; margin: 3mm 0 0 0; height: auto; } .section-row td { height: auto; vertical-align: middle; padding: 5px 6px; }
-        .section-row:first-of-type { page-break-before: avoid; margin-top: 0; }
-        .section-row td.section-title { background:#f4f4f4; font-weight:700; padding: 6px 8px; line-height: 1.3; font-size: 9px; text-align: left; vertical-align: middle; }
-        .item-row { page-break-inside: avoid; margin-bottom: 0; } .item-row td { padding: 3px 6px; }
-        .item-row td.num { text-align:center; width: 5%; }
-        .item-row td.desc { width: 55%; }
+        .spacer-row { height: 12mm; page-break-inside: avoid; page-break-before: avoid; page-break-after: avoid; }
+        .spacer-row td { border: none !important; background: none !important; padding: 0 !important; height: 12mm; }
+        .section-row { page-break-inside: avoid; page-break-before: auto; page-break-after: auto; margin: 5mm 0 0 0; height: auto; } .section-row td { height: auto; vertical-align: middle; padding: 7px 8px; }
+        .section-row:first-of-type { page-break-before: avoid; margin-top: 0; margin-bottom: 3mm; }
+        .section-row:not(:first-of-type) { margin-top: 8mm; }
+        .section-row td.section-title { background:#f4f4f4; font-weight:700; padding: 8px 10px; line-height: 1.4; font-size: 9px; text-align: left; vertical-align: middle; letter-spacing: 0.3px; }
+        .item-row { page-break-inside: avoid; margin-bottom: 0; page-break-after: auto; } .item-row td { padding: 4px 7px; line-height: 1.3; }
+        .item-row td.num { text-align:center; width: 5%; font-weight: 500; }
+        .item-row td.desc { width: 55%; text-align: left; }
         .item-row td.qty { width: 8%; text-align:center; }
         .item-row td.unit { width: 9%; text-align:center; }
         .item-row td.rate { width: 11%; text-align:right; }
-        .item-row td.amount { width: 12%; text-align:right; }
-
-        /* Force page breaks for items to prevent cutting */
-        .item-row:nth-child(4n) { page-break-after: auto; }
-        .section-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 5mm; page-break-after: avoid; }
-        .section-total td { font-weight:700; background:#fafafa; padding: 4px 6px; }
-        .section-total .label { text-align:right; padding: 4px 12px 4px 6px; }
+        .item-row td.amount { width: 12%; text-align:right; font-weight: 500; }
+        .section-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 8mm; margin-top: 3mm; page-break-after: auto; border-top: 2px solid #ddd; }
+        .section-total td { font-weight:700; background:#f9f9f9; padding: 6px 8px; line-height: 1.4; }
+        .section-total .label { text-align:right; padding: 6px 12px 6px 8px; }
         .preliminaries-section { margin-bottom: 8mm; page-break-inside: avoid; margin-left: 15mm; margin-right: 15mm; }
         .preliminaries-section .items { margin-top:0; margin-left: 0; margin-right: 0; width: 100%; }
-        .subsection-row { page-break-inside: avoid; page-break-after: avoid; margin: 2mm 0 0 0; }
-        .subsection-row td { background:#fcfcfc; font-weight:600; padding: 4px 6px; line-height: 1.3; font-size: 10px; height: auto; vertical-align: middle; }
-        .subsection-title { padding: 4px 6px; vertical-align: middle; text-align: left; }
-        .subsection-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 3mm; page-break-after: avoid; }
-        .subsection-total td { font-weight:600; background:#fdfdfd; padding: 4px 6px; }
-        .subsection-total .label { text-align:right; padding: 4px 12px 4px 6px; }
-        .totals { margin-top:12px; margin-bottom: 15mm; width: calc(100% - 30mm); margin-left: 15mm; margin-right: 15mm; page-break-inside: avoid; padding-bottom: 40mm; page-break-before: avoid; }
+        .subsection-row { page-break-inside: avoid; page-break-after: auto; margin: 3mm 0 2mm 0; padding: 2mm 0; }
+        .subsection-row td { background:#f7f7f7; font-weight:600; padding: 5px 8px; line-height: 1.35; font-size: 10px; height: auto; vertical-align: middle; border-left: 3px solid #e0e0e0; }
+        .subsection-title { padding: 5px 8px; vertical-align: middle; text-align: left; }
+        .subsection-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 4mm; margin-top: 2mm; page-break-after: auto; background: #fafafa; }
+        .subsection-total td { font-weight:600; background:#fafafa; padding: 5px 8px; line-height: 1.4; border-left: 3px solid #e0e0e0; }
+        .subsection-total .label { text-align:right; padding: 5px 12px 5px 8px; }
+        .totals { margin-top:10mm; margin-bottom: 0; width: calc(100% - 30mm); margin-left: 15mm; margin-right: 15mm; page-break-inside: avoid; padding-bottom: 50mm; page-break-before: avoid; padding-top: 5mm; border-top: 1px solid #ddd; }
 
         body.special-invoice .section-total { margin-bottom: 2mm; }
         body.special-invoice .subsection-total { margin-bottom: 2mm; }
@@ -858,15 +856,15 @@ export const generatePDF = async (data: DocumentData) => {
         body.special-invoice .sigline { height: 12px; }
         body.special-invoice .field-row { gap: 4px; }
         .totals .label { text-align:right; padding-right:12px; }
-        .footer { margin-top:24px; display:flex; flex-direction:column; gap:18px; }
+        .footer { margin-top:16mm; display:flex; flex-direction:column; gap:12mm; padding: 0 15mm; page-break-inside: avoid; }
         .sig-block { display:flex; flex-direction:column; gap:8px; }
-        .sig-title { font-weight:700; }
-        .sig-role { font-weight:700; }
-        .sigline { height:16px; border-bottom:1px dotted #999; }
-        .field-row { display:flex; align-items:flex-end; gap:8px; }
-        .field-row .label { width:80px; font-weight:600; }
-        .field-row .fill { flex:1; height:16px; border-bottom:1px dotted #999; }
-        .pagefoot { position:fixed; bottom:15mm; left:15mm; right:15mm; text-align:center; font-size:10px; color:#666; }
+        .sig-title { font-weight:700; font-size: 11px; }
+        .sig-role { font-weight:600; font-size: 10px; color: #666; }
+        .sigline { height:18px; border-bottom:1px solid #333; margin-top: 8px; }
+        .field-row { display:flex; align-items:flex-end; gap:10px; }
+        .field-row .label { width:100px; font-weight:600; font-size: 10px; }
+        .field-row .fill { flex:1; height:18px; border-bottom:1px dotted #999; }
+        .pagefoot { position:fixed; bottom:18mm; left:15mm; right:15mm; text-align:center; font-size:9px; color:#777; font-weight: 500; }
 
         /* Page sections are rendered separately to avoid text cutting */
         .boq-main {
@@ -877,6 +875,20 @@ export const generatePDF = async (data: DocumentData) => {
           max-width: 100%;
           overflow: hidden;
           margin: 0;
+          page-break-after: auto;
+        }
+
+        /* New page top spacing */
+        .boq-main > .items:first-of-type {
+          margin-top: 0;
+        }
+
+        .boq-main > .items {
+          margin-top: 8mm;
+        }
+
+        .boq-main > .preliminaries-section {
+          margin-top: 0;
         }
 
         .boq-main .items {
