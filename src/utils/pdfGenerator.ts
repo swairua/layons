@@ -976,21 +976,9 @@ export const generatePDF = async (data: DocumentData) => {
 
           <div style="height: ${data.customTitle === 'INVOICE' ? '4mm' : '8mm'}; margin-left: 15mm; margin-right: 15mm;"></div>
 
-          <table class="items">
-            <thead>
-              <tr>
-                <th style="width:5%; text-align:center;">#</th>
-                <th style="width:55%; text-align:left;">ITEM DESCRIPTION</th>
-                <th style="width:8%; text-align:center;">QTY</th>
-                <th style="width:9%; text-align:center;">UNIT</th>
-                <th style="width:11%; text-align:right;">RATE</th>
-                <th style="width:12%; text-align:right;">AMOUNT (${data.currency || 'KES'})</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rowsHtml}
-            </tbody>
-          </table>
+          <div class="sections-container" style="margin-left: 15mm; margin-right: 15mm;">
+            ${tablesHtml}
+          </div>
 
           <div class="totals">
             <table style="width:100%; margin-top:8px; margin-left: 0; margin-right: 0;">
