@@ -2402,15 +2402,19 @@ export const generatePDF = async (data: DocumentData) => {
           vertical-align: top;
           line-height: 1.2;
         }
-        
+
         .items-table td:last-child {
           border-right: none;
         }
-        
+
+        .items-table tbody tr:first-child td {
+          padding-top: 1px;
+        }
+
         .items-table tbody tr:last-child td {
           border-bottom: none;
         }
-        
+
         .items-table tbody tr:nth-child(even) {
           background: #f8f9fa;
         }
