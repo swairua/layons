@@ -702,7 +702,7 @@ export const generatePDF = async (data: DocumentData) => {
     // Helper to create a table block for a section
     const createSectionTable = (sectionTitle: string, sectionRows: string): string => {
       return `
-        <table class="items">
+        <table class="items" style="margin-left: 0 !important; margin-right: 0 !important; width: 100% !important;">
           <thead>
             <tr>
               <th style="width:5%; font-weight: bold;">No</th>
