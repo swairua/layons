@@ -2161,9 +2161,8 @@ export const generatePDF = async (data: DocumentData) => {
 
         .header-image {
           width: 100%;
-          max-height: 100px;
-          object-fit: cover;
-          height: auto;
+          height: 100px;
+          object-fit: contain;
           margin: 0 0 12px 0;
           padding: 0;
           display: block;
