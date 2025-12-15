@@ -1681,7 +1681,7 @@ export const generatePDF = async (data: DocumentData) => {
           .page,
           .page-section {
             width: 100%;
-            margin: 0;
+            margin: 0 0 10mm 0;
             background: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             padding: 15mm;
