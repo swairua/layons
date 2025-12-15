@@ -341,10 +341,10 @@ export default function BOQs() {
                           }, 0);
 
                           return (
-                            <div key={subIdx} className="bg-muted/30 rounded p-3 border border-border/50">
-                              <div className="flex justify-between items-center mb-2">
-                                <div className="font-semibold text-sm">Subsection {sub.name}: {sub.label}</div>
-                                <div className="text-sm font-semibold">{formatViewingCurrency(subsectionTotal)}</div>
+                            <div key={subIdx} className="bg-white rounded p-4 border border-border">
+                              <div className="flex justify-between items-center mb-3">
+                                <div className="font-semibold text-sm text-foreground">Subsection {sub.name}: {sub.label}</div>
+                                <div className="text-sm font-bold text-primary">{formatViewingCurrency(subsectionTotal)}</div>
                               </div>
                               <table className="w-full text-xs">
                                 <thead>
