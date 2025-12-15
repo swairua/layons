@@ -815,15 +815,15 @@ export const generatePDF = async (data: DocumentData) => {
         body.special-invoice .services-section { font-size: 11px; line-height: 1.4; }
         body.special-invoice .header-right { font-size: 11px; line-height: 1.4; }
 
-        .items { width:100%; border-collapse:collapse; margin-top:2px; margin-bottom: 2px; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm); }
+        .items { width:100%; border-collapse:collapse; margin-top:0; margin-bottom: 2px; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm); }
         .items th, .items td { border:1px solid #e6e6e6; padding:3px 4px; font-size: 10px; }
         .items thead th { background:#f8f9fa; color:#000; font-weight:bold; text-transform: uppercase; }
         .items thead { display: table-header-group; }
 
         body.special-invoice .items { margin-top: 3px; margin-bottom: 3px; }
         body.special-invoice .preliminaries-section { margin-bottom: 6px; }
-        .spacer-row { height: 15mm; page-break-inside: avoid; }
-        .spacer-row td { border: none !important; background: none !important; padding: 0 !important; height: 15mm; }
+        .spacer-row { height: 3mm; page-break-inside: avoid; }
+        .spacer-row td { border: none !important; background: none !important; padding: 0 !important; height: 3mm; }
         .section-row { page-break-inside: avoid; page-break-before: avoid; page-break-after: avoid; margin: 0; height: auto; }
         .section-row:first-of-type { page-break-before: avoid; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding:1px 4px; line-height: 1.2; font-size: 10px; }
