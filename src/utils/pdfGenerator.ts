@@ -507,7 +507,7 @@ const generatePDFHeader = (
     <!-- Header Section -->
     <div class="header">
       <!-- Full-width header image -->
-      <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" style="height: 100px !important;" />
+      <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" style="height: 125px !important;" />
 
       <!-- Header content below image -->
       <div class="header-content" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
@@ -2161,7 +2161,7 @@ export const generatePDF = async (data: DocumentData) => {
 
         .header-image {
           width: 100%;
-          height: 100px;
+          height: 125px;
           object-fit: fill;
           margin: 0 0 12px 0;
           padding: 0;
