@@ -80,17 +80,31 @@ export const PDF_PAGE_CSS = `
     display: table-footer-group;
   }
 
-  /* Add spacing before sections to prevent cutting */
-  .section-title::before {
-    content: '';
-    display: block;
-    height: 10mm;
+  /* Prevent sections from cutting at page bottom */
+  .section-row,
+  .subsection-row {
+    break-inside: avoid;
+    break-before: auto;
   }
 
-  /* Ensure proper spacing at page boundaries */
+  /* Ensure sections move to next page if not enough space */
+  .section-total,
+  .subsection-total {
+    break-inside: avoid;
+    margin-bottom: 3mm;
+  }
+
+  /* Add footer margin to prevent content cutting */
   body {
     margin: ${PDF_PAGE_CONFIG.margin}mm;
     padding: 0;
+    padding-bottom: 10mm;
+  }
+
+  /* Ensure proper page footer spacing */
+  .boq-main,
+  .items {
+    margin-bottom: 10mm;
   }
 `;
 
