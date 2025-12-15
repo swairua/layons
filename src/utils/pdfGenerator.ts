@@ -845,7 +845,7 @@ export const generatePDF = async (data: DocumentData) => {
         .subsection-row { page-break-inside: avoid; page-break-after: avoid; margin: 2mm 0 0 0; }
         .subsection-row td { background:#fcfcfc; font-weight:600; padding: 4px 6px; line-height: 1.3; font-size: 10px; height: auto; vertical-align: middle; }
         .subsection-title { padding: 4px 6px; vertical-align: middle; text-align: left; }
-        .subsection-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 2mm; }
+        .subsection-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 3mm; page-break-after: avoid; }
         .subsection-total td { font-weight:600; background:#fdfdfd; padding: 4px 6px; }
         .subsection-total .label { text-align:right; padding: 4px 12px 4px 6px; }
         .totals { margin-top:12px; margin-bottom: 15mm; width: calc(100% - 30mm); margin-left: 15mm; margin-right: 15mm; page-break-inside: avoid; padding-bottom: 40mm; page-break-before: avoid; }
