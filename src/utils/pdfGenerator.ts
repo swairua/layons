@@ -2359,7 +2359,7 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         .items-section {
-          margin: 0 0 6px 0;
+          margin: 0 0 4px 0;
         }
 
         .items-table {
