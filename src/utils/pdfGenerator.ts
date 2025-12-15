@@ -934,6 +934,32 @@ export const generatePDF = async (data: DocumentData) => {
           width: 100% !important;
         }
 
+        .sections-container {
+          display: block;
+          width: 100%;
+          box-sizing: border-box;
+        }
+
+        .sections-container .items {
+          margin-bottom: 12mm !important;
+          margin-top: 0 !important;
+          page-break-after: always;
+          page-break-inside: avoid;
+        }
+
+        .sections-container .items:last-child {
+          page-break-after: auto;
+        }
+
+        .sections-container .items thead {
+          display: table-header-group;
+        }
+
+        .section-row-header {
+          page-break-inside: avoid;
+          page-break-after: auto;
+        }
+
         .boq-main .header-content {
           padding-left: 0 !important;
           padding-right: 0 !important;
