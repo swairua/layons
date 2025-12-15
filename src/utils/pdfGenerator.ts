@@ -681,9 +681,10 @@ export const generatePDF = async (data: DocumentData) => {
       `;
     }
 
-    // Build table rows; support Sections, Subsections, and their totals
-    let rowsHtml = '';
+    // Build separate table blocks for each section to enable page breaks
+    let tablesHtml = '';
     let currentSection = '';
+    let sectionRowsHtml = '';
     let itemNo = 0;
 
     // Detect if subsections are present (items produced by boqPdfGenerator)
@@ -698,65 +699,99 @@ export const generatePDF = async (data: DocumentData) => {
     const isSubsectionSubtotal = (d: string) => /^subsection\s+[^\s]+\s+subtotal\s*$/i.test(d);
     const isSectionTotalRow = (d: string) => /^section\s+total$/i.test(d);
 
+    // Helper to create a table block for a section
+    const createSectionTable = (sectionTitle: string, sectionRows: string): string => {
+      return `
+        <table class="items">
+          <thead>
+            <tr>
+              <th style="width:5%; font-weight: bold;">No</th>
+              <th style="width:55%; text-align:left; font-weight: bold;">DESCRIPTION</th>
+              <th style="width:8%; font-weight: bold;">QTY</th>
+              <th style="width:9%; font-weight: bold;">UNIT</th>
+              <th style="width:11%; font-weight: bold;">RATE (${data.currency || 'KES'})</th>
+              <th style="width:12%; text-align:right; font-weight: bold;">AMOUNT (${data.currency || 'KES'})</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="section-row-header"><td colspan="6" class="section-title-in-table" style="background:#f4f4f4; font-weight:700; padding: 8px 10px; line-height: 1.4; font-size: 9px; text-align: left; letter-spacing: 0.3px;">${sectionTitle}</td></tr>
+            ${sectionRows}
+          </tbody>
+        </table>
+      `;
+    };
+
     if (hasSubsections) {
       (data.items || []).forEach((it) => {
         const desc = String(it.description || '');
 
         if (isSectionHeader(desc)) {
+          // Close previous section table if exists
+          if (currentSection && sectionRowsHtml) {
+            tablesHtml += createSectionTable(currentSection, sectionRowsHtml);
+          }
+          // Start new section
           currentSection = desc;
+          sectionRowsHtml = '';
           itemNo = 0;
-          rowsHtml += `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\" style=\"height: auto; vertical-align: middle;\">${currentSection}</td></tr>`;
           return;
         }
 
         if (isSubsectionSubtotal(desc)) {
-          rowsHtml += `<tr class=\"subsection-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">${desc}</td>\n          <td class=\"amount\">${formatCurrency(it.line_total || 0)}</td>\n        </tr>`;
+          sectionRowsHtml += `<tr class=\"subsection-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">${desc}</td>\n          <td class=\"amount\">${formatCurrency(it.line_total || 0)}</td>\n        </tr>`;
           return;
         }
 
         if (isSubsectionHeader(desc)) {
           itemNo = 0;
-          rowsHtml += `<tr class=\"subsection-row\"><td class=\"num\"></td><td colspan=\"5\" class=\"subsection-title\">${desc.replace(/^\s*[→-]?\s*/, '')}</td></tr>`;
+          sectionRowsHtml += `<tr class=\"subsection-row\"><td class=\"num\"></td><td colspan=\"5\" class=\"subsection-title\">${desc.replace(/^\s*[→-]?\s*/, '')}</td></tr>`;
           return;
         }
 
         if (isSectionTotalRow(desc)) {
           const total = Number(it.line_total || 0);
           sectionTotals.push(total);
-          rowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(total)}</td>\n        </tr>`;
+          sectionRowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(total)}</td>\n        </tr>`;
           itemNo = 0;
           return;
         }
 
         // Regular item row within subsection
         itemNo += 1;
-        rowsHtml += `<tr class=\"item-row\">\n        <td class=\"num\">${itemNo}</td>\n        <td class=\"desc\">${it.description}</td>\n        <td class=\"qty\">${it.quantity || ''}</td>\n        <td class=\"unit\">${(it as any).unit_abbreviation || it.unit_of_measure || ''}</td>\n        <td class=\"rate\">${formatCurrency(it.unit_price || 0)}</td>\n        <td class=\"amount\">${formatCurrency(it.line_total || 0)}</td>\n      </tr>`;
+        sectionRowsHtml += `<tr class=\"item-row\">\n        <td class=\"num\">${itemNo}</td>\n        <td class=\"desc\">${it.description}</td>\n        <td class=\"qty\">${it.quantity || ''}</td>\n        <td class=\"unit\">${(it as any).unit_abbreviation || it.unit_of_measure || ''}</td>\n        <td class=\"rate\">${formatCurrency(it.unit_price || 0)}</td>\n        <td class=\"amount\">${formatCurrency(it.line_total || 0)}</td>\n      </tr>`;
       });
+      // Flush last section
+      if (currentSection && sectionRowsHtml) {
+        tablesHtml += createSectionTable(currentSection, sectionRowsHtml);
+      }
     } else {
       // Legacy behavior: section headers are items with qty=0 and unit_price=0; totals are computed per section
       let runningSectionTotal = 0;
       (data.items || []).forEach((it) => {
         const isSection = (it.quantity === 0 && it.unit_price === 0);
         if (isSection) {
+          // Close previous section table if exists
           if (itemNo > 0) {
-            rowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(runningSectionTotal)}</td>\n        </tr>`;
+            sectionRowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(runningSectionTotal)}</td>\n        </tr>`;
             sectionTotals.push(runningSectionTotal);
+            tablesHtml += createSectionTable(currentSection, sectionRowsHtml);
           }
           runningSectionTotal = 0;
           itemNo = 0;
           currentSection = it.description;
-          rowsHtml += `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\" style=\"height: auto; vertical-align: middle;\">${currentSection}</td></tr>`;
+          sectionRowsHtml = '';
           return;
         }
         itemNo += 1;
         const line = (it.line_total || 0);
         runningSectionTotal += line;
-        rowsHtml += `<tr class=\"item-row\">\n        <td class=\"num\">${itemNo}</td>\n        <td class=\"desc\">${it.description}</td>\n        <td class=\"qty\">${it.quantity || ''}</td>\n        <td class=\"unit\">${(it as any).unit_abbreviation || it.unit_of_measure || ''}</td>\n        <td class=\"rate\">${formatCurrency(it.unit_price || 0)}</td>\n        <td class=\"amount\">${formatCurrency(line)}</td>\n      </tr>`;
+        sectionRowsHtml += `<tr class=\"item-row\">\n        <td class=\"num\">${itemNo}</td>\n        <td class=\"desc\">${it.description}</td>\n        <td class=\"qty\">${it.quantity || ''}</td>\n        <td class=\"unit\">${(it as any).unit_abbreviation || it.unit_of_measure || ''}</td>\n        <td class=\"rate\">${formatCurrency(it.unit_price || 0)}</td>\n        <td class=\"amount\">${formatCurrency(line)}</td>\n      </tr>`;
       });
       // Flush last section
       if (itemNo > 0) {
-        rowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(runningSectionTotal)}</td>\n        </tr>`;
+        sectionRowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(runningSectionTotal)}</td>\n        </tr>`;
         sectionTotals.push(runningSectionTotal);
+        tablesHtml += createSectionTable(currentSection, sectionRowsHtml);
       }
     }
 
