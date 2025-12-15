@@ -2162,7 +2162,7 @@ export const generatePDF = async (data: DocumentData) => {
         .header-image {
           width: 100%;
           height: 100px;
-          object-fit: contain;
+          object-fit: fill;
           margin: 0 0 12px 0;
           padding: 0;
           display: block;
