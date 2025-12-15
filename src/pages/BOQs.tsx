@@ -392,19 +392,19 @@ export default function BOQs() {
                         })()}
                       </div>
                     ) : (
-                      <div className="mt-4">
+                      <div className="mt-4 bg-white rounded border border-border p-4">
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="text-left text-muted-foreground border-b">
-                              <th>Description</th><th>Qty</th><th>Unit</th><th>Rate</th><th>Amount</th>
+                              <th className="pb-2">Description</th><th className="pb-2">Qty</th><th className="pb-2">Unit</th><th className="pb-2">Rate</th><th className="pb-2 text-right">Amount</th>
                             </tr>
                           </thead>
                           <tbody>
                             {(sec.items || []).map((it: any, i: number) => (
-                              <tr key={i}>
-                                <td>{it.description}</td>
-                                <td>{it.quantity}</td>
-                                <td>{
+                              <tr key={i} className="border-b last:border-b-0 hover:bg-muted/20">
+                                <td className="py-2">{it.description}</td>
+                                <td className="py-2">{it.quantity}</td>
+                                <td className="py-2">{
                                   (() => {
                                     if (it.unit_id && units) {
                                       const u = units.find((x: any) => x.id === it.unit_id);
@@ -415,8 +415,8 @@ export default function BOQs() {
                                     return '-';
                                   })()
                                 }</td>
-                                <td>{formatViewingCurrency(Number(it.rate || 0))}</td>
-                                <td>{formatViewingCurrency(Number((it.quantity || 0) * (it.rate || 0)))}</td>
+                                <td className="py-2">{formatViewingCurrency(Number(it.rate || 0))}</td>
+                                <td className="py-2 text-right font-medium">{formatViewingCurrency(Number((it.quantity || 0) * (it.rate || 0)))}</td>
                               </tr>
                             ))}
                           </tbody>
