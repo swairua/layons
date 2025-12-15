@@ -385,14 +385,14 @@ export default function BOQs() {
                             }, 0);
                           }, 0);
                           return (
-                            <div className="flex justify-end font-semibold text-sm pt-2 border-t border-border">
-                              <div>Section Total: {formatViewingCurrency(sectionTotal)}</div>
+                            <div className="flex justify-end font-bold text-sm pt-4 mt-2 border-t-2 border-primary">
+                              <div className="text-primary">Section Total: {formatViewingCurrency(sectionTotal)}</div>
                             </div>
                           );
                         })()}
                       </div>
                     ) : (
-                      <div className="mt-2">
+                      <div className="mt-4">
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="text-left text-muted-foreground border-b">
