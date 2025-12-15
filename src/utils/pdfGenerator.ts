@@ -940,18 +940,22 @@ export const generatePDF = async (data: DocumentData) => {
           box-sizing: border-box;
         }
 
-        .sections-container .items {
-          margin-bottom: 12mm !important;
+        .sections-container > table {
+          margin-bottom: 0 !important;
           margin-top: 0 !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          width: 100% !important;
           page-break-after: always;
           page-break-inside: avoid;
+          break-inside: avoid;
         }
 
-        .sections-container .items:last-child {
-          page-break-after: auto;
+        .sections-container > table:last-child {
+          page-break-after: avoid;
         }
 
-        .sections-container .items thead {
+        .sections-container table thead {
           display: table-header-group;
         }
 
