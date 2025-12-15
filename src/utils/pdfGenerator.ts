@@ -827,13 +827,16 @@ export const generatePDF = async (data: DocumentData) => {
         .section-row { page-break-inside: avoid; page-break-before: auto; page-break-after: avoid; margin: 3mm 0 0 0; height: auto; } .section-row td { height: auto; vertical-align: middle; padding: 5px 6px; }
         .section-row:first-of-type { page-break-before: avoid; margin-top: 0; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding: 6px 8px; line-height: 1.3; font-size: 9px; text-align: left; vertical-align: middle; }
-        .item-row { page-break-inside: avoid; } .item-row td { padding: 3px 6px; }
+        .item-row { page-break-inside: avoid; margin-bottom: 0; } .item-row td { padding: 3px 6px; }
         .item-row td.num { text-align:center; width: 5%; }
         .item-row td.desc { width: 55%; }
         .item-row td.qty { width: 8%; text-align:center; }
         .item-row td.unit { width: 9%; text-align:center; }
         .item-row td.rate { width: 11%; text-align:right; }
         .item-row td.amount { width: 12%; text-align:right; }
+
+        /* Force page breaks for items to prevent cutting */
+        .item-row:nth-child(4n) { page-break-after: auto; }
         .section-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 2mm; }
         .section-total td { font-weight:700; background:#fafafa; padding: 4px 6px; }
         .section-total .label { text-align:right; padding: 4px 12px 4px 6px; }
