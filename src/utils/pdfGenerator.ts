@@ -814,18 +814,18 @@ export const generatePDF = async (data: DocumentData) => {
         body.special-invoice .services-section { font-size: 11px; line-height: 1.4; }
         body.special-invoice .header-right { font-size: 11px; line-height: 1.4; }
 
-        .items { width:100%; border-collapse:collapse; margin-top:0; margin-bottom: 8mm; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm); }
+        .items { width:100%; border-collapse:collapse; margin-top:0; margin-bottom: 12mm; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm); }
         .items th, .items td { border:1px solid #e6e6e6; padding: 4px 6px; font-size: 10px; vertical-align: middle; } .items tbody { margin-top: -1px; }
         .items thead th { background:#f8f9fa; color:#000; font-weight:bold; text-transform: uppercase; padding: 5px 6px 4px 6px; }
         .items thead { display: table-header-group; }
 
         body.special-invoice .items { margin-top: 3px; margin-bottom: 3px; }
         body.special-invoice .preliminaries-section { margin-bottom: 6px; }
-        .spacer-row { height: 12mm; page-break-inside: avoid; page-break-before: avoid; page-break-after: avoid; }
-        .spacer-row td { border: none !important; background: none !important; padding: 0 !important; height: 12mm; }
-        .section-row { page-break-inside: avoid; page-break-before: auto; page-break-after: auto; margin: 5mm 0 0 0; height: auto; } .section-row td { height: auto; vertical-align: middle; padding: 7px 8px; }
+        .spacer-row { height: 15mm; page-break-inside: avoid; page-break-before: avoid; page-break-after: avoid; }
+        .spacer-row td { border: none !important; background: none !important; padding: 0 !important; height: 15mm; }
+        .section-row { page-break-inside: avoid; page-break-before: auto; page-break-after: auto; margin: 10mm 0 0 0; height: auto; } .section-row td { height: auto; vertical-align: middle; padding: 7px 8px; }
         .section-row:first-of-type { page-break-before: avoid; margin-top: 0; margin-bottom: 3mm; }
-        .section-row:not(:first-of-type) { margin-top: 8mm; }
+        .section-row:not(:first-of-type) { margin-top: 12mm; page-break-before: always; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding: 8px 10px; line-height: 1.4; font-size: 9px; text-align: left; vertical-align: middle; letter-spacing: 0.3px; }
         .item-row { page-break-inside: avoid; margin-bottom: 0; page-break-after: auto; } .item-row td { padding: 4px 7px; line-height: 1.3; }
         .item-row td.num { text-align:center; width: 5%; font-weight: 500; }
@@ -834,7 +834,7 @@ export const generatePDF = async (data: DocumentData) => {
         .item-row td.unit { width: 9%; text-align:center; }
         .item-row td.rate { width: 11%; text-align:right; }
         .item-row td.amount { width: 12%; text-align:right; font-weight: 500; }
-        .section-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 8mm; margin-top: 3mm; page-break-after: auto; border-top: 2px solid #ddd; }
+        .section-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 15mm; margin-top: 3mm; page-break-after: auto; border-top: 2px solid #ddd; }
         .section-total td { font-weight:700; background:#f9f9f9; padding: 6px 8px; line-height: 1.4; }
         .section-total .label { text-align:right; padding: 6px 12px 6px 8px; }
         .preliminaries-section { margin-bottom: 8mm; page-break-inside: avoid; margin-left: 15mm; margin-right: 15mm; }
@@ -920,10 +920,11 @@ export const generatePDF = async (data: DocumentData) => {
         .terms-page {
           display: block;
           width: 100%;
-          padding: 0;
+          padding: 15mm;
           page-break-before: always;
           box-sizing: border-box;
           margin: 0;
+          page-break-after: auto;
         }
 
         .terms-page table { border-collapse: collapse; width: 100%; }
@@ -1681,7 +1682,7 @@ export const generatePDF = async (data: DocumentData) => {
           .page,
           .page-section {
             width: 100%;
-            margin: 0;
+            margin: 0 0 10mm 0;
             background: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             padding: 15mm;
@@ -1709,7 +1710,7 @@ export const generatePDF = async (data: DocumentData) => {
             .page-section {
               box-shadow: none;
               width: 100%;
-              margin: 0;
+              margin: 0 0 10mm 0;
               padding: 15mm;
               min-height: auto;
               page-break-after: always;
@@ -1732,7 +1733,7 @@ export const generatePDF = async (data: DocumentData) => {
             .page-section {
               width: 210mm;
               padding: 15mm;
-              margin: 15mm auto;
+              margin: 15mm auto 25mm auto;
               min-height: auto;
               box-sizing: border-box;
             }
