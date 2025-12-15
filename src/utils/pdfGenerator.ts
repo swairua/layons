@@ -822,8 +822,8 @@ export const generatePDF = async (data: DocumentData) => {
 
         body.special-invoice .items { margin-top: 3px; margin-bottom: 3px; }
         body.special-invoice .preliminaries-section { margin-bottom: 6px; }
-        .spacer-row { height: 3mm; page-break-inside: avoid; }
-        .spacer-row td { border: none !important; background: none !important; padding: 0 !important; height: 3mm; }
+        .spacer-row { height: 8mm; page-break-inside: avoid; page-break-before: avoid; }
+        .spacer-row td { border: none !important; background: none !important; padding: 0 !important; height: 8mm; }
         .section-row { page-break-inside: avoid; page-break-before: auto; page-break-after: avoid; margin: 3mm 0 0 0; height: auto; } .section-row td { height: auto; vertical-align: middle; padding: 5px 6px; }
         .section-row:first-of-type { page-break-before: avoid; margin-top: 0; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding: 6px 8px; line-height: 1.3; font-size: 9px; text-align: left; vertical-align: middle; }
