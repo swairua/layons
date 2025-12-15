@@ -536,33 +536,33 @@ const generatePDFHeader = (
         </div>
 
         <!-- Bottom row: All details with borderless two-column table -->
-        <table style="font-size: 12px; font-weight: bold; line-height: 1.6; width: 100%; border-collapse: collapse; border: none;">
+        <table style="font-size: 12px; font-weight: bold; line-height: 1.3; width: 100%; border-collapse: collapse; border: none;">
           <tr style="border: none;">
-            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>Client;</strong></td>
-            <td style="border: none; padding: 2px 0;">
-              <div>${data.customer?.name || ''}</div>
-              ${data.customer?.address ? `<div>${data.customer.address}</div>` : ''}
-              ${data.customer?.city ? `<div>${data.customer.city}</div>` : ''}
-              ${data.customer?.country ? `<div>${data.customer.country}</div>` : ''}
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3;"><strong>Client;</strong></td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3;">
+              <div style="line-height: 1.2;">${data.customer?.name || ''}</div>
+              ${data.customer?.address ? `<div style="line-height: 1.2;">${data.customer.address}</div>` : ''}
+              ${data.customer?.city ? `<div style="line-height: 1.2;">${data.customer.city}</div>` : ''}
+              ${data.customer?.country ? `<div style="line-height: 1.2;">${data.customer.country}</div>` : ''}
             </td>
           </tr>
           ${data.project_title ? `
           <tr style="border: none;">
-            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>Project;</strong></td>
-            <td style="border: none; padding: 2px 0;">${data.project_title}</td>
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3;"><strong>Project;</strong></td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3;">${data.project_title}</td>
           </tr>
           ` : ''}
           <tr style="border: none;">
-            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>Subject;</strong></td>
-            <td style="border: none; padding: 2px 0;">${documentType}</td>
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3;"><strong>Subject;</strong></td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3;">${documentType}</td>
           </tr>
           <tr style="border: none;">
-            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>Date;</strong></td>
-            <td style="border: none; padding: 2px 0;">${formatDateLong(data.date || '')}</td>
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3;"><strong>Date;</strong></td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3;">${formatDateLong(data.date || '')}</td>
           </tr>
           <tr style="border: none;">
-            <td style="width: 80px; vertical-align: top; border: none; padding: 2px 0;"><strong>${documentNumber};</strong></td>
-            <td style="border: none; padding: 2px 0;">${displayNumber}</td>
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3;"><strong>${documentNumber};</strong></td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3;">${displayNumber}</td>
           </tr>
         </table>
       </div>
