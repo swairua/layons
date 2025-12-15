@@ -326,36 +326,38 @@ export default function BOQs() {
               <div><strong>Contractor:</strong> {viewing.contractor || '-'}</div>
               <div className="pt-2"><strong>Notes:</strong><div className="whitespace-pre-wrap">{viewing.data?.notes || '-'}</div></div>
 
-              <div className="pt-4 space-y-4">
+              <div className="pt-4 space-y-2">
                 {viewing.data?.sections?.map((sec: any, idx: number) => (
-                  <div key={idx} className="border border-border rounded-lg p-4">
-                    <div className="font-medium text-lg mb-3">{sec.title}</div>
+                  <div key={idx}>
+                    <div className="bg-muted/40 border-l-4 border-primary px-4 py-2 mb-1 rounded-r">
+                      <h3 className="font-bold text-sm uppercase tracking-wide text-foreground">{sec.title}</h3>
+                    </div>
 
                     {sec.subsections && sec.subsections.length > 0 ? (
-                      <div className="space-y-3">
+                      <div className="space-y-3 ml-2">
                         {sec.subsections.map((sub: any, subIdx: number) => {
                           const subsectionTotal = (sub.items || []).reduce((sum: number, it: any) => {
                             return sum + ((it.quantity || 0) * (it.rate || 0));
                           }, 0);
 
                           return (
-                            <div key={subIdx} className="bg-muted/30 rounded p-3 border border-border/50">
-                              <div className="flex justify-between items-center mb-2">
-                                <div className="font-semibold text-sm">Subsection {sub.name}: {sub.label}</div>
-                                <div className="text-sm font-semibold">{formatViewingCurrency(subsectionTotal)}</div>
+                            <div key={subIdx} className="bg-white rounded p-4 border border-border">
+                              <div className="flex justify-between items-center mb-3">
+                                <div className="font-semibold text-sm text-foreground">Subsection {sub.name}: {sub.label}</div>
+                                <div className="text-sm font-bold text-primary">{formatViewingCurrency(subsectionTotal)}</div>
                               </div>
                               <table className="w-full text-xs">
                                 <thead>
                                   <tr className="text-left text-muted-foreground border-b">
-                                    <th>Description</th><th>Qty</th><th>Unit</th><th>Rate</th><th className="text-right">Amount</th>
+                                    <th className="pb-2">Description</th><th className="pb-2">Qty</th><th className="pb-2">Unit</th><th className="pb-2">Rate</th><th className="pb-2 text-right">Amount</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {(sub.items || []).map((it: any, i: number) => (
-                                    <tr key={i}>
-                                      <td>{it.description}</td>
-                                      <td>{it.quantity}</td>
-                                      <td>{
+                                    <tr key={i} className="border-b last:border-b-0 hover:bg-white/50">
+                                      <td className="py-1">{it.description}</td>
+                                      <td className="py-1">{it.quantity}</td>
+                                      <td className="py-1">{
                                         (() => {
                                           if (it.unit_id && units) {
                                             const u = units.find((x: any) => x.id === it.unit_id);
@@ -366,8 +368,8 @@ export default function BOQs() {
                                           return '-';
                                         })()
                                       }</td>
-                                      <td>{formatViewingCurrency(Number(it.rate || 0))}</td>
-                                      <td className="text-right">{formatViewingCurrency(Number((it.quantity || 0) * (it.rate || 0)))}</td>
+                                      <td className="py-1">{formatViewingCurrency(Number(it.rate || 0))}</td>
+                                      <td className="py-1 text-right font-medium">{formatViewingCurrency(Number((it.quantity || 0) * (it.rate || 0)))}</td>
                                     </tr>
                                   ))}
                                 </tbody>
@@ -383,26 +385,26 @@ export default function BOQs() {
                             }, 0);
                           }, 0);
                           return (
-                            <div className="flex justify-end font-semibold text-sm pt-2 border-t border-border">
-                              <div>Section Total: {formatViewingCurrency(sectionTotal)}</div>
+                            <div className="flex justify-end font-bold text-sm pt-4 mt-2 border-t-2 border-primary">
+                              <div className="text-primary">Section Total: {formatViewingCurrency(sectionTotal)}</div>
                             </div>
                           );
                         })()}
                       </div>
                     ) : (
-                      <div className="mt-2">
+                      <div className="mt-4 bg-white rounded border border-border p-4">
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="text-left text-muted-foreground border-b">
-                              <th>Description</th><th>Qty</th><th>Unit</th><th>Rate</th><th>Amount</th>
+                              <th className="pb-2">Description</th><th className="pb-2">Qty</th><th className="pb-2">Unit</th><th className="pb-2">Rate</th><th className="pb-2 text-right">Amount</th>
                             </tr>
                           </thead>
                           <tbody>
                             {(sec.items || []).map((it: any, i: number) => (
-                              <tr key={i}>
-                                <td>{it.description}</td>
-                                <td>{it.quantity}</td>
-                                <td>{
+                              <tr key={i} className="border-b last:border-b-0 hover:bg-muted/20">
+                                <td className="py-2">{it.description}</td>
+                                <td className="py-2">{it.quantity}</td>
+                                <td className="py-2">{
                                   (() => {
                                     if (it.unit_id && units) {
                                       const u = units.find((x: any) => x.id === it.unit_id);
@@ -413,8 +415,8 @@ export default function BOQs() {
                                     return '-';
                                   })()
                                 }</td>
-                                <td>{formatViewingCurrency(Number(it.rate || 0))}</td>
-                                <td>{formatViewingCurrency(Number((it.quantity || 0) * (it.rate || 0)))}</td>
+                                <td className="py-2">{formatViewingCurrency(Number(it.rate || 0))}</td>
+                                <td className="py-2 text-right font-medium">{formatViewingCurrency(Number((it.quantity || 0) * (it.rate || 0)))}</td>
                               </tr>
                             ))}
                           </tbody>

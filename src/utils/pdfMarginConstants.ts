@@ -80,17 +80,97 @@ export const PDF_PAGE_CSS = `
     display: table-footer-group;
   }
 
-  /* Add spacing before sections to prevent cutting */
-  .section-title::before {
-    content: '';
-    display: block;
-    height: 10mm;
+  /* Advanced page break control */
+  @supports (break-inside: avoid) {
+    .section-row,
+    .subsection-row,
+    .item-row {
+      break-inside: avoid;
+      break-after: auto;
+    }
+
+    .section-total,
+    .subsection-total {
+      break-inside: avoid;
+      break-after: auto;
+      break-before: avoid;
+    }
+
+    .items {
+      break-inside: avoid;
+    }
   }
 
-  /* Ensure proper spacing at page boundaries */
+  /* Fallback for browsers that don't support break-* */
+  .section-row,
+  .subsection-row,
+  .item-row {
+    page-break-inside: avoid;
+  }
+
+  .section-total,
+  .subsection-total {
+    page-break-inside: avoid;
+    page-break-before: avoid;
+    page-break-after: auto;
+  }
+
+  .items {
+    page-break-inside: avoid;
+  }
+
+  /* Ensure proper page margins */
   body {
     margin: ${PDF_PAGE_CONFIG.margin}mm;
     padding: 0;
+    padding-bottom: 20mm;
+  }
+
+  /* Footer positioning */
+  .footer,
+  .pagefoot {
+    page-break-inside: avoid;
+    page-break-before: avoid;
+  }
+
+  /* Page break spacing */
+  .boq-main {
+    display: block;
+    page-break-after: auto;
+  }
+
+  .items:not(:first-of-type) {
+    margin-top: 10mm;
+    page-break-before: auto;
+  }
+
+  .items:first-of-type {
+    margin-top: 0;
+  }
+
+  /* Prevent orphaned rows */
+  tr {
+    page-break-inside: avoid;
+  }
+
+  /* Table header persistence across pages */
+  thead {
+    display: table-header-group;
+    page-break-inside: avoid;
+  }
+
+  /* Ensure spacing before new sections on new pages */
+  .section-row:not(:first-of-type) {
+    margin-top: 10mm;
+  }
+
+  .section-row:first-child {
+    margin-top: 0;
+  }
+
+  /* Subsection spacing for clarity */
+  .subsection-row:first-of-type {
+    margin-top: 2mm;
   }
 `;
 
