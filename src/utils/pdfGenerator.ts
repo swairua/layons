@@ -2370,7 +2370,6 @@ export const generatePDF = async (data: DocumentData) => {
           border: 1px solid #000;
           border-radius: 0;
           overflow: hidden;
-          line-height: 1;
         }
 
         .items-table thead {
