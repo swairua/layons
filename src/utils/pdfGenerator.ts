@@ -2375,10 +2375,11 @@ export const generatePDF = async (data: DocumentData) => {
         .items-table thead {
           background: #f8f9fa;
           color: #000;
+          display: table-header-group;
         }
 
         .items-table th {
-          padding: 3px 4px;
+          padding: 2px 4px;
           text-align: center;
           font-weight: bold;
           font-size: 9px;
@@ -2386,6 +2387,7 @@ export const generatePDF = async (data: DocumentData) => {
           letter-spacing: 0.5px;
           border-right: 1px solid rgba(255,255,255,0.2);
           line-height: 1;
+          height: auto;
         }
 
         .items-table th:last-child {
