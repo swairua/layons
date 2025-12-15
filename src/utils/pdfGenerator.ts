@@ -834,7 +834,7 @@ export const generatePDF = async (data: DocumentData) => {
         .item-row td.unit { width: 9%; text-align:center; }
         .item-row td.rate { width: 11%; text-align:right; }
         .item-row td.amount { width: 12%; text-align:right; font-weight: 500; }
-        .section-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 8mm; margin-top: 3mm; page-break-after: auto; border-top: 2px solid #ddd; }
+        .section-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 15mm; margin-top: 3mm; page-break-after: auto; border-top: 2px solid #ddd; }
         .section-total td { font-weight:700; background:#f9f9f9; padding: 6px 8px; line-height: 1.4; }
         .section-total .label { text-align:right; padding: 6px 12px 6px 8px; }
         .preliminaries-section { margin-bottom: 8mm; page-break-inside: avoid; margin-left: 15mm; margin-right: 15mm; }
