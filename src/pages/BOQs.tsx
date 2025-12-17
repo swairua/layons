@@ -462,10 +462,10 @@ export default function BOQs() {
           open={percentageRateOpen}
           onOpenChange={setPercentageRateOpen}
           boq={percentageRateBoq}
-          onDownload={async (multiplier: number) => {
+          onDownload={async (data: { percentage: number; multiplier: number }) => {
             await handleDownloadPDF(percentageRateBoq, {
               customTitle: 'INVOICE',
-              amountMultiplier: multiplier,
+              amountMultiplier: data.multiplier,
               forceCurrency: 'EUR',
               customClient: {
                 name: 'Global Crop Diversity Trust',
@@ -473,7 +473,8 @@ export default function BOQs() {
                 city: 'Bonn',
                 country: 'Germany'
               },
-              stampImageUrl: 'https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2Fd301f7401e654be39b50f49bc704c240?format=webp&width=800'
+              stampImageUrl: 'https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2Fd301f7401e654be39b50f49bc704c240?format=webp&width=800',
+              specialPaymentPercentage: data.percentage
             });
           }}
         />
