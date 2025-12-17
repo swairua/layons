@@ -819,7 +819,8 @@ export const generatePDF = async (data: DocumentData) => {
 
         /* Header styling - full page width, no overflow */
         .header { margin: 0; padding: 0; width: 100%; box-sizing: border-box; page-break-inside: avoid; page-break-after: avoid; }
-        .header-image { width: 100%; height: auto; max-height: none; object-fit: contain; display: block; margin: 0; padding: 0; }\n        .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 6px; width: 100%; padding: 0 15mm; box-sizing: border-box; page-break-inside: avoid; }
+        .header-image { width: 100%; height: 140px; max-height: none; object-fit: contain; display: block; margin: 0; padding: 0; box-sizing: border-box; }
+        .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 6px; width: 100%; padding: 0 15mm; box-sizing: border-box; page-break-inside: avoid; }
         .header-top { display: flex; align-items: flex-start; width: 100%; margin: 0 0 10px 0; padding: 0; gap: 20px; box-sizing: border-box; min-width: 0; }
         .services-section { display: block; font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0; }
         .services-section > div { margin: 0 0 4px 0; }
@@ -2211,7 +2212,7 @@ export const generatePDF = async (data: DocumentData) => {
           height: 140px !important;
           object-fit: contain !important;
           margin: 0 0 12px 0 !important;
-          padding: 0 15mm !important;
+          padding: 0 !important;
           display: block !important;
           border: none !important;
           box-sizing: border-box !important;
