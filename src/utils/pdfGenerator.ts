@@ -480,8 +480,10 @@ const generatePDFHeader = (
   let documentNumber = 'Qtn No';
   if (documentType === 'Bill of Quantities') {
     documentNumber = 'BOQ No';
-  } else if (data.customTitle === 'INVOICE') {
+  } else if (data.customTitle === 'INVOICE' || data.type === 'invoice') {
     documentNumber = 'Invoice No';
+  } else if (data.type === 'proforma') {
+    documentNumber = 'Proforma No';
   }
 
   const displayNumber = data.customTitle === 'INVOICE'
@@ -492,7 +494,7 @@ const generatePDFHeader = (
     <!-- Header Section -->
     <div class="header">
       <!-- Full-width header image -->
-      <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" style="height: 140px !important;" />
+      <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
 
       <!-- Header content below image -->
       <div class="header-content" style="display: flex; flex-direction: column; gap: 6px; margin-top: 2px;">
