@@ -146,10 +146,17 @@ export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string;
 
   // Apply customizations if provided
   const multiplier = options?.amountMultiplier ?? 1;
+  const paymentPercentageText = options?.specialPaymentPercentage
+    ? `Payment of ${options.specialPaymentPercentage}% of the total`
+    : null;
+
   const customizedItems = flatItems.map(item => ({
     ...item,
     unit_price: item.unit_price * multiplier,
-    line_total: item.line_total * multiplier
+    line_total: item.line_total * multiplier,
+    unit_of_measure: paymentPercentageText && !item._isSectionHeader && !item._isSubtotal && !item._isSectionTotal
+      ? paymentPercentageText
+      : item.unit_of_measure
   }));
 
   const customizedSubtotal = subtotal * multiplier;
