@@ -96,6 +96,94 @@ const renderHTMLToCanvas = async (htmlContent: string, pageSelector: string) => 
   }
 };
 
+// Helper function to render BOQ sections separately to avoid row splitting
+const renderBOQSectionsToPDF = async (pdf: jsPDF, wrapper: HTMLElement, pageWidth: number, pageHeight: number, headerHTML: string) => {
+  let isFirstPage = true;
+
+  // First render and add header on first page
+  const headerWrapper = document.createElement('div');
+  headerWrapper.style.position = 'absolute';
+  headerWrapper.style.left = '0';
+  headerWrapper.style.top = '0';
+  headerWrapper.style.width = '210mm';
+  headerWrapper.style.height = 'auto';
+  headerWrapper.style.backgroundColor = '#ffffff';
+  headerWrapper.style.zIndex = '-999999';
+  headerWrapper.style.pointerEvents = 'none';
+  headerWrapper.innerHTML = headerHTML;
+  document.body.appendChild(headerWrapper);
+
+  await new Promise(resolve => setTimeout(resolve, 2000));
+
+  const headerCanvas = await html2canvas(headerWrapper, {
+    scale: 2,
+    backgroundColor: '#ffffff',
+    logging: false,
+    allowTaint: true,
+    useCORS: true,
+    imageTimeout: 15000,
+    timeout: 45000,
+    windowHeight: Math.max(headerWrapper.scrollHeight, headerWrapper.offsetHeight) || 1000,
+    windowWidth: 210 * 3.779527559,
+    proxy: undefined,
+    foreignObjectRendering: false
+  });
+
+  const headerImgData = headerCanvas.toDataURL('image/png');
+  const headerImgHeight = (headerCanvas.height * pageWidth) / headerCanvas.width;
+  pdf.addImage(headerImgData, 'PNG', 0, 0, pageWidth, headerImgHeight);
+
+  document.body.removeChild(headerWrapper);
+
+  // Now render each section separately
+  const sectionBlocks = wrapper.querySelectorAll('.section-block');
+  let currentPageHeight = headerImgHeight;
+
+  for (const sectionBlock of sectionBlocks) {
+    const sectionWrapper = document.createElement('div');
+    sectionWrapper.style.position = 'absolute';
+    sectionWrapper.style.left = '0';
+    sectionWrapper.style.top = '0';
+    sectionWrapper.style.width = '210mm';
+    sectionWrapper.style.height = 'auto';
+    sectionWrapper.style.backgroundColor = '#ffffff';
+    sectionWrapper.style.zIndex = '-999999';
+    sectionWrapper.style.pointerEvents = 'none';
+    sectionWrapper.innerHTML = (sectionBlock as HTMLElement).outerHTML;
+    document.body.appendChild(sectionWrapper);
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const sectionCanvas = await html2canvas(sectionWrapper, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      logging: false,
+      allowTaint: true,
+      useCORS: true,
+      imageTimeout: 15000,
+      timeout: 45000,
+      windowHeight: Math.max(sectionWrapper.scrollHeight, sectionWrapper.offsetHeight) || 1000,
+      windowWidth: 210 * 3.779527559,
+      proxy: undefined,
+      foreignObjectRendering: false
+    });
+
+    const sectionImgData = sectionCanvas.toDataURL('image/png');
+    const sectionImgHeight = (sectionCanvas.height * pageWidth) / sectionCanvas.width;
+
+    // Check if section fits on current page, if not start new page
+    if (currentPageHeight + sectionImgHeight > pageHeight + 10) {
+      pdf.addPage();
+      currentPageHeight = 0;
+    }
+
+    pdf.addImage(sectionImgData, 'PNG', 0, currentPageHeight, pageWidth, sectionImgHeight);
+    currentPageHeight += sectionImgHeight;
+
+    document.body.removeChild(sectionWrapper);
+  }
+};
+
 // Helper function to add canvas to PDF with proper page handling
 const addCanvasToPDF = async (pdf: jsPDF, canvas: HTMLCanvasElement, pageWidth: number, pageHeight: number) => {
   // Validate canvas
