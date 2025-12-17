@@ -2211,9 +2211,10 @@ export const generatePDF = async (data: DocumentData) => {
           height: 140px !important;
           object-fit: contain !important;
           margin: 0 0 12px 0 !important;
-          padding: 0 !important;
+          padding: 0 15mm !important;
           display: block !important;
           border: none !important;
+          box-sizing: border-box !important;
         }
 
         .header-content {
