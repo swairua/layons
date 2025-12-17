@@ -1303,10 +1303,11 @@ export const generatePDF = async (data: DocumentData) => {
           useCORS: true,
           imageTimeout: 15000,
           timeout: 45000,
-          windowHeight: Math.max(headerWrapper2.scrollHeight, headerWrapper2.offsetHeight) || 1000,
+          windowHeight: Math.max(headerWrapper2.scrollHeight, headerWrapper2.offsetHeight, 500) + 100,
           windowWidth: 210 * 3.779527559,
           proxy: undefined,
-          foreignObjectRendering: false
+          foreignObjectRendering: false,
+          allowTaint: true
         });
 
         const headerImgData = headerCanvas.toDataURL('image/png');
