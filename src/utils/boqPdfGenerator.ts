@@ -43,6 +43,7 @@ export interface BoqPdfOptions {
   forceCurrency?: string;
   customClient?: { name: string; email?: string; phone?: string; address?: string; city?: string; country?: string };
   stampImageUrl?: string;
+  specialPaymentPercentage?: number;
 }
 
 export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string; logo_url?: string; address?: string; city?: string; country?: string; phone?: string; email?: string }, options?: BoqPdfOptions) {
