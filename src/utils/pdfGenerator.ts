@@ -1,25 +1,11 @@
 // PDF Generation utility using jsPDF + html2canvas for auto-download
 import { PDF_PAGE_CSS } from './pdfMarginConstants';
 import { formatCurrency as formatCurrencyUtil } from './currencyFormatter';
-
-// Browser-only imports (only loaded when actually used)
-let jsPDF: any;
-let html2canvas: any;
-
-const ensureImports = async () => {
-  if (!jsPDF) {
-    const mod = await import('jspdf');
-    jsPDF = mod.default;
-  }
-  if (!html2canvas) {
-    const mod = await import('html2canvas');
-    html2canvas = mod.default;
-  }
-};
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 // Helper function to render HTML content to canvas
 const renderHTMLToCanvas = async (htmlContent: string, pageSelector: string) => {
-  await ensureImports();
   let wrapper: HTMLElement | null = null;
   try {
     // Create a temporary wrapper for proper rendering
@@ -143,7 +129,6 @@ const addCanvasToPDF = async (pdf: jsPDF, canvas: HTMLCanvasElement, pageWidth: 
 
 // Helper function to convert HTML to PDF and auto-download
 const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string) => {
-  await ensureImports();
   let wrapper: HTMLElement | null = null;
   try {
     // Create a temporary wrapper for proper rendering
@@ -507,7 +492,7 @@ const generatePDFHeader = (
     <!-- Header Section -->
     <div class="header">
       <!-- Full-width header image -->
-      <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" style="height: 110px !important;" />
+      <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" style="height: 140px !important;" />
 
       <!-- Header content below image -->
       <div class="header-content" style="display: flex; flex-direction: column; gap: 6px; margin-top: 2px;">
@@ -571,8 +556,6 @@ const generatePDFHeader = (
 };
 
 export const generatePDF = async (data: DocumentData) => {
-  // Ensure browser-only libraries are loaded
-  await ensureImports();
 
   // Extract theme color variables from the main document so PDFs match the app theme
   const computed = typeof window !== 'undefined' ? getComputedStyle(document.documentElement) : null;
@@ -681,9 +664,10 @@ export const generatePDF = async (data: DocumentData) => {
       `;
     }
 
-    // Build table rows; support Sections, Subsections, and their totals
-    let rowsHtml = '';
+    // Build separate table blocks for each section to enable page breaks
+    let tablesHtml = '';
     let currentSection = '';
+    let sectionRowsHtml = '';
     let itemNo = 0;
 
     // Detect if subsections are present (items produced by boqPdfGenerator)
@@ -698,71 +682,105 @@ export const generatePDF = async (data: DocumentData) => {
     const isSubsectionSubtotal = (d: string) => /^subsection\s+[^\s]+\s+subtotal\s*$/i.test(d);
     const isSectionTotalRow = (d: string) => /^section\s+total$/i.test(d);
 
+    let sectionCount = 0;
+
+    // Helper to create a table block for a section
+    const createSectionTable = (sectionTitle: string, sectionRows: string, isFirstSection: boolean): string => {
+      return `
+        <div class="section-block" style="page-break-before: ${isFirstSection ? 'avoid' : 'always'}; page-break-inside: avoid;">
+          <table class="items" style="margin-bottom: 12mm; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm); page-break-after: auto;">
+            <thead>
+              <tr>
+                <th style="width:5%; font-weight: bold;">No</th>
+                <th style="width:55%; text-align:left; font-weight: bold;">DESCRIPTION</th>
+                <th style="width:8%; font-weight: bold;">QTY</th>
+                <th style="width:9%; font-weight: bold;">UNIT</th>
+                <th style="width:11%; font-weight: bold;">RATE (${data.currency || 'KES'})</th>
+                <th style="width:12%; text-align:right; font-weight: bold;">AMOUNT (${data.currency || 'KES'})</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="section-row-header"><td colspan="6" class="section-title-in-table" style="background:#f4f4f4; font-weight:700; padding: 8px 10px; line-height: 1.4; font-size: 9px; text-align: left; letter-spacing: 0.3px;">${sectionTitle}</td></tr>
+              ${sectionRows}
+            </tbody>
+          </table>
+        </div>
+      `;
+    };
+
     if (hasSubsections) {
       (data.items || []).forEach((it) => {
         const desc = String(it.description || '');
 
         if (isSectionHeader(desc)) {
+          // Close previous section table if exists
+          if (currentSection && sectionRowsHtml) {
+            tablesHtml += createSectionTable(currentSection, sectionRowsHtml, sectionCount === 0);
+            sectionCount++;
+          }
+          // Start new section
           currentSection = desc;
+          sectionRowsHtml = '';
           itemNo = 0;
-          // Add spacer row before section headers (except first section) to force page breaks
-          const isFirstSection = !rowsHtml.includes('section-row');
-          const spacerRow = !isFirstSection ? `<tr class=\"spacer-row\"><td colspan=\"6\" style=\"height: 8mm; border: none; background: none;\"></td></tr>` : '';
-          rowsHtml += spacerRow + `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\" style=\"height: auto; vertical-align: middle;\">${currentSection}</td></tr>`;
           return;
         }
 
         if (isSubsectionSubtotal(desc)) {
-          rowsHtml += `<tr class=\"subsection-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">${desc}</td>\n          <td class=\"amount\">${formatCurrency(it.line_total || 0)}</td>\n        </tr>`;
+          sectionRowsHtml += `<tr class=\"subsection-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">${desc}</td>\n          <td class=\"amount\">${formatCurrency(it.line_total || 0)}</td>\n        </tr>`;
           return;
         }
 
         if (isSubsectionHeader(desc)) {
           itemNo = 0;
-          rowsHtml += `<tr class=\"subsection-row\"><td class=\"num\"></td><td colspan=\"5\" class=\"subsection-title\">${desc.replace(/^\s*[→-]?\s*/, '')}</td></tr>`;
+          sectionRowsHtml += `<tr class=\"subsection-row\"><td class=\"num\"></td><td colspan=\"5\" class=\"subsection-title\">${desc.replace(/^\s*[→-]?\s*/, '')}</td></tr>`;
           return;
         }
 
         if (isSectionTotalRow(desc)) {
           const total = Number(it.line_total || 0);
           sectionTotals.push(total);
-          rowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(total)}</td>\n        </tr>`;
+          sectionRowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(total)}</td>\n        </tr>`;
           itemNo = 0;
           return;
         }
 
         // Regular item row within subsection
         itemNo += 1;
-        rowsHtml += `<tr class=\"item-row\">\n        <td class=\"num\">${itemNo}</td>\n        <td class=\"desc\">${it.description}</td>\n        <td class=\"qty\">${it.quantity || ''}</td>\n        <td class=\"unit\">${(it as any).unit_abbreviation || it.unit_of_measure || ''}</td>\n        <td class=\"rate\">${formatCurrency(it.unit_price || 0)}</td>\n        <td class=\"amount\">${formatCurrency(it.line_total || 0)}</td>\n      </tr>`;
+        sectionRowsHtml += `<tr class=\"item-row\">\n        <td class=\"num\">${itemNo}</td>\n        <td class=\"desc\">${it.description}</td>\n        <td class=\"qty\">${it.quantity || ''}</td>\n        <td class=\"unit\">${(it as any).unit_abbreviation || it.unit_of_measure || ''}</td>\n        <td class=\"rate\">${formatCurrency(it.unit_price || 0)}</td>\n        <td class=\"amount\">${formatCurrency(it.line_total || 0)}</td>\n      </tr>`;
       });
+      // Flush last section
+      if (currentSection && sectionRowsHtml) {
+        tablesHtml += createSectionTable(currentSection, sectionRowsHtml, sectionCount === 0);
+      }
     } else {
       // Legacy behavior: section headers are items with qty=0 and unit_price=0; totals are computed per section
       let runningSectionTotal = 0;
       (data.items || []).forEach((it) => {
         const isSection = (it.quantity === 0 && it.unit_price === 0);
         if (isSection) {
+          // Close previous section table if exists
           if (itemNo > 0) {
-            rowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(runningSectionTotal)}</td>\n        </tr>`;
+            sectionRowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(runningSectionTotal)}</td>\n        </tr>`;
             sectionTotals.push(runningSectionTotal);
+            tablesHtml += createSectionTable(currentSection, sectionRowsHtml, sectionCount === 0);
+            sectionCount++;
           }
           runningSectionTotal = 0;
           itemNo = 0;
           currentSection = it.description;
-          // Add spacer row before section headers (except first section) to force page breaks
-          const isFirstSection = sectionTotals.length === 0;
-          const spacerRow = !isFirstSection ? `<tr class=\"spacer-row\"><td colspan=\"6\" style=\"height: 8mm; border: none; background: none;\"></td></tr>` : '';
-          rowsHtml += spacerRow + `<tr class=\"section-row\"><td colspan=\"6\" class=\"section-title\" style=\"height: auto; vertical-align: middle;\">${currentSection}</td></tr>`;
+          sectionRowsHtml = '';
           return;
         }
         itemNo += 1;
         const line = (it.line_total || 0);
         runningSectionTotal += line;
-        rowsHtml += `<tr class=\"item-row\">\n        <td class=\"num\">${itemNo}</td>\n        <td class=\"desc\">${it.description}</td>\n        <td class=\"qty\">${it.quantity || ''}</td>\n        <td class=\"unit\">${(it as any).unit_abbreviation || it.unit_of_measure || ''}</td>\n        <td class=\"rate\">${formatCurrency(it.unit_price || 0)}</td>\n        <td class=\"amount\">${formatCurrency(line)}</td>\n      </tr>`;
+        sectionRowsHtml += `<tr class=\"item-row\">\n        <td class=\"num\">${itemNo}</td>\n        <td class=\"desc\">${it.description}</td>\n        <td class=\"qty\">${it.quantity || ''}</td>\n        <td class=\"unit\">${(it as any).unit_abbreviation || it.unit_of_measure || ''}</td>\n        <td class=\"rate\">${formatCurrency(it.unit_price || 0)}</td>\n        <td class=\"amount\">${formatCurrency(line)}</td>\n      </tr>`;
       });
       // Flush last section
       if (itemNo > 0) {
-        rowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(runningSectionTotal)}</td>\n        </tr>`;
+        sectionRowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(runningSectionTotal)}</td>\n        </tr>`;
         sectionTotals.push(runningSectionTotal);
+        tablesHtml += createSectionTable(currentSection, sectionRowsHtml, sectionCount === 0);
       }
     }
 
@@ -821,11 +839,9 @@ export const generatePDF = async (data: DocumentData) => {
 
         body.special-invoice .items { margin-top: 3px; margin-bottom: 3px; }
         body.special-invoice .preliminaries-section { margin-bottom: 6px; }
-        .spacer-row { height: 15mm; page-break-inside: avoid; page-break-before: avoid; page-break-after: avoid; }
-        .spacer-row td { border: none !important; background: none !important; padding: 0 !important; height: 15mm; }
-        .section-row { page-break-inside: avoid; page-break-before: auto; page-break-after: auto; margin: 10mm 0 0 0; height: auto; } .section-row td { height: auto; vertical-align: middle; padding: 7px 8px; }
+        .section-row { page-break-inside: avoid; page-break-before: auto; page-break-after: avoid; margin: 10mm 0 0 0; height: auto; } .section-row td { height: auto; vertical-align: middle; padding: 7px 8px; }
         .section-row:first-of-type { page-break-before: avoid; margin-top: 0; margin-bottom: 3mm; }
-        .section-row:not(:first-of-type) { margin-top: 12mm; page-break-before: always; }
+        .section-row:not(:first-of-type) { page-break-before: always; margin-top: 0; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding: 8px 10px; line-height: 1.4; font-size: 9px; text-align: left; vertical-align: middle; letter-spacing: 0.3px; }
         .item-row { page-break-inside: avoid; margin-bottom: 0; page-break-after: auto; } .item-row td { padding: 4px 7px; line-height: 1.3; }
         .item-row td.num { text-align:center; width: 5%; font-weight: 500; }
@@ -907,6 +923,33 @@ export const generatePDF = async (data: DocumentData) => {
           width: 100% !important;
         }
 
+        .sections-container {
+          display: block;
+          width: 100%;
+          box-sizing: border-box;
+        }
+
+        .section-block {
+          page-break-inside: avoid;
+          break-inside: avoid;
+          margin-bottom: 0;
+        }
+
+        .sections-container table {
+          page-break-inside: avoid;
+          break-inside: avoid;
+          page-break-after: auto;
+        }
+
+        .sections-container table thead {
+          display: table-header-group;
+        }
+
+        .section-row-header {
+          page-break-inside: avoid;
+          page-break-after: auto;
+        }
+
         .boq-main .header-content {
           padding-left: 0 !important;
           padding-right: 0 !important;
@@ -947,23 +990,11 @@ export const generatePDF = async (data: DocumentData) => {
 
           ${preliminariesHtml}
 
-          <div style="height: ${data.customTitle === 'INVOICE' ? '4mm' : '8mm'}; margin-left: 15mm; margin-right: 15mm;"></div>
+          <div style="height: ${data.customTitle === 'INVOICE' ? '4mm' : '8mm'};"></div>
 
-          <table class="items">
-            <thead>
-              <tr>
-                <th style="width:5%; text-align:center;">#</th>
-                <th style="width:55%; text-align:left;">ITEM DESCRIPTION</th>
-                <th style="width:8%; text-align:center;">QTY</th>
-                <th style="width:9%; text-align:center;">UNIT</th>
-                <th style="width:11%; text-align:right;">RATE</th>
-                <th style="width:12%; text-align:right;">AMOUNT (${data.currency || 'KES'})</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rowsHtml}
-            </tbody>
-          </table>
+          <div class="sections-container">
+            ${tablesHtml}
+          </div>
 
           <div class="totals">
             <table style="width:100%; margin-top:8px; margin-left: 0; margin-right: 0;">
@@ -2177,7 +2208,7 @@ export const generatePDF = async (data: DocumentData) => {
 
         .header-image {
           width: 100% !important;
-          height: 125px !important;
+          height: 140px !important;
           object-fit: fill !important;
           margin: 0 0 12px 0 !important;
           padding: 0 !important;
