@@ -835,9 +835,9 @@ export const generatePDF = async (data: DocumentData) => {
 
         body.special-invoice .items { margin-top: 3px; margin-bottom: 3px; }
         body.special-invoice .preliminaries-section { margin-bottom: 6px; }
-        .section-row { page-break-inside: avoid; page-break-before: auto; page-break-after: avoid; margin: 10mm 0 0 0; height: auto; } .section-row td { height: auto; vertical-align: middle; padding: 7px 8px; }
-        .section-row:first-of-type { page-break-before: avoid; margin-top: 0; margin-bottom: 3mm; }
-        .section-row:not(:first-of-type) { page-break-before: always; margin-top: 0; }
+        .section-row { page-break-inside: avoid; page-break-before: auto; page-break-after: avoid; margin: 2mm 0 0 0; height: auto; } .section-row td { height: auto; vertical-align: middle; padding: 7px 8px; }
+        .section-row:first-of-type { page-break-before: avoid; margin-top: 0; margin-bottom: 1mm; }
+        .section-row:not(:first-of-type) { page-break-before: auto; margin-top: 0; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding: 8px 10px; line-height: 1.4; font-size: 9px; text-align: left; vertical-align: middle; letter-spacing: 0.3px; }
         .item-row { page-break-inside: avoid; margin-bottom: 0; page-break-after: auto; } .item-row td { padding: 4px 7px; line-height: 1.3; }
         .item-row td.num { text-align:center; width: 5%; font-weight: 500; }
