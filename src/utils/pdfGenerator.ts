@@ -1285,7 +1285,7 @@ export const generatePDF = async (data: DocumentData) => {
         headerWrapper2.style.position = 'absolute';
         headerWrapper2.style.left = '0';
         headerWrapper2.style.top = '0';
-        headerWrapper2.style.width = `${contentWidth}mm`;
+        headerWrapper2.style.width = '210mm';
         headerWrapper2.style.height = 'auto';
         headerWrapper2.style.backgroundColor = '#ffffff';
         headerWrapper2.style.zIndex = '-999999';
@@ -1304,15 +1304,15 @@ export const generatePDF = async (data: DocumentData) => {
           imageTimeout: 15000,
           timeout: 45000,
           windowHeight: Math.max(headerWrapper2.scrollHeight, headerWrapper2.offsetHeight) || 1000,
-          windowWidth: contentWidth * 3.779527559,
+          windowWidth: 210 * 3.779527559,
           proxy: undefined,
           foreignObjectRendering: false
         });
 
         const headerImgData = headerCanvas.toDataURL('image/png');
-        const headerImgWidth = contentWidth;
+        const headerImgWidth = pageWidth;
         const headerImgHeight = (headerCanvas.height * headerImgWidth) / headerCanvas.width;
-        pdf.addImage(headerImgData, 'PNG', margin, currentPageY, headerImgWidth, headerImgHeight);
+        pdf.addImage(headerImgData, 'PNG', 0, currentPageY, headerImgWidth, headerImgHeight);
         currentPageY += headerImgHeight;
 
         document.body.removeChild(headerWrapper2);
@@ -1324,7 +1324,7 @@ export const generatePDF = async (data: DocumentData) => {
         prelim.style.position = 'absolute';
         prelim.style.left = '0';
         prelim.style.top = '0';
-        prelim.style.width = `${contentWidth}mm`;
+        prelim.style.width = '210mm';
         prelim.style.height = 'auto';
         prelim.style.backgroundColor = '#ffffff';
         prelim.style.zIndex = '-999999';
@@ -1343,13 +1343,13 @@ export const generatePDF = async (data: DocumentData) => {
           imageTimeout: 15000,
           timeout: 45000,
           windowHeight: Math.max(prelim.scrollHeight, prelim.offsetHeight) || 1000,
-          windowWidth: contentWidth * 3.779527559,
+          windowWidth: 210 * 3.779527559,
           proxy: undefined,
           foreignObjectRendering: false
         });
 
         const prelimImgData = prelimCanvas.toDataURL('image/png');
-        const prelimImgWidth = contentWidth;
+        const prelimImgWidth = pageWidth;
         const prelimImgHeight = (prelimCanvas.height * prelimImgWidth) / prelimCanvas.width;
 
         const availHeight = pageHeight - currentPageY - margin;
@@ -1358,7 +1358,7 @@ export const generatePDF = async (data: DocumentData) => {
           currentPageY = margin;
         }
 
-        pdf.addImage(prelimImgData, 'PNG', margin, currentPageY, prelimImgWidth, prelimImgHeight);
+        pdf.addImage(prelimImgData, 'PNG', 0, currentPageY, prelimImgWidth, prelimImgHeight);
         currentPageY += prelimImgHeight;
 
         document.body.removeChild(prelim);
@@ -1372,7 +1372,7 @@ export const generatePDF = async (data: DocumentData) => {
         secWrapper.style.position = 'absolute';
         secWrapper.style.left = '0';
         secWrapper.style.top = '0';
-        secWrapper.style.width = `${contentWidth}mm`;
+        secWrapper.style.width = '210mm';
         secWrapper.style.height = 'auto';
         secWrapper.style.backgroundColor = '#ffffff';
         secWrapper.style.zIndex = '-999999';
@@ -1391,13 +1391,13 @@ export const generatePDF = async (data: DocumentData) => {
           imageTimeout: 15000,
           timeout: 45000,
           windowHeight: Math.max(secWrapper.scrollHeight, secWrapper.offsetHeight) || 1000,
-          windowWidth: contentWidth * 3.779527559,
+          windowWidth: 210 * 3.779527559,
           proxy: undefined,
           foreignObjectRendering: false
         });
 
         const secImgData = secCanvas.toDataURL('image/png');
-        const secImgWidth = contentWidth;
+        const secImgWidth = pageWidth;
         const secImgHeight = (secCanvas.height * secImgWidth) / secCanvas.width;
 
         const secAvailHeight = pageHeight - currentPageY - margin;
@@ -1406,7 +1406,7 @@ export const generatePDF = async (data: DocumentData) => {
           currentPageY = margin;
         }
 
-        pdf.addImage(secImgData, 'PNG', margin, currentPageY, secImgWidth, secImgHeight);
+        pdf.addImage(secImgData, 'PNG', 0, currentPageY, secImgWidth, secImgHeight);
         currentPageY += secImgHeight;
 
         document.body.removeChild(secWrapper);
@@ -1419,7 +1419,7 @@ export const generatePDF = async (data: DocumentData) => {
         totalsWrapper2.style.position = 'absolute';
         totalsWrapper2.style.left = '0';
         totalsWrapper2.style.top = '0';
-        totalsWrapper2.style.width = `${contentWidth}mm`;
+        totalsWrapper2.style.width = '210mm';
         totalsWrapper2.style.height = 'auto';
         totalsWrapper2.style.backgroundColor = '#ffffff';
         totalsWrapper2.style.zIndex = '-999999';
@@ -1438,13 +1438,13 @@ export const generatePDF = async (data: DocumentData) => {
           imageTimeout: 15000,
           timeout: 45000,
           windowHeight: Math.max(totalsWrapper2.scrollHeight, totalsWrapper2.offsetHeight) || 1000,
-          windowWidth: contentWidth * 3.779527559,
+          windowWidth: 210 * 3.779527559,
           proxy: undefined,
           foreignObjectRendering: false
         });
 
         const totalsImgData = totalsCanvas.toDataURL('image/png');
-        const totalsImgWidth = contentWidth;
+        const totalsImgWidth = pageWidth;
         const totalsImgHeight = (totalsCanvas.height * totalsImgWidth) / totalsCanvas.width;
 
         const totalsAvailHeight = pageHeight - currentPageY - margin;
@@ -1453,7 +1453,7 @@ export const generatePDF = async (data: DocumentData) => {
           currentPageY = margin;
         }
 
-        pdf.addImage(totalsImgData, 'PNG', margin, currentPageY, totalsImgWidth, totalsImgHeight);
+        pdf.addImage(totalsImgData, 'PNG', 0, currentPageY, totalsImgWidth, totalsImgHeight);
 
         document.body.removeChild(totalsWrapper2);
       }
