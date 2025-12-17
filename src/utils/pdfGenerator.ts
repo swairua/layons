@@ -113,17 +113,18 @@ const addCanvasToPDF = async (pdf: jsPDF, canvas: HTMLCanvasElement, pageWidth: 
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
   let heightLeft = imgHeight;
   let position = 0;
+  let isFirstPage = true;
 
-  // Add images to PDF pages
-  while (heightLeft >= 0) {
-    const heightToPrint = Math.min(pageHeight, heightLeft);
+  // Add images to PDF pages - only add pages with actual content
+  while (heightLeft > 1) { // Use > 1 instead of >= 0 to avoid blank pages
+    if (!isFirstPage) {
+      pdf.addPage();
+    }
+
     pdf.addImage(imgData, 'PNG', 0, -position, pageWidth, imgHeight);
     heightLeft -= pageHeight;
     position += pageHeight;
-
-    if (heightLeft > 0) {
-      pdf.addPage();
-    }
+    isFirstPage = false;
   }
 };
 
