@@ -525,8 +525,8 @@ const generatePDFHeader = (
         <!-- Bottom row: All details with borderless two-column table -->
         <table style="font-size: 12px; line-height: 1.3; width: 100%; border-collapse: collapse; border: none;">
           <tr style="border: none;">
-            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">Client</td>
-            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">Client</td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">
               <div style="line-height: 1.2;">${data.customer?.name || ''}</div>
               ${data.customer?.address ? `<div style="line-height: 1.2;">${data.customer.address}</div>` : ''}
               ${data.customer?.city ? `<div style="line-height: 1.2;">${data.customer.city}</div>` : ''}
