@@ -1307,8 +1307,7 @@ export const generatePDF = async (data: DocumentData) => {
           windowHeight: Math.max(headerWrapper2.scrollHeight, headerWrapper2.offsetHeight, 500) + 100,
           windowWidth: 210 * 3.779527559,
           proxy: undefined,
-          foreignObjectRendering: false,
-          allowTaint: true
+          foreignObjectRendering: false
         });
 
         const headerImgData = headerCanvas.toDataURL('image/png');
