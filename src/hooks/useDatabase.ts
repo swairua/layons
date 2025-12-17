@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { ensureCompanyImageColumns } from '@/utils/ensureDatabaseColumns';
 
 // Types
 export interface Company {
@@ -242,11 +243,15 @@ export const useCompanies = () => {
   return useQuery({
     queryKey: ['companies'],
     queryFn: async () => {
+      // Ensure company image columns exist in the database
+      // This handles the case where migrations haven't been applied yet
+      await ensureCompanyImageColumns();
+
       const { data, error } = await supabase
         .from('companies')
         .select('*')
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
       return data as Company[];
     },

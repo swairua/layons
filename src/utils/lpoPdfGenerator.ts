@@ -1,5 +1,4 @@
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { PDF_PAGE_CSS } from './pdfMarginConstants';
 
 export interface LPOPDFData {
   id: string;
@@ -51,274 +50,21 @@ export interface CompanyData {
   registration_number?: string;
   tax_number?: string;
   logo_url?: string;
+  header_image?: string;
+  stamp_image?: string;
 }
 
-export const generateLPOPDF = (lpo: LPOPDFData, company: CompanyData) => {
-  const doc = new jsPDF();
-  let yPosition = 20;
-
-  // Set font
-  doc.setFont('helvetica');
-
-  // Add logo space reservation if logo URL exists
-  // Note: jsPDF image support requires loading image as base64 and using doc.addImage()
-  // For now, we reserve space and add a placeholder
-  if (company.logo_url) {
-    doc.setFontSize(8);
-    doc.setTextColor(128, 128, 128);
-    doc.text('[LOGO PLACEHOLDER - jsPDF Image Support Needed]', 20, yPosition);
-    yPosition += 20; // Reserve space for future logo implementation
-  }
-
-  // Company Header
-  doc.setFontSize(20);
-  doc.setTextColor(40, 40, 40);
-  doc.text(company.name, 20, yPosition);
-  yPosition += 10;
-
-  doc.setFontSize(10);
-  doc.setTextColor(100, 100, 100);
-  if (company.address) {
-    doc.text(company.address, 20, yPosition);
-    yPosition += 5;
-  }
-  if (company.city || company.state || company.postal_code) {
-    const location = [company.city, company.state, company.postal_code]
-      .filter(Boolean)
-      .join(', ');
-    doc.text(location, 20, yPosition);
-    yPosition += 5;
-  }
-  if (company.phone) {
-    doc.text(`Phone: ${company.phone}`, 20, yPosition);
-    yPosition += 5;
-  }
-  if (company.email) {
-    doc.text(`Email: ${company.email}`, 20, yPosition);
-    yPosition += 5;
-  }
-
-  // Document Title
-  yPosition += 10;
-  doc.setFontSize(18);
-  doc.setTextColor(40, 40, 40);
-  doc.text('LOCAL PURCHASE ORDER', 20, yPosition);
-  yPosition += 15;
-
-  // LPO Information Box
-  doc.setFontSize(10);
-  doc.setTextColor(0, 0, 0);
-
-  // LPO Details (Right side)
-  const rightColumnX = 120;
-  let rightY = yPosition - 5;
-
-  doc.text('LPO Number:', rightColumnX, rightY);
-  doc.setFont('helvetica', 'bold');
-  doc.text(lpo.lpo_number, rightColumnX + 30, rightY);
-  doc.setFont('helvetica', 'normal');
-  rightY += 8;
-
-  doc.text('LPO Date:', rightColumnX, rightY);
-  doc.text(formatDate(lpo.lpo_date), rightColumnX + 30, rightY);
-  rightY += 8;
-
-  if (lpo.delivery_date) {
-    doc.text('Delivery Date:', rightColumnX, rightY);
-    doc.text(formatDate(lpo.delivery_date), rightColumnX + 30, rightY);
-    rightY += 8;
-  }
-
-  doc.text('Status:', rightColumnX, rightY);
-  doc.text(lpo.status.toUpperCase(), rightColumnX + 30, rightY);
-
-  // Supplier Information (Left side)
-  if (lpo.suppliers) {
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Supplier:', 20, yPosition);
-    yPosition += 8;
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(lpo.suppliers.name, 20, yPosition);
-    yPosition += 6;
-
-    if (lpo.suppliers.address) {
-      doc.text(lpo.suppliers.address, 20, yPosition);
-      yPosition += 6;
-    }
-
-    if (lpo.suppliers.city || lpo.suppliers.country) {
-      const location = [lpo.suppliers.city, lpo.suppliers.country]
-        .filter(Boolean)
-        .join(', ');
-      doc.text(location, 20, yPosition);
-      yPosition += 6;
-    }
-
-    if (lpo.suppliers.phone) {
-      doc.text(`Phone: ${lpo.suppliers.phone}`, 20, yPosition);
-      yPosition += 6;
-    }
-
-    if (lpo.suppliers.email) {
-      doc.text(`Email: ${lpo.suppliers.email}`, 20, yPosition);
-      yPosition += 6;
-    }
-  }
-
-  yPosition = Math.max(yPosition, rightY) + 15;
-
-  // Delivery Information
-  if (lpo.delivery_address || lpo.contact_person || lpo.contact_phone) {
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Delivery Information:', 20, yPosition);
-    yPosition += 8;
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-
-    if (lpo.contact_person) {
-      doc.text(`Contact Person: ${lpo.contact_person}`, 20, yPosition);
-      yPosition += 6;
-    }
-
-    if (lpo.contact_phone) {
-      doc.text(`Contact Phone: ${lpo.contact_phone}`, 20, yPosition);
-      yPosition += 6;
-    }
-
-    if (lpo.delivery_address) {
-      doc.text('Delivery Address:', 20, yPosition);
-      yPosition += 6;
-      const addressLines = lpo.delivery_address.split('\n');
-      addressLines.forEach(line => {
-        doc.text(line, 20, yPosition);
-        yPosition += 5;
-      });
-    }
-
-    yPosition += 10;
-  }
-
-  // Items Table
-  if (lpo.lpo_items && lpo.lpo_items.length > 0) {
-    const tableColumns = [
-      'Item',
-      'Description',
-      'Qty',
-      'Unit Price',
-      'Tax %',
-      'Tax Amount',
-      'Total'
-    ];
-
-    const tableRows = lpo.lpo_items.map(item => [
-      item.products?.name || 'N/A',
-      item.description,
-      `${item.quantity} ${item.products?.unit_of_measure || 'pcs'}`,
-      formatCurrency(item.unit_price),
-      `${item.tax_rate}%`,
-      formatCurrency(item.tax_amount),
-      formatCurrency(item.line_total)
-    ]);
-
-    autoTable(doc, {
-      startY: yPosition,
-      head: [tableColumns],
-      body: tableRows,
-      theme: 'grid',
-      styles: {
-        fontSize: 9,
-        cellPadding: 3,
-      },
-      headStyles: {
-        fillColor: [66, 139, 202],
-        textColor: [255, 255, 255],
-        fontStyle: 'bold',
-      },
-      columnStyles: {
-        2: { halign: 'center' }, // Quantity
-        3: { halign: 'right' },  // Unit Price
-        4: { halign: 'center' }, // Tax %
-        5: { halign: 'right' },  // Tax Amount
-        6: { halign: 'right' },  // Total
-      },
-    });
-
-    // Get the final Y position after the table
-    yPosition = (doc as any).lastAutoTable.finalY + 10;
-
-    // Totals
-    const totalsX = 150;
-    doc.setFontSize(10);
-
-    doc.text('Subtotal:', totalsX - 30, yPosition);
-    doc.text(formatCurrency(lpo.subtotal), totalsX, yPosition);
-    yPosition += 8;
-
-    doc.text('Tax Amount:', totalsX - 30, yPosition);
-    doc.text(formatCurrency(lpo.tax_amount), totalsX, yPosition);
-    yPosition += 8;
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.text('Total Amount:', totalsX - 30, yPosition);
-    doc.text(formatCurrency(lpo.total_amount), totalsX, yPosition);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    yPosition += 15;
-  }
-
-  // Notes
-  if (lpo.notes) {
-    doc.setFont('helvetica', 'bold');
-    doc.text('Notes:', 20, yPosition);
-    yPosition += 8;
-
-    doc.setFont('helvetica', 'normal');
-    const noteLines = doc.splitTextToSize(lpo.notes, 170);
-    doc.text(noteLines, 20, yPosition);
-    yPosition += noteLines.length * 5 + 10;
-  }
-
-  // Terms and Conditions
-  if (lpo.terms_and_conditions) {
-    doc.setFont('helvetica', 'bold');
-    doc.text('Terms & Conditions:', 20, yPosition);
-    yPosition += 8;
-
-    doc.setFont('helvetica', 'normal');
-    const termsLines = doc.splitTextToSize(lpo.terms_and_conditions, 170);
-    doc.text(termsLines, 20, yPosition);
-    yPosition += termsLines.length * 5 + 10;
-  }
-
-  // Stamp Section
-  yPosition += 15;
-  doc.setFontSize(10);
-  doc.setTextColor(0, 0, 0);
-  doc.text('COMPANY STAMP:', 20, yPosition);
-  yPosition += 30;
-
-  // Note: For base64 image embedding, you would need to convert the image URL to base64
-  // For now, we'll add a note about the stamp placement
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(128, 128, 128);
-  doc.text('[Stamp Image - Requires image conversion to base64 for embedding]', 20, yPosition);
-
-  // Footer
-  const pageHeight = doc.internal.pageSize.height;
-  doc.setFontSize(8);
-  doc.setTextColor(128, 128, 128);
-  doc.text(`Generated on ${new Date().toLocaleString()}`, 20, pageHeight - 20);
-  doc.text(`Page 1`, 180, pageHeight - 20);
-
-  // Save the PDF
-  doc.save(`LPO-${lpo.lpo_number}.pdf`);
+const DEFAULT_COMPANY: CompanyData = {
+  name: 'Layons Construction Limited',
+  address: '',
+  city: 'Nairobi',
+  country: 'Kenya',
+  phone: '',
+  email: 'layonscoltd@gmail.com',
+  tax_number: '',
+  logo_url: 'https://cdn.builder.io/api/v1/image/assets%2Fb048b36350454e4dba55aefd37788f9c%2Fbd04dab542504461a2451b061741034c?format=webp&width=800',
+  header_image: 'https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800',
+  stamp_image: 'https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800'
 };
 
 const formatDate = (dateString: string) => {
@@ -336,4 +82,407 @@ const formatCurrency = (amount: number) => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(amount);
+};
+
+export const generateLPOPDF = (lpo: LPOPDFData, company?: CompanyData) => {
+  const companyData = company || DEFAULT_COMPANY;
+  
+  // Get stamp image with fallback
+  const stampImage = companyData.stamp_image || DEFAULT_COMPANY.stamp_image;
+  const headerImage = companyData.header_image || DEFAULT_COMPANY.header_image;
+
+  // Create a new window with the document content
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    throw new Error('Could not open print window. Please allow popups.');
+  }
+
+  // Generate items table rows
+  const itemsTableRows = lpo.lpo_items?.map(item => `
+    <tr>
+      <td class="center">${item.products?.name || 'N/A'}</td>
+      <td>${item.description}</td>
+      <td class="center">${item.quantity} ${item.products?.unit_of_measure || 'pcs'}</td>
+      <td class="amount">${formatCurrency(item.unit_price)}</td>
+      <td class="center">${item.tax_rate}%</td>
+      <td class="amount">${formatCurrency(item.tax_amount)}</td>
+      <td class="amount">${formatCurrency(item.line_total)}</td>
+    </tr>
+  `).join('') || '';
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>LPO ${lpo.lpo_number}</title>
+      <meta charset="UTF-8">
+      <style>
+        ${PDF_PAGE_CSS}
+        
+        * {
+          box-sizing: border-box;
+        }
+        
+        body {
+          font-family: 'Arial', sans-serif;
+          margin: 0;
+          padding: 0;
+          color: #333;
+          line-height: 1.4;
+          font-size: 12px;
+          background: white;
+        }
+        
+        .page {
+          width: 210mm;
+          min-height: 297mm;
+          margin: 0 auto;
+          background: white;
+          box-shadow: 0 0 10px rgba(0,0,0,0.1);
+          padding: 20mm;
+          position: relative;
+        }
+        
+        .header-image {
+          width: 100%;
+          height: 140px;
+          margin-bottom: 15px;
+          display: block;
+          object-fit: cover;
+        }
+        
+        .header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 20px;
+          padding-bottom: 15px;
+          border-bottom: 2px solid #333;
+        }
+        
+        .company-info {
+          flex: 1;
+        }
+        
+        .company-name {
+          font-size: 18px;
+          font-weight: bold;
+          margin-bottom: 5px;
+        }
+        
+        .company-details {
+          font-size: 10px;
+          line-height: 1.6;
+          color: #666;
+        }
+        
+        .document-title {
+          font-size: 24px;
+          font-weight: bold;
+          text-align: center;
+          margin: 20px 0;
+          text-transform: uppercase;
+        }
+        
+        .info-section {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+          margin: 20px 0;
+        }
+        
+        .info-block {
+          padding: 15px;
+          background: #f8f9fa;
+          border-radius: 4px;
+          border: 1px solid #e9ecef;
+        }
+        
+        .section-title {
+          font-size: 12px;
+          font-weight: bold;
+          margin-bottom: 10px;
+          text-transform: uppercase;
+          color: #333;
+        }
+        
+        .info-content {
+          font-size: 11px;
+          line-height: 1.8;
+          color: #666;
+        }
+        
+        .info-content div {
+          margin-bottom: 4px;
+        }
+        
+        .items-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 20px 0;
+          font-size: 10px;
+          border: 1px solid #dee2e6;
+        }
+        
+        .items-table thead {
+          background: #f0f0f0;
+          border: 1px solid #dee2e6;
+        }
+        
+        .items-table th {
+          padding: 10px;
+          text-align: left;
+          font-weight: bold;
+          border: 1px solid #dee2e6;
+        }
+        
+        .items-table td {
+          padding: 8px 10px;
+          border: 1px solid #dee2e6;
+        }
+        
+        .items-table tbody tr:nth-child(even) {
+          background: #f8f9fa;
+        }
+        
+        .amount {
+          text-align: right !important;
+          font-weight: 500;
+        }
+        
+        .center {
+          text-align: center !important;
+        }
+        
+        .totals-section {
+          display: flex;
+          justify-content: flex-end;
+          margin: 20px 0;
+        }
+        
+        .totals {
+          width: 300px;
+        }
+        
+        .total-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 8px 0;
+          border-bottom: 1px solid #dee2e6;
+        }
+        
+        .total-row.final {
+          border-top: 2px solid #333;
+          border-bottom: 2px solid #333;
+          font-weight: bold;
+          font-size: 12px;
+          padding: 10px 0;
+        }
+        
+        .notes-section {
+          margin-top: 20px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+        }
+        
+        .notes-block {
+          padding: 15px;
+          background: #f8f9fa;
+          border: 1px solid #e9ecef;
+          border-radius: 4px;
+        }
+        
+        .notes-block-title {
+          font-weight: bold;
+          margin-bottom: 10px;
+          font-size: 11px;
+          text-transform: uppercase;
+        }
+        
+        .notes-content {
+          font-size: 10px;
+          line-height: 1.6;
+          white-space: pre-wrap;
+          color: #666;
+        }
+        
+        .stamp-section {
+          margin-top: 30px;
+          padding: 20px;
+          border-top: 1px solid #dee2e6;
+          text-align: center;
+        }
+        
+        .stamp-image {
+          max-width: 150px;
+          max-height: 100px;
+          margin-top: 10px;
+        }
+        
+        .footer {
+          margin-top: 30px;
+          padding-top: 15px;
+          border-top: 1px solid #e9ecef;
+          font-size: 9px;
+          color: #999;
+          text-align: center;
+        }
+        
+        @media print {
+          body {
+            background: white;
+          }
+          
+          .page {
+            box-shadow: none;
+            margin: 0;
+            padding: 0;
+          }
+        }
+        
+        @media screen {
+          body {
+            background: #f5f5f5;
+            padding: 20px;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="page">
+        <!-- Full-width header image -->
+        ${headerImage ? `<img src="${headerImage}" alt="${companyData.name}" class="header-image" />` : ''}
+        
+        <!-- Header Section -->
+        <div class="header">
+          <div class="company-info">
+            <div class="company-name">${companyData.name}</div>
+            <div class="company-details">
+              ${companyData.registration_number ? `Registration: ${companyData.registration_number}<br>` : ''}
+              ${companyData.tax_number ? `PIN: ${companyData.tax_number}<br>` : ''}
+              ${companyData.address ? `${companyData.address}<br>` : ''}
+              ${[companyData.city, companyData.state, companyData.postal_code].filter(Boolean).join(', ')}${companyData.country ? `, ${companyData.country}` : ''}<br>
+              ${companyData.phone ? `Tel: ${companyData.phone}<br>` : ''}
+              ${companyData.email ? `Email: ${companyData.email}` : ''}
+            </div>
+          </div>
+        </div>
+        
+        <!-- Document Title -->
+        <div class="document-title">LOCAL PURCHASE ORDER</div>
+        
+        <!-- Info Sections -->
+        <div class="info-section">
+          <div class="info-block">
+            <div class="section-title">LPO Details</div>
+            <div class="info-content">
+              <div><strong>LPO Number:</strong> ${lpo.lpo_number}</div>
+              <div><strong>LPO Date:</strong> ${formatDate(lpo.lpo_date)}</div>
+              ${lpo.delivery_date ? `<div><strong>Delivery Date:</strong> ${formatDate(lpo.delivery_date)}</div>` : ''}
+              <div><strong>Status:</strong> ${lpo.status.toUpperCase()}</div>
+            </div>
+          </div>
+          
+          <div class="info-block">
+            <div class="section-title">Supplier Information</div>
+            <div class="info-content">
+              ${lpo.suppliers ? `
+                <div><strong>${lpo.suppliers.name}</strong></div>
+                ${lpo.suppliers.address ? `<div>${lpo.suppliers.address}</div>` : ''}
+                ${[lpo.suppliers.city, lpo.suppliers.country].filter(Boolean).join(', ') ? `<div>${[lpo.suppliers.city, lpo.suppliers.country].filter(Boolean).join(', ')}</div>` : ''}
+                ${lpo.suppliers.phone ? `<div>Phone: ${lpo.suppliers.phone}</div>` : ''}
+                ${lpo.suppliers.email ? `<div>Email: ${lpo.suppliers.email}</div>` : ''}
+              ` : '<div>No supplier information provided</div>'}
+            </div>
+          </div>
+        </div>
+        
+        ${lpo.delivery_address || lpo.contact_person || lpo.contact_phone ? `
+          <div class="info-block">
+            <div class="section-title">Delivery Information</div>
+            <div class="info-content">
+              ${lpo.contact_person ? `<div><strong>Contact Person:</strong> ${lpo.contact_person}</div>` : ''}
+              ${lpo.contact_phone ? `<div><strong>Contact Phone:</strong> ${lpo.contact_phone}</div>` : ''}
+              ${lpo.delivery_address ? `<div><strong>Address:</strong><br>${lpo.delivery_address.replace(/\n/g, '<br>')}</div>` : ''}
+            </div>
+          </div>
+        ` : ''}
+        
+        <!-- Items Table -->
+        ${lpo.lpo_items && lpo.lpo_items.length > 0 ? `
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Description</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th>Tax %</th>
+                <th>Tax Amount</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsTableRows}
+            </tbody>
+          </table>
+          
+          <!-- Totals -->
+          <div class="totals-section">
+            <div class="totals">
+              <div class="total-row">
+                <span>Subtotal:</span>
+                <span>${formatCurrency(lpo.subtotal)}</span>
+              </div>
+              <div class="total-row">
+                <span>Tax Amount:</span>
+                <span>${formatCurrency(lpo.tax_amount)}</span>
+              </div>
+              <div class="total-row final">
+                <span>Total Amount:</span>
+                <span>${formatCurrency(lpo.total_amount)}</span>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+        
+        <!-- Notes Section -->
+        <div class="notes-section">
+          ${lpo.notes ? `
+            <div class="notes-block">
+              <div class="notes-block-title">Notes</div>
+              <div class="notes-content">${lpo.notes}</div>
+            </div>
+          ` : ''}
+          
+          ${lpo.terms_and_conditions ? `
+            <div class="notes-block">
+              <div class="notes-block-title">Terms & Conditions</div>
+              <div class="notes-content">${lpo.terms_and_conditions}</div>
+            </div>
+          ` : ''}
+        </div>
+        
+        <!-- Stamp Section -->
+        <div class="stamp-section">
+          <div style="font-weight: bold;">COMPANY STAMP / AUTHORIZED BY</div>
+          ${stampImage ? `<img src="${stampImage}" alt="Company Stamp" class="stamp-image" />` : '<div style="color: #999; margin-top: 20px;">Company Stamp</div>'}
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+          Generated on ${new Date().toLocaleString()} | Page 1
+        </div>
+      </div>
+      
+      <script>
+        window.print();
+      </script>
+    </body>
+    </html>
+  `;
+
+  printWindow.document.write(htmlContent);
+  printWindow.document.close();
 };
