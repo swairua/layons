@@ -929,14 +929,16 @@ export const generatePDF = async (data: DocumentData) => {
           box-sizing: border-box;
         }
 
-        .sections-container > table {
-          page-break-after: always;
+        .section-block {
           page-break-inside: avoid;
           break-inside: avoid;
+          margin-bottom: 0;
         }
 
-        .sections-container > table:last-child {
-          page-break-after: avoid;
+        .sections-container table {
+          page-break-inside: avoid;
+          break-inside: avoid;
+          page-break-after: auto;
         }
 
         .sections-container table thead {
