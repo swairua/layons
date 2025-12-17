@@ -1290,6 +1290,7 @@ export const generatePDF = async (data: DocumentData) => {
         headerWrapper2.style.backgroundColor = '#ffffff';
         headerWrapper2.style.zIndex = '-999999';
         headerWrapper2.style.pointerEvents = 'none';
+        headerWrapper2.style.overflow = 'visible';
         headerWrapper2.innerHTML = headerElement.outerHTML;
         document.body.appendChild(headerWrapper2);
 
