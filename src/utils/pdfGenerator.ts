@@ -1273,47 +1273,189 @@ export const generatePDF = async (data: DocumentData) => {
         throw new Error('BOQ main section not found');
       }
 
-      const boqCanvas = await html2canvas(boqMainElement, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false,
-        allowTaint: true,
-        useCORS: true,
-        imageTimeout: 15000,
-        timeout: 45000,
-        windowHeight: Math.max(boqMainElement.scrollHeight, boqMainElement.offsetHeight) || 1000,
-        windowWidth: contentWidth * 3.779527559, // 180mm to pixels (96 DPI * 180/25.4)
-        proxy: undefined,
-        foreignObjectRendering: false,
-        onclone: (clonedDocument) => {
-          // Ensure CSS page breaks are respected during rendering
-          const style = clonedDocument.createElement('style');
-          style.textContent = '@media print { * { page-break-inside: avoid !important; } }';
-          clonedDocument.head.appendChild(style);
-        }
-      });
+      // Render sections separately to avoid row splitting across pages
+      const headerElement = boqMainElement.querySelector('.container > .header') as HTMLElement;
+      const preliminariesElement = boqMainElement.querySelector('.preliminaries-section') as HTMLElement;
+      const sectionsContainer = boqMainElement.querySelector('.sections-container') as HTMLElement;
 
-      // Add BOQ pages to PDF with proper margin handling
-      const imgBoqData = boqCanvas.toDataURL('image/png');
-      const imgBoqWidth = contentWidth; // Content width 180mm (210mm - 30mm margins)
-      const imgBoqHeight = (boqCanvas.height * imgBoqWidth) / boqCanvas.width;
-      let boqHeightLeft = imgBoqHeight;
-      let boqPosition = 0;
-      let firstPage = true;
+      // Render header first
+      let currentPageY = margin;
+      if (headerElement) {
+        const headerWrapper2 = document.createElement('div');
+        headerWrapper2.style.position = 'absolute';
+        headerWrapper2.style.left = '0';
+        headerWrapper2.style.top = '0';
+        headerWrapper2.style.width = `${contentWidth}mm`;
+        headerWrapper2.style.height = 'auto';
+        headerWrapper2.style.backgroundColor = '#ffffff';
+        headerWrapper2.style.zIndex = '-999999';
+        headerWrapper2.style.pointerEvents = 'none';
+        headerWrapper2.innerHTML = headerElement.outerHTML;
+        document.body.appendChild(headerWrapper2);
 
-      // Add BOQ content, creating multiple pages if needed with proper margins
-      while (boqHeightLeft >= 0) {
-        if (!firstPage) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        const headerCanvas = await html2canvas(headerWrapper2, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          logging: false,
+          allowTaint: true,
+          useCORS: true,
+          imageTimeout: 15000,
+          timeout: 45000,
+          windowHeight: Math.max(headerWrapper2.scrollHeight, headerWrapper2.offsetHeight) || 1000,
+          windowWidth: contentWidth * 3.779527559,
+          proxy: undefined,
+          foreignObjectRendering: false
+        });
+
+        const headerImgData = headerCanvas.toDataURL('image/png');
+        const headerImgWidth = contentWidth;
+        const headerImgHeight = (headerCanvas.height * headerImgWidth) / headerCanvas.width;
+        pdf.addImage(headerImgData, 'PNG', margin, currentPageY, headerImgWidth, headerImgHeight);
+        currentPageY += headerImgHeight;
+
+        document.body.removeChild(headerWrapper2);
+      }
+
+      // Render preliminaries if present
+      if (preliminariesElement) {
+        const prelim = document.createElement('div');
+        prelim.style.position = 'absolute';
+        prelim.style.left = '0';
+        prelim.style.top = '0';
+        prelim.style.width = `${contentWidth}mm`;
+        prelim.style.height = 'auto';
+        prelim.style.backgroundColor = '#ffffff';
+        prelim.style.zIndex = '-999999';
+        prelim.style.pointerEvents = 'none';
+        prelim.innerHTML = preliminariesElement.outerHTML;
+        document.body.appendChild(prelim);
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const prelimCanvas = await html2canvas(prelim, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          logging: false,
+          allowTaint: true,
+          useCORS: true,
+          imageTimeout: 15000,
+          timeout: 45000,
+          windowHeight: Math.max(prelim.scrollHeight, prelim.offsetHeight) || 1000,
+          windowWidth: contentWidth * 3.779527559,
+          proxy: undefined,
+          foreignObjectRendering: false
+        });
+
+        const prelimImgData = prelimCanvas.toDataURL('image/png');
+        const prelimImgWidth = contentWidth;
+        const prelimImgHeight = (prelimCanvas.height * prelimImgWidth) / prelimCanvas.width;
+
+        const availHeight = pageHeight - currentPageY - margin;
+        if (prelimImgHeight > availHeight && currentPageY > margin + 10) {
           pdf.addPage();
+          currentPageY = margin;
         }
-        pdf.addImage(imgBoqData, 'PNG', margin, margin - boqPosition, imgBoqWidth, imgBoqHeight);
-        boqHeightLeft -= (pageHeight - (margin * 2) - 8); // Account for margins and spacing
-        boqPosition += pageHeight;
-        firstPage = false;
 
-        if (boqHeightLeft > 0) {
-          // Ensure proper spacing before next page
+        pdf.addImage(prelimImgData, 'PNG', margin, currentPageY, prelimImgWidth, prelimImgHeight);
+        currentPageY += prelimImgHeight;
+
+        document.body.removeChild(prelim);
+      }
+
+      // Render each section block separately
+      const sectionBlocks = sectionsContainer ? Array.from(sectionsContainer.querySelectorAll('.section-block')) : [];
+
+      for (const sectionBlock of sectionBlocks) {
+        const secWrapper = document.createElement('div');
+        secWrapper.style.position = 'absolute';
+        secWrapper.style.left = '0';
+        secWrapper.style.top = '0';
+        secWrapper.style.width = `${contentWidth}mm`;
+        secWrapper.style.height = 'auto';
+        secWrapper.style.backgroundColor = '#ffffff';
+        secWrapper.style.zIndex = '-999999';
+        secWrapper.style.pointerEvents = 'none';
+        secWrapper.innerHTML = (sectionBlock as HTMLElement).outerHTML;
+        document.body.appendChild(secWrapper);
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const secCanvas = await html2canvas(secWrapper, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          logging: false,
+          allowTaint: true,
+          useCORS: true,
+          imageTimeout: 15000,
+          timeout: 45000,
+          windowHeight: Math.max(secWrapper.scrollHeight, secWrapper.offsetHeight) || 1000,
+          windowWidth: contentWidth * 3.779527559,
+          proxy: undefined,
+          foreignObjectRendering: false
+        });
+
+        const secImgData = secCanvas.toDataURL('image/png');
+        const secImgWidth = contentWidth;
+        const secImgHeight = (secCanvas.height * secImgWidth) / secCanvas.width;
+
+        const secAvailHeight = pageHeight - currentPageY - margin;
+        if (secImgHeight > secAvailHeight && currentPageY > margin + 10) {
+          pdf.addPage();
+          currentPageY = margin;
         }
+
+        pdf.addImage(secImgData, 'PNG', margin, currentPageY, secImgWidth, secImgHeight);
+        currentPageY += secImgHeight;
+
+        document.body.removeChild(secWrapper);
+      }
+
+      // Render totals section
+      const totalsElement = boqMainElement.querySelector('.totals') as HTMLElement;
+      if (totalsElement) {
+        const totalsWrapper2 = document.createElement('div');
+        totalsWrapper2.style.position = 'absolute';
+        totalsWrapper2.style.left = '0';
+        totalsWrapper2.style.top = '0';
+        totalsWrapper2.style.width = `${contentWidth}mm`;
+        totalsWrapper2.style.height = 'auto';
+        totalsWrapper2.style.backgroundColor = '#ffffff';
+        totalsWrapper2.style.zIndex = '-999999';
+        totalsWrapper2.style.pointerEvents = 'none';
+        totalsWrapper2.innerHTML = totalsElement.outerHTML;
+        document.body.appendChild(totalsWrapper2);
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const totalsCanvas = await html2canvas(totalsWrapper2, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          logging: false,
+          allowTaint: true,
+          useCORS: true,
+          imageTimeout: 15000,
+          timeout: 45000,
+          windowHeight: Math.max(totalsWrapper2.scrollHeight, totalsWrapper2.offsetHeight) || 1000,
+          windowWidth: contentWidth * 3.779527559,
+          proxy: undefined,
+          foreignObjectRendering: false
+        });
+
+        const totalsImgData = totalsCanvas.toDataURL('image/png');
+        const totalsImgWidth = contentWidth;
+        const totalsImgHeight = (totalsCanvas.height * totalsImgWidth) / totalsCanvas.width;
+
+        const totalsAvailHeight = pageHeight - currentPageY - margin;
+        if (totalsImgHeight > totalsAvailHeight && currentPageY > margin + 10) {
+          pdf.addPage();
+          currentPageY = margin;
+        }
+
+        pdf.addImage(totalsImgData, 'PNG', margin, currentPageY, totalsImgWidth, totalsImgHeight);
+
+        document.body.removeChild(totalsWrapper2);
       }
 
       // Render Page 2: Terms and Conditions (on a fresh page) - only if terms section exists
