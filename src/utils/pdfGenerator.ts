@@ -535,21 +535,21 @@ const generatePDFHeader = (
           </tr>
           ${data.project_title ? `
           <tr style="border: none;">
-            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">Project</td>
-            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">${data.project_title}</td>
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">Project</td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">${data.project_title}</td>
           </tr>
           ` : ''}
           <tr style="border: none;">
-            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">Subject</td>
-            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">${documentType}</td>
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">Subject</td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">${documentType}</td>
           </tr>
           <tr style="border: none;">
-            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">Date</td>
-            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">${formatDateLong(data.date || '')}</td>
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">Date</td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">${formatDateLong(data.date || '')}</td>
           </tr>
           <tr style="border: none;">
-            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">${documentNumber}</td>
-            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">${displayNumber}</td>
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">${documentNumber}</td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">${displayNumber}</td>
           </tr>
         </table>
       </div>
