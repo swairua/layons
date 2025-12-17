@@ -525,8 +525,8 @@ const generatePDFHeader = (
         <!-- Bottom row: All details with borderless two-column table -->
         <table style="font-size: 12px; line-height: 1.3; width: 100%; border-collapse: collapse; border: none;">
           <tr style="border: none;">
-            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">Client</td>
-            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">Client</td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">
               <div style="line-height: 1.2;">${data.customer?.name || ''}</div>
               ${data.customer?.address ? `<div style="line-height: 1.2;">${data.customer.address}</div>` : ''}
               ${data.customer?.city ? `<div style="line-height: 1.2;">${data.customer.city}</div>` : ''}
@@ -535,21 +535,21 @@ const generatePDFHeader = (
           </tr>
           ${data.project_title ? `
           <tr style="border: none;">
-            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">Project</td>
-            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">${data.project_title}</td>
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">Project</td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">${data.project_title}</td>
           </tr>
           ` : ''}
           <tr style="border: none;">
-            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">Subject</td>
-            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">${documentType}</td>
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">Subject</td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">${documentType}</td>
           </tr>
           <tr style="border: none;">
-            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">Date</td>
-            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">${formatDateLong(data.date || '')}</td>
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">Date</td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">${formatDateLong(data.date || '')}</td>
           </tr>
           <tr style="border: none;">
-            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">${documentNumber}</td>
-            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: normal;">${displayNumber}</td>
+            <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">${documentNumber}</td>
+            <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">${displayNumber}</td>
           </tr>
         </table>
       </div>
@@ -821,7 +821,7 @@ export const generatePDF = async (data: DocumentData) => {
 
         /* Header styling - full page width, no overflow */
         .header { margin: 0; padding: 0; width: 100%; box-sizing: border-box; page-break-inside: avoid; page-break-after: avoid; }
-        .header-image { width: 100%; height: 140px; max-height: none; object-fit: contain; display: block; margin: 0; padding: 0; box-sizing: border-box; }
+        .header-image { width: 100%; max-height: 150px; height: auto; object-fit: contain; display: block; margin: 0; padding: 0; box-sizing: border-box; }
         .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 6px; width: 100%; padding: 0 15mm; box-sizing: border-box; page-break-inside: avoid; }
         .header-top { display: flex; align-items: flex-start; width: 100%; margin: 0 0 10px 0; padding: 0; gap: 20px; box-sizing: border-box; min-width: 0; }
         .services-section { display: block; font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0; }
@@ -1433,7 +1433,7 @@ export const generatePDF = async (data: DocumentData) => {
           ${showHeader ? generatePDFHeader(headerImage, company, companyServices, data, formatDateLong, documentTitle) : ''}
 
           <!-- Section Title with alphabetical letter -->
-          <div class="section-title" style="margin: ${showHeader ? '25px 0 15px 0' : '20px 0 15px 0'}; padding: 12px; background: #fff; border-left: 4px solid #000; font-size: 14px; font-weight: bold; text-transform: uppercase;">${sectionTitleWithLetter}</div>
+          <div class="section-title" style="margin: ${showHeader ? '20px 0 12px 0' : '15px 0 10px 0'}; padding: 0; background: transparent; border-left: none; font-size: 13px; font-weight: bold; text-transform: uppercase;">${sectionTitleWithLetter}</div>
 
           <!-- Materials Subsection -->
           <div class="subsection" style="margin-bottom:12px;">
@@ -1790,8 +1790,8 @@ export const generatePDF = async (data: DocumentData) => {
 
           .header-image {
             width: 100%;
-            max-height: 60px;
-            object-fit: cover;
+            max-height: 150px;
+            object-fit: contain;
             height: auto;
             margin: 0 0 8px 0;
             padding: 0;
@@ -2211,7 +2211,8 @@ export const generatePDF = async (data: DocumentData) => {
 
         .header-image {
           width: 100% !important;
-          height: 140px !important;
+          max-height: 150px !important;
+          height: auto !important;
           object-fit: contain !important;
           margin: 0 0 12px 0 !important;
           padding: 0 !important;
