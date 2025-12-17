@@ -683,24 +683,26 @@ export const generatePDF = async (data: DocumentData) => {
     const isSectionTotalRow = (d: string) => /^section\s+total$/i.test(d);
 
     // Helper to create a table block for a section
-    const createSectionTable = (sectionTitle: string, sectionRows: string): string => {
+    const createSectionTable = (sectionTitle: string, sectionRows: string, isFirstSection: boolean): string => {
       return `
-        <table class="items" style="margin-bottom: 12mm; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm);">
-          <thead>
-            <tr>
-              <th style="width:5%; font-weight: bold;">No</th>
-              <th style="width:55%; text-align:left; font-weight: bold;">DESCRIPTION</th>
-              <th style="width:8%; font-weight: bold;">QTY</th>
-              <th style="width:9%; font-weight: bold;">UNIT</th>
-              <th style="width:11%; font-weight: bold;">RATE (${data.currency || 'KES'})</th>
-              <th style="width:12%; text-align:right; font-weight: bold;">AMOUNT (${data.currency || 'KES'})</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="section-row-header"><td colspan="6" class="section-title-in-table" style="background:#f4f4f4; font-weight:700; padding: 8px 10px; line-height: 1.4; font-size: 9px; text-align: left; letter-spacing: 0.3px;">${sectionTitle}</td></tr>
-            ${sectionRows}
-          </tbody>
-        </table>
+        <div class="section-block" style="page-break-before: ${isFirstSection ? 'avoid' : 'always'}; page-break-inside: avoid;">
+          <table class="items" style="margin-bottom: 12mm; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm); page-break-after: auto;">
+            <thead>
+              <tr>
+                <th style="width:5%; font-weight: bold;">No</th>
+                <th style="width:55%; text-align:left; font-weight: bold;">DESCRIPTION</th>
+                <th style="width:8%; font-weight: bold;">QTY</th>
+                <th style="width:9%; font-weight: bold;">UNIT</th>
+                <th style="width:11%; font-weight: bold;">RATE (${data.currency || 'KES'})</th>
+                <th style="width:12%; text-align:right; font-weight: bold;">AMOUNT (${data.currency || 'KES'})</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="section-row-header"><td colspan="6" class="section-title-in-table" style="background:#f4f4f4; font-weight:700; padding: 8px 10px; line-height: 1.4; font-size: 9px; text-align: left; letter-spacing: 0.3px;">${sectionTitle}</td></tr>
+              ${sectionRows}
+            </tbody>
+          </table>
+        </div>
       `;
     };
 
