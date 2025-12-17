@@ -6,6 +6,7 @@ import { Layers, Plus, Eye, Download, Trash2, Copy, Pencil, FileText } from 'luc
 import { CreateBOQModal } from '@/components/boq/CreateBOQModal';
 import { CreatePercentageCopyModal } from '@/components/boq/CreatePercentageCopyModal';
 import { EditBOQModal } from '@/components/boq/EditBOQModal';
+import { ChangePercentageRateModal } from '@/components/boq/ChangePercentageRateModal';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
@@ -18,6 +19,8 @@ import { toast } from 'sonner';
 export default function BOQs() {
   const [open, setOpen] = useState(false);
   const [percentageCopyOpen, setPercentageCopyOpen] = useState(false);
+  const [percentageRateOpen, setPercentageRateOpen] = useState(false);
+  const [percentageRateBoq, setPercentageRateBoq] = useState<any | null>(null);
   const { currentCompany } = useCurrentCompany();
   const companyId = currentCompany?.id;
   const { data: boqs = [], isLoading, refetch: refetchBOQs } = useBOQs(companyId);
@@ -247,19 +250,11 @@ export default function BOQs() {
                           size="sm"
                           variant="outline"
                           className="text-xs"
-                          onClick={() => handleDownloadPDF(b, {
-                            customTitle: 'INVOICE',
-                            amountMultiplier: 0.4,
-                            forceCurrency: 'EUR',
-                            customClient: {
-                              name: 'Global Crop Diversity Trust',
-                              address: 'Platz der Vereinten Nationen 7',
-                              city: 'Bonn',
-                              country: 'Germany'
-                            },
-                            stampImageUrl: 'https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2Fd301f7401e654be39b50f49bc704c240?format=webp&width=800'
-                          })}
-                          title="Download Special Invoice PDF (40% of amount)"
+                          onClick={() => {
+                            setPercentageRateBoq(b);
+                            setPercentageRateOpen(true);
+                          }}
+                          title="Download Special Invoice PDF"
                         >
                           Invoice PDF
                         </Button>
@@ -461,6 +456,28 @@ export default function BOQs() {
         loadingText="Converting..."
         isDangerous={false}
       />
+
+      {percentageRateBoq && (
+        <ChangePercentageRateModal
+          open={percentageRateOpen}
+          onOpenChange={setPercentageRateOpen}
+          boq={percentageRateBoq}
+          onDownload={async (multiplier: number) => {
+            await handleDownloadPDF(percentageRateBoq, {
+              customTitle: 'INVOICE',
+              amountMultiplier: multiplier,
+              forceCurrency: 'EUR',
+              customClient: {
+                name: 'Global Crop Diversity Trust',
+                address: 'Platz der Vereinten Nationen 7',
+                city: 'Bonn',
+                country: 'Germany'
+              },
+              stampImageUrl: 'https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2Fd301f7401e654be39b50f49bc704c240?format=webp&width=800'
+            });
+          }}
+        />
+      )}
     </div>
   );
 }
