@@ -1897,12 +1897,12 @@ export const generatePDF = async (data: DocumentData) => {
             font-size: 12px;
             font-weight: bold;
             color: #000;
-            margin: 0 0 2px 0;
+            margin: 12px 0 8px 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            padding: 2px 2px 2px 6px;
-            background: #fff;
-            border-left: 4px solid #000;
+            padding: 0;
+            background: transparent;
+            border-left: none;
             page-break-inside: avoid;
             page-break-before: auto;
             page-break-after: avoid;
