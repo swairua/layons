@@ -1,21 +1,8 @@
 // PDF Generation utility using jsPDF + html2canvas for auto-download
 import { PDF_PAGE_CSS } from './pdfMarginConstants';
 import { formatCurrency as formatCurrencyUtil } from './currencyFormatter';
-
-// Browser-only imports (only loaded when actually used)
-let jsPDF: any;
-let html2canvas: any;
-
-const ensureImports = async () => {
-  if (!jsPDF) {
-    const mod = await import('jspdf');
-    jsPDF = mod.default;
-  }
-  if (!html2canvas) {
-    const mod = await import('html2canvas');
-    html2canvas = mod.default;
-  }
-};
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 // Helper function to render HTML content to canvas
 const renderHTMLToCanvas = async (htmlContent: string, pageSelector: string) => {
