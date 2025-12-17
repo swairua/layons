@@ -9,7 +9,7 @@ interface ChangePercentageRateModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   boq: any;
-  onDownload: (percentage: number) => Promise<void>;
+  onDownload: (data: { percentage: number; multiplier: number }) => Promise<void>;
 }
 
 export function ChangePercentageRateModal({
@@ -29,7 +29,7 @@ export function ChangePercentageRateModal({
 
     setIsLoading(true);
     try {
-      await onDownload(percentage / 100);
+      await onDownload({ percentage, multiplier: percentage / 100 });
       onOpenChange(false);
     } catch (err) {
       console.error('Download failed', err);
