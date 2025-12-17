@@ -53,6 +53,7 @@ const DEFAULT_COMPANY: CompanyData = {
   email: 'layonscoltd@gmail.com',
   tax_number: '',
   logo_url: 'https://cdn.builder.io/api/v1/image/assets%2Fb048b36350454e4dba55aefd37788f9c%2Fbd04dab542504461a2451b061741034c?format=webp&width=800',
+  header_image: 'https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800',
   stamp_image: 'https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800'
 };
 
@@ -119,6 +120,14 @@ export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: C
           position: relative;
         }
         
+        .header-image {
+          width: 100%;
+          height: 140px;
+          margin-bottom: 15px;
+          display: block;
+          object-fit: cover;
+        }
+
         .header {
           display: flex;
           justify-content: space-between;
@@ -455,7 +464,10 @@ export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: C
       <div class="page">
         <!-- Watermark -->
         <div class="watermark">Credit Note</div>
-        
+
+        <!-- Full-width header image -->
+        ${companyData.header_image ? `<img src="${companyData.header_image}" alt="${companyData.name}" class="header-image" />` : ''}
+
         <!-- Header Section -->
         <div class="header">
           <div class="company-info">
