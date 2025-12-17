@@ -96,6 +96,94 @@ const renderHTMLToCanvas = async (htmlContent: string, pageSelector: string) => 
   }
 };
 
+// Helper function to render BOQ sections separately to avoid row splitting
+const renderBOQSectionsToPDF = async (pdf: jsPDF, wrapper: HTMLElement, pageWidth: number, pageHeight: number, headerHTML: string) => {
+  let isFirstPage = true;
+
+  // First render and add header on first page
+  const headerWrapper = document.createElement('div');
+  headerWrapper.style.position = 'absolute';
+  headerWrapper.style.left = '0';
+  headerWrapper.style.top = '0';
+  headerWrapper.style.width = '210mm';
+  headerWrapper.style.height = 'auto';
+  headerWrapper.style.backgroundColor = '#ffffff';
+  headerWrapper.style.zIndex = '-999999';
+  headerWrapper.style.pointerEvents = 'none';
+  headerWrapper.innerHTML = headerHTML;
+  document.body.appendChild(headerWrapper);
+
+  await new Promise(resolve => setTimeout(resolve, 2000));
+
+  const headerCanvas = await html2canvas(headerWrapper, {
+    scale: 2,
+    backgroundColor: '#ffffff',
+    logging: false,
+    allowTaint: true,
+    useCORS: true,
+    imageTimeout: 15000,
+    timeout: 45000,
+    windowHeight: Math.max(headerWrapper.scrollHeight, headerWrapper.offsetHeight) || 1000,
+    windowWidth: 210 * 3.779527559,
+    proxy: undefined,
+    foreignObjectRendering: false
+  });
+
+  const headerImgData = headerCanvas.toDataURL('image/png');
+  const headerImgHeight = (headerCanvas.height * pageWidth) / headerCanvas.width;
+  pdf.addImage(headerImgData, 'PNG', 0, 0, pageWidth, headerImgHeight);
+
+  document.body.removeChild(headerWrapper);
+
+  // Now render each section separately
+  const sectionBlocks = wrapper.querySelectorAll('.section-block');
+  let currentPageHeight = headerImgHeight;
+
+  for (const sectionBlock of sectionBlocks) {
+    const sectionWrapper = document.createElement('div');
+    sectionWrapper.style.position = 'absolute';
+    sectionWrapper.style.left = '0';
+    sectionWrapper.style.top = '0';
+    sectionWrapper.style.width = '210mm';
+    sectionWrapper.style.height = 'auto';
+    sectionWrapper.style.backgroundColor = '#ffffff';
+    sectionWrapper.style.zIndex = '-999999';
+    sectionWrapper.style.pointerEvents = 'none';
+    sectionWrapper.innerHTML = (sectionBlock as HTMLElement).outerHTML;
+    document.body.appendChild(sectionWrapper);
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const sectionCanvas = await html2canvas(sectionWrapper, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      logging: false,
+      allowTaint: true,
+      useCORS: true,
+      imageTimeout: 15000,
+      timeout: 45000,
+      windowHeight: Math.max(sectionWrapper.scrollHeight, sectionWrapper.offsetHeight) || 1000,
+      windowWidth: 210 * 3.779527559,
+      proxy: undefined,
+      foreignObjectRendering: false
+    });
+
+    const sectionImgData = sectionCanvas.toDataURL('image/png');
+    const sectionImgHeight = (sectionCanvas.height * pageWidth) / sectionCanvas.width;
+
+    // Check if section fits on current page, if not start new page
+    if (currentPageHeight + sectionImgHeight > pageHeight + 10) {
+      pdf.addPage();
+      currentPageHeight = 0;
+    }
+
+    pdf.addImage(sectionImgData, 'PNG', 0, currentPageHeight, pageWidth, sectionImgHeight);
+    currentPageHeight += sectionImgHeight;
+
+    document.body.removeChild(sectionWrapper);
+  }
+};
+
 // Helper function to add canvas to PDF with proper page handling
 const addCanvasToPDF = async (pdf: jsPDF, canvas: HTMLCanvasElement, pageWidth: number, pageHeight: number) => {
   // Validate canvas
@@ -113,17 +201,18 @@ const addCanvasToPDF = async (pdf: jsPDF, canvas: HTMLCanvasElement, pageWidth: 
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
   let heightLeft = imgHeight;
   let position = 0;
+  let isFirstPage = true;
 
-  // Add images to PDF pages
-  while (heightLeft >= 0) {
-    const heightToPrint = Math.min(pageHeight, heightLeft);
+  // Add images to PDF pages - only add pages with actual content
+  while (heightLeft > 1) { // Use > 1 instead of >= 0 to avoid blank pages
+    if (!isFirstPage) {
+      pdf.addPage();
+    }
+
     pdf.addImage(imgData, 'PNG', 0, -position, pageWidth, imgHeight);
     heightLeft -= pageHeight;
     position += pageHeight;
-
-    if (heightLeft > 0) {
-      pdf.addPage();
-    }
+    isFirstPage = false;
   }
 };
 
@@ -235,7 +324,7 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
       let position = 0;
 
       // Add image to PDF, handling multiple page-heights if needed
-      while (heightLeft >= 0) {
+      while (heightLeft > 1) { // Use > 1 instead of >= 0 to avoid blank pages
         if (!isFirstPage) {
           pdf.addPage();
         }
@@ -247,10 +336,6 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
         heightLeft -= pageHeight;
         position += pageHeight;
         isFirstPage = false;
-
-        if (heightLeft > 0) {
-          // More content to add on next page
-        }
       }
     }
 
@@ -280,7 +365,7 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
       let heightLeft = imgHeight;
       let position = 0;
 
-      while (heightLeft >= 0) {
+      while (heightLeft > 1) { // Use > 1 instead of >= 0 to avoid blank pages
         if (!isFirstPage) {
           pdf.addPage();
         }
@@ -288,10 +373,6 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
         heightLeft -= pageHeight;
         position += pageHeight;
         isFirstPage = false;
-
-        if (heightLeft > 0) {
-          // More content to add
-        }
       }
     }
 
@@ -497,7 +578,7 @@ const generatePDFHeader = (
       <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
 
       <!-- Header content below image -->
-      <div class="header-content" style="display: flex; flex-direction: column; gap: 6px; margin-top: 2px;">
+      <div class="header-content" style="display: flex; flex-direction: column; gap: 8px; margin-top: 2px; margin-bottom: 8px;">
         <!-- Top row: Services (left) and Company details (right) -->
         <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: calc(100% + 12mm); margin-right: -12mm; box-sizing: border-box; min-width: 0;">
           <!-- Services Section -->
@@ -523,7 +604,7 @@ const generatePDFHeader = (
         </div>
 
         <!-- Bottom row: All details with borderless two-column table -->
-        <table style="font-size: 12px; line-height: 1.3; width: 100%; border-collapse: collapse; border: none;">
+        <table style="font-size: 12px; line-height: 1.3; width: 100%; border-collapse: collapse; border: none; margin-bottom: 10px;">
           <tr style="border: none;">
             <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">Client</td>
             <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">
@@ -835,16 +916,16 @@ export const generatePDF = async (data: DocumentData) => {
         body.special-invoice .services-section { font-size: 11px; line-height: 1.4; }
         body.special-invoice .header-right { font-size: 11px; line-height: 1.4; }
 
-        .items { width:100%; border-collapse:collapse; margin-top:0; margin-bottom: 12mm; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm); }
+        .items { width:100%; border-collapse:collapse; margin-top:0; margin-bottom: 4mm; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm); }
         .items th, .items td { border:1px solid #e6e6e6; padding: 4px 6px; font-size: 10px; vertical-align: middle; } .items tbody { margin-top: -1px; }
         .items thead th { background:#f8f9fa; color:#000; font-weight:bold; text-transform: uppercase; padding: 5px 6px 4px 6px; }
         .items thead { display: table-header-group; }
 
         body.special-invoice .items { margin-top: 3px; margin-bottom: 3px; }
         body.special-invoice .preliminaries-section { margin-bottom: 6px; }
-        .section-row { page-break-inside: avoid; page-break-before: auto; page-break-after: avoid; margin: 10mm 0 0 0; height: auto; } .section-row td { height: auto; vertical-align: middle; padding: 7px 8px; }
-        .section-row:first-of-type { page-break-before: avoid; margin-top: 0; margin-bottom: 3mm; }
-        .section-row:not(:first-of-type) { page-break-before: always; margin-top: 0; }
+        .section-row { page-break-inside: avoid; page-break-before: auto; page-break-after: avoid; margin: 2mm 0 0 0; height: auto; } .section-row td { height: auto; vertical-align: middle; padding: 7px 8px; }
+        .section-row:first-of-type { page-break-before: avoid; margin-top: 0; margin-bottom: 1mm; }
+        .section-row:not(:first-of-type) { page-break-before: auto; margin-top: 0; }
         .section-row td.section-title { background:#f4f4f4; font-weight:700; padding: 8px 10px; line-height: 1.4; font-size: 9px; text-align: left; vertical-align: middle; letter-spacing: 0.3px; }
         .item-row { page-break-inside: avoid; margin-bottom: 0; page-break-after: auto; } .item-row td { padding: 4px 7px; line-height: 1.3; }
         .item-row td.num { text-align:center; width: 5%; font-weight: 500; }
@@ -853,7 +934,7 @@ export const generatePDF = async (data: DocumentData) => {
         .item-row td.unit { width: 9%; text-align:center; }
         .item-row td.rate { width: 11%; text-align:right; }
         .item-row td.amount { width: 12%; text-align:right; font-weight: 500; }
-        .section-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 15mm; margin-top: 3mm; page-break-after: auto; border-top: 2px solid #ddd; }
+        .section-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 3mm; margin-top: 2mm; page-break-after: auto; border-top: 2px solid #ddd; }
         .section-total td { font-weight:700; background:#f9f9f9; padding: 6px 8px; line-height: 1.4; }
         .section-total .label { text-align:right; padding: 6px 12px 6px 8px; }
         .preliminaries-section { margin-bottom: 8mm; page-break-inside: avoid; margin-left: 15mm; margin-right: 15mm; }
@@ -864,7 +945,7 @@ export const generatePDF = async (data: DocumentData) => {
         .subsection-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 4mm; margin-top: 2mm; page-break-after: auto; background: #fafafa; }
         .subsection-total td { font-weight:600; background:#fafafa; padding: 5px 8px; line-height: 1.4; border-left: 3px solid #e0e0e0; }
         .subsection-total .label { text-align:right; padding: 5px 12px 5px 8px; }
-        .totals { margin-top:10mm; margin-bottom: 0; width: calc(100% - 30mm); margin-left: 15mm; margin-right: 15mm; page-break-inside: avoid; padding-bottom: 50mm; page-break-before: avoid; padding-top: 5mm; border-top: 1px solid #ddd; }
+        .totals { margin-top:4mm; margin-bottom: 0; width: calc(100% - 30mm); margin-left: 15mm; margin-right: 15mm; page-break-inside: avoid; padding-bottom: 10mm; page-break-before: avoid; padding-top: 3mm; border-top: 1px solid #ddd; }
 
         body.special-invoice .section-total { margin-bottom: 2mm; }
         body.special-invoice .subsection-total { margin-bottom: 2mm; }
@@ -874,7 +955,7 @@ export const generatePDF = async (data: DocumentData) => {
         body.special-invoice .sigline { height: 12px; }
         body.special-invoice .field-row { gap: 4px; }
         .totals .label { text-align:right; padding-right:12px; }
-        .footer { margin-top:16mm; display:flex; flex-direction:column; gap:12mm; padding: 0 15mm; page-break-inside: avoid; }
+        .footer { margin-top:8mm; display:flex; flex-direction:column; gap:6mm; padding: 0 15mm; page-break-inside: avoid; }
         .sig-block { display:flex; flex-direction:column; gap:8px; }
         .sig-title { font-weight:700; font-size: 11px; }
         .sig-role { font-weight:600; font-size: 10px; color: #666; }
@@ -993,7 +1074,7 @@ export const generatePDF = async (data: DocumentData) => {
 
           ${preliminariesHtml}
 
-          <div style="height: ${data.customTitle === 'INVOICE' ? '4mm' : '8mm'};"></div>
+          <div style="height: 2mm;"></div>
 
           <div class="sections-container">
             ${tablesHtml}
@@ -1192,47 +1273,190 @@ export const generatePDF = async (data: DocumentData) => {
         throw new Error('BOQ main section not found');
       }
 
-      const boqCanvas = await html2canvas(boqMainElement, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false,
-        allowTaint: true,
-        useCORS: true,
-        imageTimeout: 15000,
-        timeout: 45000,
-        windowHeight: Math.max(boqMainElement.scrollHeight, boqMainElement.offsetHeight) || 1000,
-        windowWidth: contentWidth * 3.779527559, // 180mm to pixels (96 DPI * 180/25.4)
-        proxy: undefined,
-        foreignObjectRendering: false,
-        onclone: (clonedDocument) => {
-          // Ensure CSS page breaks are respected during rendering
-          const style = clonedDocument.createElement('style');
-          style.textContent = '@media print { * { page-break-inside: avoid !important; } }';
-          clonedDocument.head.appendChild(style);
-        }
-      });
+      // Render sections separately to avoid row splitting across pages
+      const headerElement = boqMainElement.querySelector('.container > .header') as HTMLElement;
+      const preliminariesElement = boqMainElement.querySelector('.preliminaries-section') as HTMLElement;
+      const sectionsContainer = boqMainElement.querySelector('.sections-container') as HTMLElement;
 
-      // Add BOQ pages to PDF with proper margin handling
-      const imgBoqData = boqCanvas.toDataURL('image/png');
-      const imgBoqWidth = contentWidth; // Content width 180mm (210mm - 30mm margins)
-      const imgBoqHeight = (boqCanvas.height * imgBoqWidth) / boqCanvas.width;
-      let boqHeightLeft = imgBoqHeight;
-      let boqPosition = 0;
-      let firstPage = true;
+      // Render header first
+      let currentPageY = margin;
+      if (headerElement) {
+        const headerWrapper2 = document.createElement('div');
+        headerWrapper2.style.position = 'absolute';
+        headerWrapper2.style.left = '0';
+        headerWrapper2.style.top = '0';
+        headerWrapper2.style.width = '210mm';
+        headerWrapper2.style.height = 'auto';
+        headerWrapper2.style.backgroundColor = '#ffffff';
+        headerWrapper2.style.zIndex = '-999999';
+        headerWrapper2.style.pointerEvents = 'none';
+        headerWrapper2.style.overflow = 'visible';
+        headerWrapper2.innerHTML = headerElement.outerHTML;
+        document.body.appendChild(headerWrapper2);
 
-      // Add BOQ content, creating multiple pages if needed with proper margins
-      while (boqHeightLeft >= 0) {
-        if (!firstPage) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        const headerCanvas = await html2canvas(headerWrapper2, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          logging: false,
+          allowTaint: true,
+          useCORS: true,
+          imageTimeout: 15000,
+          timeout: 45000,
+          windowHeight: Math.max(headerWrapper2.scrollHeight, headerWrapper2.offsetHeight, 500) + 100,
+          windowWidth: 210 * 3.779527559,
+          proxy: undefined,
+          foreignObjectRendering: false
+        });
+
+        const headerImgData = headerCanvas.toDataURL('image/png');
+        const headerImgWidth = pageWidth;
+        const headerImgHeight = (headerCanvas.height * headerImgWidth) / headerCanvas.width;
+        pdf.addImage(headerImgData, 'PNG', 0, currentPageY, headerImgWidth, headerImgHeight);
+        currentPageY += headerImgHeight;
+
+        document.body.removeChild(headerWrapper2);
+      }
+
+      // Render preliminaries if present
+      if (preliminariesElement) {
+        const prelim = document.createElement('div');
+        prelim.style.position = 'absolute';
+        prelim.style.left = '0';
+        prelim.style.top = '0';
+        prelim.style.width = '210mm';
+        prelim.style.height = 'auto';
+        prelim.style.backgroundColor = '#ffffff';
+        prelim.style.zIndex = '-999999';
+        prelim.style.pointerEvents = 'none';
+        prelim.innerHTML = preliminariesElement.outerHTML;
+        document.body.appendChild(prelim);
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const prelimCanvas = await html2canvas(prelim, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          logging: false,
+          allowTaint: true,
+          useCORS: true,
+          imageTimeout: 15000,
+          timeout: 45000,
+          windowHeight: Math.max(prelim.scrollHeight, prelim.offsetHeight) || 1000,
+          windowWidth: 210 * 3.779527559,
+          proxy: undefined,
+          foreignObjectRendering: false
+        });
+
+        const prelimImgData = prelimCanvas.toDataURL('image/png');
+        const prelimImgWidth = pageWidth;
+        const prelimImgHeight = (prelimCanvas.height * prelimImgWidth) / prelimCanvas.width;
+
+        const availHeight = pageHeight - currentPageY - margin;
+        if (prelimImgHeight > availHeight && currentPageY > margin + 10) {
           pdf.addPage();
+          currentPageY = margin;
         }
-        pdf.addImage(imgBoqData, 'PNG', margin, margin - boqPosition, imgBoqWidth, imgBoqHeight);
-        boqHeightLeft -= (pageHeight - (margin * 2) - 8); // Account for margins and spacing
-        boqPosition += pageHeight;
-        firstPage = false;
 
-        if (boqHeightLeft > 0) {
-          // Ensure proper spacing before next page
+        pdf.addImage(prelimImgData, 'PNG', 0, currentPageY, prelimImgWidth, prelimImgHeight);
+        currentPageY += prelimImgHeight;
+
+        document.body.removeChild(prelim);
+      }
+
+      // Render each section block separately
+      const sectionBlocks = sectionsContainer ? Array.from(sectionsContainer.querySelectorAll('.section-block')) : [];
+
+      for (const sectionBlock of sectionBlocks) {
+        const secWrapper = document.createElement('div');
+        secWrapper.style.position = 'absolute';
+        secWrapper.style.left = '0';
+        secWrapper.style.top = '0';
+        secWrapper.style.width = '210mm';
+        secWrapper.style.height = 'auto';
+        secWrapper.style.backgroundColor = '#ffffff';
+        secWrapper.style.zIndex = '-999999';
+        secWrapper.style.pointerEvents = 'none';
+        secWrapper.innerHTML = (sectionBlock as HTMLElement).outerHTML;
+        document.body.appendChild(secWrapper);
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const secCanvas = await html2canvas(secWrapper, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          logging: false,
+          allowTaint: true,
+          useCORS: true,
+          imageTimeout: 15000,
+          timeout: 45000,
+          windowHeight: Math.max(secWrapper.scrollHeight, secWrapper.offsetHeight) || 1000,
+          windowWidth: 210 * 3.779527559,
+          proxy: undefined,
+          foreignObjectRendering: false
+        });
+
+        const secImgData = secCanvas.toDataURL('image/png');
+        const secImgWidth = pageWidth;
+        const secImgHeight = (secCanvas.height * secImgWidth) / secCanvas.width;
+
+        const secAvailHeight = pageHeight - currentPageY - margin;
+        if (secImgHeight > secAvailHeight && currentPageY > margin + 10) {
+          pdf.addPage();
+          currentPageY = margin;
         }
+
+        pdf.addImage(secImgData, 'PNG', 0, currentPageY, secImgWidth, secImgHeight);
+        currentPageY += secImgHeight;
+
+        document.body.removeChild(secWrapper);
+      }
+
+      // Render totals section
+      const totalsElement = boqMainElement.querySelector('.totals') as HTMLElement;
+      if (totalsElement) {
+        const totalsWrapper2 = document.createElement('div');
+        totalsWrapper2.style.position = 'absolute';
+        totalsWrapper2.style.left = '0';
+        totalsWrapper2.style.top = '0';
+        totalsWrapper2.style.width = '210mm';
+        totalsWrapper2.style.height = 'auto';
+        totalsWrapper2.style.backgroundColor = '#ffffff';
+        totalsWrapper2.style.zIndex = '-999999';
+        totalsWrapper2.style.pointerEvents = 'none';
+        totalsWrapper2.innerHTML = totalsElement.outerHTML;
+        document.body.appendChild(totalsWrapper2);
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const totalsCanvas = await html2canvas(totalsWrapper2, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          logging: false,
+          allowTaint: true,
+          useCORS: true,
+          imageTimeout: 15000,
+          timeout: 45000,
+          windowHeight: Math.max(totalsWrapper2.scrollHeight, totalsWrapper2.offsetHeight) || 1000,
+          windowWidth: 210 * 3.779527559,
+          proxy: undefined,
+          foreignObjectRendering: false
+        });
+
+        const totalsImgData = totalsCanvas.toDataURL('image/png');
+        const totalsImgWidth = pageWidth;
+        const totalsImgHeight = (totalsCanvas.height * totalsImgWidth) / totalsCanvas.width;
+
+        const totalsAvailHeight = pageHeight - currentPageY - margin;
+        if (totalsImgHeight > totalsAvailHeight && currentPageY > margin + 10) {
+          pdf.addPage();
+          currentPageY = margin;
+        }
+
+        pdf.addImage(totalsImgData, 'PNG', 0, currentPageY, totalsImgWidth, totalsImgHeight);
+
+        document.body.removeChild(totalsWrapper2);
       }
 
       // Render Page 2: Terms and Conditions (on a fresh page) - only if terms section exists
