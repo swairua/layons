@@ -6,7 +6,6 @@ import html2canvas from 'html2canvas';
 
 // Helper function to render HTML content to canvas
 const renderHTMLToCanvas = async (htmlContent: string, pageSelector: string) => {
-  await ensureImports();
   let wrapper: HTMLElement | null = null;
   try {
     // Create a temporary wrapper for proper rendering
@@ -130,7 +129,6 @@ const addCanvasToPDF = async (pdf: jsPDF, canvas: HTMLCanvasElement, pageWidth: 
 
 // Helper function to convert HTML to PDF and auto-download
 const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string) => {
-  await ensureImports();
   let wrapper: HTMLElement | null = null;
   try {
     // Create a temporary wrapper for proper rendering
@@ -558,8 +556,6 @@ const generatePDFHeader = (
 };
 
 export const generatePDF = async (data: DocumentData) => {
-  // Ensure browser-only libraries are loaded
-  await ensureImports();
 
   // Extract theme color variables from the main document so PDFs match the app theme
   const computed = typeof window !== 'undefined' ? getComputedStyle(document.documentElement) : null;
