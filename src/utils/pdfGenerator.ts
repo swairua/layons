@@ -480,8 +480,10 @@ const generatePDFHeader = (
   let documentNumber = 'Qtn No';
   if (documentType === 'Bill of Quantities') {
     documentNumber = 'BOQ No';
-  } else if (data.customTitle === 'INVOICE') {
+  } else if (data.customTitle === 'INVOICE' || data.type === 'invoice') {
     documentNumber = 'Invoice No';
+  } else if (data.type === 'proforma') {
+    documentNumber = 'Proforma No';
   }
 
   const displayNumber = data.customTitle === 'INVOICE'
@@ -492,7 +494,7 @@ const generatePDFHeader = (
     <!-- Header Section -->
     <div class="header">
       <!-- Full-width header image -->
-      <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" style="height: 140px !important;" />
+      <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
 
       <!-- Header content below image -->
       <div class="header-content" style="display: flex; flex-direction: column; gap: 6px; margin-top: 2px;">
@@ -819,7 +821,8 @@ export const generatePDF = async (data: DocumentData) => {
 
         /* Header styling - full page width, no overflow */
         .header { margin: 0; padding: 0; width: 100%; box-sizing: border-box; page-break-inside: avoid; page-break-after: avoid; }
-        .header-image { width: 100%; height: auto; max-height: none; object-fit: contain; display: block; margin: 0; padding: 0; }\n        .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 6px; width: 100%; padding: 0 15mm; box-sizing: border-box; page-break-inside: avoid; }
+        .header-image { width: 100%; height: 140px; max-height: none; object-fit: contain; display: block; margin: 0; padding: 0; box-sizing: border-box; }
+        .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 6px; width: 100%; padding: 0 15mm; box-sizing: border-box; page-break-inside: avoid; }
         .header-top { display: flex; align-items: flex-start; width: 100%; margin: 0 0 10px 0; padding: 0; gap: 20px; box-sizing: border-box; min-width: 0; }
         .services-section { display: block; font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0; }
         .services-section > div { margin: 0 0 4px 0; }
@@ -1894,12 +1897,12 @@ export const generatePDF = async (data: DocumentData) => {
             font-size: 12px;
             font-weight: bold;
             color: #000;
-            margin: 0 0 2px 0;
+            margin: 12px 0 8px 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            padding: 2px 2px 2px 6px;
-            background: #fff;
-            border-left: 4px solid #000;
+            padding: 0;
+            background: transparent;
+            border-left: none;
             page-break-inside: avoid;
             page-break-before: auto;
             page-break-after: avoid;
@@ -2209,11 +2212,12 @@ export const generatePDF = async (data: DocumentData) => {
         .header-image {
           width: 100% !important;
           height: 140px !important;
-          object-fit: fill !important;
+          object-fit: contain !important;
           margin: 0 0 12px 0 !important;
           padding: 0 !important;
           display: block !important;
           border: none !important;
+          box-sizing: border-box !important;
         }
 
         .header-content {
