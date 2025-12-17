@@ -243,11 +243,15 @@ export const useCompanies = () => {
   return useQuery({
     queryKey: ['companies'],
     queryFn: async () => {
+      // Ensure company image columns exist in the database
+      // This handles the case where migrations haven't been applied yet
+      await ensureCompanyImageColumns();
+
       const { data, error } = await supabase
         .from('companies')
         .select('*')
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
       return data as Company[];
     },
