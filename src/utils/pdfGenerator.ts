@@ -1433,7 +1433,7 @@ export const generatePDF = async (data: DocumentData) => {
           ${showHeader ? generatePDFHeader(headerImage, company, companyServices, data, formatDateLong, documentTitle) : ''}
 
           <!-- Section Title with alphabetical letter -->
-          <div class="section-title" style="margin: ${showHeader ? '25px 0 15px 0' : '20px 0 15px 0'}; padding: 12px; background: #fff; border-left: 4px solid #000; font-size: 14px; font-weight: bold; text-transform: uppercase;">${sectionTitleWithLetter}</div>
+          <div class="section-title" style="margin: ${showHeader ? '20px 0 12px 0' : '15px 0 10px 0'}; padding: 0; background: transparent; border-left: none; font-size: 13px; font-weight: bold; text-transform: uppercase;">${sectionTitleWithLetter}</div>
 
           <!-- Materials Subsection -->
           <div class="subsection" style="margin-bottom:12px;">
@@ -1790,8 +1790,8 @@ export const generatePDF = async (data: DocumentData) => {
 
           .header-image {
             width: 100%;
-            max-height: 60px;
-            object-fit: cover;
+            max-height: 80px;
+            object-fit: contain;
             height: auto;
             margin: 0 0 8px 0;
             padding: 0;
