@@ -867,7 +867,7 @@ export const generatePDF = async (data: DocumentData) => {
         body.special-invoice .sigline { height: 12px; }
         body.special-invoice .field-row { gap: 4px; }
         .totals .label { text-align:right; padding-right:12px; }
-        .footer { margin-top:16mm; display:flex; flex-direction:column; gap:12mm; padding: 0 15mm; page-break-inside: avoid; }
+        .footer { margin-top:8mm; display:flex; flex-direction:column; gap:6mm; padding: 0 15mm; page-break-inside: avoid; }
         .sig-block { display:flex; flex-direction:column; gap:8px; }
         .sig-title { font-weight:700; font-size: 11px; }
         .sig-role { font-weight:600; font-size: 10px; color: #666; }
