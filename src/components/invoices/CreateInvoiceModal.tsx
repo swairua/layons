@@ -659,7 +659,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                               <div className="text-sm text-muted-foreground">{product.product_code}</div>
                             </div>
                             <div className="text-right">
-                              <div className="font-semibold">{formatCurrency(product.unit_price)}</div>
+                              <div className="font-semibold">{formatCurrency(product.selling_price || 0)}</div>
                               <div className="text-xs text-muted-foreground">Stock: {product.stock_quantity}</div>
                             </div>
                           </div>
@@ -757,7 +757,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                               >
                                 <div className="flex justify-between">
                                   <span className="font-medium">{product.name}</span>
-                                  <span>{formatCurrency(product.unit_price)}</span>
+                                  <span>{formatCurrency(product.selling_price || 0)}</span>
                                 </div>
                               </div>
                             ))}
