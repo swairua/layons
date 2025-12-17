@@ -857,7 +857,7 @@ export const generatePDF = async (data: DocumentData) => {
         .subsection-total { page-break-inside: avoid; page-break-before: avoid; margin-bottom: 4mm; margin-top: 2mm; page-break-after: auto; background: #fafafa; }
         .subsection-total td { font-weight:600; background:#fafafa; padding: 5px 8px; line-height: 1.4; border-left: 3px solid #e0e0e0; }
         .subsection-total .label { text-align:right; padding: 5px 12px 5px 8px; }
-        .totals { margin-top:10mm; margin-bottom: 0; width: calc(100% - 30mm); margin-left: 15mm; margin-right: 15mm; page-break-inside: avoid; padding-bottom: 50mm; page-break-before: avoid; padding-top: 5mm; border-top: 1px solid #ddd; }
+        .totals { margin-top:4mm; margin-bottom: 0; width: calc(100% - 30mm); margin-left: 15mm; margin-right: 15mm; page-break-inside: avoid; padding-bottom: 10mm; page-break-before: avoid; padding-top: 3mm; border-top: 1px solid #ddd; }
 
         body.special-invoice .section-total { margin-bottom: 2mm; }
         body.special-invoice .subsection-total { margin-bottom: 2mm; }
