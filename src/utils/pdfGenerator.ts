@@ -682,6 +682,8 @@ export const generatePDF = async (data: DocumentData) => {
     const isSubsectionSubtotal = (d: string) => /^subsection\s+[^\s]+\s+subtotal\s*$/i.test(d);
     const isSectionTotalRow = (d: string) => /^section\s+total$/i.test(d);
 
+    let sectionCount = 0;
+
     // Helper to create a table block for a section
     const createSectionTable = (sectionTitle: string, sectionRows: string, isFirstSection: boolean): string => {
       return `
@@ -713,7 +715,8 @@ export const generatePDF = async (data: DocumentData) => {
         if (isSectionHeader(desc)) {
           // Close previous section table if exists
           if (currentSection && sectionRowsHtml) {
-            tablesHtml += createSectionTable(currentSection, sectionRowsHtml);
+            tablesHtml += createSectionTable(currentSection, sectionRowsHtml, sectionCount === 0);
+            sectionCount++;
           }
           // Start new section
           currentSection = desc;
@@ -747,7 +750,7 @@ export const generatePDF = async (data: DocumentData) => {
       });
       // Flush last section
       if (currentSection && sectionRowsHtml) {
-        tablesHtml += createSectionTable(currentSection, sectionRowsHtml);
+        tablesHtml += createSectionTable(currentSection, sectionRowsHtml, sectionCount === 0);
       }
     } else {
       // Legacy behavior: section headers are items with qty=0 and unit_price=0; totals are computed per section
@@ -759,7 +762,8 @@ export const generatePDF = async (data: DocumentData) => {
           if (itemNo > 0) {
             sectionRowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(runningSectionTotal)}</td>\n        </tr>`;
             sectionTotals.push(runningSectionTotal);
-            tablesHtml += createSectionTable(currentSection, sectionRowsHtml);
+            tablesHtml += createSectionTable(currentSection, sectionRowsHtml, sectionCount === 0);
+            sectionCount++;
           }
           runningSectionTotal = 0;
           itemNo = 0;
@@ -776,7 +780,7 @@ export const generatePDF = async (data: DocumentData) => {
       if (itemNo > 0) {
         sectionRowsHtml += `<tr class=\"section-total\">\n          <td class=\"num\"></td>\n          <td colspan=\"4\" class=\"label\">SECTION TOTAL:</td>\n          <td class=\"amount\">${formatCurrency(runningSectionTotal)}</td>\n        </tr>`;
         sectionTotals.push(runningSectionTotal);
-        tablesHtml += createSectionTable(currentSection, sectionRowsHtml);
+        tablesHtml += createSectionTable(currentSection, sectionRowsHtml, sectionCount === 0);
       }
     }
 
