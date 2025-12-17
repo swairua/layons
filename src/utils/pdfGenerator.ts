@@ -277,7 +277,7 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
       let heightLeft = imgHeight;
       let position = 0;
 
-      while (heightLeft >= 0) {
+      while (heightLeft > 1) { // Use > 1 instead of >= 0 to avoid blank pages
         if (!isFirstPage) {
           pdf.addPage();
         }
@@ -285,10 +285,6 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
         heightLeft -= pageHeight;
         position += pageHeight;
         isFirstPage = false;
-
-        if (heightLeft > 0) {
-          // More content to add
-        }
       }
     }
 
