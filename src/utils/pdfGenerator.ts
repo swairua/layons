@@ -604,7 +604,7 @@ const generatePDFHeader = (
         </div>
 
         <!-- Bottom row: All details with borderless two-column table -->
-        <table style="font-size: 12px; line-height: 1.3; width: 100%; border-collapse: collapse; border: none;">
+        <table style="font-size: 12px; line-height: 1.3; width: 100%; border-collapse: collapse; border: none; margin-bottom: 10px;">
           <tr style="border: none;">
             <td style="width: 70px; vertical-align: top; border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">Client</td>
             <td style="border: none; padding: 1px 0; line-height: 1.3; font-weight: bold;">
