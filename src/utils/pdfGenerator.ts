@@ -986,7 +986,7 @@ export const generatePDF = async (data: DocumentData) => {
 
           ${preliminariesHtml}
 
-          <div style="height: ${data.customTitle === 'INVOICE' ? '4mm' : '8mm'};"></div>
+          <div style="height: 2mm;"></div>
 
           <div class="sections-container">
             ${tablesHtml}
