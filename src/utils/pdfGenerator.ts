@@ -578,7 +578,7 @@ const generatePDFHeader = (
       <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
 
       <!-- Header content below image -->
-      <div class="header-content" style="display: flex; flex-direction: column; gap: 6px; margin-top: 2px;">
+      <div class="header-content" style="display: flex; flex-direction: column; gap: 8px; margin-top: 2px; margin-bottom: 8px;">
         <!-- Top row: Services (left) and Company details (right) -->
         <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: calc(100% + 12mm); margin-right: -12mm; box-sizing: border-box; min-width: 0;">
           <!-- Services Section -->
