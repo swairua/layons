@@ -73,16 +73,6 @@ export default function BOQs() {
     try {
       await deleteBOQ.mutateAsync(deleteDialog.boqId);
 
-      // Log the delete action
-      await logDelete(
-        companyId,
-        'boq',
-        deleteDialog.boqId,
-        deleteDialog.boqNumber,
-        deleteDialog.boqNumber,
-        { deletedAt: new Date().toISOString() }
-      );
-
       toast.success('BOQ deleted');
       setDeleteDialog({ open: false });
     } catch (err) {
