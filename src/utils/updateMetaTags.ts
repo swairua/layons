@@ -15,7 +15,7 @@ export function updateMetaTags(companyData?: {
   const companyServices =
     companyData?.company_services ||
     'Professional Management System with Quotations, Invoices, Payments, Inventory, and Multi-Company Support';
-  const logoUrl = companyData?.logo_url || 'https://lovable.dev/opengraph-image-p98pqg.png';
+  const logoUrl = companyData?.logo_url || '/favicon.ico';
   const companyLocation = [companyData?.address, companyData?.city, companyData?.country]
     .filter(Boolean)
     .join(', ');
