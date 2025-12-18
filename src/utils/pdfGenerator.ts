@@ -770,7 +770,7 @@ export const generatePDF = async (data: DocumentData) => {
     // Helper to create a table block for a section
     const createSectionTable = (sectionTitle: string, sectionRows: string, isFirstSection: boolean): string => {
       return `
-        <div class="section-block" style="page-break-before: ${isFirstSection ? 'avoid' : 'always'}; page-break-inside: avoid;">
+        <div class="section-block" style="page-break-before: ${isFirstSection ? 'avoid' : 'always'} !important; page-break-inside: avoid !important; break-before: ${isFirstSection ? 'avoid' : 'page'};">
           <table class="items" style="margin-bottom: 12mm; margin-left: 15mm; margin-right: 15mm; width: calc(100% - 30mm); page-break-after: auto;">
             <thead>
               <tr>
@@ -1017,6 +1017,11 @@ export const generatePDF = async (data: DocumentData) => {
           page-break-inside: avoid;
           break-inside: avoid;
           margin-bottom: 0;
+        }
+
+        .section-block + .section-block {
+          page-break-before: always !important;
+          break-before: page !important;
         }
 
         .sections-container table {
@@ -2345,8 +2350,8 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .stamp-section img {
-            max-width: 100px;
-            max-height: 100px;
+            max-width: 38mm;
+            max-height: 38mm;
             object-fit: contain;
           }
 
