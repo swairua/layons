@@ -289,7 +289,7 @@ export default function BOQs() {
                         variant="destructive"
                         onClick={() => handleDeleteClick(b.id, b.number)}
                         title={b.converted_to_invoice_id ? "Cannot delete converted BOQ" : "Delete"}
-                        className={b.converted_to_invoice_id ? "opacity-50 cursor-not-allowed" : ""}
+                        disabled={!!b.converted_to_invoice_id}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
