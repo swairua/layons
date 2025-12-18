@@ -1019,6 +1019,11 @@ export const generatePDF = async (data: DocumentData) => {
           margin-bottom: 0;
         }
 
+        .section-block + .section-block {
+          page-break-before: always !important;
+          break-before: page !important;
+        }
+
         .sections-container table {
           page-break-inside: avoid;
           break-inside: avoid;
