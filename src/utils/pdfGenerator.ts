@@ -1057,7 +1057,7 @@ export const generatePDF = async (data: DocumentData) => {
         .terms-page table { border-collapse: collapse; width: 100%; }
         .terms-page table tr { border: none; }
         .terms-page table td { border: none; padding: 4px 0; }
-        .stamp-image { width: 100px; height: 100px; }
+        .stamp-image { width: 38mm; height: 38mm; }
 
         @media print {
           .header { margin: 0; padding: 0; }
@@ -1092,8 +1092,8 @@ export const generatePDF = async (data: DocumentData) => {
           ${data.customTitle === 'INVOICE' ? `
           <!-- Stamp for Invoice -->
           <div style="margin-top: 20px; padding-top: 12px; display: flex; justify-content: flex-end; margin-left: 15mm; margin-right: 15mm;">
-            <div style="text-align: center; width: 100px;">
-              <img src="${data.stampImageUrl || stampImage}" alt="Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
+            <div style="text-align: center; width: 38mm;">
+              <img src="${data.stampImageUrl || stampImage}" alt="Stamp" style="width: 38mm; height: 38mm; object-fit: contain;" />
             </div>
           </div>
           ` : ''}
@@ -1155,8 +1155,8 @@ export const generatePDF = async (data: DocumentData) => {
             </div>
             ${data.customer.phone ? `<div><strong>Tel No;</strong><br/>${data.customer.phone}</div>` : ''}
           </div>
-          <div style="text-align: center; flex-shrink: 0; width: 100px;">
-            <img src="${data.stampImageUrl || stampImage}" alt="Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
+          <div style="text-align: center; flex-shrink: 0; width: 38mm;">
+            <img src="${data.stampImageUrl || stampImage}" alt="Stamp" style="width: 38mm; height: 38mm; object-fit: contain;" />
           </div>
         </div>
 
