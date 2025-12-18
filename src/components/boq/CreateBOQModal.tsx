@@ -80,7 +80,7 @@ const defaultSection = (): BOQSectionRow => ({
   ],
 });
 
-export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
+export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModalProps) {
   const { data: companies } = useCompanies();
   const currentCompany = companies?.[0];
   const { data: customers = [] } = useCustomers(currentCompany?.id);
