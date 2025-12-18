@@ -8,11 +8,13 @@ export function generateNextBOQNumber(existingBOQs: Array<{ number: string }>): 
     return 'BOQ-001';
   }
 
-  // Extract numeric part from existing BOQ numbers
+  // Extract numeric part only from sequential BOQ numbers (BOQ-NNN format)
+  // Ignore date-based BOQ numbers (BOQ-YYYYMMDD-XXXX format)
   let maxNumber = 0;
 
   existingBOQs.forEach((boq) => {
-    const match = boq.number.match(/BOQ-(\d+)/);
+    // Match only BOQ-NNN format where NNN is 1-3 digits and not followed by a dash
+    const match = boq.number.match(/^BOQ-(\d{1,3})$/);
     if (match && match[1]) {
       const numericPart = parseInt(match[1], 10);
       if (!isNaN(numericPart) && numericPart > maxNumber) {
