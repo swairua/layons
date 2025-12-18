@@ -3305,6 +3305,10 @@ export const generatePDF = async (data: DocumentData) => {
 
 // Specific function for invoice PDF generation
 export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' | 'PROFORMA' = 'INVOICE', company?: CompanyDetails) => {
+  console.log('🎯 downloadInvoicePDF called for:', invoice.invoice_number);
+  console.log('📊 Raw invoice_items count:', invoice.invoice_items?.length || 0);
+  console.log('📊 Raw invoice_items:', invoice.invoice_items);
+
   const items = invoice.invoice_items?.map((item: any) => {
     const quantity = Number(item.quantity || 0);
     const unitPrice = Number(item.unit_price || 0);
@@ -3329,8 +3333,12 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
     };
   }) || [];
 
+  console.log('✅ Mapped items count:', items.length);
+  console.log('✅ Mapped items:', items);
+
   // Check if items have sections
   const hasSections = items.some((item: any) => item.section_name);
+  console.log('🔍 Has sections:', hasSections);
 
   let documentData: DocumentData;
 
