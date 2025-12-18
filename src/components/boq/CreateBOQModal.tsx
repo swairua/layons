@@ -84,6 +84,7 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
   const currentCompany = companies?.[0];
   const { data: customers = [] } = useCustomers(currentCompany?.id);
   const { data: units = [] } = useUnits(currentCompany?.id);
+  const { data: existingBOQs = [] } = useBOQs(currentCompany?.id);
   const { profile } = useAuth();
 
   const [unitModalOpen, setUnitModalOpen] = useState(false);
@@ -91,14 +92,8 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
 
   const todayISO = new Date().toISOString().split('T')[0];
   const defaultNumber = useMemo(() => {
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const hh = String(d.getHours()).padStart(2, '0');
-    const mm = String(d.getMinutes()).padStart(2, '0');
-    return `BOQ-${y}${m}${day}-${hh}${mm}`;
-  }, []);
+    return generateNextBOQNumber(existingBOQs);
+  }, [existingBOQs]);
 
   const [boqNumber, setBoqNumber] = useState(defaultNumber);
   const [boqDate, setBoqDate] = useState(todayISO);
