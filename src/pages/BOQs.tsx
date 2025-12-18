@@ -284,7 +284,13 @@ export default function BOQs() {
                       >
                         <FileText className="h-4 w-4" />
                       </Button>
-                      <Button size="icon" variant="destructive" onClick={() => handleDeleteClick(b.id, b.number)} title="Delete">
+                      <Button
+                        size="icon"
+                        variant="destructive"
+                        onClick={() => handleDeleteClick(b.id, b.number)}
+                        title={b.converted_to_invoice_id ? "Cannot delete converted BOQ" : "Delete"}
+                        className={b.converted_to_invoice_id ? "opacity-50 cursor-not-allowed" : ""}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
