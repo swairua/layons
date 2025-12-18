@@ -586,16 +586,7 @@ export const useCreateBOQ = () => {
 };
 
 export const useDeleteBOQ = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from('boqs').delete().eq('id', id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['boqs'] });
-    },
-  });
+  throw new Error('useDeleteBOQ is deprecated. Use useAuditedDeleteBOQ from useAuditedDeleteOperations instead.');
 };
 
 // Units hooks

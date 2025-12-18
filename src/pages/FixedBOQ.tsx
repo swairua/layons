@@ -11,6 +11,7 @@ import { generatePDF } from '@/utils/pdfGenerator';
 import { executeSQL, formatSQLForManualExecution } from '@/utils/execSQL';
 import { parseErrorMessage } from '@/utils/errorHelpers';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
+import { useAuditedDeleteOperations } from '@/hooks/useAuditedDeleteOperations';
 
 interface FixedBOQItem {
   id: string;
@@ -34,6 +35,8 @@ const parseNumber = (s: string | null | undefined) => {
 export default function FixedBOQ() {
   const { currentCompany } = useCurrentCompany();
   const companyId = currentCompany?.id || null;
+  const { useAuditedDeleteFixedBOQItem } = useAuditedDeleteOperations();
+  const deleteItem = useAuditedDeleteFixedBOQItem(companyId || '');
 
   const [items, setItems] = useState<FixedBOQItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -325,11 +328,7 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
   const handleDeleteConfirm = async () => {
     if (!deleteDialog.itemId) return;
     try {
-      const { error } = await supabase
-        .from('fixed_boq_items')
-        .delete()
-        .eq('id', deleteDialog.itemId);
-      if (error) throw error;
+      await deleteItem.mutateAsync(deleteDialog.itemId);
       toast.success('Item deleted successfully');
       setDeleteDialog({ open: false });
       await fetchItems();

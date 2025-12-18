@@ -289,11 +289,24 @@ export function useAuditedDeleteOperations() {
     return useMutation({
       mutationFn: async (id: string) => {
         // Fetch BOQ before deletion for audit
-        const { data: boq } = await supabase
+        const { data: boq, error: fetchError } = await supabase
           .from('boqs')
           .select('*')
           .eq('id', id)
           .single();
+
+        if (fetchError) {
+          console.error('Error fetching BOQ for deletion:', fetchError);
+          throw new Error(`Could not verify BOQ status: ${fetchError.message}`);
+        }
+
+        if (!boq) {
+          throw new Error('BOQ not found');
+        }
+
+        if (boq.converted_to_invoice_id) {
+          throw new Error(`Cannot delete BOQ ${boq.number}: It has been converted to an invoice. Please delete the invoice first if you really need to delete this BOQ.`);
+        }
 
         // Perform audited delete
         const result = await auditedDelete({
@@ -302,12 +315,17 @@ export function useAuditedDeleteOperations() {
           whereValue: id,
           entityType: 'BOQ',
           entityId: id,
-          entityName: boq?.number,
+          entityName: boq.number,
           deletedData: boq,
           companyId,
         });
 
         if (!result.success) {
+          // If it's a foreign key error, provide a better message
+          const errorMsg = result.error?.message || '';
+          if (errorMsg.includes('foreign key') || errorMsg.includes('violates foreign key constraint')) {
+            throw new Error(`Cannot delete BOQ ${boq.number}: It is referenced by other records (e.g. invoices). Please remove those references first.`);
+          }
           throw result.error || new Error('Failed to delete BOQ');
         }
 
@@ -315,6 +333,41 @@ export function useAuditedDeleteOperations() {
       },
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['boqs'] });
+      },
+    });
+  };
+
+  // Audited Fixed BOQ item delete
+  const useAuditedDeleteFixedBOQItem = (companyId: string) => {
+    return useMutation({
+      mutationFn: async (id: string) => {
+        // Fetch item before deletion for audit
+        const { data: item } = await supabase
+          .from('fixed_boq_items')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        // Perform audited delete
+        const result = await auditedDelete({
+          tableName: 'fixed_boq_items',
+          whereKey: 'id',
+          whereValue: id,
+          entityType: 'FixedBOQItem',
+          entityId: id,
+          entityName: item?.description,
+          deletedData: item,
+          companyId,
+        });
+
+        if (!result.success) {
+          throw result.error || new Error('Failed to delete Fixed BOQ item');
+        }
+
+        return result;
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['fixed_boq_items'] });
       },
     });
   };
@@ -517,6 +570,7 @@ export function useAuditedDeleteOperations() {
     useAuditedDeleteUnit,
     useAuditedDeleteLPOItem,
     useAuditedDeleteCreditNoteItem,
+    useAuditedDeleteFixedBOQItem,
     useAuditedDeleteByParent,
   };
 }

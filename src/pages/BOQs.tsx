@@ -73,16 +73,6 @@ export default function BOQs() {
     try {
       await deleteBOQ.mutateAsync(deleteDialog.boqId);
 
-      // Log the delete action
-      await logDelete(
-        companyId,
-        'boq',
-        deleteDialog.boqId,
-        deleteDialog.boqNumber,
-        deleteDialog.boqNumber,
-        { deletedAt: new Date().toISOString() }
-      );
-
       toast.success('BOQ deleted');
       setDeleteDialog({ open: false });
     } catch (err) {
@@ -294,7 +284,13 @@ export default function BOQs() {
                       >
                         <FileText className="h-4 w-4" />
                       </Button>
-                      <Button size="icon" variant="destructive" onClick={() => handleDeleteClick(b.id, b.number)} title="Delete">
+                      <Button
+                        size="icon"
+                        variant="destructive"
+                        onClick={() => handleDeleteClick(b.id, b.number)}
+                        title={b.converted_to_invoice_id ? "Cannot delete converted BOQ" : "Delete"}
+                        disabled={!!b.converted_to_invoice_id}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
