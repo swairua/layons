@@ -513,7 +513,7 @@ const DEFAULT_COMPANY: CompanyDetails = {
   tax_number: '',
   logo_url: 'https://cdn.builder.io/api/v1/image/assets%2Fb048b36350454e4dba55aefd37788f9c%2Fbd04dab542504461a2451b061741034c?format=webp&width=800',
   header_image: 'https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2F1ce2c870c8304b9cab69f4c60615a6af?format=webp&width=800',
-  stamp_image: 'https://cdn.builder.io/api/v1/image/assets%2F9ff3999d5c9643b5b444cfaefad1cb5e%2F70894a4a73a347ac823210fd2ffd0871?format=webp&width=800'
+  stamp_image: 'https://cdn.builder.io/api/v1/image/assets%2Fd268027e32e4464daae70b56ad7162a8%2Fab5f0478b4fc4e3f942ccde11c08b62e?format=webp&width=800'
 };
 
 // Helper function to determine which columns have values
@@ -1148,13 +1148,20 @@ export const generatePDF = async (data: DocumentData) => {
 
         <!-- Client Section -->
         <div style="margin-bottom: 10px; padding-top: 6px; page-break-inside: avoid;">
-          <div style="font-size: 10px; color: #333; line-height: 1.6;">
-            <div style="margin-bottom: 8px;">
-              <strong>Client;</strong><br/>
-              ${data.customer.name}${data.customer.address ? '<br/>' + data.customer.address : ''}${data.customer.city ? '<br/>' + data.customer.city : ''}${data.customer.country ? '<br/>' + data.customer.country : ''}
-            </div>
-            ${data.customer.phone ? `<div><strong>Tel No;</strong><br/>${data.customer.phone}</div>` : ''}
-          </div>
+          <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #333; border: none;">
+            <tr style="border: none;">
+              <td style="width: 30%; border: none; vertical-align: top;"><strong>Client;</strong></td>
+              <td style="width: 70%; border: none;">
+                ${data.customer.name}${data.customer.address ? '<br/>' + data.customer.address : ''}${data.customer.city ? '<br/>' + data.customer.city : ''}${data.customer.country ? '<br/>' + data.customer.country : ''}
+              </td>
+            </tr>
+            ${data.customer.phone ? `
+            <tr style="border: none;">
+              <td style="width: 30%; border: none;"><strong>Tel No;</strong></td>
+              <td style="width: 70%; border: none;">${data.customer.phone}</td>
+            </tr>
+            ` : ''}
+          </table>
         </div>
 
         <!-- Prepaired By Section -->
