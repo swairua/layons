@@ -25,7 +25,8 @@ export default function BOQs() {
   const { currentCompany } = useCurrentCompany();
   const companyId = currentCompany?.id;
   const { data: boqs = [], isLoading, refetch: refetchBOQs } = useBOQs(companyId);
-  const deleteBOQ = useDeleteBOQ();
+  const { useAuditedDeleteBOQ } = useAuditedDeleteOperations();
+  const deleteBOQ = useAuditedDeleteBOQ(companyId || '');
   const { data: units = [] } = useUnits(companyId);
   const { logDelete } = useAuditLog();
 
