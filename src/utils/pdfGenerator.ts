@@ -3165,9 +3165,11 @@ export const generatePDF = async (data: DocumentData) => {
         ` : ''}
 
         <!-- Stamp Section (for all documents) -->
+        ${stampImage ? `
         <div class="stamp-section" style="display:flex; justify-content:center; margin:30px 0 24px 0;">
           <img src="${stampImage}" alt="Company Stamp" style="width: 44mm; height: 44mm; object-fit:contain;" />
         </div>
+        ` : ''}
 
         <!-- Footer (only for non-invoice/quotation types) -->
         ${(data.type !== 'invoice' && data.type !== 'quotation') ? `
