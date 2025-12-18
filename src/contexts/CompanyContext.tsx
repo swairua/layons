@@ -23,6 +23,7 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
     if (defaultCompanyId) {
       const matchById = companies.find(company => company.id === defaultCompanyId);
       if (matchById) {
+        console.log('[CompanyContext] Selected by VITE_DEFAULT_COMPANY_ID:', matchById);
         return matchById;
       }
     }
@@ -30,10 +31,12 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
     if (defaultCompanyName) {
       const matchByName = companies.find(company => company.name?.toLowerCase() === defaultCompanyName);
       if (matchByName) {
+        console.log('[CompanyContext] Selected by VITE_DEFAULT_COMPANY_NAME:', matchByName);
         return matchByName;
       }
     }
 
+    console.log('[CompanyContext] Selected companies[0]:', companies[0]);
     return companies[0];
   }, [companies, defaultCompanyId, defaultCompanyName]);
 
