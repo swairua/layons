@@ -239,7 +239,12 @@ export default function Invoices() {
     try {
       // Ensure invoice has items; if not, fetch them on demand
       let enrichedInvoice: any = invoice;
+
+      console.log('📄 Starting invoice PDF download for:', invoice.invoice_number);
+      console.log('📋 Invoice items present:', invoice.invoice_items?.length || 0);
+
       if (!invoice.invoice_items || invoice.invoice_items.length === 0) {
+        console.log('⚠️ No invoice items found, fetching from database...');
         const { data: items, error } = await supabase
           .from('invoice_items')
           .select(`
@@ -257,16 +262,24 @@ export default function Invoices() {
             line_total,
             sort_order,
             unit_of_measure,
+            section_name,
+            section_labor_cost,
             products(id, name, product_code, unit_of_measure)
           `)
-          .eq('invoice_id', invoice.id);
+          .eq('invoice_id', invoice.id)
+          .order('sort_order', { ascending: true });
+
         if (error) {
-          console.error('Failed to fetch invoice items:', error);
+          console.error('❌ Failed to fetch invoice items:', error);
           toast.error('Failed to load invoice items for PDF');
           return;
         }
+
+        console.log('✅ Invoice items fetched:', items?.length || 0);
         enrichedInvoice = { ...invoice, invoice_items: items || [] };
       }
+
+      console.log('📦 Final invoice items for PDF:', enrichedInvoice.invoice_items?.length || 0);
 
       // Get current company details for PDF
       const companyDetails = currentCompany ? {
