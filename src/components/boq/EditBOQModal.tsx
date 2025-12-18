@@ -278,6 +278,18 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
 
     setSubmitting(true);
     try {
+      const filledSections = getFilledItems();
+
+      // Calculate subtotal from filled items only
+      let filledSubtotal = 0;
+      filledSections.forEach(sec => {
+        sec.subsections.forEach(sub => {
+          sub.items.forEach(item => {
+            filledSubtotal += (item.quantity || 0) * (item.rate || 0);
+          });
+        });
+      });
+
       const doc: BoqDocument = {
         number: boqNumber,
         date: boqDate,
@@ -292,7 +304,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
         },
         contractor: contractor || undefined,
         project_title: projectTitle || undefined,
-        sections: sections.map(s => ({
+        sections: filledSections.map(s => ({
           title: s.title || undefined,
           subsections: s.subsections.map(sub => ({
             name: sub.name,
@@ -324,9 +336,9 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
         contractor: contractor || null,
         project_title: projectTitle || null,
         currency: currency,
-        subtotal: totals.subtotal,
+        subtotal: filledSubtotal,
         tax_amount: 0,
-        total_amount: totals.subtotal,
+        total_amount: filledSubtotal,
         data: doc,
       };
 
