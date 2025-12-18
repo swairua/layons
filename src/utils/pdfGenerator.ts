@@ -1866,8 +1866,8 @@ export const generatePDF = async (data: DocumentData) => {
                 <td style="border: none;">________________________</td>
               </tr>
             </table>
-            <div style="text-align: center; flex-shrink: 0; width: 38mm;">
-              <img src="${stampImage}" alt="Layons Construction Stamp" style="width: 38mm; height: 38mm; object-fit: contain;" />
+            <div style="text-align: center; flex-shrink: 0; width: 42mm;">
+              <img src="${stampImage}" alt="Layons Construction Stamp" style="width: 42mm; height: 42mm; object-fit: contain;" />
             </div>
           </div>
 
@@ -3235,8 +3235,8 @@ export const generatePDF = async (data: DocumentData) => {
                 <td style="border: none;">________________________</td>
               </tr>
             </table>
-            <div style="text-align: center; flex-shrink: 0; width: 38mm;">
-              <img src="${stampImage}" alt="Layons Construction Stamp" style="width: 38mm; height: 38mm; object-fit: contain;" />
+            <div style="text-align: center; flex-shrink: 0; width: 42mm;">
+              <img src="${stampImage}" alt="Layons Construction Stamp" style="width: 42mm; height: 42mm; object-fit: contain;" />
             </div>
           </div>
 
