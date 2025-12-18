@@ -1809,9 +1809,9 @@ export const generatePDF = async (data: DocumentData) => {
         </div>
 
         <!-- Stamp Section -->
-        <div class="stamp-section" style="display:flex; justify-content:center; margin:40px 0 24px 0;">
+        ${stampImage ? `<div class="stamp-section" style="display:flex; justify-content:center; margin:40px 0 24px 0;">
           <img src="${stampImage}" alt="Company Stamp" style="width: 44mm; height: 44mm; object-fit:contain;" />
-        </div>
+        </div>` : ''}
       </div>
     `;
 
