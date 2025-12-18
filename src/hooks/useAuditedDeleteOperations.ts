@@ -295,6 +295,10 @@ export function useAuditedDeleteOperations() {
           .eq('id', id)
           .single();
 
+        if (boq?.converted_to_invoice_id) {
+          throw new Error(`Cannot delete BOQ ${boq.number}: It has been converted to an invoice. Please delete the invoice first if you really need to delete this BOQ.`);
+        }
+
         // Perform audited delete
         const result = await auditedDelete({
           tableName: 'boqs',
@@ -315,6 +319,41 @@ export function useAuditedDeleteOperations() {
       },
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['boqs'] });
+      },
+    });
+  };
+
+  // Audited Fixed BOQ item delete
+  const useAuditedDeleteFixedBOQItem = (companyId: string) => {
+    return useMutation({
+      mutationFn: async (id: string) => {
+        // Fetch item before deletion for audit
+        const { data: item } = await supabase
+          .from('fixed_boq_items')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        // Perform audited delete
+        const result = await auditedDelete({
+          tableName: 'fixed_boq_items',
+          whereKey: 'id',
+          whereValue: id,
+          entityType: 'FixedBOQItem',
+          entityId: id,
+          entityName: item?.description,
+          deletedData: item,
+          companyId,
+        });
+
+        if (!result.success) {
+          throw result.error || new Error('Failed to delete Fixed BOQ item');
+        }
+
+        return result;
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['fixed_boq_items'] });
       },
     });
   };
@@ -517,6 +556,7 @@ export function useAuditedDeleteOperations() {
     useAuditedDeleteUnit,
     useAuditedDeleteLPOItem,
     useAuditedDeleteCreditNoteItem,
+    useAuditedDeleteFixedBOQItem,
     useAuditedDeleteByParent,
   };
 }
