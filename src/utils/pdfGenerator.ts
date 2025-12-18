@@ -1057,7 +1057,7 @@ export const generatePDF = async (data: DocumentData) => {
         .terms-page table { border-collapse: collapse; width: 100%; }
         .terms-page table tr { border: none; }
         .terms-page table td { border: none; padding: 4px 0; }
-        .stamp-image { width: 100px; height: 100px; }
+        .stamp-image { width: 38mm; height: 38mm; }
 
         @media print {
           .header { margin: 0; padding: 0; }
@@ -1092,8 +1092,8 @@ export const generatePDF = async (data: DocumentData) => {
           ${data.customTitle === 'INVOICE' ? `
           <!-- Stamp for Invoice -->
           <div style="margin-top: 20px; padding-top: 12px; display: flex; justify-content: flex-end; margin-left: 15mm; margin-right: 15mm;">
-            <div style="text-align: center; width: 100px;">
-              <img src="${data.stampImageUrl || stampImage}" alt="Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
+            <div style="text-align: center; width: 38mm;">
+              <img src="${data.stampImageUrl || stampImage}" alt="Stamp" style="width: 38mm; height: 38mm; object-fit: contain;" />
             </div>
           </div>
           ` : ''}
@@ -1146,17 +1146,14 @@ export const generatePDF = async (data: DocumentData) => {
           </table>
         </div>
 
-        <!-- Client Section with Stamp -->
-        <div style="margin-bottom: 10px; padding-top: 6px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; page-break-inside: avoid;">
-          <div style="flex: 1; font-size: 10px; color: #333; line-height: 1.6;">
+        <!-- Client Section -->
+        <div style="margin-bottom: 10px; padding-top: 6px; page-break-inside: avoid;">
+          <div style="font-size: 10px; color: #333; line-height: 1.6;">
             <div style="margin-bottom: 8px;">
               <strong>Client;</strong><br/>
               ${data.customer.name}${data.customer.address ? '<br/>' + data.customer.address : ''}${data.customer.city ? '<br/>' + data.customer.city : ''}${data.customer.country ? '<br/>' + data.customer.country : ''}
             </div>
             ${data.customer.phone ? `<div><strong>Tel No;</strong><br/>${data.customer.phone}</div>` : ''}
-          </div>
-          <div style="text-align: center; flex-shrink: 0; width: 100px;">
-            <img src="${data.stampImageUrl || stampImage}" alt="Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
           </div>
         </div>
 
@@ -1170,10 +1167,11 @@ export const generatePDF = async (data: DocumentData) => {
           </table>
         </div>
 
-        <!-- Account Details Section -->
-        <div style="margin-top: 8px; padding-top: 4px; page-break-inside: avoid;">
-          <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Account Details;</h3>
-          <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
+        <!-- Account Details Section with Stamp -->
+        <div style="margin-top: 8px; padding-top: 4px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; page-break-inside: avoid;">
+          <div style="flex: 1;">
+            <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Account Details;</h3>
+            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
             <tr style="border: none;">
               <td style="width: 30%; border: none;"><strong>BANK;</strong></td>
               <td style="width: 70%; border: none;">CO-OPERATIVE BANK OF KENYA</td>
@@ -1211,6 +1209,10 @@ export const generatePDF = async (data: DocumentData) => {
               <td style="border: none;">01192659527000</td>
             </tr>
           </table>
+          </div>
+          <div style="text-align: center; flex-shrink: 0; width: 38mm;">
+            <img src="${data.stampImageUrl || stampImage}" alt="Stamp" style="width: 38mm; height: 38mm; object-fit: contain;" />
+          </div>
         </div>
       </div>
       `}
@@ -1787,7 +1789,7 @@ export const generatePDF = async (data: DocumentData) => {
 
         <!-- Stamp Section -->
         <div class="stamp-section" style="display:flex; justify-content:center; margin:40px 0 24px 0;">
-          <img src="${stampImage}" alt="Company Stamp" style="width: 100px; height: 100px; object-fit:contain;" />
+          <img src="${stampImage}" alt="Company Stamp" style="width: 38mm; height: 38mm; object-fit:contain;" />
         </div>
       </div>
     `;
@@ -1852,8 +1854,8 @@ export const generatePDF = async (data: DocumentData) => {
                 <td style="border: none;">________________________</td>
               </tr>
             </table>
-            <div style="text-align: center; flex-shrink: 0; width: 100px;">
-              <img src="${stampImage}" alt="Layons Construction Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
+            <div style="text-align: center; flex-shrink: 0; width: 38mm;">
+              <img src="${stampImage}" alt="Layons Construction Stamp" style="width: 38mm; height: 38mm; object-fit: contain;" />
             </div>
           </div>
 
@@ -3143,7 +3145,7 @@ export const generatePDF = async (data: DocumentData) => {
 
         <!-- Stamp Section (for all documents) -->
         <div class="stamp-section" style="display:flex; justify-content:center; margin:30px 0 24px 0;">
-          <img src="${stampImage}" alt="Company Stamp" style="width: 100px; height: 100px; object-fit:contain;" />
+          <img src="${stampImage}" alt="Company Stamp" style="width: 38mm; height: 38mm; object-fit:contain;" />
         </div>
 
         <!-- Footer (only for non-invoice/quotation types) -->
@@ -3221,8 +3223,8 @@ export const generatePDF = async (data: DocumentData) => {
                 <td style="border: none;">________________________</td>
               </tr>
             </table>
-            <div style="text-align: center; flex-shrink: 0; width: 100px;">
-              <img src="${stampImage}" alt="Layons Construction Stamp" style="width: 100px; height: 100px; object-fit: contain;" />
+            <div style="text-align: center; flex-shrink: 0; width: 38mm;">
+              <img src="${stampImage}" alt="Layons Construction Stamp" style="width: 38mm; height: 38mm; object-fit: contain;" />
             </div>
           </div>
 
