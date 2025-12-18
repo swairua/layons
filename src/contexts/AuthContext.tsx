@@ -361,11 +361,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Set auth state immediately
           setSession(quickSession);
           setUser(quickSession.user);
+          setLoading(false);
           setInitialized(true);
           initializingRef.current = false;
+          console.log('🎉 Fast auth initialization completed - app started');
 
-          // Fetch profile - CRITICAL for admin checks, don't background
-          fetchProfile(quickSession.user.id)
+          // Fetch profile in background with timeout to prevent hanging
+          const profileTimeoutPromise = new Promise<UserProfile | null>((resolve) => {
+            setTimeout(() => {
+              console.warn('⏱️ Profile fetch timeout during quick auth');
+              resolve(null);
+            }, 5000); // 5 second timeout
+          });
+
+          Promise.race([
+            fetchProfile(quickSession.user.id),
+            profileTimeoutPromise
+          ])
             .then(userProfile => {
               if (mountedRef.current) {
                 // Set the actual profile - this is crucial for admin/role checks
@@ -406,13 +418,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                   created_at: new Date().toISOString(),
                   updated_at: new Date().toISOString()
                 } as UserProfile);
-              }
-            })
-            .finally(() => {
-              // Now that we've attempted to fetch the profile, we can stop loading
-              if (mountedRef.current) {
-                setLoading(false);
-                console.log('🎉 Fast auth initialization completed');
               }
             });
 
