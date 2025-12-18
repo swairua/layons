@@ -1222,8 +1222,8 @@ export const generatePDF = async (data: DocumentData) => {
             </tr>
           </table>
           </div>
-          <div style="text-align: center; flex-shrink: 0; width: 38mm;">
-            <img src="${data.stampImageUrl || stampImage}" alt="Stamp" style="width: 38mm; height: 38mm; object-fit: contain;" />
+          <div style="text-align: center; flex-shrink: 0; width: 42mm;">
+            <img src="${data.stampImageUrl || stampImage}" alt="Stamp" style="width: 42mm; height: 42mm; object-fit: contain;" />
           </div>
         </div>
       </div>
