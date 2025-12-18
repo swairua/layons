@@ -339,6 +339,7 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
       } : undefined);
 
       toast.success(`BOQ ${boqNumber} generated and saved`);
+      onSuccess?.();
       onOpenChange(false);
     } catch (err) {
       console.error('Failed to generate BOQ PDF or save', err);
