@@ -431,6 +431,16 @@ export const useCreateInvoiceWithItems = () => {
           itemsError = res.error as any;
         }
 
+        // Fallback: if the database doesn't support section fields, try without them
+        if (itemsError && (itemsError.code === 'PGRST204' || String(itemsError.message || '').toLowerCase().includes('section'))) {
+          console.warn('Database does not support section fields, retrying without them...');
+          const minimalItems = invoiceItems.map(({ section_name, section_labor_cost, unit_of_measure, tax_inclusive, ...rest }) => rest);
+          const retry = await supabase
+            .from('invoice_items')
+            .insert(minimalItems);
+          itemsError = retry.error as any;
+        }
+
         if (itemsError) throw itemsError;
 
         // Create stock movements for products that affect inventory
