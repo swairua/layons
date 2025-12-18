@@ -82,7 +82,7 @@ export default function CashReceipts() {
       const from = page * PAGE_SIZE;
       const to = from + PAGE_SIZE;
 
-      // Fetch receipts without items for faster loading
+      // Fetch receipts with items
       const { data, error } = await supabase
         .from('cash_receipts')
         .select(`
@@ -100,6 +100,17 @@ export default function CashReceipts() {
             id,
             name,
             email
+          ),
+          cash_receipt_items (
+            id,
+            product_id,
+            description,
+            quantity,
+            unit_price,
+            tax_percentage,
+            tax_amount,
+            line_total,
+            unit_of_measure
           )
         `)
         .eq('company_id', currentCompany.id)
@@ -331,7 +342,9 @@ export default function CashReceipts() {
                           {new Date(receipt.receipt_date).toLocaleDateString()}
                         </TableCell>
                         <TableCell>
-                          <Badge>-</Badge>
+                          <Badge>
+                            {receipt.cash_receipt_items?.length || 0} item{(receipt.cash_receipt_items?.length || 0) !== 1 ? 's' : ''}
+                          </Badge>
                         </TableCell>
                         <TableCell>{formatCurrency(receipt.total_amount)}</TableCell>
                         <TableCell>

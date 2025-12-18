@@ -206,13 +206,20 @@ export default function CompanySettings() {
       try {
         headerImageUrl = await uploadToSupabaseStorage(file, currentCompany.id);
         console.log('✅ Supabase storage upload successful');
+        setStorageStatus('available');
       } catch (storageError) {
-        console.warn('⚠️ Supabase storage failed:', storageError);
+        const errorMsg = storageError instanceof Error ? storageError.message : String(storageError);
+        console.warn('⚠️ Supabase storage failed:', errorMsg);
+
+        // Mark storage as unavailable if network error
+        if (errorMsg.includes('Failed to fetch') || errorMsg.includes('Network')) {
+          setStorageStatus('unavailable');
+        }
 
         if (file.size <= 1024 * 1024) {
           headerImageUrl = await convertToBase64(file);
           console.log('✅ Base64 fallback successful');
-          toast.info('Header image saved locally (storage not available)');
+          toast.info('Header image saved locally (cloud storage not available)');
         } else {
           throw new Error('File too large for local storage. Please use a smaller image or configure cloud storage.');
         }
@@ -230,7 +237,7 @@ export default function CompanySettings() {
       logError(err, 'Header Image Upload');
       let userMessage = getUserFriendlyMessage(err, 'Failed to upload header image');
 
-      if (userMessage.includes('company-logos') || userMessage.includes('bucket')) {
+      if (userMessage.includes('company-logos') || userMessage.includes('bucket') || userMessage.includes('cloud storage')) {
         userMessage = 'Cloud storage not configured. Using local storage for smaller files (max 1MB).';
 
         if (file.size <= 1024 * 1024) {
@@ -272,13 +279,20 @@ export default function CompanySettings() {
       try {
         stampImageUrl = await uploadToSupabaseStorage(file, currentCompany.id);
         console.log('✅ Supabase storage upload successful');
+        setStorageStatus('available');
       } catch (storageError) {
-        console.warn('⚠️ Supabase storage failed:', storageError);
+        const errorMsg = storageError instanceof Error ? storageError.message : String(storageError);
+        console.warn('⚠️ Supabase storage failed:', errorMsg);
+
+        // Mark storage as unavailable if network error
+        if (errorMsg.includes('Failed to fetch') || errorMsg.includes('Network')) {
+          setStorageStatus('unavailable');
+        }
 
         if (file.size <= 1024 * 1024) {
           stampImageUrl = await convertToBase64(file);
           console.log('✅ Base64 fallback successful');
-          toast.info('Stamp image saved locally (storage not available)');
+          toast.info('Stamp image saved locally (cloud storage not available)');
         } else {
           throw new Error('File too large for local storage. Please use a smaller image or configure cloud storage.');
         }
@@ -296,7 +310,7 @@ export default function CompanySettings() {
       logError(err, 'Stamp Image Upload');
       let userMessage = getUserFriendlyMessage(err, 'Failed to upload stamp image');
 
-      if (userMessage.includes('company-logos') || userMessage.includes('bucket')) {
+      if (userMessage.includes('company-logos') || userMessage.includes('bucket') || userMessage.includes('cloud storage')) {
         userMessage = 'Cloud storage not configured. Using local storage for smaller files (max 1MB).';
 
         if (file.size <= 1024 * 1024) {
@@ -328,22 +342,9 @@ export default function CompanySettings() {
     const ext = fileNameParts.length > 1 ? fileNameParts.pop() : 'png';
     const filePath = `company-${companyId}/logo-${Date.now()}.${ext}`;
 
-    // Check if storage is available by listing buckets first
-    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-
-    if (bucketsError) {
-      // Handle RLS permission errors specifically
-      if (bucketsError.message.includes('row-level security') ||
-          bucketsError.message.includes('permission') ||
-          bucketsError.message.includes('policy')) {
-        throw new Error('Cloud storage requires admin permissions. Please use local storage or contact your administrator.');
-      }
-      throw new Error(`Storage not available: ${bucketsError.message}`);
-    }
-
     const bucketName = import.meta.env.VITE_COMPANY_LOGO_BUCKET || 'company-logos';
 
-    // Upload the file directly to configured bucket
+    // Upload the file directly to configured bucket (skip bucket listing as it requires admin)
     const { data: uploadData, error: uploadError } = await supabase
       .storage
       .from(bucketName)
@@ -360,13 +361,19 @@ export default function CompanySettings() {
           uploadError.message.includes('policy')) {
         throw new Error('You don\'t have permission to upload to cloud storage. Please use local storage or contact your administrator.');
       }
+      // Catch network errors and bucket not found errors
+      if (uploadError.message.includes('Failed to fetch') ||
+          uploadError.message.includes('does not exist') ||
+          uploadError.message.includes('Not Found')) {
+        throw new Error('Cloud storage bucket not found or not accessible. Using local storage instead.');
+      }
       throw new Error(`Upload failed: ${uploadError.message}`);
     }
 
     // Get public URL
     const { data: publicUrlData } = supabase
       .storage
-      .from(import.meta.env.VITE_COMPANY_LOGO_BUCKET || 'company-logos')
+      .from(bucketName)
       .getPublicUrl(filePath);
 
     if (!publicUrlData.publicUrl) {
@@ -414,6 +421,11 @@ export default function CompanySettings() {
           toast.warning('Cloud storage bucket exists but access is restricted. Using local storage.');
           return;
         }
+        if (msg.includes('Failed to fetch') || msg.includes('Network')) {
+          setStorageStatus('unavailable');
+          toast.warning('Network issue connecting to cloud storage. Using local storage (max 1MB).');
+          return;
+        }
         // Any other error -> treat as unavailable but do not hard fail
         setStorageStatus('unavailable');
         toast.warning('Cloud storage not available. Using local storage.');
@@ -433,6 +445,8 @@ export default function CompanySettings() {
           errorMessage.includes('permission') ||
           errorMessage.includes('policy')) {
         toast.info('Cloud storage requires admin setup. Using local storage (max 1MB) for now.');
+      } else if (errorMessage.includes('Failed to fetch') || errorMessage.includes('Network')) {
+        toast.warning('Network issue connecting to cloud storage. Using local storage (max 1MB).');
       } else {
         toast.warning('Cloud storage not available. Logo uploads will use local storage (max 1MB).');
       }
