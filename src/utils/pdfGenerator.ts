@@ -1105,9 +1105,9 @@ export const generatePDF = async (data: DocumentData) => {
 
           ${data.customTitle === 'INVOICE' ? `
           <!-- Stamp for Invoice -->
-          <div style="margin-top: 20px; padding-top: 12px; display: flex; justify-content: flex-end; margin-left: 15mm; margin-right: 15mm;">
-            <div style="text-align: center; width: 44mm;">
-              <img src="${data.stampImageUrl || stampImage}" alt="Stamp" style="width: 44mm; height: 44mm; object-fit: contain;" />
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; display: flex; justify-content: center;">
+            <div style="text-align: center; width: 60mm;">
+              <img src="${data.stampImageUrl || stampImage}" alt="Company Stamp" style="width: 60mm; height: 60mm; object-fit: contain;" />
             </div>
           </div>
           ` : ''}
