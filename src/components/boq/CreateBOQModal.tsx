@@ -243,6 +243,8 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
 
     setSubmitting(true);
     try {
+      const filledSections = getFilledItems();
+
       const doc: BoqDocument = {
         number: boqNumber,
         date: boqDate,
@@ -257,7 +259,7 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
         },
         contractor: contractor || undefined,
         project_title: projectTitle || undefined,
-        sections: sections.map(s => ({
+        sections: filledSections.map(s => ({
           title: s.title || undefined,
           subsections: s.subsections.map(sub => ({
             name: sub.name,
