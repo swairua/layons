@@ -575,7 +575,7 @@ const generatePDFHeader = (
     <!-- Header Section -->
     <div class="header">
       <!-- Full-width header image -->
-      <img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />
+      ${headerImage ? `<img src="${headerImage}" alt="Layons Construction Limited" class="header-image" />` : ''}
 
       <!-- Header content below image -->
       <div class="header-content" style="display: flex; flex-direction: column; gap: 8px; margin-top: 2px; margin-bottom: 8px;">
@@ -639,6 +639,11 @@ const generatePDFHeader = (
 };
 
 export const generatePDF = async (data: DocumentData) => {
+  console.log('🎨 generatePDF called');
+  console.log('📄 Document type:', data.type);
+  console.log('📋 Items count:', data.items?.length || 0);
+  console.log('📑 Sections count:', data.sections?.length || 0);
+  console.log('💰 Total amount:', data.total_amount);
 
   // Extract theme color variables from the main document so PDFs match the app theme
   const computed = typeof window !== 'undefined' ? getComputedStyle(document.documentElement) : null;
@@ -660,6 +665,10 @@ export const generatePDF = async (data: DocumentData) => {
   // Get header and stamp images with fallbacks
   const headerImage = company.header_image || DEFAULT_COMPANY.header_image;
   const stampImage = company.stamp_image || DEFAULT_COMPANY.stamp_image;
+
+  console.log('🖼️ Header Image:', headerImage);
+  console.log('🔖 Stamp Image:', stampImage);
+  console.log('📋 Company data:', company);
 
   // Analyze which columns have values
   const visibleColumns = analyzeColumns(data.items);
@@ -1800,9 +1809,9 @@ export const generatePDF = async (data: DocumentData) => {
         </div>
 
         <!-- Stamp Section -->
-        <div class="stamp-section" style="display:flex; justify-content:center; margin:40px 0 24px 0;">
+        ${stampImage ? `<div class="stamp-section" style="display:flex; justify-content:center; margin:40px 0 24px 0;">
           <img src="${stampImage}" alt="Company Stamp" style="width: 44mm; height: 44mm; object-fit:contain;" />
-        </div>
+        </div>` : ''}
       </div>
     `;
 
@@ -3305,6 +3314,10 @@ export const generatePDF = async (data: DocumentData) => {
 
 // Specific function for invoice PDF generation
 export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' | 'PROFORMA' = 'INVOICE', company?: CompanyDetails) => {
+  console.log('🎯 downloadInvoicePDF called for:', invoice.invoice_number);
+  console.log('📊 Raw invoice_items count:', invoice.invoice_items?.length || 0);
+  console.log('📊 Raw invoice_items:', invoice.invoice_items);
+
   const items = invoice.invoice_items?.map((item: any) => {
     const quantity = Number(item.quantity || 0);
     const unitPrice = Number(item.unit_price || 0);
@@ -3329,8 +3342,12 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
     };
   }) || [];
 
+  console.log('✅ Mapped items count:', items.length);
+  console.log('✅ Mapped items:', items);
+
   // Check if items have sections
   const hasSections = items.some((item: any) => item.section_name);
+  console.log('🔍 Has sections:', hasSections);
 
   let documentData: DocumentData;
 

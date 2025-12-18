@@ -152,6 +152,7 @@ export const useInvoicesFixed = (companyId?: string) => {
               console.error('Error fetching invoice items (non-fatal):', (error as any)?.message || error);
             } else if (data) {
               invoiceItems = data;
+              console.log('✅ Invoice items fetched:', invoiceItems.length);
             }
           }
         } catch (err) {
@@ -180,7 +181,10 @@ export const useInvoicesFixed = (companyId?: string) => {
           invoice_items: itemsMap.get(invoice.id) || []
         }));
 
-        console.log('Invoices enriched successfully:', enrichedInvoices.length);
+        console.log('✅ Invoices enriched successfully:', enrichedInvoices.length);
+        enrichedInvoices.forEach(inv => {
+          console.log(`  📦 Invoice ${inv.invoice_number}: ${inv.invoice_items.length} items`);
+        });
         return enrichedInvoices;
 
       } catch (error) {
