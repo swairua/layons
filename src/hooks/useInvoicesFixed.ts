@@ -14,6 +14,14 @@ export const useInvoicesFixed = (companyId?: string) => {
       try {
         console.log('Fetching invoices for company:', companyId);
 
+        // Check authentication status
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.warn('No active session - user may not be authenticated');
+          throw new Error('Authentication required: No active session');
+        }
+        console.log('✅ Session verified for user:', session.user?.email);
+
         // Step 1: Get invoices without embedded relationships
         // Note: Use paid_amount and balance_due as per the database schema
         const { data: invoices, error: invoicesError } = await supabase
@@ -42,7 +50,12 @@ export const useInvoicesFixed = (companyId?: string) => {
 
         if (invoicesError) {
           const errorMsg = invoicesError?.message || JSON.stringify(invoicesError);
-          console.error('Error fetching invoices:', errorMsg);
+          console.error('Error fetching invoices from Supabase:', {
+            message: errorMsg,
+            code: (invoicesError as any)?.code,
+            status: (invoicesError as any)?.status,
+            fullError: invoicesError
+          });
           throw new Error(`Failed to fetch invoices: ${errorMsg}`);
         }
 
