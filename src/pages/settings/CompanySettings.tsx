@@ -328,22 +328,9 @@ export default function CompanySettings() {
     const ext = fileNameParts.length > 1 ? fileNameParts.pop() : 'png';
     const filePath = `company-${companyId}/logo-${Date.now()}.${ext}`;
 
-    // Check if storage is available by listing buckets first
-    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-
-    if (bucketsError) {
-      // Handle RLS permission errors specifically
-      if (bucketsError.message.includes('row-level security') ||
-          bucketsError.message.includes('permission') ||
-          bucketsError.message.includes('policy')) {
-        throw new Error('Cloud storage requires admin permissions. Please use local storage or contact your administrator.');
-      }
-      throw new Error(`Storage not available: ${bucketsError.message}`);
-    }
-
     const bucketName = import.meta.env.VITE_COMPANY_LOGO_BUCKET || 'company-logos';
 
-    // Upload the file directly to configured bucket
+    // Upload the file directly to configured bucket (skip bucket listing as it requires admin)
     const { data: uploadData, error: uploadError } = await supabase
       .storage
       .from(bucketName)
@@ -360,13 +347,19 @@ export default function CompanySettings() {
           uploadError.message.includes('policy')) {
         throw new Error('You don\'t have permission to upload to cloud storage. Please use local storage or contact your administrator.');
       }
+      // Catch network errors and bucket not found errors
+      if (uploadError.message.includes('Failed to fetch') ||
+          uploadError.message.includes('does not exist') ||
+          uploadError.message.includes('Not Found')) {
+        throw new Error('Cloud storage bucket not found or not accessible. Using local storage instead.');
+      }
       throw new Error(`Upload failed: ${uploadError.message}`);
     }
 
     // Get public URL
     const { data: publicUrlData } = supabase
       .storage
-      .from(import.meta.env.VITE_COMPANY_LOGO_BUCKET || 'company-logos')
+      .from(bucketName)
       .getPublicUrl(filePath);
 
     if (!publicUrlData.publicUrl) {
