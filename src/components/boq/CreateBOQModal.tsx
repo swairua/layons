@@ -245,6 +245,16 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
     try {
       const filledSections = getFilledItems();
 
+      // Calculate subtotal from filled items only
+      let filledSubtotal = 0;
+      filledSections.forEach(sec => {
+        sec.subsections.forEach(sub => {
+          sub.items.forEach(item => {
+            filledSubtotal += (item.quantity || 0) * (item.rate || 0);
+          });
+        });
+      });
+
       const doc: BoqDocument = {
         number: boqNumber,
         date: boqDate,
