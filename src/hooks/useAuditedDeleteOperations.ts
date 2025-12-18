@@ -289,13 +289,22 @@ export function useAuditedDeleteOperations() {
     return useMutation({
       mutationFn: async (id: string) => {
         // Fetch BOQ before deletion for audit
-        const { data: boq } = await supabase
+        const { data: boq, error: fetchError } = await supabase
           .from('boqs')
           .select('*')
           .eq('id', id)
           .single();
 
-        if (boq?.converted_to_invoice_id) {
+        if (fetchError) {
+          console.error('Error fetching BOQ for deletion:', fetchError);
+          throw new Error(`Could not verify BOQ status: ${fetchError.message}`);
+        }
+
+        if (!boq) {
+          throw new Error('BOQ not found');
+        }
+
+        if (boq.converted_to_invoice_id) {
           throw new Error(`Cannot delete BOQ ${boq.number}: It has been converted to an invoice. Please delete the invoice first if you really need to delete this BOQ.`);
         }
 
@@ -306,12 +315,17 @@ export function useAuditedDeleteOperations() {
           whereValue: id,
           entityType: 'BOQ',
           entityId: id,
-          entityName: boq?.number,
+          entityName: boq.number,
           deletedData: boq,
           companyId,
         });
 
         if (!result.success) {
+          // If it's a foreign key error, provide a better message
+          const errorMsg = result.error?.message || '';
+          if (errorMsg.includes('foreign key') || errorMsg.includes('violates foreign key constraint')) {
+            throw new Error(`Cannot delete BOQ ${boq.number}: It is referenced by other records (e.g. invoices). Please remove those references first.`);
+          }
           throw result.error || new Error('Failed to delete BOQ');
         }
 
