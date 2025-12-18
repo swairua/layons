@@ -105,6 +105,13 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
   const [sections, setSections] = useState<BOQSectionRow[]>([defaultSection()]);
   const [submitting, setSubmitting] = useState(false);
 
+  // Update BOQ number when modal opens or when available BOQs change
+  useEffect(() => {
+    if (open) {
+      setBoqNumber(defaultNumber);
+    }
+  }, [open, defaultNumber]);
+
   const selectedClient = useMemo(() => customers.find(c => c.id === clientId), [customers, clientId]);
 
   const addSection = () => {
