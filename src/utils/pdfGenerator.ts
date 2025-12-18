@@ -582,7 +582,7 @@ const generatePDFHeader = (
         <!-- Top row: Services (left) and Company details (right) -->
         <div class="header-top" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; width: calc(100% + 12mm); margin-right: -12mm; box-sizing: border-box; min-width: 0;">
           <!-- Services Section -->
-          <div class="services-section" style="font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 auto; box-sizing: border-box; min-width: 0;">
+          <div class="services-section" style="font-size: 12px; font-weight: bold; color: #000; line-height: 1.6; text-align: left; flex: 0 1 auto; box-sizing: border-box; min-width: 0;">
             ${(() => {
               const services = companyServices.split(/[\n,]/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
               const itemsPerLine = Math.ceil(services.length / 3);
@@ -905,7 +905,7 @@ export const generatePDF = async (data: DocumentData) => {
         .header-image { width: 100%; max-height: 150px; height: auto; object-fit: contain; display: block; margin: 0; padding: 0; box-sizing: border-box; }
         .header-content { display: flex; flex-direction: column; gap: 12px; margin-top: 6px; width: 100%; padding: 0 15mm; box-sizing: border-box; page-break-inside: avoid; }
         .header-top { display: flex; align-items: flex-start; width: 100%; margin: 0 0 10px 0; padding: 0; gap: 20px; box-sizing: border-box; min-width: 0; }
-        .services-section { display: block; font-size: 12px; font-weight: bold; color: #333; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0; }
+        .services-section { display: block; font-size: 12px; font-weight: bold; color: #000; line-height: 1.6; text-align: left; flex: 0 1 50%; box-sizing: border-box; min-width: 0; }
         .services-section > div { margin: 0 0 4px 0; }
         .services-section > div:last-child { margin-bottom: 0; }
         .header-right { display: block; text-align: right; font-size: 12px; line-height: 1.6; flex: 0 0 auto; padding: 0; margin: 0; box-sizing: border-box; }
@@ -958,7 +958,7 @@ export const generatePDF = async (data: DocumentData) => {
         .footer { margin-top:8mm; display:flex; flex-direction:column; gap:6mm; padding: 0 15mm; page-break-inside: avoid; }
         .sig-block { display:flex; flex-direction:column; gap:8px; }
         .sig-title { font-weight:700; font-size: 11px; }
-        .sig-role { font-weight:600; font-size: 10px; color: #666; }
+        .sig-role { font-weight:600; font-size: 10px; color: #000; }
         .sigline { height:18px; border-bottom:1px solid #333; margin-top: 8px; }
         .field-row { display:flex; align-items:flex-end; gap:10px; }
         .field-row .label { width:100px; font-weight:600; font-size: 10px; }
@@ -1111,9 +1111,9 @@ export const generatePDF = async (data: DocumentData) => {
         <!-- Terms Section -->
         <div style="margin-bottom: 15px; page-break-inside: avoid;">
           <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
-          <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
+          <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #000;">
             <li style="margin-bottom: 6px; page-break-inside: avoid;">The Payment terms for each stage are as follows;
-              <ul style="display: block; width: 100%; clear: both; font-size: 11px; line-height: 1.6; margin: 12px 0 6px 0; padding-left: 40px; color: #333; list-style-type: lower-alpha;">
+              <ul style="display: block; width: 100%; clear: both; font-size: 11px; line-height: 1.6; margin: 12px 0 6px 0; padding-left: 40px; color: #000; list-style-type: lower-alpha;">
                 <li style="margin-bottom: 4px;">50% Upon Order (${formatCurrency(grandTotalForBOQ * 0.5)})</li>
                 <li style="margin-bottom: 4px;">40% As Progressive (${formatCurrency(grandTotalForBOQ * 0.4)})</li>
                 <li style="margin-bottom: 4px;">10% Upon Completion (${formatCurrency(grandTotalForBOQ * 0.1)})</li>
@@ -1130,12 +1130,12 @@ export const generatePDF = async (data: DocumentData) => {
         <!-- Acceptance of Quote Section -->
         <div style="margin-bottom: 12px; padding-top: 8px; page-break-inside: avoid;">
           <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Acceptance of Quote;</h3>
-          <p style="font-size: 10px; margin: 0; color: #333;">The above prices specifications and terms are satisfactory.</p>
+          <p style="font-size: 10px; margin: 0; color: #000;">The above prices specifications and terms are satisfactory.</p>
         </div>
 
         <!-- Contractor Section -->
         <div style="margin-bottom: 10px; padding-top: 6px; page-break-inside: avoid;">
-          <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #333; border: none;">
+          <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #000; border: none;">
             <tr style="border: none;">
               <td style="width: 30%; border: none;"><strong>Contractor;</strong></td>
               <td style="width: 70%; border: none;">${company.name}</td>
@@ -1153,7 +1153,7 @@ export const generatePDF = async (data: DocumentData) => {
 
         <!-- Client Section -->
         <div style="margin-bottom: 10px; padding-top: 6px; page-break-inside: avoid;">
-          <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #333; border: none;">
+          <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #000; border: none;">
             <tr style="border: none;">
               <td style="width: 30%; border: none; vertical-align: top;"><strong>Client;</strong></td>
               <td style="width: 70%; border: none;">
@@ -1171,7 +1171,7 @@ export const generatePDF = async (data: DocumentData) => {
 
         <!-- Prepaired By Section -->
         <div style="margin-bottom: 8px; padding-top: 4px; page-break-inside: avoid;">
-          <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #333; border: none;">
+          <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #000; border: none;">
             <tr style="border: none;">
               <td style="width: 30%; border: none;"><strong>PREPAIRED BY;</strong></td>
               <td style="width: 70%; border: none;">${company.name}</td>
@@ -1183,7 +1183,7 @@ export const generatePDF = async (data: DocumentData) => {
         <div style="margin-top: 8px; padding-top: 4px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; page-break-inside: avoid;">
           <div style="flex: 1;">
             <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Account Details;</h3>
-            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
+            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #000; border: none;">
             <tr style="border: none;">
               <td style="width: 30%; border: none;"><strong>BANK;</strong></td>
               <td style="width: 70%; border: none;">CO-OPERATIVE BANK OF KENYA</td>
@@ -1814,9 +1814,9 @@ export const generatePDF = async (data: DocumentData) => {
           <!-- Terms Section -->
           <div style="margin-bottom: 15px;">
             <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
-            <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
+            <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #000;">
               <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
-                <ul style="display: block; width: 100%; clear: both; font-size: 11px; line-height: 1.6; margin: 12px 0 6px 0; padding-left: 40px; color: #333; list-style-type: lower-alpha;">
+                <ul style="display: block; width: 100%; clear: both; font-size: 11px; line-height: 1.6; margin: 12px 0 6px 0; padding-left: 40px; color: #000; list-style-type: lower-alpha;">
                   <li style="margin-bottom: 4px;">50% Upon Order (${formatCurrency(grandTotal * 0.5)})</li>
                   <li style="margin-bottom: 4px;">40% As Progressive (${formatCurrency(grandTotal * 0.4)})</li>
                   <li style="margin-bottom: 4px;">10% Upon Completion (${formatCurrency(grandTotal * 0.1)})</li>
@@ -1833,12 +1833,12 @@ export const generatePDF = async (data: DocumentData) => {
           <!-- Acceptance of Quote Section -->
           <div style="margin-bottom: 12px; padding-top: 8px;">
             <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Acceptance of Quote;</h3>
-            <p style="font-size: 10px; margin: 0; color: #333;">The above prices specifications and terms are satisfactory.</p>
+            <p style="font-size: 10px; margin: 0; color: #000;">The above prices specifications and terms are satisfactory.</p>
           </div>
 
           <!-- Contractor Section -->
           <div style="margin-bottom: 10px; padding-top: 6px;">
-            <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #333; border: none;">
+            <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #000; border: none;">
               <tr style="border: none;">
                 <td style="width: 30%; border: none;"><strong>Contractor;</strong></td>
                 <td style="width: 70%; border: none;">${company.name}</td>
@@ -1856,7 +1856,7 @@ export const generatePDF = async (data: DocumentData) => {
 
           <!-- Client Section with Stamp -->
           <div style="margin-bottom: 10px; padding-top: 6px; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-            <table style="font-size: 10px; flex: 1; line-height: 1.6; color: #333; border: none;">
+            <table style="font-size: 10px; flex: 1; line-height: 1.6; color: #000; border: none;">
               <tr style="border: none;">
                 <td style="width: 40%; border: none;"><strong>Client;</strong></td>
                 <td style="width: 60%; border: none;">________________________</td>
@@ -1873,7 +1873,7 @@ export const generatePDF = async (data: DocumentData) => {
 
           <!-- Prepaired By Section -->
           <div style="margin-bottom: 8px; padding-top: 4px;">
-            <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #333; border: none;">
+            <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #000; border: none;">
               <tr style="border: none;">
                 <td style="width: 30%; border: none;"><strong>PREPAIRED BY;</strong></td>
                 <td style="width: 70%; border: none;">${company.name}</td>
@@ -1884,7 +1884,7 @@ export const generatePDF = async (data: DocumentData) => {
           <!-- Account Details Section -->
           <div style="margin-top: 8px; padding-top: 4px;">
             <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Account Details;</h3>
-            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
+            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #000; border: none;">
               <tr style="border: none;">
                 <td style="width: 30%; border: none;"><strong>BANK;</strong></td>
                 <td style="width: 70%; border: none;">CO-OPERATIVE BANK OF KENYA</td>
@@ -1945,7 +1945,7 @@ export const generatePDF = async (data: DocumentData) => {
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            color: #333;
+            color: #000;
             line-height: 1.4;
             font-size: 12px;
             background: white;
@@ -2087,12 +2087,12 @@ export const generatePDF = async (data: DocumentData) => {
             font-size: 18px;
             font-weight: bold;
             margin-bottom: 8px;
-            color: #212529;
+            color: #000;
           }
 
           .company-details {
             font-size: 10px;
-            color: #666;
+            color: #000;
             line-height: 1.6;
           }
 
@@ -2122,13 +2122,13 @@ export const generatePDF = async (data: DocumentData) => {
 
           .document-details .label {
             font-weight: bold;
-            color: #495057;
+            color: #000;
             width: 40%;
           }
 
           .document-details .value {
             text-align: right;
-            color: #212529;
+            color: #000;
           }
 
           .section-title {
@@ -2151,11 +2151,11 @@ export const generatePDF = async (data: DocumentData) => {
             font-size: 16px;
             font-weight: bold;
             margin-bottom: 8px;
-            color: #212529;
+            color: #000;
           }
 
           .customer-details {
-            color: #666;
+            color: #000;
             line-height: 1.6;
           }
 
@@ -2290,14 +2290,14 @@ export const generatePDF = async (data: DocumentData) => {
 
           .totals-table .label {
             text-align: left;
-            color: #495057;
+            color: #000;
             font-weight: 500;
           }
 
           .totals-table .amount {
             text-align: right;
             font-weight: 600;
-            color: #212529;
+            color: #000;
           }
 
           .totals-table .total-row {
@@ -2406,7 +2406,7 @@ export const generatePDF = async (data: DocumentData) => {
           font-family: 'Arial', sans-serif;
           margin: 0;
           padding: 0;
-          color: #333;
+          color: #000;
           line-height: 1.4;
           font-size: 12px;
           background: white;
@@ -2483,7 +2483,7 @@ export const generatePDF = async (data: DocumentData) => {
           display: block;
           font-size: 12px;
           font-weight: bold;
-          color: #333;
+          color: #000;
           line-height: 1.6;
           text-align: left;
           flex: 0 1 50%;
@@ -2577,7 +2577,7 @@ export const generatePDF = async (data: DocumentData) => {
 
         .client-details-table td.value {
           width: 75%;
-          color: #212529;
+          color: #000;
         }
 
         .logo {
@@ -2619,13 +2619,13 @@ export const generatePDF = async (data: DocumentData) => {
 
         .document-details .label {
           font-weight: bold;
-          color: #495057;
+          color: #000;
           width: 50%;
         }
 
         .document-details .value {
           text-align: left;
-          color: #212529;
+          color: #000;
         }
         
         
@@ -2643,11 +2643,11 @@ export const generatePDF = async (data: DocumentData) => {
           font-size: 16px;
           font-weight: bold;
           margin-bottom: 8px;
-          color: #212529;
+          color: #000;
         }
 
         .customer-details {
-          color: #666;
+          color: #000;
           line-height: 1.6;
         }
 
@@ -2750,14 +2750,14 @@ export const generatePDF = async (data: DocumentData) => {
         
         .totals-table .label {
           text-align: left;
-          color: #495057;
+          color: #000;
           font-weight: 500;
         }
         
         .totals-table .amount {
           text-align: right;
           font-weight: 600;
-          color: #212529;
+          color: #000;
         }
         
         .totals-table .subtotal-row {
@@ -2789,7 +2789,7 @@ export const generatePDF = async (data: DocumentData) => {
           right: 20mm;
           text-align: center;
           font-size: 10px;
-          color: #666;
+          color: #000;
           border-top: 1px solid #e9ecef;
           padding-top: 15px;
         }
@@ -2831,7 +2831,7 @@ export const generatePDF = async (data: DocumentData) => {
 
         .field-value {
           font-size: 11px;
-          color: #333;
+          color: #000;
           line-height: 1.4;
           word-wrap: break-word;
         }
@@ -2863,7 +2863,7 @@ export const generatePDF = async (data: DocumentData) => {
         .signature-line {
           font-size: 10px;
           font-weight: bold;
-          color: #333;
+          color: #000;
           border-bottom: 1px solid #333;
           margin-bottom: 4px;
           padding-bottom: 2px;
@@ -2872,7 +2872,7 @@ export const generatePDF = async (data: DocumentData) => {
 
         .signature-date {
           font-size: 10px;
-          color: #666;
+          color: #000;
         }
 
         .watermark {
@@ -2920,7 +2920,7 @@ export const generatePDF = async (data: DocumentData) => {
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
           }
         }
-        \n        .payment-banner {\n          background: #f8f9fa;\n          padding: 8px 15px;\n          margin-bottom: 20px;\n          border-left: 4px solid hsl(var(--primary));\n          font-size: 10px;\n          color: #333;\n          text-align: center;\n          border-radius: 4px;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          background: #f8f9fa;\n          padding: 10px;\n          margin: 15px 0;\n          border-left: 4px solid hsl(var(--primary));\n          font-size: 10px;\n          color: #333;\n          text-align: center;\n          border-radius: 4px;\n          font-weight: 600;\n        }\n      </style>
+        \n        .payment-banner {\n          background: #f8f9fa;\n          padding: 8px 15px;\n          margin-bottom: 20px;\n          border-left: 4px solid hsl(var(--primary));\n          font-size: 10px;\n          color: #000;\n          text-align: center;\n          border-radius: 4px;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          background: #f8f9fa;\n          padding: 10px;\n          margin: 15px 0;\n          border-left: 4px solid hsl(var(--primary));\n          font-size: 10px;\n          color: #000;\n          text-align: center;\n          border-radius: 4px;\n          font-weight: 600;\n        }\n      </style>
     </head>
     <body>
       <div class="page">
@@ -3183,9 +3183,9 @@ export const generatePDF = async (data: DocumentData) => {
           <!-- Terms Section -->
           <div style="margin-bottom: 15px;">
             <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
-            <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #333;">
+            <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #000;">
               <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
-                <ul style="display: block; width: 100%; clear: both; font-size: 11px; line-height: 1.6; margin: 12px 0 6px 0; padding-left: 40px; color: #333; list-style-type: lower-alpha;">
+                <ul style="display: block; width: 100%; clear: both; font-size: 11px; line-height: 1.6; margin: 12px 0 6px 0; padding-left: 40px; color: #000; list-style-type: lower-alpha;">
                   <li style="margin-bottom: 4px;">50% Upon Order (${formatCurrency(data.total_amount * 0.5)})</li>
                   <li style="margin-bottom: 4px;">40% As Progressive (${formatCurrency(data.total_amount * 0.4)})</li>
                   <li style="margin-bottom: 4px;">10% Upon Completion (${formatCurrency(data.total_amount * 0.1)})</li>
@@ -3202,12 +3202,12 @@ export const generatePDF = async (data: DocumentData) => {
           <!-- Acceptance of Quote Section -->
           <div style="margin-bottom: 12px; padding-top: 8px;">
             <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Acceptance of Quote;</h3>
-            <p style="font-size: 10px; margin: 0; color: #333;">The above prices specifications and terms are satisfactory.</p>
+            <p style="font-size: 10px; margin: 0; color: #000;">The above prices specifications and terms are satisfactory.</p>
           </div>
 
           <!-- Contractor Section -->
           <div style="margin-bottom: 10px; padding-top: 6px;">
-            <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #333; border: none;">
+            <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #000; border: none;">
               <tr style="border: none;">
                 <td style="width: 30%; border: none;"><strong>Contractor;</strong></td>
                 <td style="width: 70%; border: none;">${company.name}</td>
@@ -3225,7 +3225,7 @@ export const generatePDF = async (data: DocumentData) => {
 
           <!-- Client Section with Stamp -->
           <div style="margin-bottom: 10px; padding-top: 6px; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-            <table style="font-size: 10px; flex: 1; line-height: 1.6; color: #333; border: none;">
+            <table style="font-size: 10px; flex: 1; line-height: 1.6; color: #000; border: none;">
               <tr style="border: none;">
                 <td style="width: 40%; border: none;"><strong>Client;</strong></td>
                 <td style="width: 60%; border: none;">________________________</td>
@@ -3242,7 +3242,7 @@ export const generatePDF = async (data: DocumentData) => {
 
           <!-- Prepaired By Section -->
           <div style="margin-bottom: 8px; padding-top: 4px;">
-            <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #333; border: none;">
+            <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #000; border: none;">
               <tr style="border: none;">
                 <td style="width: 30%; border: none;"><strong>PREPAIRED BY;</strong></td>
                 <td style="width: 70%; border: none;">${company.name}</td>
@@ -3253,7 +3253,7 @@ export const generatePDF = async (data: DocumentData) => {
           <!-- Account Details Section -->
           <div style="margin-top: 8px; padding-top: 4px;">
             <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Account Details;</h3>
-            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #333; border: none;">
+            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #000; border: none;">
               <tr style="border: none;">
                 <td style="width: 30%; border: none;"><strong>BANK;</strong></td>
                 <td style="width: 70%; border: none;">CO-OPERATIVE BANK OF KENYA</td>
