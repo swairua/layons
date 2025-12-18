@@ -21,10 +21,11 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Trash2, Calculator, Layers } from 'lucide-react';
-import { useCompanies, useCustomers, useUnits } from '@/hooks/useDatabase';
+import { useCompanies, useCustomers, useUnits, useBOQs } from '@/hooks/useDatabase';
 import { CreateUnitModal } from '@/components/units/CreateUnitModal';
 import { toast } from 'sonner';
 import { downloadBOQPDF, BoqDocument } from '@/utils/boqPdfGenerator';
+import { generateNextBOQNumber } from '@/utils/boqNumberGenerator';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
