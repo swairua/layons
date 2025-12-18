@@ -505,7 +505,7 @@ export default function BOQs() {
                 city: 'Bonn',
                 country: 'Germany'
               },
-              stampImageUrl: 'https://cdn.builder.io/api/v1/image/assets%2Ff04fab3fe283460ba50093ba53a92dcd%2Fd301f7401e654be39b50f49bc704c240?format=webp&width=800',
+              stampImageUrl: 'https://cdn.builder.io/api/v1/image/assets%2F431212e7a441426cb89fb9ab85eaab25%2F3742605378df401d9078c76d81877fea?format=webp&width=800',
               specialPaymentPercentage: data.percentage
             });
           }}
