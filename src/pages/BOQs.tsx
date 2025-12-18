@@ -10,8 +10,9 @@ import { ChangePercentageRateModal } from '@/components/boq/ChangePercentageRate
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
-import { useBOQs, useDeleteBOQ, useUnits } from '@/hooks/useDatabase';
+import { useBOQs, useUnits } from '@/hooks/useDatabase';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { useAuditedDeleteOperations } from '@/hooks/useAuditedDeleteOperations';
 import { useConvertBoqToInvoice } from '@/hooks/useBOQ';
 import { downloadBOQPDF } from '@/utils/boqPdfGenerator';
 import { toast } from 'sonner';
@@ -24,7 +25,8 @@ export default function BOQs() {
   const { currentCompany } = useCurrentCompany();
   const companyId = currentCompany?.id;
   const { data: boqs = [], isLoading, refetch: refetchBOQs } = useBOQs(companyId);
-  const deleteBOQ = useDeleteBOQ();
+  const { useAuditedDeleteBOQ } = useAuditedDeleteOperations();
+  const deleteBOQ = useAuditedDeleteBOQ(companyId || '');
   const { data: units = [] } = useUnits(companyId);
   const { logDelete } = useAuditLog();
 

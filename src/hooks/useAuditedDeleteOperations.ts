@@ -302,7 +302,7 @@ export function useAuditedDeleteOperations() {
           whereValue: id,
           entityType: 'BOQ',
           entityId: id,
-          entityName: boq?.name,
+          entityName: boq?.number,
           deletedData: boq,
           companyId,
         });
