@@ -39,7 +39,7 @@ BEGIN
       v_entity_name := OLD.lpo_number;
       v_entity_number := OLD.lpo_number;
     WHEN 'boqs' THEN
-      v_entity_name := OLD.name;
+      v_entity_name := OLD.number;
     WHEN 'tax_settings' THEN
       v_entity_name := OLD.name;
   END CASE;
