@@ -84,8 +84,32 @@ export default function BOQs() {
       toast.success('BOQ deleted');
       setDeleteDialog({ open: false });
     } catch (err) {
-      console.error('Delete failed', err);
-      toast.error('Failed to delete BOQ');
+      let errorMessage = 'Failed to delete BOQ';
+
+      // Extract error message from various error types
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === 'object' && err !== null) {
+        // Handle Supabase error objects
+        if ('message' in err) {
+          errorMessage = String(err.message);
+        } else if ('details' in err) {
+          errorMessage = String(err.details);
+        } else {
+          errorMessage = JSON.stringify(err);
+        }
+      } else if (typeof err === 'string') {
+        errorMessage = err;
+      }
+
+      console.error('Delete failed:', errorMessage);
+
+      // Provide specific guidance for common errors
+      if (errorMessage.includes('foreign key') || errorMessage.includes('constraint')) {
+        errorMessage = 'Cannot delete BOQ: It has been converted to an invoice or has related records. Please delete related records first.';
+      }
+
+      toast.error(errorMessage);
     }
   };
 
@@ -280,7 +304,7 @@ export default function BOQs() {
         </CardContent>
       </Card>
 
-      <CreateBOQModal open={open} onOpenChange={setOpen} />
+      <CreateBOQModal open={open} onOpenChange={setOpen} onSuccess={() => refetchBOQs()} />
 
       <CreatePercentageCopyModal
         open={percentageCopyOpen}

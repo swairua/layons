@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,6 +32,7 @@ import { useAuth } from '@/contexts/AuthContext';
 interface CreateBOQModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 interface BOQItemRow {
@@ -79,7 +80,7 @@ const defaultSection = (): BOQSectionRow => ({
   ],
 });
 
-export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
+export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModalProps) {
   const { data: companies } = useCompanies();
   const currentCompany = companies?.[0];
   const { data: customers = [] } = useCustomers(currentCompany?.id);
@@ -104,6 +105,13 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
   const [currency, setCurrency] = useState(currentCompany?.currency || 'KES');
   const [sections, setSections] = useState<BOQSectionRow[]>([defaultSection()]);
   const [submitting, setSubmitting] = useState(false);
+
+  // Update BOQ number when modal opens or when available BOQs change
+  useEffect(() => {
+    if (open) {
+      setBoqNumber(defaultNumber);
+    }
+  }, [open, defaultNumber]);
 
   const selectedClient = useMemo(() => customers.find(c => c.id === clientId), [customers, clientId]);
 
@@ -331,6 +339,7 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
       } : undefined);
 
       toast.success(`BOQ ${boqNumber} generated and saved`);
+      onSuccess?.();
       onOpenChange(false);
     } catch (err) {
       console.error('Failed to generate BOQ PDF or save', err);
