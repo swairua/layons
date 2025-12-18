@@ -32,6 +32,7 @@ import { useAuth } from '@/contexts/AuthContext';
 interface CreateBOQModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 interface BOQItemRow {
