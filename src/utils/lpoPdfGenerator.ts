@@ -315,8 +315,8 @@ export const generateLPOPDF = (lpo: LPOPDFData, company?: CompanyData) => {
         }
         
         .stamp-image {
-          width: 38mm;
-          height: 38mm;
+          width: 42mm;
+          height: 42mm;
           object-fit: contain;
           margin-top: 10px;
         }

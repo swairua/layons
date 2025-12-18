@@ -614,7 +614,7 @@ export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: C
 
         <!-- Stamp Section -->
         <div style="display:flex; justify-content:center; margin:30px 0 24px 0;">
-          <img src="${stampImage}" alt="Company Stamp" style="width: 38mm; height: 38mm; object-fit: contain;" />
+          <img src="${stampImage}" alt="Company Stamp" style="width: 42mm; height: 42mm; object-fit: contain;" />
         </div>
 
         <!-- Footer -->

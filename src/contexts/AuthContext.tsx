@@ -364,39 +364,63 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setLoading(false);
           setInitialized(true);
           initializingRef.current = false;
+          console.log('🎉 Fast auth initialization completed - app started');
 
-          // Fetch profile in background (non-critical if it fails)
-      fetchProfile(quickSession.user.id)
+          // Fetch profile in background with timeout to prevent hanging
+          const profileTimeoutPromise = new Promise<UserProfile | null>((resolve) => {
+            setTimeout(() => {
+              console.warn('⏱️ Profile fetch timeout during quick auth');
+              resolve(null);
+            }, 5000); // 5 second timeout
+          });
+
+          Promise.race([
+            fetchProfile(quickSession.user.id),
+            profileTimeoutPromise
+          ])
             .then(userProfile => {
               if (mountedRef.current) {
-                // Set profile even if null - app should work with just the auth user
-                setProfile(userProfile || {
+                // Set the actual profile - this is crucial for admin/role checks
+                if (userProfile) {
+                  setProfile(userProfile);
+                  console.log('✅ Profile loaded successfully');
+
+                  // Update last login silently
+                  updateLastLogin(quickSession.user.id).catch(err =>
+                    logError('Update last login failed:', err, {
+                      userId: quickSession.user.id,
+                      context: 'quickAuth'
+                    })
+                  );
+                } else {
+                  // If fetch returned null, create minimal profile to allow app to work
+                  console.warn('⚠️ Profile fetch returned null, creating minimal profile');
+                  setProfile({
+                    id: quickSession.user.id,
+                    email: quickSession.user.email || '',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                  } as UserProfile);
+                }
+              }
+            })
+            .catch(profileError => {
+              logError('⚠️ Profile fetch failed:', profileError, {
+                userId: quickSession.user.id,
+                context: 'profileFetch'
+              });
+
+              // Create minimal profile to allow app to work
+              if (mountedRef.current) {
+                setProfile({
                   id: quickSession.user.id,
                   email: quickSession.user.email || '',
                   created_at: new Date().toISOString(),
                   updated_at: new Date().toISOString()
                 } as UserProfile);
-                console.log('✅ Profile loaded in background');
-
-                // Update last login silently
-                if (userProfile) {
-                  updateLastLogin(quickSession.user.id).catch(err =>
-                    logError('Background update last login failed:', err, {
-                      userId: quickSession.user.id,
-                      context: 'quickAuth'
-                    })
-                  );
-                }
               }
-            })
-            .catch(profileError => {
-              logError('⚠️ Background profile fetch failed:', profileError, {
-                userId: quickSession.user.id,
-                context: 'backgroundProfileFetch'
-              });
             });
 
-          console.log('🎉 Fast auth initialization completed successfully');
           return;
         }
 
@@ -539,34 +563,60 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return { error: formattedError as AuthError };
     }
 
-    // Immediately update auth state to avoid UI waiting for onAuthStateChange
+    // Immediately update auth state
     try {
       const session = (data as any)?.data?.session;
       const signedInUser = session?.user;
       if (signedInUser) {
         setSession(session);
         setUser(signedInUser);
-        // Fetch profile in background (non-critical if it fails)
-        fetchProfile(signedInUser.id).then(userProfile => {
-          setProfile(userProfile || {
-            id: signedInUser.id,
-            email: signedInUser.email || '',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          } as UserProfile);
-        }).catch(() => {
-          // Create minimal profile if fetch fails
-          setProfile({
-            id: signedInUser.id,
-            email: signedInUser.email || '',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          } as UserProfile);
-        });
-      }
-    } catch {}
 
-    setLoading(false);
+        // Set loading to false immediately, profile fetch happens in background
+        setLoading(false);
+
+        // Fetch profile in background with timeout to prevent hanging
+        const profileTimeoutPromise = new Promise<UserProfile | null>((resolve) => {
+          setTimeout(() => {
+            console.warn('⏱️ Profile fetch timeout');
+            resolve(null);
+          }, 5000); // 5 second timeout
+        });
+
+        Promise.race([
+          fetchProfile(signedInUser.id),
+          profileTimeoutPromise
+        ])
+          .then(userProfile => {
+            if (mountedRef.current) {
+              setProfile(userProfile || {
+                id: signedInUser.id,
+                email: signedInUser.email || '',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              } as UserProfile);
+            }
+          })
+          .catch((profileError) => {
+            // Create minimal profile if fetch fails
+            if (mountedRef.current) {
+              setProfile({
+                id: signedInUser.id,
+                email: signedInUser.email || '',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              } as UserProfile);
+            }
+            logError('Profile fetch failed after sign in:', profileError, {
+              userId: signedInUser.id,
+              context: 'signIn'
+            });
+          });
+      } else {
+        setLoading(false);
+      }
+    } catch {
+      setLoading(false);
+    }
     setTimeout(() => toast.success('Signed in successfully'), 0);
     return { error: null };
   }, []);
@@ -630,8 +680,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const { error } = await supabase.auth.signOut();
 
       if (error) {
-        logError('❌ Sign out error:', error, { context: 'signOut' });
-        setTimeout(() => toast.error('Error signing out'), 0);
+        // Better error message handling
+        let errorMsg = 'Error signing out';
+        if (error instanceof Error) {
+          errorMsg = error.message;
+        } else if (typeof error === 'string') {
+          errorMsg = error;
+        } else if (error && typeof error === 'object') {
+          const errObj = error as any;
+          errorMsg = errObj.message || errObj.error_description || JSON.stringify(error);
+        }
+
+        logError('❌ Sign out error:', errorMsg, { context: 'signOut' });
+
+        // Still clear local state on error - user may have network issues
+        setUser(null);
+        setProfile(null);
+        setSession(null);
+        clearAuthTokens();
+
+        setTimeout(() => toast.error(`Signed out locally (server error: ${errorMsg})`), 0);
       } else {
         console.log('✅ Supabase sign out successful');
 
@@ -647,8 +715,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log('🎉 Sign out complete!');
       }
     } catch (error) {
-      logError('❌ Sign out exception:', error, { context: 'signOut' });
-      setTimeout(() => toast.error('Error signing out'), 0);
+      // Handle network errors gracefully
+      let errorMsg = 'Unknown error';
+      if (error instanceof Error) {
+        errorMsg = error.message;
+      } else if (typeof error === 'string') {
+        errorMsg = error;
+      } else if (error && typeof error === 'object') {
+        const errObj = error as any;
+        errorMsg = errObj.message || errObj.error_description || String(error);
+      }
+
+      logError('❌ Sign out exception:', errorMsg, { context: 'signOut' });
+
+      // Clear local state anyway to allow user to proceed
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+      clearAuthTokens();
+
+      // Don't block the user from continuing
+      setTimeout(() => toast.info('Signed out locally (connection error)'), 0);
     } finally {
       if (mountedRef.current) {
         setLoading(false);
