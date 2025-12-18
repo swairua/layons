@@ -566,27 +566,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setSession(session);
         setUser(signedInUser);
 
-        // Fetch profile - CRITICAL for admin checks
-        fetchProfile(signedInUser.id)
+        // Set loading to false immediately, profile fetch happens in background
+        setLoading(false);
+
+        // Fetch profile in background with timeout to prevent hanging
+        const profileTimeoutPromise = new Promise<UserProfile | null>((resolve) => {
+          setTimeout(() => {
+            console.warn('⏱️ Profile fetch timeout');
+            resolve(null);
+          }, 5000); // 5 second timeout
+        });
+
+        Promise.race([
+          fetchProfile(signedInUser.id),
+          profileTimeoutPromise
+        ])
           .then(userProfile => {
-            setProfile(userProfile || {
-              id: signedInUser.id,
-              email: signedInUser.email || '',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            } as UserProfile);
+            if (mountedRef.current) {
+              setProfile(userProfile || {
+                id: signedInUser.id,
+                email: signedInUser.email || '',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              } as UserProfile);
+            }
           })
-          .catch(() => {
+          .catch((profileError) => {
             // Create minimal profile if fetch fails
-            setProfile({
-              id: signedInUser.id,
-              email: signedInUser.email || '',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            } as UserProfile);
-          })
-          .finally(() => {
-            setLoading(false);
+            if (mountedRef.current) {
+              setProfile({
+                id: signedInUser.id,
+                email: signedInUser.email || '',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              } as UserProfile);
+            }
+            logError('Profile fetch failed after sign in:', profileError, {
+              userId: signedInUser.id,
+              context: 'signIn'
+            });
           });
       } else {
         setLoading(false);
