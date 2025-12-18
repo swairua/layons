@@ -21,6 +21,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useBOQs } from '@/hooks/useDatabase';
 import { fetchBOQByNumber, createPercentageCopy, saveBOQCopy } from '@/utils/boqHelper';
+import { generateNextBOQNumber } from '@/utils/boqNumberGenerator';
 
 interface CreatePercentageCopyModalProps {
   open: boolean;
@@ -37,28 +38,24 @@ export function CreatePercentageCopyModal({
 }: CreatePercentageCopyModalProps) {
   const { profile } = useAuth();
   const { data: availableBOQs = [] } = useBOQs(companyId);
-  const [boqNumber, setBoqNumber] = useState('BOQ-20251124-1441');
+  const [boqNumber, setBoqNumber] = useState('');
   const [percentage, setPercentage] = useState(40);
   const [newBoqNumber, setNewBoqNumber] = useState('');
   const [loading, setLoading] = useState(false);
 
   const generateNewNumber = () => {
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const hh = String(d.getHours()).padStart(2, '0');
-    const mm = String(d.getMinutes()).padStart(2, '0');
-    const ss = String(d.getSeconds()).padStart(2, '0');
-    const newNum = `BOQ-${y}${m}${day}-${hh}${mm}${ss}`;
+    const newNum = generateNextBOQNumber(availableBOQs);
     setNewBoqNumber(newNum);
   };
 
   React.useEffect(() => {
     if (open) {
+      if (availableBOQs.length > 0 && !boqNumber) {
+        setBoqNumber(availableBOQs[0].number);
+      }
       generateNewNumber();
     }
-  }, [open]);
+  }, [open, availableBOQs]);
 
   const handleCreate = async () => {
     if (!boqNumber.trim()) {
@@ -156,7 +153,7 @@ export function CreatePercentageCopyModal({
                 id="source-boq"
                 value={boqNumber}
                 onChange={(e) => setBoqNumber(e.target.value)}
-                placeholder="e.g., BOQ-20251124-1441"
+                placeholder="e.g., BOQ-001"
               />
             )}
           </div>

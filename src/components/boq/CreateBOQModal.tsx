@@ -21,10 +21,11 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Trash2, Calculator, Layers } from 'lucide-react';
-import { useCompanies, useCustomers, useUnits } from '@/hooks/useDatabase';
+import { useCompanies, useCustomers, useUnits, useBOQs } from '@/hooks/useDatabase';
 import { CreateUnitModal } from '@/components/units/CreateUnitModal';
 import { toast } from 'sonner';
 import { downloadBOQPDF, BoqDocument } from '@/utils/boqPdfGenerator';
+import { generateNextBOQNumber } from '@/utils/boqNumberGenerator';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -83,6 +84,7 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
   const currentCompany = companies?.[0];
   const { data: customers = [] } = useCustomers(currentCompany?.id);
   const { data: units = [] } = useUnits(currentCompany?.id);
+  const { data: existingBOQs = [] } = useBOQs(currentCompany?.id);
   const { profile } = useAuth();
 
   const [unitModalOpen, setUnitModalOpen] = useState(false);
@@ -90,14 +92,8 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
 
   const todayISO = new Date().toISOString().split('T')[0];
   const defaultNumber = useMemo(() => {
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const hh = String(d.getHours()).padStart(2, '0');
-    const mm = String(d.getMinutes()).padStart(2, '0');
-    return `BOQ-${y}${m}${day}-${hh}${mm}`;
-  }, []);
+    return generateNextBOQNumber(existingBOQs);
+  }, [existingBOQs]);
 
   const [boqNumber, setBoqNumber] = useState(defaultNumber);
   const [boqDate, setBoqDate] = useState(todayISO);
@@ -205,13 +201,39 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
     return { subtotal };
   }, [sections]);
 
+  const isItemEmpty = (item: BOQItemRow): boolean => {
+    return !item.description.trim() && item.quantity === 1 && item.rate === 0;
+  };
+
+  const isItemPartiallyFilled = (item: BOQItemRow): boolean => {
+    const hasDescription = item.description.trim().length > 0;
+    const hasQuantity = item.quantity > 0;
+    const hasRate = item.rate >= 0;
+    const filledFields = [hasDescription, hasQuantity, hasRate].filter(Boolean).length;
+    return filledFields > 0 && filledFields < 3;
+  };
+
+  const getFilledItems = () => {
+    return sections.map(s => ({
+      ...s,
+      subsections: s.subsections.map(sub => ({
+        ...sub,
+        items: sub.items.filter(i => !isItemEmpty(i))
+      }))
+    }));
+  };
+
   const validate = () => {
     if (!clientId) { toast.error('Please select a client'); return false; }
     if (!boqNumber || !boqDate) { toast.error('BOQ number and date are required'); return false; }
-    const hasItems = sections.some(s => s.subsections.some(sub => sub.items.length > 0));
+
+    const filledSections = getFilledItems();
+    const hasItems = filledSections.some(s => s.subsections.some(sub => sub.items.length > 0));
     if (!hasItems) { toast.error('Add at least one item'); return false; }
-    const hasInvalid = sections.some(s => s.subsections.some(sub => sub.items.some(i => !i.description || i.quantity <= 0 || i.rate < 0)));
-    if (hasInvalid) { toast.error('Each item needs description, quantity > 0, and non-negative rate'); return false; }
+
+    const hasPartiallyFilled = filledSections.some(s => s.subsections.some(sub => sub.items.some(i => isItemPartiallyFilled(i))));
+    if (hasPartiallyFilled) { toast.error('Each item needs description, quantity > 0, and rate > 0'); return false; }
+
     return true;
   };
 
@@ -221,6 +243,18 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
 
     setSubmitting(true);
     try {
+      const filledSections = getFilledItems();
+
+      // Calculate subtotal from filled items only
+      let filledSubtotal = 0;
+      filledSections.forEach(sec => {
+        sec.subsections.forEach(sub => {
+          sub.items.forEach(item => {
+            filledSubtotal += (item.quantity || 0) * (item.rate || 0);
+          });
+        });
+      });
+
       const doc: BoqDocument = {
         number: boqNumber,
         date: boqDate,
@@ -235,7 +269,7 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
         },
         contractor: contractor || undefined,
         project_title: projectTitle || undefined,
-        sections: sections.map(s => ({
+        sections: filledSections.map(s => ({
           title: s.title || undefined,
           subsections: s.subsections.map(sub => ({
             name: sub.name,
@@ -270,9 +304,9 @@ export function CreateBOQModal({ open, onOpenChange }: CreateBOQModalProps) {
         contractor: contractor || null,
         project_title: projectTitle || null,
         currency: currency,
-        subtotal: totals.subtotal,
+        subtotal: filledSubtotal,
         tax_amount: 0,
-        total_amount: totals.subtotal,
+        total_amount: filledSubtotal,
         attachment_url: null,
         data: doc,
         created_by: profile?.id || null,
