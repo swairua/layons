@@ -2345,8 +2345,8 @@ export const generatePDF = async (data: DocumentData) => {
           }
 
           .stamp-section img {
-            max-width: 100px;
-            max-height: 100px;
+            max-width: 38mm;
+            max-height: 38mm;
             object-fit: contain;
           }
 
