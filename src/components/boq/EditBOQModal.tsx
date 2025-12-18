@@ -235,13 +235,39 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
     return { subtotal };
   }, [sections]);
 
+  const isItemEmpty = (item: BOQItemRow): boolean => {
+    return !item.description.trim() && item.quantity === 1 && item.rate === 0;
+  };
+
+  const isItemPartiallyFilled = (item: BOQItemRow): boolean => {
+    const hasDescription = item.description.trim().length > 0;
+    const hasQuantity = item.quantity > 0;
+    const hasRate = item.rate >= 0;
+    const filledFields = [hasDescription, hasQuantity, hasRate].filter(Boolean).length;
+    return filledFields > 0 && filledFields < 3;
+  };
+
+  const getFilledItems = () => {
+    return sections.map(s => ({
+      ...s,
+      subsections: s.subsections.map(sub => ({
+        ...sub,
+        items: sub.items.filter(i => !isItemEmpty(i))
+      }))
+    }));
+  };
+
   const validate = () => {
     if (!clientId) { toast.error('Please select a client'); return false; }
     if (!boqNumber || !boqDate) { toast.error('BOQ number and date are required'); return false; }
-    const hasItems = sections.some(s => s.subsections.some(sub => sub.items.length > 0));
+
+    const filledSections = getFilledItems();
+    const hasItems = filledSections.some(s => s.subsections.some(sub => sub.items.length > 0));
     if (!hasItems) { toast.error('Add at least one item'); return false; }
-    const hasInvalid = sections.some(s => s.subsections.some(sub => sub.items.some(i => !i.description || i.quantity <= 0 || i.rate < 0)));
-    if (hasInvalid) { toast.error('Each item needs description, quantity > 0, and non-negative rate'); return false; }
+
+    const hasPartiallyFilled = filledSections.some(s => s.subsections.some(sub => sub.items.some(i => isItemPartiallyFilled(i))));
+    if (hasPartiallyFilled) { toast.error('Each item needs description, quantity > 0, and rate > 0'); return false; }
+
     return true;
   };
 
