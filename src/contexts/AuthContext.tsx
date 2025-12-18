@@ -558,34 +558,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return { error: formattedError as AuthError };
     }
 
-    // Immediately update auth state to avoid UI waiting for onAuthStateChange
+    // Immediately update auth state
     try {
       const session = (data as any)?.data?.session;
       const signedInUser = session?.user;
       if (signedInUser) {
         setSession(session);
         setUser(signedInUser);
-        // Fetch profile in background (non-critical if it fails)
-        fetchProfile(signedInUser.id).then(userProfile => {
-          setProfile(userProfile || {
-            id: signedInUser.id,
-            email: signedInUser.email || '',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          } as UserProfile);
-        }).catch(() => {
-          // Create minimal profile if fetch fails
-          setProfile({
-            id: signedInUser.id,
-            email: signedInUser.email || '',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          } as UserProfile);
-        });
-      }
-    } catch {}
 
-    setLoading(false);
+        // Fetch profile - CRITICAL for admin checks
+        fetchProfile(signedInUser.id)
+          .then(userProfile => {
+            setProfile(userProfile || {
+              id: signedInUser.id,
+              email: signedInUser.email || '',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            } as UserProfile);
+          })
+          .catch(() => {
+            // Create minimal profile if fetch fails
+            setProfile({
+              id: signedInUser.id,
+              email: signedInUser.email || '',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            } as UserProfile);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      } else {
+        setLoading(false);
+      }
+    } catch {
+      setLoading(false);
+    }
     setTimeout(() => toast.success('Signed in successfully'), 0);
     return { error: null };
   }, []);
