@@ -21,6 +21,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useBOQs } from '@/hooks/useDatabase';
 import { fetchBOQByNumber, createPercentageCopy, saveBOQCopy } from '@/utils/boqHelper';
+import { generateNextBOQNumber } from '@/utils/boqNumberGenerator';
 
 interface CreatePercentageCopyModalProps {
   open: boolean;
