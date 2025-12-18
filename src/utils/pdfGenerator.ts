@@ -1787,7 +1787,7 @@ export const generatePDF = async (data: DocumentData) => {
 
         <!-- Stamp Section -->
         <div class="stamp-section" style="display:flex; justify-content:center; margin:40px 0 24px 0;">
-          <img src="${stampImage}" alt="Company Stamp" style="width: 100px; height: 100px; object-fit:contain;" />
+          <img src="${stampImage}" alt="Company Stamp" style="width: 38mm; height: 38mm; object-fit:contain;" />
         </div>
       </div>
     `;
@@ -3143,7 +3143,7 @@ export const generatePDF = async (data: DocumentData) => {
 
         <!-- Stamp Section (for all documents) -->
         <div class="stamp-section" style="display:flex; justify-content:center; margin:30px 0 24px 0;">
-          <img src="${stampImage}" alt="Company Stamp" style="width: 100px; height: 100px; object-fit:contain;" />
+          <img src="${stampImage}" alt="Company Stamp" style="width: 38mm; height: 38mm; object-fit:contain;" />
         </div>
 
         <!-- Footer (only for non-invoice/quotation types) -->
