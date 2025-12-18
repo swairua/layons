@@ -85,7 +85,18 @@ export default function BOQs() {
       setDeleteDialog({ open: false });
     } catch (err) {
       console.error('Delete failed', err);
-      toast.error('Failed to delete BOQ');
+
+      let errorMessage = 'Failed to delete BOQ';
+      if (err instanceof Error) {
+        errorMessage = err.message;
+
+        // Provide specific guidance for common errors
+        if (errorMessage.includes('foreign key') || errorMessage.includes('constraint')) {
+          errorMessage = 'Cannot delete BOQ: It has been converted to an invoice or has related records. Please delete related records first.';
+        }
+      }
+
+      toast.error(errorMessage);
     }
   };
 
