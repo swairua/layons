@@ -280,7 +280,7 @@ export default function BOQs() {
         </CardContent>
       </Card>
 
-      <CreateBOQModal open={open} onOpenChange={setOpen} />
+      <CreateBOQModal open={open} onOpenChange={setOpen} onSuccess={() => refetchBOQs()} />
 
       <CreatePercentageCopyModal
         open={percentageCopyOpen}
