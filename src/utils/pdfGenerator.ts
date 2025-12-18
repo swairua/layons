@@ -1148,13 +1148,20 @@ export const generatePDF = async (data: DocumentData) => {
 
         <!-- Client Section -->
         <div style="margin-bottom: 10px; padding-top: 6px; page-break-inside: avoid;">
-          <div style="font-size: 10px; color: #333; line-height: 1.6;">
-            <div style="margin-bottom: 8px;">
-              <strong>Client;</strong><br/>
-              ${data.customer.name}${data.customer.address ? '<br/>' + data.customer.address : ''}${data.customer.city ? '<br/>' + data.customer.city : ''}${data.customer.country ? '<br/>' + data.customer.country : ''}
-            </div>
-            ${data.customer.phone ? `<div><strong>Tel No;</strong><br/>${data.customer.phone}</div>` : ''}
-          </div>
+          <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #333; border: none;">
+            <tr style="border: none;">
+              <td style="width: 30%; border: none; vertical-align: top;"><strong>Client;</strong></td>
+              <td style="width: 70%; border: none;">
+                ${data.customer.name}${data.customer.address ? '<br/>' + data.customer.address : ''}${data.customer.city ? '<br/>' + data.customer.city : ''}${data.customer.country ? '<br/>' + data.customer.country : ''}
+              </td>
+            </tr>
+            ${data.customer.phone ? `
+            <tr style="border: none;">
+              <td style="width: 30%; border: none;"><strong>Tel No;</strong></td>
+              <td style="width: 70%; border: none;">${data.customer.phone}</td>
+            </tr>
+            ` : ''}
+          </table>
         </div>
 
         <!-- Prepaired By Section -->
