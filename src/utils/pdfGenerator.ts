@@ -639,6 +639,11 @@ const generatePDFHeader = (
 };
 
 export const generatePDF = async (data: DocumentData) => {
+  console.log('🎨 generatePDF called');
+  console.log('📄 Document type:', data.type);
+  console.log('📋 Items count:', data.items?.length || 0);
+  console.log('📑 Sections count:', data.sections?.length || 0);
+  console.log('💰 Total amount:', data.total_amount);
 
   // Extract theme color variables from the main document so PDFs match the app theme
   const computed = typeof window !== 'undefined' ? getComputedStyle(document.documentElement) : null;
