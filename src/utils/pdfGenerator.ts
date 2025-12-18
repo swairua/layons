@@ -666,6 +666,10 @@ export const generatePDF = async (data: DocumentData) => {
   const headerImage = company.header_image || DEFAULT_COMPANY.header_image;
   const stampImage = company.stamp_image || DEFAULT_COMPANY.stamp_image;
 
+  console.log('🖼️ Header Image:', headerImage);
+  console.log('🔖 Stamp Image:', stampImage);
+  console.log('📋 Company data:', company);
+
   // Analyze which columns have values
   const visibleColumns = analyzeColumns(data.items);
   const formatCurrency = (amount: number) => {
