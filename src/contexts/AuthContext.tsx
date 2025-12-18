@@ -657,8 +657,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const { error } = await supabase.auth.signOut();
 
       if (error) {
-        logError('❌ Sign out error:', error, { context: 'signOut' });
-        setTimeout(() => toast.error('Error signing out'), 0);
+        // Better error message handling
+        let errorMsg = 'Error signing out';
+        if (error instanceof Error) {
+          errorMsg = error.message;
+        } else if (typeof error === 'string') {
+          errorMsg = error;
+        } else if (error && typeof error === 'object') {
+          const errObj = error as any;
+          errorMsg = errObj.message || errObj.error_description || JSON.stringify(error);
+        }
+
+        logError('❌ Sign out error:', errorMsg, { context: 'signOut' });
+
+        // Still clear local state on error - user may have network issues
+        setUser(null);
+        setProfile(null);
+        setSession(null);
+        clearAuthTokens();
+
+        setTimeout(() => toast.error(`Signed out locally (server error: ${errorMsg})`), 0);
       } else {
         console.log('✅ Supabase sign out successful');
 
@@ -674,8 +692,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log('🎉 Sign out complete!');
       }
     } catch (error) {
-      logError('❌ Sign out exception:', error, { context: 'signOut' });
-      setTimeout(() => toast.error('Error signing out'), 0);
+      // Handle network errors gracefully
+      let errorMsg = 'Unknown error';
+      if (error instanceof Error) {
+        errorMsg = error.message;
+      } else if (typeof error === 'string') {
+        errorMsg = error;
+      } else if (error && typeof error === 'object') {
+        const errObj = error as any;
+        errorMsg = errObj.message || errObj.error_description || String(error);
+      }
+
+      logError('❌ Sign out exception:', errorMsg, { context: 'signOut' });
+
+      // Clear local state anyway to allow user to proceed
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+      clearAuthTokens();
+
+      // Don't block the user from continuing
+      setTimeout(() => toast.info('Signed out locally (connection error)'), 0);
     } finally {
       if (mountedRef.current) {
         setLoading(false);
