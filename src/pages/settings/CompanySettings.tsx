@@ -407,6 +407,11 @@ export default function CompanySettings() {
           toast.warning('Cloud storage bucket exists but access is restricted. Using local storage.');
           return;
         }
+        if (msg.includes('Failed to fetch') || msg.includes('Network')) {
+          setStorageStatus('unavailable');
+          toast.warning('Network issue connecting to cloud storage. Using local storage (max 1MB).');
+          return;
+        }
         // Any other error -> treat as unavailable but do not hard fail
         setStorageStatus('unavailable');
         toast.warning('Cloud storage not available. Using local storage.');
@@ -426,6 +431,8 @@ export default function CompanySettings() {
           errorMessage.includes('permission') ||
           errorMessage.includes('policy')) {
         toast.info('Cloud storage requires admin setup. Using local storage (max 1MB) for now.');
+      } else if (errorMessage.includes('Failed to fetch') || errorMessage.includes('Network')) {
+        toast.warning('Network issue connecting to cloud storage. Using local storage (max 1MB).');
       } else {
         toast.warning('Cloud storage not available. Logo uploads will use local storage (max 1MB).');
       }
