@@ -72,38 +72,42 @@ export async function performAuditedDelete(
       user_agent: options.userAgent || null,
     };
 
-    // Attempt to insert audit log; if insert fails due to schema differences (missing columns), retry with minimal payload
+    // Attempt to insert audit log; if insert fails, log but continue with delete
     try {
       const { error: auditError } = await supabase
         .from('audit_logs')
         .insert([auditData]);
 
       if (auditError) {
-        console.error('Failed to log deletion to audit_logs (first attempt):', auditError);
+        console.error('Failed to log deletion to audit_logs (full attempt):', auditError);
 
-        // If error mentions missing column(s), retry with a minimal payload
-        const message = String(auditError.message || '').toLowerCase();
-        if (message.includes('column "company_id"') || message.includes('column "deleted_data"') || message.includes('column') && message.includes('does not exist')) {
+        // If full audit insert fails, try with minimal payload
+        try {
           const minimalAudit = {
             user_id: options.userId,
             action: 'delete',
             entity_type: target.entityType,
             entity_id: target.entityId,
+            entity_name: target.entityName,
             details: auditData.details,
-          } as any;
+          };
 
           const { error: auditError2 } = await supabase
             .from('audit_logs')
             .insert([minimalAudit]);
 
           if (auditError2) {
-            console.error('Failed to log deletion to audit_logs (minimal attempt):', auditError2);
+            console.warn('Failed to log deletion to audit_logs (minimal attempt):', auditError2);
+            // Continue - deletion already succeeded, just audit logging failed
           }
+        } catch (minimalErr) {
+          console.warn('Minimal audit insert also failed:', minimalErr);
+          // Continue - deletion already succeeded, just audit logging failed
         }
       }
     } catch (auditInsertErr) {
-      console.error('Unexpected error while logging audit deletion:', auditInsertErr);
-      // Do not fail the delete for audit logging issues
+      console.warn('Unexpected error while logging audit deletion:', auditInsertErr);
+      // Do not fail the delete for audit logging issues - deletion already succeeded
     }
 
     return { success: true };
