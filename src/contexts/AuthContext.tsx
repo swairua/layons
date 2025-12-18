@@ -361,42 +361,61 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Set auth state immediately
           setSession(quickSession);
           setUser(quickSession.user);
-          setLoading(false);
           setInitialized(true);
           initializingRef.current = false;
 
-          // Fetch profile in background (non-critical if it fails)
-      fetchProfile(quickSession.user.id)
+          // Fetch profile - CRITICAL for admin checks, don't background
+          fetchProfile(quickSession.user.id)
             .then(userProfile => {
               if (mountedRef.current) {
-                // Set profile even if null - app should work with just the auth user
-                setProfile(userProfile || {
+                // Set the actual profile - this is crucial for admin/role checks
+                if (userProfile) {
+                  setProfile(userProfile);
+                  console.log('✅ Profile loaded successfully');
+
+                  // Update last login silently
+                  updateLastLogin(quickSession.user.id).catch(err =>
+                    logError('Update last login failed:', err, {
+                      userId: quickSession.user.id,
+                      context: 'quickAuth'
+                    })
+                  );
+                } else {
+                  // If fetch returned null, create minimal profile to allow app to work
+                  console.warn('⚠️ Profile fetch returned null, creating minimal profile');
+                  setProfile({
+                    id: quickSession.user.id,
+                    email: quickSession.user.email || '',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                  } as UserProfile);
+                }
+              }
+            })
+            .catch(profileError => {
+              logError('⚠️ Profile fetch failed:', profileError, {
+                userId: quickSession.user.id,
+                context: 'profileFetch'
+              });
+
+              // Create minimal profile to allow app to work
+              if (mountedRef.current) {
+                setProfile({
                   id: quickSession.user.id,
                   email: quickSession.user.email || '',
                   created_at: new Date().toISOString(),
                   updated_at: new Date().toISOString()
                 } as UserProfile);
-                console.log('✅ Profile loaded in background');
-
-                // Update last login silently
-                if (userProfile) {
-                  updateLastLogin(quickSession.user.id).catch(err =>
-                    logError('Background update last login failed:', err, {
-                      userId: quickSession.user.id,
-                      context: 'quickAuth'
-                    })
-                  );
-                }
               }
             })
-            .catch(profileError => {
-              logError('⚠️ Background profile fetch failed:', profileError, {
-                userId: quickSession.user.id,
-                context: 'backgroundProfileFetch'
-              });
+            .finally(() => {
+              // Now that we've attempted to fetch the profile, we can stop loading
+              if (mountedRef.current) {
+                setLoading(false);
+                console.log('🎉 Fast auth initialization completed');
+              }
             });
 
-          console.log('🎉 Fast auth initialization completed successfully');
           return;
         }
 
