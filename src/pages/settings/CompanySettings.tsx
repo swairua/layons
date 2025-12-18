@@ -206,13 +206,20 @@ export default function CompanySettings() {
       try {
         headerImageUrl = await uploadToSupabaseStorage(file, currentCompany.id);
         console.log('✅ Supabase storage upload successful');
+        setStorageStatus('available');
       } catch (storageError) {
-        console.warn('⚠️ Supabase storage failed:', storageError);
+        const errorMsg = storageError instanceof Error ? storageError.message : String(storageError);
+        console.warn('⚠️ Supabase storage failed:', errorMsg);
+
+        // Mark storage as unavailable if network error
+        if (errorMsg.includes('Failed to fetch') || errorMsg.includes('Network')) {
+          setStorageStatus('unavailable');
+        }
 
         if (file.size <= 1024 * 1024) {
           headerImageUrl = await convertToBase64(file);
           console.log('✅ Base64 fallback successful');
-          toast.info('Header image saved locally (storage not available)');
+          toast.info('Header image saved locally (cloud storage not available)');
         } else {
           throw new Error('File too large for local storage. Please use a smaller image or configure cloud storage.');
         }
@@ -230,7 +237,7 @@ export default function CompanySettings() {
       logError(err, 'Header Image Upload');
       let userMessage = getUserFriendlyMessage(err, 'Failed to upload header image');
 
-      if (userMessage.includes('company-logos') || userMessage.includes('bucket')) {
+      if (userMessage.includes('company-logos') || userMessage.includes('bucket') || userMessage.includes('cloud storage')) {
         userMessage = 'Cloud storage not configured. Using local storage for smaller files (max 1MB).';
 
         if (file.size <= 1024 * 1024) {
