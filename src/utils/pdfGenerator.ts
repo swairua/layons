@@ -1209,6 +1209,10 @@ export const generatePDF = async (data: DocumentData) => {
               <td style="border: none;">01192659527000</td>
             </tr>
           </table>
+          </div>
+          <div style="text-align: center; flex-shrink: 0; width: 38mm;">
+            <img src="${data.stampImageUrl || stampImage}" alt="Stamp" style="width: 38mm; height: 38mm; object-fit: contain;" />
+          </div>
         </div>
       </div>
       `}
