@@ -153,7 +153,7 @@ export function CreatePercentageCopyModal({
                 id="source-boq"
                 value={boqNumber}
                 onChange={(e) => setBoqNumber(e.target.value)}
-                placeholder="e.g., BOQ-20251124-1441"
+                placeholder="e.g., BOQ-001"
               />
             )}
           </div>
