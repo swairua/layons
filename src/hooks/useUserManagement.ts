@@ -104,7 +104,16 @@ export const useUserManagement = () => {
         }
       } catch (parseErr) {
         console.error('Error parsing error message:', parseErr);
-        errorMessage = err?.message || err?.toString() || 'Failed to parse error';
+        // Better fallback that avoids [object Object]
+        if (err instanceof Error && err.message) {
+          errorMessage = err.message;
+        } else if (typeof err === 'string') {
+          errorMessage = err;
+        } else if (err && typeof err === 'object' && 'message' in err) {
+          errorMessage = String(err.message);
+        } else {
+          errorMessage = 'Failed to fetch invitations. Please try again.';
+        }
       }
 
       setError(`Failed to fetch invitations: ${errorMessage}`);
