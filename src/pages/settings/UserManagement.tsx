@@ -345,9 +345,8 @@ export default function UserManagement() {
                           </DropdownMenuItem>
                           {user.id !== currentUser?.id && (
                             <DropdownMenuItem
-                              className="text-destructive opacity-50 cursor-not-allowed"
-                              disabled
-                              title="User deletion requires backend setup"
+                              onClick={() => setDeleteDialog({ open: true, user })}
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
                               Delete User
