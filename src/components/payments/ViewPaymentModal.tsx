@@ -63,6 +63,14 @@ export const ViewPaymentModal = ({
 }: ViewPaymentModalProps) => {
   if (!payment) return null;
 
+  // Debug log payment data
+  console.log('ViewPaymentModal - payment data:', {
+    payment_number: payment.payment_number,
+    has_allocations: !!payment.payment_allocations,
+    allocations_count: payment.payment_allocations?.length || 0,
+    allocations: payment.payment_allocations
+  });
+
   const getPaymentMethodBadge = (method: string) => {
     switch (method.toLowerCase()) {
       case 'cash':
