@@ -965,8 +965,7 @@ export const usePayments = (companyId?: string) => {
               id,
               payment_id,
               invoice_id,
-              allocated_amount,
-              invoices(id, invoice_number, total_amount)
+              allocated_amount
             `)
             .in('payment_id', paymentIds);
 
@@ -980,6 +979,83 @@ export const usePayments = (companyId?: string) => {
           console.warn('Error fetching payment allocations:', err);
         }
 
+        // Step 3b: Get invoice details separately to avoid RLS issues with relationships
+        let invoiceMap = new Map();
+        try {
+          if (paymentAllocations.length > 0) {
+            const allInvoiceIds = paymentAllocations.map(a => a.invoice_id);
+            const nullInvoiceIds = allInvoiceIds.filter(id => !id);
+            const validInvoiceIds = [...new Set(allInvoiceIds.filter(Boolean))];
+
+            console.log('Payment allocations:', paymentAllocations);
+            console.log('Raw invoice IDs from allocations:', allInvoiceIds);
+            console.log('Null/missing invoice IDs:', nullInvoiceIds.length);
+            console.log('Valid invoice IDs:', validInvoiceIds);
+            console.log('Fetching invoice details for company:', companyId);
+            console.log('Total valid invoice IDs to fetch:', validInvoiceIds.length);
+
+            if (validInvoiceIds.length > 0) {
+              // Try to fetch invoices by their IDs
+              let { data: invoiceData, error: invoiceError } = await supabase
+                .from('invoices')
+                .select('id, invoice_number, total_amount, company_id')
+                .in('id', validInvoiceIds);
+
+              console.log('Invoice fetch result (specific IDs):', {
+                success: !invoiceError,
+                count: invoiceData?.length || 0,
+                error: invoiceError?.message,
+                companyId: companyId,
+                requestedInvoiceIds: validInvoiceIds,
+                fetchedInvoices: invoiceData
+              });
+
+              if (!invoiceError && invoiceData && invoiceData.length > 0) {
+                console.log(`✅ Fetched ${invoiceData.length} invoice details via ID filter`);
+                invoiceData.forEach(invoice => {
+                  invoiceMap.set(invoice.id, invoice);
+                });
+              } else {
+                console.warn('⚠️ Invoice ID filter returned no results, trying fallback approach...');
+
+                // Fallback: Fetch all invoices for the company
+                const { data: allInvoices, error: allInvoicesError } = await supabase
+                  .from('invoices')
+                  .select('id, invoice_number, total_amount, company_id')
+                  .eq('company_id', companyId);
+
+                console.log('Fallback invoice fetch result (all for company):', {
+                  success: !allInvoicesError,
+                  count: allInvoices?.length || 0,
+                  error: allInvoicesError?.message,
+                  companyId: companyId
+                });
+
+                if (!allInvoicesError && allInvoices) {
+                  // Filter to only the ones we need
+                  const matchedInvoices = allInvoices.filter(inv =>
+                    validInvoiceIds.includes(inv.id)
+                  );
+                  console.log(`✅ Fallback matched ${matchedInvoices.length} invoices`);
+                  matchedInvoices.forEach(invoice => {
+                    invoiceMap.set(invoice.id, invoice);
+                  });
+                }
+              }
+
+              // Log which invoice IDs were not found
+              const notFoundIds = validInvoiceIds.filter(id => !invoiceMap.has(id));
+              if (notFoundIds.length > 0) {
+                console.warn(`⚠️ ${notFoundIds.length} invoice(s) not found:`, notFoundIds);
+              }
+            } else {
+              console.warn('⚠️ No valid invoice IDs to fetch (all are null or empty)');
+            }
+          }
+        } catch (err) {
+          console.warn('Error fetching invoice details:', err);
+        }
+
         // Step 4: Create lookup maps
         const customerMap = new Map();
         (customers || []).forEach(customer => {
@@ -991,11 +1067,13 @@ export const usePayments = (companyId?: string) => {
           if (!allocationsMap.has(allocation.payment_id)) {
             allocationsMap.set(allocation.payment_id, []);
           }
+          const invoice = invoiceMap.get(allocation.invoice_id);
+          console.log(`Allocation ${allocation.id}: invoice_id=${allocation.invoice_id}, found_invoice=${!!invoice}, invoice_number=${invoice?.invoice_number || 'N/A'}`);
           allocationsMap.get(allocation.payment_id).push({
             id: allocation.id,
-            invoice_number: allocation.invoices?.invoice_number || 'N/A',
+            invoice_number: invoice?.invoice_number || 'N/A',
             allocated_amount: allocation.allocated_amount,
-            invoice_total: allocation.invoices?.total_amount || 0
+            invoice_total: invoice?.total_amount || 0
           });
         });
 
