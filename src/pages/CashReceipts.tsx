@@ -15,10 +15,8 @@ import {
 import {
   Plus,
   Search,
-  Eye,
   Download,
   Trash2,
-  Loader2,
   Edit
 } from 'lucide-react';
 import { useCompanies } from '@/hooks/useDatabase';
@@ -204,7 +202,7 @@ export default function CashReceipts() {
   const filteredReceipts = receipts.filter(receipt => {
     const matchesSearch =
       receipt.receipt_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      receipt.customers?.name.toLowerCase().includes(searchTerm.toLowerCase());
+      (receipt.customers?.name ?? '').toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
@@ -411,11 +409,11 @@ export default function CashReceipts() {
 
       <ConfirmationDialog
         open={deleteDialog.open}
-        onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
+        onCancel={() => setDeleteDialog({ open: false })}
         title="Delete Cash Receipt"
         description={`Are you sure you want to delete receipt ${deleteDialog.receipt?.receipt_number}? This action cannot be undone.`}
         onConfirm={handleDeleteConfirm}
-        isDestructive={true}
+        isDangerous={true}
         isLoading={isDeleting}
       />
     </div>
