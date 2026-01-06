@@ -177,7 +177,7 @@ export const useUserManagement = () => {
     }
   };
 
-  // Delete user (admin only)
+  // Delete user (admin only) - requires backend API
   const deleteUser = async (userId: string): Promise<{ success: boolean; error?: string }> => {
     if (!isAdmin || userId === currentUser?.id) {
       return { success: false, error: 'Cannot delete yourself or unauthorized' };
@@ -186,20 +186,16 @@ export const useUserManagement = () => {
     setLoading(true);
 
     try {
-      // Delete from auth (this will cascade to profiles due to foreign key)
-      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-
-      if (authError) {
-        throw authError;
-      }
-
-      toast.success('User deleted successfully');
-      await fetchUsers();
-      return { success: true };
+      // This operation requires a backend API or Edge Function with admin privileges
+      // For now, we'll return a user-friendly error message
+      console.error('User deletion not yet implemented. This requires a backend API.');
+      return {
+        success: false,
+        error: 'User deletion requires a backend API. Please contact your system administrator.'
+      };
     } catch (err) {
       const errorMessage = parseErrorMessageWithCodes(err, 'user deletion');
       console.error('Error deleting user:', err);
-      toast.error(`Failed to delete user: ${errorMessage}`);
       return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
