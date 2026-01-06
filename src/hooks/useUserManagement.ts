@@ -35,7 +35,7 @@ export interface UpdateUserData {
   position?: string;
 }
 
-export const useUserManagement = () => {
+const useUserManagement = () => {
   const { profile: currentUser, isAdmin } = useAuth();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [invitations, setInvitations] = useState<UserInvitation[]>([]);
@@ -121,7 +121,8 @@ export const useUserManagement = () => {
     }
   };
 
-  // Create a new user (admin only)
+  // Create a new user (admin only) - requires Supabase Edge Function with admin privileges
+  // See USER_MANAGEMENT_SETUP_GUIDE.md for implementation instructions
   const createUser = async (userData: CreateUserData): Promise<{ success: boolean; error?: string }> => {
     if (!isAdmin || !currentUser?.company_id) {
       return { success: false, error: 'Unauthorized' };
@@ -130,56 +131,18 @@ export const useUserManagement = () => {
     setLoading(true);
 
     try {
-      // Check if user already exists
-      const { data: existingUser } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', userData.email)
-        .single();
+      // TODO: Implement Edge Function call for user creation
+      // Endpoint: POST {SUPABASE_URL}/functions/v1/create-user
+      // See USER_MANAGEMENT_SETUP_GUIDE.md for complete implementation
 
-      if (existingUser) {
-        return { success: false, error: 'User with this email already exists' };
-      }
-
-      // Create auth user
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: userData.email,
-        password: generateTemporaryPassword(),
-        email_confirm: true,
-        user_metadata: {
-          full_name: userData.full_name,
-        },
-      });
-
-      if (authError) {
-        throw authError;
-      }
-
-      // Update profile with additional data
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          full_name: userData.full_name,
-          role: userData.role,
-          phone: userData.phone,
-          company_id: currentUser.company_id,
-          department: userData.department,
-          position: userData.position,
-          status: 'active',
-        })
-        .eq('id', authData.user.id);
-
-      if (profileError) {
-        throw profileError;
-      }
-
-      toast.success('User created successfully');
-      await fetchUsers();
-      return { success: true };
+      console.error('User creation requires Supabase Edge Function setup. See USER_MANAGEMENT_SETUP_GUIDE.md');
+      return {
+        success: false,
+        error: 'User creation requires backend setup. Please use the "Invite User" feature to onboard new users.'
+      };
     } catch (err) {
       const errorMessage = parseErrorMessageWithCodes(err, 'user creation');
       console.error('Error creating user:', err);
-      toast.error(`Failed to create user: ${errorMessage}`);
       return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
@@ -217,7 +180,8 @@ export const useUserManagement = () => {
     }
   };
 
-  // Delete user (admin only)
+  // Delete user (admin only) - requires Supabase Edge Function with admin privileges
+  // See USER_MANAGEMENT_SETUP_GUIDE.md for implementation instructions
   const deleteUser = async (userId: string): Promise<{ success: boolean; error?: string }> => {
     if (!isAdmin || userId === currentUser?.id) {
       return { success: false, error: 'Cannot delete yourself or unauthorized' };
@@ -226,20 +190,18 @@ export const useUserManagement = () => {
     setLoading(true);
 
     try {
-      // Delete from auth (this will cascade to profiles due to foreign key)
-      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+      // TODO: Implement Edge Function call for user deletion
+      // Endpoint: POST {SUPABASE_URL}/functions/v1/delete-user
+      // See USER_MANAGEMENT_SETUP_GUIDE.md for complete implementation
 
-      if (authError) {
-        throw authError;
-      }
-
-      toast.success('User deleted successfully');
-      await fetchUsers();
-      return { success: true };
+      console.error('User deletion requires Supabase Edge Function setup. See USER_MANAGEMENT_SETUP_GUIDE.md');
+      return {
+        success: false,
+        error: 'User deletion requires backend setup. Please contact your system administrator.'
+      };
     } catch (err) {
       const errorMessage = parseErrorMessageWithCodes(err, 'user deletion');
       console.error('Error deleting user:', err);
-      toast.error(`Failed to delete user: ${errorMessage}`);
       return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
@@ -433,16 +395,6 @@ export const useUserManagement = () => {
     acceptInvitation,
     getUserStats,
   };
-};
-
-// Helper function to generate temporary password
-const generateTemporaryPassword = (): string => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-  let password = '';
-  for (let i = 0; i < 12; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return password;
 };
 
 export default useUserManagement;

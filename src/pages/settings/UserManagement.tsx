@@ -217,16 +217,18 @@ export default function UserManagement() {
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setModalState({ type: 'invite' })}
           >
             <Mail className="h-4 w-4 mr-2" />
             Invite User
           </Button>
-          <Button 
-            variant="primary-gradient" 
+          <Button
+            variant="primary-gradient"
             size="lg"
+            disabled
+            title="Direct user creation requires backend setup. Use 'Invite User' instead."
             onClick={() => setModalState({ type: 'create' })}
           >
             <UserPlus className="h-4 w-4 mr-2" />
@@ -235,6 +237,24 @@ export default function UserManagement() {
         </div>
       </div>
 
+      {/* Info Banner */}
+      <Card className="border-blue-200 bg-blue-50">
+        <CardContent className="pt-6">
+          <div className="flex space-x-4">
+            <Mail className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="space-y-2">
+              <p className="font-medium text-blue-900">How to Add Users</p>
+              <p className="text-sm text-blue-800">
+                Use the <span className="font-semibold">"Invite User"</span> button to send invitation emails to new team members.
+                They'll receive an email with a link to accept the invitation and create their account.
+              </p>
+              <p className="text-sm text-blue-800">
+                Once users are invited, you can manage their roles and permissions from the table below.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -385,8 +405,9 @@ export default function UserManagement() {
                           </DropdownMenuItem>
                           {user.id !== currentUser?.id && (
                             <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => setDeleteDialog({ open: true, user })}
+                              className="text-destructive opacity-50 cursor-not-allowed"
+                              disabled
+                              title="User deletion requires backend setup"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
                               Delete User
@@ -469,6 +490,38 @@ export default function UserManagement() {
           </CardContent>
         </Card>
       )}
+
+      {/* Implementation Guide */}
+      <Card className="border-amber-200 bg-amber-50">
+        <CardHeader>
+          <CardTitle className="text-amber-900">Need Full User Management?</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <div>
+              <h4 className="font-semibold text-amber-900 mb-2">Currently Available</h4>
+              <ul className="text-sm text-amber-800 space-y-1 ml-4 list-disc">
+                <li>Invite users via email</li>
+                <li>Edit user roles and status</li>
+                <li>View pending invitations</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold text-amber-900 mb-2">Requires Backend Setup</h4>
+              <ul className="text-sm text-amber-800 space-y-1 ml-4 list-disc">
+                <li>Direct user creation (requires Supabase admin API)</li>
+                <li>User deletion (requires Supabase admin API)</li>
+                <li>Email invitations (requires email service integration)</li>
+              </ul>
+            </div>
+            <div className="pt-2">
+              <p className="text-sm text-amber-800">
+                To enable these features, you'll need to set up Supabase Edge Functions with admin privileges or integrate with a backend API.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Modals */}
       <CreateUserModal
