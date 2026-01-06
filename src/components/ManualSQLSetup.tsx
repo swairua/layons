@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, Copy, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { verifyInvoiceCompanyIdColumn } from '@/utils/fixMissingInvoiceCompanyId';
+import { verifyInvoiceRLSFix, getFallbackRLSPolicySql } from '@/utils/fixInvoiceRLSPolicy';
 
 interface DatabaseFix {
   id: string;
