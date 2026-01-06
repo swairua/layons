@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AuditDashboard } from './AuditDashboard';
+import { AuditTrailViewer } from './AuditTrailViewer';
+import { DeleteAuditLog } from './DeleteAuditLog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield } from 'lucide-react';
+import { Info, Shield, BarChart3, Eye } from 'lucide-react';
 
 export function AuditManagement() {
   return (
