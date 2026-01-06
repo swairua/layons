@@ -15,10 +15,8 @@ import {
 import {
   Plus,
   Search,
-  Eye,
   Download,
   Trash2,
-  Loader2,
   Edit
 } from 'lucide-react';
 import { useCompanies } from '@/hooks/useDatabase';
