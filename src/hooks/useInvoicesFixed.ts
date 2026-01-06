@@ -24,7 +24,7 @@ export const useInvoicesFixed = (companyId?: string) => {
 
         // Step 1: Get invoices without embedded relationships
         // Note: Use paid_amount and balance_due as per the database schema
-        const { data: invoices, error: invoicesError } = await supabase
+        let query = supabase
           .from('invoices')
           .select(`
             id,
@@ -45,6 +45,8 @@ export const useInvoicesFixed = (companyId?: string) => {
             updated_at
           `)
           .order('created_at', { ascending: false });
+
+        const { data: invoices, error: invoicesError } = await query;
 
         if (invoicesError) {
           const errorMsg = invoicesError?.message || JSON.stringify(invoicesError);
