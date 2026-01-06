@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -36,7 +36,7 @@ export function AdminDiagnostics() {
   const [showSqlFix, setShowSqlFix] = useState(false);
 
   // Auto-expand the SQL fix panel when recursion error is detected
-  React.useEffect(() => {
+  useEffect(() => {
     if (error.includes('infinite recursion')) {
       setShowSqlFix(true);
     }
