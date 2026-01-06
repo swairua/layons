@@ -15,6 +15,9 @@ interface State {
 }
 
 export class AuthErrorBoundary extends Component<Props, State> {
+  private retryCount = 0;
+  private maxRetries = 2;
+
   constructor(props: Props) {
     super(props);
     this.state = { hasError: false, showDiagnostics: false };
@@ -40,7 +43,19 @@ export class AuthErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Auth error boundary caught an error:', error, errorInfo);
+    // Only log critical auth errors, not transient network issues
+    const errorMsg = error?.message || '';
+    const isCriticalError =
+      errorMsg.includes('Invalid Refresh Token') ||
+      errorMsg.includes('invalid_token') ||
+      errorMsg.includes('Auth session') ||
+      errorMsg.includes('auth');
+
+    if (isCriticalError) {
+      console.error('Auth error boundary caught critical error:', error, errorInfo);
+    } else {
+      console.warn('Auth error boundary caught error (may be transient):', errorMsg);
+    }
   }
 
   handleRetry = () => {
