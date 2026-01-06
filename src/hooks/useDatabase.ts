@@ -964,7 +964,7 @@ export const usePayments = (companyId?: string) => {
           allocationsMap.get(allocation.payment_id).push({
             id: allocation.id,
             invoice_number: allocation.invoices?.invoice_number || 'N/A',
-            allocated_amount: allocation.amount_allocated,
+            allocated_amount: allocation.allocated_amount,
             invoice_total: allocation.invoices?.total_amount || 0
           });
         });
