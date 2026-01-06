@@ -9,6 +9,7 @@ import { useCurrentCompany } from "@/contexts/CompanyContext";
 import { setFavicon } from "@/utils/setFavicon";
 import { updateMetaTags } from "@/utils/updateMetaTags";
 import { verifyInvoiceCompanyIdColumn } from "@/utils/fixMissingInvoiceCompanyId";
+import { verifyInvoiceRLSFix } from "@/utils/fixInvoiceRLSPolicy";
 
 // Lazy load the page components to reduce initial bundle size and startup time
 import { lazy, Suspense } from "react";
