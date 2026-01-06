@@ -753,16 +753,15 @@ export const useCreateDeliveryNote = () => {
         throw new Error('Delivery note must be linked to an existing invoice or sale.');
       }
 
-      // Verify the invoice exists and belongs to the same company
+      // Verify the invoice exists
       const { data: invoice, error: invoiceError } = await supabase
         .from('invoices')
-        .select('id, customer_id, company_id')
+        .select('id, customer_id')
         .eq('id', deliveryNote.invoice_id)
-        .eq('company_id', deliveryNote.company_id)
         .single();
 
       if (invoiceError || !invoice) {
-        throw new Error('Related invoice not found or does not belong to this company.');
+        throw new Error('Related invoice not found.');
       }
 
       // Verify customer matches
