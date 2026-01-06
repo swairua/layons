@@ -1279,6 +1279,7 @@ export const useDeletePayment = () => {
           }
 
           // Step 3: Delete payment allocations
+          console.log('Deleting payment allocations for payment:', paymentId);
           const { error: deleteAllocError } = await supabase
             .from('payment_allocations')
             .delete()
@@ -1286,7 +1287,11 @@ export const useDeletePayment = () => {
 
           if (deleteAllocError) {
             console.error('Failed to delete payment allocations:', deleteAllocError);
-            throw new Error(`Failed to delete allocations: ${deleteAllocError.message}`);
+            const errorMsg = deleteAllocError?.message || 'Unknown error';
+            if (errorMsg.includes('row-level security') || errorMsg.includes('permission denied')) {
+              throw new Error(`You don't have permission to delete payment allocations. Please check your access settings.`);
+            }
+            throw new Error(`Failed to delete allocations: ${errorMsg}`);
           }
         }
 
@@ -1299,7 +1304,20 @@ export const useDeletePayment = () => {
 
         if (deletePaymentError) {
           console.error('Failed to delete payment:', deletePaymentError);
-          throw new Error(`Failed to delete payment: ${deletePaymentError.message}`);
+          const errorMsg = deletePaymentError?.message || 'Unknown error';
+
+          // Handle specific error types
+          if (errorMsg.includes('row-level security') || errorMsg.includes('permission denied')) {
+            throw new Error(`You don't have permission to delete this payment. Please check your access settings.`);
+          }
+          if (errorMsg.includes('FOREIGN KEY') || errorMsg.includes('constraint')) {
+            throw new Error(`Cannot delete this payment. It may be referenced by other records. Please try again or contact support.`);
+          }
+          if (errorMsg.includes('Failed to fetch') || errorMsg.includes('network')) {
+            throw new Error(`Network error while deleting payment. Please check your connection and try again.`);
+          }
+
+          throw new Error(`Failed to delete payment: ${errorMsg}`);
         }
 
         console.log('Payment deleted successfully:', paymentId);
@@ -1310,7 +1328,9 @@ export const useDeletePayment = () => {
         };
       } catch (error) {
         console.error('Error in useDeletePayment:', error);
-        throw error;
+        // Convert error to string properly
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        throw new Error(errorMessage);
       }
     },
     onSuccess: () => {
