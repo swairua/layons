@@ -3712,6 +3712,14 @@ export const generateCustomerStatementPDF = async (customer: any, invoices: any[
 
 // Function for generating payment receipt PDF
 export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyDetails) => {
+  // Debug: Log the payment structure
+  console.log('generatePaymentReceiptPDF received payment:', {
+    payment_number: payment.payment_number,
+    has_allocations: !!payment.payment_allocations,
+    allocations_count: payment.payment_allocations?.length || 0,
+    allocations: payment.payment_allocations
+  });
+
   // Extract invoice particulars from payment allocations
   const invoiceParticulars = payment.payment_allocations && payment.payment_allocations.length > 0
     ? payment.payment_allocations.map((alloc: any) => ({
@@ -3722,6 +3730,8 @@ export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyD
         previous_balance: alloc.previous_balance !== undefined ? alloc.previous_balance : (alloc.invoice_total || 0),
       }))
     : [];
+
+  console.log('Invoice particulars extracted:', invoiceParticulars);
 
   // Ensure current balance is properly calculated or use enriched data
   const invoicesToDisplay = invoiceParticulars.map((inv: any) => {
