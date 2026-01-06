@@ -55,6 +55,14 @@ const App = () => {
     // Non-blocking async initialization
     (async () => {
       try {
+        // Check if RLS is properly disabled (fixes infinite recursion)
+        const rslDisabled = await verifyRLSDisabled();
+        if (!rslDisabled) {
+          console.error('❌ RLS still has infinite recursion - you need to run the SQL fix from the Database Setup panel');
+        } else {
+          console.log('✅ RLS check passed');
+        }
+
         // Verify invoice company_id column exists
         // This fixes issues with delete operations
         await verifyInvoiceCompanyIdColumn();
