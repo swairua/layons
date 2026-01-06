@@ -1574,7 +1574,10 @@ export const useDeleteInvoice = () => {
         .from('invoices')
         .delete()
         .eq('id', id);
-      if (error) throw error;
+      if (error) {
+        const errorMessage = parseErrorMessage(error);
+        throw new Error(errorMessage);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices_fixed'] });
