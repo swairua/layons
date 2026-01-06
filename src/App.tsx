@@ -58,14 +58,26 @@ const App = () => {
         // Check if RLS is properly disabled (fixes infinite recursion)
         const rslDisabled = await verifyRLSDisabled();
         if (!rslDisabled) {
-          console.error('❌ RLS still has infinite recursion - you need to run the SQL fix from the Database Setup panel');
+          console.error('❌ RLS RECURSION ERROR DETECTED');
+          console.error('The database has RLS policies that cause infinite recursion.');
+          console.error('');
+          console.error('📋 IMMEDIATE FIX REQUIRED:');
+          console.error('1. Open your Supabase Dashboard');
+          console.error('2. Go to SQL Editor');
+          console.error('3. Copy and run the SQL from: FINAL_RLS_RECURSION_FIX.sql');
+          console.error('4. Then refresh this page');
+          console.error('');
+          console.error('OR use the ManualSQLSetup page at /setup-test');
         } else {
-          console.log('✅ RLS check passed');
+          console.log('✅ RLS check passed - database is accessible');
         }
 
         // Verify invoice company_id column exists
         // This fixes issues with delete operations
-        await verifyInvoiceCompanyIdColumn();
+        const companyIdExists = await verifyInvoiceCompanyIdColumn();
+        if (!companyIdExists) {
+          console.warn('⚠️ company_id column verification issue - will be fixed by RLS SQL fix');
+        }
 
         // Verify invoice RLS policy doesn't have infinite recursion
         await verifyInvoiceRLSFix();
