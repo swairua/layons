@@ -935,11 +935,23 @@ export const usePayments = (companyId?: string) => {
         if (!payments || payments.length === 0) return [];
 
         // Step 2: Get customers separately (filter out invalid UUIDs)
-        const customerIds = [...new Set(payments.map(payment => payment.customer_id).filter(id => id && typeof id === 'string' && id.length === 36))];
-        const { data: customers } = customerIds.length > 0 ? await supabase
-          .from('customers')
-          .select('id, name, email, phone, address, city, country')
-          .in('id', customerIds) : { data: [] };
+        let customers: any[] = [];
+        try {
+          const customerIds = [...new Set(payments.map(payment => payment.customer_id).filter(id => id && typeof id === 'string' && id.length === 36))];
+          if (customerIds.length > 0) {
+            const { data, error } = await supabase
+              .from('customers')
+              .select('id, name, email, phone, address, city, country')
+              .in('id', customerIds);
+            if (!error && data) {
+              customers = data;
+            } else if (error) {
+              console.warn('Could not fetch customers (non-fatal):', error.message);
+            }
+          }
+        } catch (err) {
+          console.warn('Error fetching customers:', err);
+        }
 
         // Step 3: Get payment allocations separately
         let paymentAllocations: any[] = [];
