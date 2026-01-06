@@ -90,8 +90,25 @@ export function AdminDiagnostics() {
           </Button>
 
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-              {error}
+            <div className="space-y-3">
+              <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+                <p className="font-semibold mb-2">Error: {error}</p>
+
+                {error.includes('infinite recursion') && (
+                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-xs">
+                    <p className="font-semibold mb-2">🔧 How to Fix This:</p>
+                    <ol className="list-decimal list-inside space-y-1 mb-3">
+                      <li>Go to your Supabase Dashboard</li>
+                      <li>Navigate to SQL Editor (left sidebar)</li>
+                      <li>Create a new SQL query</li>
+                      <li>Copy and paste the SQL from <code className="bg-white px-1 rounded">FIX_PROFILES_RLS_RECURSION.sql</code> in the project root</li>
+                      <li>Click "Run" or press Ctrl+Enter</li>
+                      <li>Wait for completion, then refresh your browser</li>
+                    </ol>
+                    <p className="text-xs">This will remove the problematic RLS policies that are causing infinite recursion.</p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
