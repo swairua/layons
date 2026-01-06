@@ -414,6 +414,16 @@ export default function Payments() {
                         >
                           <Download className="h-4 w-4" />
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteClick(payment)}
+                          title="Delete payment"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          disabled={deletePayment.isPending}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
