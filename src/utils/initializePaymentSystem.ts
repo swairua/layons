@@ -1,5 +1,34 @@
 import { supabase } from '@/integrations/supabase/client';
 
+async function executeSql(sql: string): Promise<{ success: boolean; error?: string }> {
+  // Try multiple RPC methods since different Supabase projects have different functions
+  const methods = [
+    { name: 'exec', params: { sql } },
+    { name: 'exec_sql', params: { sql } },
+    { name: 'sql', params: { query: sql } }
+  ];
+
+  for (const method of methods) {
+    try {
+      const { error } = await (supabase.rpc as any)(method.name, method.params);
+      if (!error) {
+        return { success: true };
+      }
+      // If it's a "function not found" error, try next method
+      if (error?.code === '42883') {
+        continue;
+      }
+      // For other errors, return the error message
+      return { success: false, error: error?.message || 'Unknown error' };
+    } catch (err) {
+      // Try next method on exception
+      continue;
+    }
+  }
+
+  return { success: false, error: 'No SQL execution method available' };
+}
+
 export interface InitializationResult {
   success: boolean;
   message: string;
