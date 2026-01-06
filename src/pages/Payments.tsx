@@ -105,6 +105,17 @@ export default function Payments() {
 
   const handleDownloadReceipt = (payment: Payment) => {
     try {
+      // Debug: Log the payment data
+      console.log('Payment data for receipt:', {
+        payment_number: payment.payment_number,
+        payment_allocations: payment.payment_allocations,
+        allocations_count: payment.payment_allocations?.length || 0
+      });
+
+      if (!payment.payment_allocations || payment.payment_allocations.length === 0) {
+        toast.warning('No invoices associated with this payment. Receipt will be generated without invoice particulars.');
+      }
+
       // Enrich payment data with invoice balance information
       const enrichedPayment = {
         ...payment,
@@ -119,15 +130,20 @@ export default function Payments() {
           // Calculate due amount after this payment
           const dueAmount = Math.max(0, previousBalance - alloc.allocated_amount);
 
-          return {
+          const enrichedAlloc = {
             ...alloc,
             paid_amount: invoice?.paid_amount || 0,
             balance_due: invoice?.balance_due || 0,
             previous_balance: previousBalance,
             due_amount: dueAmount
           };
+
+          console.log('Enriched allocation:', enrichedAlloc);
+          return enrichedAlloc;
         }) || []
       };
+
+      console.log('Enriched payment for PDF:', enrichedPayment);
 
       // Use the utility function with company details
       const companyDetails = currentCompany ? {

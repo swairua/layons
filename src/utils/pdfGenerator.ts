@@ -3712,23 +3712,36 @@ export const generateCustomerStatementPDF = async (customer: any, invoices: any[
 
 // Function for generating payment receipt PDF
 export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyDetails) => {
+  // Debug: Log the payment structure
+  console.log('generatePaymentReceiptPDF received payment:', {
+    payment_number: payment.payment_number,
+    has_allocations: !!payment.payment_allocations,
+    allocations_count: payment.payment_allocations?.length || 0,
+    allocations: payment.payment_allocations
+  });
+
   // Extract invoice particulars from payment allocations
   const invoiceParticulars = payment.payment_allocations && payment.payment_allocations.length > 0
     ? payment.payment_allocations.map((alloc: any) => ({
         invoice_number: alloc.invoice_number || 'N/A',
         invoice_total: alloc.invoice_total || 0,
         allocated_amount: alloc.allocated_amount || 0,
-        // Previous balance = total invoice amount (before this payment)
-        previous_balance: alloc.invoice_total || 0,
+        // Use enriched previous_balance if available, otherwise calculate
+        previous_balance: alloc.previous_balance !== undefined ? alloc.previous_balance : (alloc.invoice_total || 0),
       }))
     : [];
 
-  // Calculate current balance for each invoice (invoice total - allocated amount from this payment)
-  const invoicesToDisplay = invoiceParticulars.map((inv: any) => ({
-    ...inv,
-    // Current balance = total invoice amount - amount paid in this payment
-    current_balance: Math.max(0, inv.invoice_total - inv.allocated_amount),
-  }));
+  console.log('Invoice particulars extracted:', invoiceParticulars);
+
+  // Ensure current balance is properly calculated or use enriched data
+  const invoicesToDisplay = invoiceParticulars.map((inv: any) => {
+    const currentBalance = inv.previous_balance - inv.allocated_amount;
+    return {
+      ...inv,
+      // Current balance = previous balance - amount paid in this payment
+      current_balance: Math.max(0, currentBalance),
+    };
+  });
 
   const documentData: DocumentData = {
     type: 'receipt', // Use receipt type for payment receipts

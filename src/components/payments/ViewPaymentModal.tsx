@@ -63,6 +63,14 @@ export const ViewPaymentModal = ({
 }: ViewPaymentModalProps) => {
   if (!payment) return null;
 
+  // Debug log payment data
+  console.log('ViewPaymentModal - payment data:', {
+    payment_number: payment.payment_number,
+    has_allocations: !!payment.payment_allocations,
+    allocations_count: payment.payment_allocations?.length || 0,
+    allocations: payment.payment_allocations
+  });
+
   const getPaymentMethodBadge = (method: string) => {
     switch (method.toLowerCase()) {
       case 'cash':
@@ -197,69 +205,76 @@ export const ViewPaymentModal = ({
           )}
 
           {/* Payment Allocations */}
-          {payment.payment_allocations && payment.payment_allocations.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  Invoice Allocations
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Invoice Number</TableHead>
-                      <TableHead>Invoice Total</TableHead>
-                      <TableHead>Allocated Amount</TableHead>
-                      <TableHead>Remaining Balance</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {payment.payment_allocations.map((allocation) => (
-                      <TableRow key={allocation.id}>
-                        <TableCell className="font-medium">{allocation.invoice_number}</TableCell>
-                        <TableCell>{formatCurrency(allocation.invoice_total)}</TableCell>
-                        <TableCell className="font-medium text-success">
-                          {formatCurrency(allocation.allocated_amount)}
-                        </TableCell>
-                        <TableCell>
-                          {formatCurrency(allocation.invoice_total - allocation.allocated_amount)}
-                        </TableCell>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Invoice Allocations
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {payment.payment_allocations && payment.payment_allocations.length > 0 ? (
+                <>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Invoice Number</TableHead>
+                        <TableHead>Invoice Total</TableHead>
+                        <TableHead>Allocated Amount</TableHead>
+                        <TableHead>Remaining Balance</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {payment.payment_allocations.map((allocation) => (
+                        <TableRow key={allocation.id}>
+                          <TableCell className="font-medium">{allocation.invoice_number}</TableCell>
+                          <TableCell>{formatCurrency(allocation.invoice_total)}</TableCell>
+                          <TableCell className="font-medium text-success">
+                            {formatCurrency(allocation.allocated_amount)}
+                          </TableCell>
+                          <TableCell>
+                            {formatCurrency(allocation.invoice_total - allocation.allocated_amount)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
 
-                <Separator className="my-4" />
-
-                {/* Allocation Summary */}
-                <div className="space-y-2 max-w-sm ml-auto">
-                  <div className="flex justify-between">
-                    <span className="text-sm">Payment Amount:</span>
-                    <span className="text-sm font-medium">{formatCurrency(payment.amount)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Allocated:</span>
-                    <span className="text-sm">{formatCurrency(totalAllocated)}</span>
-                  </div>
-                  {unallocatedAmount > 0 && (
-                    <div className="flex justify-between text-warning">
-                      <span className="text-sm">Unallocated:</span>
-                      <span className="text-sm font-medium">{formatCurrency(unallocatedAmount)}</span>
-                    </div>
-                  )}
-                  <Separator />
-                  <div className="flex justify-between font-semibold">
-                    <span>Status:</span>
-                    <span className="text-success">
-                      {unallocatedAmount === 0 ? 'Fully Allocated' : 'Partially Allocated'}
-                    </span>
-                  </div>
+                  <Separator className="my-4" />
+                </>
+              ) : (
+                <div className="text-center py-6">
+                  <p className="text-sm text-muted-foreground mb-2">No invoices associated with this payment</p>
+                  <p className="text-xs text-muted-foreground">This payment has not been allocated to any invoices yet</p>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              )}
+
+              {/* Allocation Summary */}
+              <div className="space-y-2 max-w-sm ml-auto">
+                <div className="flex justify-between">
+                  <span className="text-sm">Payment Amount:</span>
+                  <span className="text-sm font-medium">{formatCurrency(payment.amount)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm">Allocated:</span>
+                  <span className="text-sm">{formatCurrency(totalAllocated)}</span>
+                </div>
+                {unallocatedAmount > 0 && (
+                  <div className="flex justify-between text-warning">
+                    <span className="text-sm">Unallocated:</span>
+                    <span className="text-sm font-medium">{formatCurrency(unallocatedAmount)}</span>
+                  </div>
+                )}
+                <Separator />
+                <div className="flex justify-between font-semibold">
+                  <span>Status:</span>
+                  <span className={unallocatedAmount === 0 ? 'text-success' : 'text-warning'}>
+                    {unallocatedAmount === 0 ? 'Fully Allocated' : 'Partially Allocated'}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Payment Notes */}
           {payment.notes && (

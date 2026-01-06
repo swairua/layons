@@ -1111,7 +1111,7 @@ export const useCreatePayment = () => {
               .insert([{
                 payment_id: paymentResult.id,
                 invoice_id: invoice_id,
-                amount_allocated: paymentData.amount
+                allocated_amount: paymentData.amount
               }]);
 
             allocationError = insertError;
@@ -1199,6 +1199,107 @@ export const useCreatePayment = () => {
       queryClient.invalidateQueries({ queryKey: ['invoice', result.invoice_id] });
       queryClient.invalidateQueries({ queryKey: ['customer_invoices'] });
     },
+  });
+};
+
+// Delete payment hook
+export const useDeletePayment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (paymentId: string) => {
+      if (!paymentId || typeof paymentId !== 'string' || paymentId.length !== 36) {
+        throw new Error('Invalid payment ID');
+      }
+
+      // Step 1: Get the payment record with all its allocations
+      const { data: payment, error: paymentError } = await supabase
+        .from('payments')
+        .select(`
+          id,
+          amount,
+          payment_allocations(id, invoice_id, allocated_amount, invoices(id, total_amount, paid_amount, balance_due, status))
+        `)
+        .eq('id', paymentId)
+        .single();
+
+      if (paymentError || !payment) {
+        throw new Error('Payment not found');
+      }
+
+      const allocations = payment.payment_allocations || [];
+
+      // Step 2: Reverse invoice adjustments for each allocation
+      for (const allocation of allocations) {
+        if (allocation.invoices) {
+          const invoice = allocation.invoices;
+          const reversedPaidAmount = Math.max(0, (invoice.paid_amount || 0) - (allocation.allocated_amount || 0));
+          const reversedBalanceDue = invoice.total_amount - reversedPaidAmount;
+
+          // Determine new invoice status
+          let newStatus = 'draft';
+          if (reversedBalanceDue <= 0) {
+            newStatus = 'paid';
+          } else if (reversedPaidAmount > 0) {
+            newStatus = 'partial';
+          } else if (reversedBalanceDue >= invoice.total_amount) {
+            newStatus = 'draft';
+          }
+
+          // Update invoice
+          const { error: invoiceError } = await supabase
+            .from('invoices')
+            .update({
+              paid_amount: reversedPaidAmount,
+              balance_due: reversedBalanceDue,
+              status: newStatus,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', allocation.invoice_id);
+
+          if (invoiceError) {
+            console.error('Failed to reverse invoice balance:', invoiceError);
+            throw new Error(`Failed to reverse invoice balance: ${invoiceError.message}`);
+          }
+        }
+      }
+
+      // Step 3: Delete payment allocations
+      if (allocations.length > 0) {
+        const { error: deleteAllocError } = await supabase
+          .from('payment_allocations')
+          .delete()
+          .in('id', allocations.map(a => a.id));
+
+        if (deleteAllocError) {
+          console.error('Failed to delete payment allocations:', deleteAllocError);
+          throw new Error(`Failed to delete payment allocations: ${deleteAllocError.message}`);
+        }
+      }
+
+      // Step 4: Delete the payment record
+      const { error: deletePaymentError } = await supabase
+        .from('payments')
+        .delete()
+        .eq('id', paymentId);
+
+      if (deletePaymentError) {
+        throw new Error(`Failed to delete payment: ${deletePaymentError.message}`);
+      }
+
+      return {
+        success: true,
+        payment_id: paymentId,
+        allocations_reversed: allocations.length
+      };
+    },
+    onSuccess: () => {
+      // Invalidate caches to refresh UI
+      queryClient.invalidateQueries({ queryKey: ['payments'] });
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['customer_invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['customer_payments'] });
+    }
   });
 };
 
