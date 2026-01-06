@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -22,9 +22,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { 
-  Plus, 
-  Search, 
+import {
+  Plus,
+  Search,
   UserPlus,
   Edit,
   Trash2,
@@ -34,7 +34,8 @@ import {
   Clock,
   Users,
   UserX,
-  MoreHorizontal
+  MoreHorizontal,
+  Loader2
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -82,7 +83,7 @@ function getInitials(name: string) {
 }
 
 export default function UserManagement() {
-  const { isAdmin, profile: currentUser } = useAuth();
+  const { isAdmin, profile: currentUser, refreshProfile } = useAuth();
   const {
     users,
     invitations,
@@ -97,6 +98,7 @@ export default function UserManagement() {
   } = useUserManagement();
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [modalState, setModalState] = useState<{
     type: 'create' | 'edit' | 'invite' | null;
     user?: UserProfile | null;
@@ -115,7 +117,20 @@ export default function UserManagement() {
     user.department?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleRefreshProfile = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshProfile();
+      toast.success('Profile refreshed. If you are an admin, please reload the page.');
+    } catch (error) {
+      toast.error('Failed to refresh profile');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   if (!isAdmin) {
+
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -135,6 +150,26 @@ export default function UserManagement() {
               <p className="text-muted-foreground mb-4">
                 You need administrator privileges to access user management.
               </p>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground mb-4">
+                  If you believe you should have access, try refreshing your profile:
+                </p>
+                <Button
+                  onClick={handleRefreshProfile}
+                  disabled={isRefreshing}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {isRefreshing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Refreshing...
+                    </>
+                  ) : (
+                    'Refresh Profile'
+                  )}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

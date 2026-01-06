@@ -5,6 +5,10 @@ import { toast } from '@/utils/safeToast';
 import { initializeAuth, clearAuthTokens, safeAuthOperation } from '@/utils/authHelpers';
 import { logError, getUserFriendlyErrorMessage, isErrorType } from '@/utils/errorLogger';
 
+// Type definitions for user roles and statuses
+export type UserRole = 'admin' | 'super_admin' | 'accountant' | 'stock_manager' | 'user';
+export type UserStatus = 'active' | 'inactive' | 'pending';
+
 // Helper function to safely format error for display
 const formatErrorForDisplay = (error: unknown): string => {
   if (!error) return 'Unknown error occurred';
@@ -42,8 +46,8 @@ export interface UserProfile {
   company_id?: string;
   department?: string;
   position?: string;
-  role?: string;
-  status?: string;
+  role?: UserRole;
+  status?: UserStatus;
   last_login?: string;
   created_at: string;
   updated_at: string;
@@ -366,12 +370,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           initializingRef.current = false;
           console.log('🎉 Fast auth initialization completed - app started');
 
-          // Fetch profile in background with timeout to prevent hanging
+          // Fetch profile in background with extended timeout to prevent missing admin roles
           const profileTimeoutPromise = new Promise<UserProfile | null>((resolve) => {
             setTimeout(() => {
               console.warn('⏱️ Profile fetch timeout during quick auth');
               resolve(null);
-            }, 5000); // 5 second timeout
+            }, 10000); // 10 second timeout - increased to allow profile fetch to complete
           });
 
           Promise.race([
@@ -393,14 +397,57 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     })
                   );
                 } else {
-                  // If fetch returned null, create minimal profile to allow app to work
-                  console.warn('⚠️ Profile fetch returned null, creating minimal profile');
-                  setProfile({
-                    id: quickSession.user.id,
-                    email: quickSession.user.email || '',
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                  } as UserProfile);
+                  // If fetch returned null, try again with a longer timeout
+                  console.warn('⚠️ Profile fetch returned null, retrying with longer timeout');
+
+                  const retryTimeoutPromise = new Promise<UserProfile | null>((resolve) => {
+                    setTimeout(() => {
+                      console.warn('⏱️ Profile retry timeout');
+                      resolve(null);
+                    }, 15000); // 15 second timeout for retry
+                  });
+
+                  Promise.race([
+                    fetchProfile(quickSession.user.id),
+                    retryTimeoutPromise
+                  ])
+                    .then(retryProfile => {
+                      if (mountedRef.current) {
+                        if (retryProfile) {
+                          setProfile(retryProfile);
+                          console.log('✅ Profile loaded on retry');
+                        } else {
+                          // If still no profile, create minimal profile to allow app to work
+                          console.warn('⚠️ Profile still unavailable after retry, creating minimal profile');
+                          setProfile({
+                            id: quickSession.user.id,
+                            email: quickSession.user.email || '',
+                            role: 'user', // Default to user role, may be updated when profile loads
+                            status: 'active',
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                          } as UserProfile);
+                        }
+                      }
+                    })
+                    .catch(retryError => {
+                      logError('⚠️ Profile retry fetch failed:', retryError, {
+                        userId: quickSession.user.id,
+                        context: 'profileRetry'
+                      });
+
+                      // Create minimal profile to allow app to work
+                      if (mountedRef.current) {
+                        setProfile({
+                          id: quickSession.user.id,
+                          email: quickSession.user.email || '',
+                          role: 'user', // Default to user role, may be updated when profile loads
+                          status: 'active',
+                          created_at: new Date().toISOString(),
+                          updated_at: new Date().toISOString()
+                        } as UserProfile);
+                      }
+                    });
                 }
               }
             })
@@ -410,14 +457,51 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 context: 'profileFetch'
               });
 
-              // Create minimal profile to allow app to work
+              // Try again with a longer timeout on error
               if (mountedRef.current) {
-                setProfile({
-                  id: quickSession.user.id,
-                  email: quickSession.user.email || '',
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString()
-                } as UserProfile);
+                console.warn('⚠️ Profile fetch failed, retrying with longer timeout');
+
+                const retryTimeoutPromise = new Promise<UserProfile | null>((resolve) => {
+                  setTimeout(() => {
+                    console.warn('⏱️ Profile retry timeout');
+                    resolve(null);
+                  }, 15000); // 15 second timeout for retry
+                });
+
+                Promise.race([
+                  fetchProfile(quickSession.user.id),
+                  retryTimeoutPromise
+                ])
+                  .then(retryProfile => {
+                    if (mountedRef.current) {
+                      if (retryProfile) {
+                        setProfile(retryProfile);
+                        console.log('✅ Profile loaded on retry');
+                      } else {
+                        // Create minimal profile as fallback
+                        setProfile({
+                          id: quickSession.user.id,
+                          email: quickSession.user.email || '',
+                          role: 'user',
+                          status: 'active',
+                          created_at: new Date().toISOString(),
+                          updated_at: new Date().toISOString()
+                        } as UserProfile);
+                      }
+                    }
+                  })
+                  .catch(() => {
+                    if (mountedRef.current) {
+                      setProfile({
+                        id: quickSession.user.id,
+                        email: quickSession.user.email || '',
+                        role: 'user',
+                        status: 'active',
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                      } as UserProfile);
+                    }
+                  });
               }
             });
 
@@ -444,12 +528,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                   setSession(bgSession);
                   setUser(bgSession.user);
 
-                  // Fetch profile (non-critical if it fails)
-                  const userProfile = await fetchProfile(bgSession.user.id);
+                  // Fetch profile with extended timeout (non-critical if it fails)
+                  const bgProfileTimeoutPromise = new Promise<UserProfile | null>((resolve) => {
+                    setTimeout(() => {
+                      console.warn('⏱️ Background profile fetch timeout');
+                      resolve(null);
+                    }, 10000); // 10 second timeout
+                  });
+
+                  const userProfile = await Promise.race([
+                    fetchProfile(bgSession.user.id),
+                    bgProfileTimeoutPromise
+                  ]);
+
                   if (mountedRef.current) {
                     setProfile(userProfile || {
                       id: bgSession.user.id,
                       email: bgSession.user.email || '',
+                      role: 'user',
+                      status: 'active',
                       created_at: new Date().toISOString(),
                       updated_at: new Date().toISOString()
                     } as UserProfile);
@@ -574,12 +671,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Set loading to false immediately, profile fetch happens in background
         setLoading(false);
 
-        // Fetch profile in background with timeout to prevent hanging
+        // Fetch profile in background with extended timeout to prevent missing admin roles
         const profileTimeoutPromise = new Promise<UserProfile | null>((resolve) => {
           setTimeout(() => {
             console.warn('⏱️ Profile fetch timeout');
             resolve(null);
-          }, 5000); // 5 second timeout
+          }, 10000); // 10 second timeout - increased to allow profile fetch to complete
         });
 
         Promise.race([
@@ -588,23 +685,91 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         ])
           .then(userProfile => {
             if (mountedRef.current) {
-              setProfile(userProfile || {
-                id: signedInUser.id,
-                email: signedInUser.email || '',
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              } as UserProfile);
+              if (userProfile) {
+                setProfile(userProfile);
+                console.log('✅ Profile loaded successfully after sign in');
+              } else {
+                // If fetch returned null, try again with a longer timeout
+                console.warn('⚠️ Profile fetch returned null, retrying with longer timeout');
+
+                const retryTimeoutPromise = new Promise<UserProfile | null>((resolve) => {
+                  setTimeout(() => {
+                    console.warn('⏱️ Profile retry timeout');
+                    resolve(null);
+                  }, 15000); // 15 second timeout for retry
+                });
+
+                Promise.race([
+                  fetchProfile(signedInUser.id),
+                  retryTimeoutPromise
+                ])
+                  .then(retryProfile => {
+                    if (mountedRef.current) {
+                      setProfile(retryProfile || {
+                        id: signedInUser.id,
+                        email: signedInUser.email || '',
+                        role: 'user',
+                        status: 'active',
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                      } as UserProfile);
+                    }
+                  })
+                  .catch(() => {
+                    if (mountedRef.current) {
+                      setProfile({
+                        id: signedInUser.id,
+                        email: signedInUser.email || '',
+                        role: 'user',
+                        status: 'active',
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                      } as UserProfile);
+                    }
+                  });
+              }
             }
           })
           .catch((profileError) => {
-            // Create minimal profile if fetch fails
+            // Try again with a longer timeout on error
             if (mountedRef.current) {
-              setProfile({
-                id: signedInUser.id,
-                email: signedInUser.email || '',
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              } as UserProfile);
+              console.warn('⚠️ Profile fetch failed, retrying with longer timeout');
+
+              const retryTimeoutPromise = new Promise<UserProfile | null>((resolve) => {
+                setTimeout(() => {
+                  console.warn('⏱️ Profile retry timeout');
+                  resolve(null);
+                }, 15000); // 15 second timeout for retry
+              });
+
+              Promise.race([
+                fetchProfile(signedInUser.id),
+                retryTimeoutPromise
+              ])
+                .then(retryProfile => {
+                  if (mountedRef.current) {
+                    setProfile(retryProfile || {
+                      id: signedInUser.id,
+                      email: signedInUser.email || '',
+                      role: 'user',
+                      status: 'active',
+                      created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString()
+                    } as UserProfile);
+                  }
+                })
+                .catch(() => {
+                  if (mountedRef.current) {
+                    setProfile({
+                      id: signedInUser.id,
+                      email: signedInUser.email || '',
+                      role: 'user',
+                      status: 'active',
+                      created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString()
+                    } as UserProfile);
+                  }
+                });
             }
             logError('Profile fetch failed after sign in:', profileError, {
               userId: signedInUser.id,
