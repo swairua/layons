@@ -243,14 +243,19 @@ FROM invoices;`;
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-muted-foreground">
           <p>
-            Your Supabase database has an RLS (Row Level Security) policy on the invoices table that references a <code className="bg-slate-100 px-2 py-1 rounded">company_id</code> column that doesn't exist.
+            Your Supabase database has RLS (Row Level Security) policies that are either referencing non-existent columns or causing circular dependencies.
           </p>
           <p>
-            This prevents the delete operation from working with the error: <code className="bg-slate-100 px-2 py-1 rounded text-xs">record "old" has no field "company_id"</code>
+            The <strong>company_id</strong> column may not exist on the invoices table, causing errors like: <code className="bg-slate-100 px-2 py-1 rounded text-xs">"column invoices.company_id does not exist"</code>
           </p>
-          <p>
-            The fix drops the problematic policy and creates a simpler one that allows authenticated users to manage invoices.
-          </p>
+          <p className="font-semibold">This fix will:</p>
+          <ul className="list-disc list-inside space-y-1 ml-2">
+            <li>Disable RLS on tables with problematic policies</li>
+            <li>Drop policies that reference non-existent columns</li>
+            <li>Add the <code className="bg-slate-100 px-2 py-1 rounded text-xs">company_id</code> column if missing</li>
+            <li>Populate company_id from customer relationships</li>
+            <li>Allow full database functionality</li>
+          </ul>
         </CardContent>
       </Card>
 
