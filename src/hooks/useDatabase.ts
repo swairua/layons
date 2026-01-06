@@ -984,7 +984,10 @@ export const usePayments = (companyId?: string) => {
         try {
           if (paymentAllocations.length > 0) {
             const invoiceIds = [...new Set(paymentAllocations.map(alloc => alloc.invoice_id).filter(Boolean))];
+            console.log('Payment allocations:', paymentAllocations);
+            console.log('Raw invoice IDs from allocations:', paymentAllocations.map(a => a.invoice_id));
             console.log('Fetching invoice details for IDs:', invoiceIds.length > 0 ? invoiceIds.slice(0, 3) + '...' : 'none');
+            console.log('Total invoice IDs to fetch:', invoiceIds.length);
 
             if (invoiceIds.length > 0) {
               const { data: invoiceData, error: invoiceError } = await supabase
@@ -992,11 +995,19 @@ export const usePayments = (companyId?: string) => {
                 .select('id, invoice_number, total_amount')
                 .in('id', invoiceIds);
 
+              console.log('Invoice fetch result:', {
+                success: !invoiceError,
+                count: invoiceData?.length || 0,
+                error: invoiceError?.message,
+                invoices: invoiceData
+              });
+
               if (!invoiceError && invoiceData) {
                 console.log(`✅ Fetched ${invoiceData.length} invoice details`);
                 invoiceData.forEach(invoice => {
                   invoiceMap.set(invoice.id, invoice);
                 });
+                console.log('Invoice map after population:', Array.from(invoiceMap.entries()));
               } else if (invoiceError) {
                 console.warn('⚠️ Could not fetch invoice details:', invoiceError.message);
               }
