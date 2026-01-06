@@ -1207,21 +1207,36 @@ export const useDeletePayment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (paymentId: string) => {
+    mutationFn: async (paymentData: { paymentId: string; companyId: string }) => {
+      const { paymentId, companyId } = paymentData;
+
       if (!paymentId || typeof paymentId !== 'string' || paymentId.length !== 36) {
         throw new Error('Invalid payment ID');
       }
 
+      if (!companyId || typeof companyId !== 'string' || companyId.length !== 36) {
+        throw new Error('Invalid company ID');
+      }
+
       try {
-        // Step 1: Get the payment record (simple query first)
+        // Step 1: Get the payment record with company_id filter (for RLS compliance)
         const { data: payment, error: paymentError } = await supabase
           .from('payments')
-          .select('id, amount')
+          .select('id, amount, company_id')
           .eq('id', paymentId)
+          .eq('company_id', companyId)
           .single();
 
-        if (paymentError || !payment) {
-          console.error('Payment fetch error:', paymentError);
+        if (paymentError) {
+          console.error('Payment fetch error details:', {
+            code: paymentError.code,
+            message: paymentError.message,
+            details: paymentError.details
+          });
+          throw new Error(`Payment fetch failed: ${paymentError.message}`);
+        }
+
+        if (!payment) {
           throw new Error('Payment not found');
         }
 
