@@ -336,13 +336,14 @@ export default function UserManagement() {
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" disabled={!isAdmin}>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
                             onClick={() => setModalState({ type: 'edit', user })}
+                            disabled={!isAdmin}
                           >
                             <Edit className="mr-2 h-4 w-4" />
                             Edit User
