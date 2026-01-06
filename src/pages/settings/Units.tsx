@@ -35,7 +35,8 @@ export default function UnitsSettings() {
       setDeleteDialog({ open: false });
     } catch (err) {
       console.error(err);
-      toast.error('Failed to delete unit');
+      const errorMessage = parseErrorMessage(err);
+      toast.error(`Failed to delete unit: ${errorMessage}`);
     }
   };
 
