@@ -76,7 +76,11 @@ export async function verifyRLSDisabled(): Promise<boolean> {
     if (error) {
       const errorMsg = (error?.message || '').toLowerCase();
       if (errorMsg.includes('infinite recursion') || errorMsg.includes('recursive')) {
-        console.error('❌ RLS still has recursion, need to disable completely');
+        console.error('❌ RLS policy still has recursion issue');
+        console.error('📋 MANUAL FIX REQUIRED:');
+        console.error('1. Go to Supabase Dashboard > SQL Editor');
+        console.error('2. Copy and run the SQL from FINAL_RLS_RECURSION_FIX.sql');
+        console.error('3. This disables RLS on all tables to prevent infinite recursion');
         return false;
       }
       // Some other error - might be OK (like no data)
