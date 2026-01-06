@@ -48,8 +48,9 @@ export async function performAuditedDelete(
       .eq(whereKey, whereValue);
 
     if (deleteError) {
-      console.error(`Delete failed for ${tableName}:`, deleteError);
-      return { success: false, error: deleteError as Error };
+      const errorMessage = parseErrorMessage(deleteError);
+      console.error(`Delete failed for ${tableName}:`, deleteError, `- Message: ${errorMessage}`);
+      return { success: false, error: new Error(errorMessage) };
     }
 
     // Log the deletion to audit_logs
@@ -113,8 +114,9 @@ export async function performAuditedDelete(
 
     return { success: true };
   } catch (err) {
-    const error = err instanceof Error ? err : new Error(String(err));
-    console.error('Error in performAuditedDelete:', error);
+    const errorMessage = parseErrorMessage(err);
+    const error = new Error(errorMessage);
+    console.error('Error in performAuditedDelete:', err, `- Message: ${errorMessage}`);
     return { success: false, error };
   }
 }
@@ -148,8 +150,9 @@ export async function performAuditedDeleteMultiple(
       .eq(whereKey, whereValue);
 
     if (deleteError) {
-      console.error(`Delete failed for ${tableName}:`, deleteError);
-      return { success: false, error: deleteError as Error };
+      const errorMessage = parseErrorMessage(deleteError);
+      console.error(`Delete failed for ${tableName}:`, deleteError, `- Message: ${errorMessage}`);
+      return { success: false, error: new Error(errorMessage) };
     }
 
     // Log each deletion to audit_logs
@@ -212,8 +215,9 @@ export async function performAuditedDeleteMultiple(
 
     return { success: true, deletedCount: recordsToDelete?.length || 0 };
   } catch (err) {
-    const error = err instanceof Error ? err : new Error(String(err));
-    console.error('Error in performAuditedDeleteMultiple:', error);
+    const errorMessage = parseErrorMessage(err);
+    const error = new Error(errorMessage);
+    console.error('Error in performAuditedDeleteMultiple:', err, `- Message: ${errorMessage}`);
     return { success: false, error };
   }
 }
