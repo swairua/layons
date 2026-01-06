@@ -1219,6 +1219,26 @@ export const useDeletePayment = () => {
       }
 
       try {
+        // Verify payment exists and belongs to this company before deletion
+        console.log('Verifying payment exists:', paymentId);
+        const { data: paymentExists, error: verifyError } = await supabase
+          .from('payments')
+          .select('id, company_id')
+          .eq('id', paymentId)
+          .eq('company_id', companyId)
+          .single();
+
+        if (verifyError) {
+          const errorMsg = verifyError?.message || 'Unknown error';
+          if (errorMsg.includes('No rows found')) {
+            throw new Error('Payment not found or you do not have permission to delete it');
+          }
+          throw verifyError;
+        }
+
+        if (!paymentExists) {
+          throw new Error('Payment not found. It may have been deleted already.');
+        }
         // Step 1: Get payment allocations to reverse invoices
         console.log('Fetching allocations for payment:', paymentId);
         const { data: allocations, error: allocError } = await supabase
