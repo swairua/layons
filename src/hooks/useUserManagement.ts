@@ -42,9 +42,9 @@ const useUserManagement = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch all users in the same company
+  // Fetch all users in the same company (accessible to all authenticated users)
   const fetchUsers = async () => {
-    if (!currentUser?.company_id || !isAdmin) {
+    if (!currentUser?.company_id) {
       return;
     }
 
@@ -73,9 +73,9 @@ const useUserManagement = () => {
     }
   };
 
-  // Fetch pending invitations
+  // Fetch pending invitations (accessible to all authenticated users)
   const fetchInvitations = async () => {
-    if (!currentUser?.company_id || !isAdmin) {
+    if (!currentUser?.company_id) {
       return;
     }
 
@@ -121,37 +121,49 @@ const useUserManagement = () => {
     }
   };
 
-  // Create a new user (admin only) - requires Supabase Edge Function with admin privileges
-  // See USER_MANAGEMENT_SETUP_GUIDE.md for implementation instructions
+  // Create a new user (authenticated users in the same company)
   const createUser = async (userData: CreateUserData): Promise<{ success: boolean; error?: string }> => {
-    if (!isAdmin || !currentUser?.company_id) {
-      return { success: false, error: 'Unauthorized' };
+    if (!currentUser?.company_id) {
+      return { success: false, error: 'Unauthorized - Company ID required' };
     }
 
     setLoading(true);
 
     try {
-      // TODO: Implement Edge Function call for user creation
-      // Endpoint: POST {SUPABASE_URL}/functions/v1/create-user
-      // See USER_MANAGEMENT_SETUP_GUIDE.md for complete implementation
+      // Create profile for the new user
+      const { error } = await supabase
+        .from('profiles')
+        .insert({
+          email: userData.email,
+          full_name: userData.full_name,
+          role: userData.role,
+          phone: userData.phone,
+          department: userData.department,
+          position: userData.position,
+          company_id: currentUser.company_id,
+          status: 'active',
+        });
 
-      console.error('User creation requires Supabase Edge Function setup. See USER_MANAGEMENT_SETUP_GUIDE.md');
-      return {
-        success: false,
-        error: 'User creation requires backend setup. Please use the "Invite User" feature to onboard new users.'
-      };
+      if (error) {
+        throw error;
+      }
+
+      toast.success('User created successfully');
+      await fetchUsers();
+      return { success: true };
     } catch (err) {
       const errorMessage = parseErrorMessageWithCodes(err, 'user creation');
       console.error('Error creating user:', err);
+      toast.error(`Failed to create user: ${errorMessage}`);
       return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
   };
 
-  // Update user (admin only)
+  // Update user (authenticated users in the same company can edit)
   const updateUser = async (userId: string, userData: UpdateUserData): Promise<{ success: boolean; error?: string }> => {
-    if (!isAdmin) {
+    if (!currentUser?.company_id) {
       return { success: false, error: 'Unauthorized' };
     }
 
@@ -180,38 +192,46 @@ const useUserManagement = () => {
     }
   };
 
-  // Delete user (admin only) - requires Supabase Edge Function with admin privileges
-  // See USER_MANAGEMENT_SETUP_GUIDE.md for implementation instructions
+  // Delete user (authenticated users in the same company, cannot delete themselves)
   const deleteUser = async (userId: string): Promise<{ success: boolean; error?: string }> => {
-    if (!isAdmin || userId === currentUser?.id) {
-      return { success: false, error: 'Cannot delete yourself or unauthorized' };
+    if (userId === currentUser?.id) {
+      return { success: false, error: 'Cannot delete yourself' };
+    }
+
+    if (!currentUser?.company_id) {
+      return { success: false, error: 'Unauthorized - Company ID required' };
     }
 
     setLoading(true);
 
     try {
-      // TODO: Implement Edge Function call for user deletion
-      // Endpoint: POST {SUPABASE_URL}/functions/v1/delete-user
-      // See USER_MANAGEMENT_SETUP_GUIDE.md for complete implementation
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId)
+        .eq('company_id', currentUser.company_id);
 
-      console.error('User deletion requires Supabase Edge Function setup. See USER_MANAGEMENT_SETUP_GUIDE.md');
-      return {
-        success: false,
-        error: 'User deletion requires backend setup. Please contact your system administrator.'
-      };
+      if (error) {
+        throw error;
+      }
+
+      toast.success('User deleted successfully');
+      await fetchUsers();
+      return { success: true };
     } catch (err) {
       const errorMessage = parseErrorMessageWithCodes(err, 'user deletion');
       console.error('Error deleting user:', err);
+      toast.error(`Failed to delete user: ${errorMessage}`);
       return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
   };
 
-  // Invite user via email
+  // Invite user via email (authenticated users in the same company)
   const inviteUser = async (email: string, role: UserRole): Promise<{ success: boolean; error?: string }> => {
-    if (!isAdmin || !currentUser?.company_id) {
-      return { success: false, error: 'Unauthorized' };
+    if (!currentUser?.company_id) {
+      return { success: false, error: 'Unauthorized - Company ID required' };
     }
 
     setLoading(true);
@@ -269,10 +289,10 @@ const useUserManagement = () => {
     }
   };
 
-  // Revoke invitation
+  // Revoke invitation (authenticated users can revoke invitations in their company)
   const revokeInvitation = async (invitationId: string): Promise<{ success: boolean; error?: string }> => {
-    if (!isAdmin) {
-      return { success: false, error: 'Unauthorized' };
+    if (!currentUser?.company_id) {
+      return { success: false, error: 'Unauthorized - Company ID required' };
     }
 
     setLoading(true);
@@ -372,13 +392,13 @@ const useUserManagement = () => {
     };
   };
 
-  // Load data on mount
+  // Load data on mount (accessible to all authenticated users in the company)
   useEffect(() => {
-    if (isAdmin && currentUser?.company_id) {
+    if (currentUser?.company_id) {
       fetchUsers();
       fetchInvitations();
     }
-  }, [isAdmin, currentUser?.company_id]);
+  }, [currentUser?.company_id]);
 
   return {
     users,

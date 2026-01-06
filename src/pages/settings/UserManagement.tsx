@@ -120,78 +120,6 @@ export default function UserManagement() {
     user.department?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleRefreshProfile = async () => {
-    setIsRefreshing(true);
-    try {
-      await refreshProfile();
-      toast.success('Profile refreshed! Admin privileges updated.');
-    } catch (error) {
-      toast.error('Failed to refresh profile');
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
-
-  if (!isAdmin) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">User Management</h1>
-            <p className="text-muted-foreground">
-              Manage user accounts, roles, and permissions
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-center">
-          <div className="space-y-6 w-full max-w-md">
-            <Card className="text-center">
-              <CardContent className="pt-6">
-                <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Access Denied</h3>
-                <p className="text-muted-foreground mb-4">
-                  You need administrator privileges to access user management.
-                </p>
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Try refreshing your profile or use the database fix:
-                  </p>
-                  <div className="space-y-2">
-                    <Button
-                      onClick={handleRefreshProfile}
-                      disabled={isRefreshing}
-                      variant="outline"
-                      className="w-full"
-                    >
-                      {isRefreshing ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Refreshing...
-                        </>
-                      ) : (
-                        'Refresh Profile'
-                      )}
-                    </Button>
-                    <Button
-                      onClick={() => navigate('/database-fix')}
-                      variant="default"
-                      className="w-full"
-                    >
-                      Database Fix Guide
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <AdminDiagnostics />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const handleCreateUser = async (userData: any) => {
     return await createUser(userData);
   };
@@ -241,8 +169,6 @@ export default function UserManagement() {
           <Button
             variant="primary-gradient"
             size="lg"
-            disabled
-            title="Direct user creation requires backend setup. Use 'Invite User' instead."
             onClick={() => setModalState({ type: 'create' })}
           >
             <UserPlus className="h-4 w-4 mr-2" />
@@ -419,9 +345,8 @@ export default function UserManagement() {
                           </DropdownMenuItem>
                           {user.id !== currentUser?.id && (
                             <DropdownMenuItem
-                              className="text-destructive opacity-50 cursor-not-allowed"
-                              disabled
-                              title="User deletion requires backend setup"
+                              onClick={() => setDeleteDialog({ open: true, user })}
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
                               Delete User
