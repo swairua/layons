@@ -202,8 +202,16 @@ COMMIT;
               </Card>
             </div>
 
-            <AlertDialogFooter className="gap-2">
+            <AlertDialogFooter className="flex-col gap-2 sm:flex-row">
               <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <Button
+                variant="outline"
+                onClick={() => window.location.href = '/database-fix'}
+                className="gap-2"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Go to Database Fix Page
+              </Button>
               <Button
                 onClick={handleAutomaticFix}
                 disabled={isApplying}
