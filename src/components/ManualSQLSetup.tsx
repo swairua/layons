@@ -27,6 +27,16 @@ export function ManualSQLSetup() {
 
   const databaseFixes: DatabaseFix[] = [
     {
+      id: 'disable-rls-recursion',
+      title: '🚨 EMERGENCY: Disable RLS to Fix Infinite Recursion',
+      description: 'Immediately disables RLS (Row Level Security) on invoices and related tables to stop the infinite recursion error. This is an emergency fix to unblock the application.',
+      issue: 'Error: "infinite recursion detected in policy for relation profiles" - prevents any invoice operations',
+      severity: 'critical',
+      verified: false,
+      verify: verifyRLSDisabled,
+      sql: getDisableRLSSql()
+    },
+    {
       id: 'invoice-company-id',
       title: 'Add company_id to Invoices Table',
       description: 'Adds the missing company_id column to the invoices table, which is required for proper data organization and deletion operations.',
