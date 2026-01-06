@@ -8,6 +8,7 @@ import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { CreateUnitModal } from '@/components/units/CreateUnitModal';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { toast } from 'sonner';
+import { parseErrorMessage } from '@/utils/errorHelpers';
 
 export default function UnitsSettings() {
   const { currentCompany } = useCurrentCompany();
