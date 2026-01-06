@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { parseErrorMessage } from '@/utils/errorHelpers';
+import { RLSPolicyError } from '@/utils/RLSError';
 import { ensureCompanyImageColumns } from '@/utils/ensureDatabaseColumns';
 
 // Types
@@ -1575,16 +1576,24 @@ export const useDeleteInvoice = () => {
         .delete()
         .eq('id', id);
       if (error) {
-        const errorMessage = parseErrorMessage(error);
-
-        // Check if this is the company_id RLS policy issue
+        // Check if this is an RLS policy issue
         const fullError = JSON.stringify(error);
-        if (fullError.includes('company_id') || fullError.includes('has no field')) {
+        const msgLower = (error?.message || '').toLowerCase();
+
+        if (msgLower.includes('company_id') ||
+            msgLower.includes('has no field') ||
+            msgLower.includes('policy') ||
+            msgLower.includes('does not exist')) {
           console.error('🔧 RLS Policy Issue Detected');
-          console.error('Go to: /database-fix for automatic or manual fix options');
-          throw new Error(`Delete failed - RLS policy issue detected. Please visit /database-fix to resolve this.`);
+          console.error('Error details:', error);
+          // Throw a special RLS error that will trigger the fix dialog
+          throw new RLSPolicyError(
+            `Unable to delete invoice due to RLS policy issue: ${error.message}`,
+            true
+          );
         }
 
+        const errorMessage = parseErrorMessage(error);
         throw new Error(errorMessage);
       }
     },

@@ -11,7 +11,7 @@ import { updateMetaTags } from "@/utils/updateMetaTags";
 import { verifyInvoiceCompanyIdColumn } from "@/utils/fixMissingInvoiceCompanyId";
 import { verifyInvoiceRLSFix } from "@/utils/fixInvoiceRLSPolicy";
 import { verifyRLSDisabled } from "@/utils/disableInvoiceRLS";
-import { fixDeleteInvoiceRLS, verifyDeleteInvoiceRLSFix } from "@/utils/fixDeleteInvoiceRLS";
+import { fixRLSWithProperOrder, verifyRLSColumnFix } from "@/utils/fixRLSProperOrder";
 
 // Lazy load the page components to reduce initial bundle size and startup time
 import { lazy, Suspense } from "react";
@@ -87,19 +87,20 @@ const App = () => {
 
         // Fix RLS policy for invoice deletion (handles company_id column issue)
         try {
-          const isFixed = await verifyDeleteInvoiceRLSFix();
+          const isFixed = await verifyRLSColumnFix();
           if (!isFixed) {
-            console.log('Attempting to fix RLS policy for invoice deletion...');
-            const fixResult = await fixDeleteInvoiceRLS();
+            console.log('🔧 RLS column issue detected. Attempting to fix (disable → add column → re-enable)...');
+            const fixResult = await fixRLSWithProperOrder();
             if (fixResult.success) {
-              console.log('✅ RLS policy fixed successfully');
+              console.log('✅ RLS column fix applied successfully');
             } else if (fixResult.requiresManualFix) {
-              console.warn('⚠️ Manual RLS policy fix required. Run this SQL in Supabase:');
-              console.warn(fixResult.sql);
+              console.warn('⚠️ Manual RLS fix required. User will see a fix dialog when they try to delete an invoice.');
             }
+          } else {
+            console.log('✅ RLS column verification passed - database is ready');
           }
         } catch (err) {
-          console.warn('⚠️ Could not fix RLS policy', err);
+          console.warn('⚠️ Could not automatically fix RLS column issue', err);
         }
 
         // Verify invoice RLS policy doesn't have infinite recursion

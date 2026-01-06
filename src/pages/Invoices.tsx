@@ -50,6 +50,9 @@ import { ViewInvoiceModal } from '@/components/invoices/ViewInvoiceModal';
 import { RecordPaymentModal } from '@/components/payments/RecordPaymentModal';
 import { CreateDeliveryNoteModal } from '@/components/delivery/CreateDeliveryNoteModal';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
+import { RLSErrorDialog } from '@/components/RLSErrorDialog';
+import { fixRLSWithProperOrder } from '@/utils/fixRLSProperOrder';
+import { isRLSError } from '@/utils/RLSError';
 import { downloadInvoicePDF } from '@/utils/pdfGenerator';
 import { fixInvoiceColumns, calculateInvoiceStatus } from '@/utils/fixInvoiceColumns';
 import { supabase } from '@/integrations/supabase/client';
@@ -98,6 +101,7 @@ export default function Invoices() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; invoice?: Invoice }>({ open: false });
   const [isFixingData, setIsFixingData] = useState(false);
+  const [showRLSErrorDialog, setShowRLSErrorDialog] = useState(false);
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState('all');
@@ -168,8 +172,15 @@ export default function Invoices() {
       setDeleteDialog({ open: false });
     } catch (err) {
       console.error('Delete failed', err);
-      const errorMessage = parseErrorMessage(err);
-      toast.error(`Failed to delete invoice: ${errorMessage}`);
+
+      // Check if this is an RLS error using our custom error type
+      if (isRLSError(err)) {
+        console.log('🔧 RLS Error Detected - showing fix dialog');
+        setShowRLSErrorDialog(true);
+      } else {
+        const errorMessage = parseErrorMessage(err);
+        toast.error(`Failed to delete invoice: ${errorMessage}`);
+      }
     }
   };
 
@@ -792,6 +803,16 @@ Website:`;
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteDialog({ open: false })}
         confirmText="Delete"
+      />
+
+      <RLSErrorDialog
+        open={showRLSErrorDialog}
+        onOpenChange={setShowRLSErrorDialog}
+        onSuccess={() => {
+          refetch();
+          setDeleteDialog({ open: false });
+        }}
+        invoiceName={deleteDialog.invoice?.invoice_number}
       />
     </div>
   );
