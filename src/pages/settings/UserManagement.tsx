@@ -217,16 +217,18 @@ export default function UserManagement() {
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setModalState({ type: 'invite' })}
           >
             <Mail className="h-4 w-4 mr-2" />
             Invite User
           </Button>
-          <Button 
-            variant="primary-gradient" 
+          <Button
+            variant="primary-gradient"
             size="lg"
+            disabled
+            title="Direct user creation requires backend setup. Use 'Invite User' instead."
             onClick={() => setModalState({ type: 'create' })}
           >
             <UserPlus className="h-4 w-4 mr-2" />
