@@ -334,7 +334,8 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
       await fetchItems();
     } catch (err) {
       console.error('Delete failed:', err);
-      toast.error('Failed to delete item');
+      const errorMessage = parseErrorMessage(err);
+      toast.error(`Failed to delete item: ${errorMessage}`);
     }
   };
 

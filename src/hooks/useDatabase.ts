@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { parseErrorMessage } from '@/utils/errorHelpers';
 import { ensureCompanyImageColumns } from '@/utils/ensureDatabaseColumns';
 
 // Types
@@ -1534,7 +1535,8 @@ export const useDeleteQuotation = () => {
 
       if (error) {
         // If deletion fails due to schema differences (e.g., missing company_id) or RLS, attempt soft-delete fallback
-        const message = String(error.message || '').toLowerCase();
+        const errorMessage = parseErrorMessage(error);
+        const message = errorMessage.toLowerCase();
         console.warn('Quotation delete failed, attempting soft-delete fallback:', message);
 
         if (message.includes('company_id') || message.includes('does not exist') || message.includes('permission') || message.includes('rls')) {
@@ -1545,16 +1547,16 @@ export const useDeleteQuotation = () => {
             .eq('id', id);
 
           if (updateError) {
-            // If update also fails, throw the original error for visibility
-            throw error;
+            // If update also fails, throw an error with the proper message
+            throw new Error(errorMessage);
           }
 
           // Soft-delete succeeded; return early
           return;
         }
 
-        // For other errors, rethrow
-        throw error;
+        // For other errors, throw with proper error message
+        throw new Error(errorMessage);
       }
     },
     onSuccess: () => {
@@ -1572,7 +1574,10 @@ export const useDeleteInvoice = () => {
         .from('invoices')
         .delete()
         .eq('id', id);
-      if (error) throw error;
+      if (error) {
+        const errorMessage = parseErrorMessage(error);
+        throw new Error(errorMessage);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices_fixed'] });

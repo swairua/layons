@@ -8,6 +8,7 @@ import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { CreateUnitModal } from '@/components/units/CreateUnitModal';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { toast } from 'sonner';
+import { parseErrorMessage } from '@/utils/errorHelpers';
 
 export default function UnitsSettings() {
   const { currentCompany } = useCurrentCompany();
@@ -34,7 +35,8 @@ export default function UnitsSettings() {
       setDeleteDialog({ open: false });
     } catch (err) {
       console.error(err);
-      toast.error('Failed to delete unit');
+      const errorMessage = parseErrorMessage(err);
+      toast.error(`Failed to delete unit: ${errorMessage}`);
     }
   };
 

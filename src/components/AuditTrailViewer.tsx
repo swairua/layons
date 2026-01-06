@@ -170,7 +170,6 @@ export function AuditTrailViewer() {
                 <SelectValue placeholder="All Actions" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Actions</SelectItem>
                 {actions.map((action) => (
                   <SelectItem key={action} value={action}>
                     {ACTION_LABELS[action]}
@@ -183,7 +182,6 @@ export function AuditTrailViewer() {
                 <SelectValue placeholder="All Types" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
                 {entityTypes.map((type) => (
                   <SelectItem key={type} value={type}>
                     {type}

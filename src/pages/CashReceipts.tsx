@@ -23,6 +23,7 @@ import { useCompanies } from '@/hooks/useDatabase';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { parseErrorMessage } from '@/utils/errorHelpers';
 import { CreateCashReceiptModal } from '@/components/cash-receipts/CreateCashReceiptModal';
 import { EditCashReceiptModal } from '@/components/cash-receipts/EditCashReceiptModal';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
@@ -193,7 +194,8 @@ export default function CashReceipts() {
       setDeleteDialog({ open: false });
     } catch (err) {
       console.error('Delete failed', err);
-      toast.error('Failed to delete cash receipt');
+      const errorMessage = parseErrorMessage(err);
+      toast.error(`Failed to delete cash receipt: ${errorMessage}`);
     } finally {
       setIsDeleting(false);
     }

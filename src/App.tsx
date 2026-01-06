@@ -8,6 +8,9 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useCurrentCompany } from "@/contexts/CompanyContext";
 import { setFavicon } from "@/utils/setFavicon";
 import { updateMetaTags } from "@/utils/updateMetaTags";
+import { verifyInvoiceCompanyIdColumn } from "@/utils/fixMissingInvoiceCompanyId";
+import { verifyInvoiceRLSFix } from "@/utils/fixInvoiceRLSPolicy";
+import { verifyRLSDisabled } from "@/utils/disableInvoiceRLS";
 
 // Lazy load the page components to reduce initial bundle size and startup time
 import { lazy, Suspense } from "react";
@@ -50,6 +53,26 @@ const App = () => {
   useEffect(() => {
     // Initialize on app startup
     // Non-blocking async initialization
+    (async () => {
+      try {
+        // Check if RLS is properly disabled (fixes infinite recursion)
+        const rslDisabled = await verifyRLSDisabled();
+        if (!rslDisabled) {
+          console.error('❌ RLS still has infinite recursion - you need to run the SQL fix from the Database Setup panel');
+        } else {
+          console.log('✅ RLS check passed');
+        }
+
+        // Verify invoice company_id column exists
+        // This fixes issues with delete operations
+        await verifyInvoiceCompanyIdColumn();
+
+        // Verify invoice RLS policy doesn't have infinite recursion
+        await verifyInvoiceRLSFix();
+      } catch (error) {
+        console.warn('Database schema verification completed with issues (non-critical)', error);
+      }
+    })();
   }, []);
 
   useEffect(() => {
