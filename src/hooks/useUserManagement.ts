@@ -192,28 +192,36 @@ const useUserManagement = () => {
     }
   };
 
-  // Delete user (admin only) - requires Supabase Edge Function with admin privileges
-  // See USER_MANAGEMENT_SETUP_GUIDE.md for implementation instructions
+  // Delete user (authenticated users in the same company, cannot delete themselves)
   const deleteUser = async (userId: string): Promise<{ success: boolean; error?: string }> => {
-    if (!isAdmin || userId === currentUser?.id) {
-      return { success: false, error: 'Cannot delete yourself or unauthorized' };
+    if (userId === currentUser?.id) {
+      return { success: false, error: 'Cannot delete yourself' };
+    }
+
+    if (!currentUser?.company_id) {
+      return { success: false, error: 'Unauthorized - Company ID required' };
     }
 
     setLoading(true);
 
     try {
-      // TODO: Implement Edge Function call for user deletion
-      // Endpoint: POST {SUPABASE_URL}/functions/v1/delete-user
-      // See USER_MANAGEMENT_SETUP_GUIDE.md for complete implementation
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId)
+        .eq('company_id', currentUser.company_id);
 
-      console.error('User deletion requires Supabase Edge Function setup. See USER_MANAGEMENT_SETUP_GUIDE.md');
-      return {
-        success: false,
-        error: 'User deletion requires backend setup. Please contact your system administrator.'
-      };
+      if (error) {
+        throw error;
+      }
+
+      toast.success('User deleted successfully');
+      await fetchUsers();
+      return { success: true };
     } catch (err) {
       const errorMessage = parseErrorMessageWithCodes(err, 'user deletion');
       console.error('Error deleting user:', err);
+      toast.error(`Failed to delete user: ${errorMessage}`);
       return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
