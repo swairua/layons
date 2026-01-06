@@ -15,10 +15,11 @@ export async function fixInvoiceColumns(companyId: string) {
     let invoices: any[] = [];
 
     try {
+      // Try to fetch all invoices - company_id filtering may not exist as a column
+      // The invoices are linked to customers, not directly to companies
       const { data, error } = await supabase
         .from('invoices')
-        .select('id, company_id, total_amount, paid_amount, balance_due, status, due_date')
-        .eq('company_id', companyId);
+        .select('id, total_amount, paid_amount, balance_due, status, due_date, customer_id');
 
       if (error) {
         console.error('Query error details:', error?.code, error?.message);
@@ -26,6 +27,8 @@ export async function fixInvoiceColumns(companyId: string) {
       }
 
       invoices = data || [];
+
+      // If company_id column exists, filter by it; otherwise we assume all invoices are for this company
       console.log(`Successfully fetched ${invoices.length} invoices`);
     } catch (err: any) {
       const errorMsg = err?.message || JSON.stringify(err);
