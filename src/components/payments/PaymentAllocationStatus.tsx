@@ -463,6 +463,23 @@ export function PaymentAllocationStatus() {
             </Alert>
 
             <div className="flex flex-wrap gap-2">
+              {checks[2]?.status === 'error' && (
+                <Button
+                  size="sm"
+                  onClick={handleFixProfile}
+                  disabled={isFixingProfile}
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
+                >
+                  {isFixingProfile ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Fixing Profile...
+                    </>
+                  ) : (
+                    'Fix Profile'
+                  )}
+                </Button>
+              )}
               <Button
                 size="sm"
                 onClick={() => setShowSetupGuide(!showSetupGuide)}
