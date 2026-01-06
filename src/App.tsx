@@ -57,6 +57,9 @@ const App = () => {
         // Verify invoice company_id column exists
         // This fixes issues with delete operations
         await verifyInvoiceCompanyIdColumn();
+
+        // Verify invoice RLS policy doesn't have infinite recursion
+        await verifyInvoiceRLSFix();
       } catch (error) {
         console.warn('Database schema verification completed with issues (non-critical)', error);
       }
