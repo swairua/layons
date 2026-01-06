@@ -170,7 +170,6 @@ export function AuditTrailViewer() {
                 <SelectValue placeholder="All Actions" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Actions</SelectItem>
                 {actions.map((action) => (
                   <SelectItem key={action} value={action}>
                     {ACTION_LABELS[action]}
