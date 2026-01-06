@@ -9,23 +9,34 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from '@/components/ui/table';
-import { 
-  Plus, 
-  Search, 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  Plus,
+  Search,
   Filter,
   Eye,
   DollarSign,
-  Download
+  Download,
+  Trash2
 } from 'lucide-react';
-import { usePayments, useCompanies } from '@/hooks/useDatabase';
+import { usePayments, useCompanies, useDeletePayment } from '@/hooks/useDatabase';
 import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
 import { generatePaymentReceiptPDF } from '@/utils/pdfGenerator';
 
@@ -85,12 +96,15 @@ export default function Payments() {
   const [showRecordModal, setShowRecordModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<any>(null);
-  
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [paymentToDelete, setPaymentToDelete] = useState<any>(null);
+
   // Fetch live payments data and company details
   const { data: companies = [] } = useCompanies();
   const currentCompany = companies[0];
   const { data: payments = [], isLoading, error } = usePayments(currentCompany?.id);
   const { data: invoices = [] } = useInvoices(currentCompany?.id);
+  const deletePayment = useDeletePayment();
 
 
   const handleRecordPayment = () => {
@@ -101,6 +115,37 @@ export default function Payments() {
     // Payment data is already in the correct format from the database
     setSelectedPayment(payment);
     setShowViewModal(true);
+  };
+
+  const handleDeleteClick = (payment: Payment) => {
+    setPaymentToDelete(payment);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!paymentToDelete || !currentCompany?.id) {
+      toast.error('Missing required information for deletion');
+      return;
+    }
+
+    try {
+      console.log('Initiating payment deletion:', paymentToDelete.id);
+      await deletePayment.mutateAsync({
+        paymentId: paymentToDelete.id,
+        companyId: currentCompany.id
+      });
+      toast.success(`Payment ${paymentToDelete.payment_number} deleted successfully`);
+      setShowDeleteConfirm(false);
+      setPaymentToDelete(null);
+    } catch (error) {
+      console.error('Delete error caught:', error);
+      const errorMessage = error instanceof Error
+        ? error.message
+        : typeof error === 'string'
+        ? error
+        : 'Unknown error occurred';
+      toast.error(`Failed to delete payment: ${errorMessage}`);
+    }
   };
 
   const handleDownloadReceipt = (payment: Payment) => {
@@ -381,6 +426,16 @@ export default function Payments() {
                         >
                           <Download className="h-4 w-4" />
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteClick(payment)}
+                          title="Delete payment"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          disabled={deletePayment.isPending}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -412,6 +467,28 @@ export default function Payments() {
         onDownloadReceipt={handleDownloadReceipt}
         onSendReceipt={(payment) => toast.info(`Sending receipt for payment ${payment.payment_number}`)}
       />
+
+      {/* Delete Payment Confirmation Dialog */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Payment</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete payment {paymentToDelete?.payment_number}? This will reverse all allocations and update invoice balances. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={deletePayment.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletePayment.isPending ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

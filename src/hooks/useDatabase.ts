@@ -1207,91 +1207,111 @@ export const useDeletePayment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (paymentId: string) => {
+    mutationFn: async (paymentData: { paymentId: string; companyId: string }) => {
+      const { paymentId, companyId } = paymentData;
+
       if (!paymentId || typeof paymentId !== 'string' || paymentId.length !== 36) {
         throw new Error('Invalid payment ID');
       }
 
-      // Step 1: Get the payment record with all its allocations
-      const { data: payment, error: paymentError } = await supabase
-        .from('payments')
-        .select(`
-          id,
-          amount,
-          payment_allocations(id, invoice_id, allocated_amount, invoices(id, total_amount, paid_amount, balance_due, status))
-        `)
-        .eq('id', paymentId)
-        .single();
-
-      if (paymentError || !payment) {
-        throw new Error('Payment not found');
+      if (!companyId || typeof companyId !== 'string' || companyId.length !== 36) {
+        throw new Error('Invalid company ID');
       }
 
-      const allocations = payment.payment_allocations || [];
-
-      // Step 2: Reverse invoice adjustments for each allocation
-      for (const allocation of allocations) {
-        if (allocation.invoices) {
-          const invoice = allocation.invoices;
-          const reversedPaidAmount = Math.max(0, (invoice.paid_amount || 0) - (allocation.allocated_amount || 0));
-          const reversedBalanceDue = invoice.total_amount - reversedPaidAmount;
-
-          // Determine new invoice status
-          let newStatus = 'draft';
-          if (reversedBalanceDue <= 0) {
-            newStatus = 'paid';
-          } else if (reversedPaidAmount > 0) {
-            newStatus = 'partial';
-          } else if (reversedBalanceDue >= invoice.total_amount) {
-            newStatus = 'draft';
-          }
-
-          // Update invoice
-          const { error: invoiceError } = await supabase
-            .from('invoices')
-            .update({
-              paid_amount: reversedPaidAmount,
-              balance_due: reversedBalanceDue,
-              status: newStatus,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', allocation.invoice_id);
-
-          if (invoiceError) {
-            console.error('Failed to reverse invoice balance:', invoiceError);
-            throw new Error(`Failed to reverse invoice balance: ${invoiceError.message}`);
-          }
-        }
-      }
-
-      // Step 3: Delete payment allocations
-      if (allocations.length > 0) {
-        const { error: deleteAllocError } = await supabase
+      try {
+        // Step 1: Get payment allocations to reverse invoices
+        console.log('Fetching allocations for payment:', paymentId);
+        const { data: allocations, error: allocError } = await supabase
           .from('payment_allocations')
-          .delete()
-          .in('id', allocations.map(a => a.id));
+          .select('id, invoice_id, allocated_amount')
+          .eq('payment_id', paymentId);
 
-        if (deleteAllocError) {
-          console.error('Failed to delete payment allocations:', deleteAllocError);
-          throw new Error(`Failed to delete payment allocations: ${deleteAllocError.message}`);
+        if (allocError) {
+          console.warn('Could not fetch allocations:', allocError.message);
         }
+
+        const allocationsList = allocations || [];
+        console.log('Found allocations:', allocationsList.length);
+
+        // Step 2: Reverse invoice adjustments for each allocation
+        if (allocationsList.length > 0) {
+          for (const allocation of allocationsList) {
+            try {
+              // Fetch the invoice for this allocation
+              const { data: invoice } = await supabase
+                .from('invoices')
+                .select('id, total_amount, paid_amount, balance_due, status')
+                .eq('id', allocation.invoice_id)
+                .single();
+
+              if (invoice) {
+                const reversedPaidAmount = Math.max(0, (invoice.paid_amount || 0) - (allocation.allocated_amount || 0));
+                const reversedBalanceDue = invoice.total_amount - reversedPaidAmount;
+
+                // Determine new invoice status
+                let newStatus = 'draft';
+                if (reversedBalanceDue <= 0) {
+                  newStatus = 'paid';
+                } else if (reversedPaidAmount > 0) {
+                  newStatus = 'partial';
+                }
+
+                // Update invoice
+                const { error: updateError } = await supabase
+                  .from('invoices')
+                  .update({
+                    paid_amount: reversedPaidAmount,
+                    balance_due: reversedBalanceDue,
+                    status: newStatus,
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq('id', allocation.invoice_id);
+
+                if (updateError) {
+                  console.warn(`Could not update invoice ${allocation.invoice_id}:`, updateError.message);
+                  // Continue anyway - don't fail the entire delete
+                }
+              }
+            } catch (err) {
+              console.warn(`Error processing allocation ${allocation.id}:`, err);
+              // Continue to next allocation
+            }
+          }
+
+          // Step 3: Delete payment allocations
+          const { error: deleteAllocError } = await supabase
+            .from('payment_allocations')
+            .delete()
+            .eq('payment_id', paymentId);
+
+          if (deleteAllocError) {
+            console.error('Failed to delete payment allocations:', deleteAllocError);
+            throw new Error(`Failed to delete allocations: ${deleteAllocError.message}`);
+          }
+        }
+
+        // Step 4: Delete the payment record
+        console.log('Deleting payment:', paymentId);
+        const { error: deletePaymentError } = await supabase
+          .from('payments')
+          .delete()
+          .eq('id', paymentId);
+
+        if (deletePaymentError) {
+          console.error('Failed to delete payment:', deletePaymentError);
+          throw new Error(`Failed to delete payment: ${deletePaymentError.message}`);
+        }
+
+        console.log('Payment deleted successfully:', paymentId);
+        return {
+          success: true,
+          payment_id: paymentId,
+          allocations_reversed: allocationsList.length
+        };
+      } catch (error) {
+        console.error('Error in useDeletePayment:', error);
+        throw error;
       }
-
-      // Step 4: Delete the payment record
-      const { error: deletePaymentError } = await supabase
-        .from('payments')
-        .delete()
-        .eq('id', paymentId);
-
-      if (deletePaymentError) {
-        throw new Error(`Failed to delete payment: ${deletePaymentError.message}`);
-      }
-
-      return {
-        success: true,
-        payment_id: paymentId,
-        allocations_reversed: allocations.length
-      };
     },
     onSuccess: () => {
       // Invalidate caches to refresh UI
