@@ -140,12 +140,25 @@ export default function Payments() {
       setPaymentToDelete(null);
     } catch (error) {
       console.error('Delete error caught:', error);
-      const errorMessage = error instanceof Error
-        ? error.message
-        : typeof error === 'string'
-        ? error
-        : 'Unknown error occurred';
-      toast.error(`Failed to delete payment: ${errorMessage}`);
+
+      let errorMessage = 'Unknown error occurred';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        errorMessage = (error as any)?.message || JSON.stringify(error);
+      }
+
+      // Clean up any [object Object] messages
+      if (errorMessage.includes('[object Object]')) {
+        errorMessage = 'Failed to delete payment. Please try again or contact support.';
+      }
+
+      toast.error(errorMessage, {
+        duration: 6000
+      });
     }
   };
 
