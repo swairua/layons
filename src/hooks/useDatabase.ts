@@ -995,11 +995,10 @@ export const usePayments = (companyId?: string) => {
             console.log('Total valid invoice IDs to fetch:', validInvoiceIds.length);
 
             if (validInvoiceIds.length > 0) {
-              // Filter by company_id AND invoice id to properly work with RLS policy
+              // Filter by invoice id - RLS policy will ensure we only see invoices from our company
               const { data: invoiceData, error: invoiceError } = await supabase
                 .from('invoices')
                 .select('id, invoice_number, total_amount, company_id')
-                .eq('company_id', companyId)
                 .in('id', validInvoiceIds);
 
               console.log('Invoice fetch result:', {
