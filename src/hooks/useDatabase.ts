@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { parseErrorMessage } from '@/utils/errorHelpers';
 import { ensureCompanyImageColumns } from '@/utils/ensureDatabaseColumns';
 
 // Types
