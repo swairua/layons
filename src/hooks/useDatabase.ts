@@ -995,13 +995,13 @@ export const usePayments = (companyId?: string) => {
             console.log('Total valid invoice IDs to fetch:', validInvoiceIds.length);
 
             if (validInvoiceIds.length > 0) {
-              // Filter by invoice id - RLS policy will ensure we only see invoices from our company
-              const { data: invoiceData, error: invoiceError } = await supabase
+              // Try to fetch invoices by their IDs
+              let { data: invoiceData, error: invoiceError } = await supabase
                 .from('invoices')
                 .select('id, invoice_number, total_amount, company_id')
                 .in('id', validInvoiceIds);
 
-              console.log('Invoice fetch result:', {
+              console.log('Invoice fetch result (specific IDs):', {
                 success: !invoiceError,
                 count: invoiceData?.length || 0,
                 error: invoiceError?.message,
@@ -1010,20 +1010,43 @@ export const usePayments = (companyId?: string) => {
                 fetchedInvoices: invoiceData
               });
 
-              if (!invoiceError && invoiceData) {
-                console.log(`✅ Fetched ${invoiceData.length} invoice details`);
+              if (!invoiceError && invoiceData && invoiceData.length > 0) {
+                console.log(`✅ Fetched ${invoiceData.length} invoice details via ID filter`);
                 invoiceData.forEach(invoice => {
                   invoiceMap.set(invoice.id, invoice);
                 });
-                console.log('Invoice map after population:', Array.from(invoiceMap.entries()));
+              } else {
+                console.warn('⚠️ Invoice ID filter returned no results, trying fallback approach...');
 
-                // Log which invoice IDs were not found
-                const notFoundIds = validInvoiceIds.filter(id => !invoiceMap.has(id));
-                if (notFoundIds.length > 0) {
-                  console.warn(`⚠️ ${notFoundIds.length} invoice(s) not found:`, notFoundIds);
+                // Fallback: Fetch all invoices for the company
+                const { data: allInvoices, error: allInvoicesError } = await supabase
+                  .from('invoices')
+                  .select('id, invoice_number, total_amount, company_id')
+                  .eq('company_id', companyId);
+
+                console.log('Fallback invoice fetch result (all for company):', {
+                  success: !allInvoicesError,
+                  count: allInvoices?.length || 0,
+                  error: allInvoicesError?.message,
+                  companyId: companyId
+                });
+
+                if (!allInvoicesError && allInvoices) {
+                  // Filter to only the ones we need
+                  const matchedInvoices = allInvoices.filter(inv =>
+                    validInvoiceIds.includes(inv.id)
+                  );
+                  console.log(`✅ Fallback matched ${matchedInvoices.length} invoices`);
+                  matchedInvoices.forEach(invoice => {
+                    invoiceMap.set(invoice.id, invoice);
+                  });
                 }
-              } else if (invoiceError) {
-                console.warn('⚠️ Could not fetch invoice details:', invoiceError.message);
+              }
+
+              // Log which invoice IDs were not found
+              const notFoundIds = validInvoiceIds.filter(id => !invoiceMap.has(id));
+              if (notFoundIds.length > 0) {
+                console.warn(`⚠️ ${notFoundIds.length} invoice(s) not found:`, notFoundIds);
               }
             } else {
               console.warn('⚠️ No valid invoice IDs to fetch (all are null or empty)');
