@@ -983,27 +983,32 @@ export const usePayments = (companyId?: string) => {
         let invoiceMap = new Map();
         try {
           if (paymentAllocations.length > 0) {
-            const invoiceIds = [...new Set(paymentAllocations.map(alloc => alloc.invoice_id).filter(Boolean))];
-            console.log('Payment allocations:', paymentAllocations);
-            console.log('Raw invoice IDs from allocations:', paymentAllocations.map(a => a.invoice_id));
-            console.log('Fetching invoice details for IDs:', invoiceIds.length > 0 ? invoiceIds.slice(0, 3) + '...' : 'none');
-            console.log('Total invoice IDs to fetch:', invoiceIds.length);
+            const allInvoiceIds = paymentAllocations.map(a => a.invoice_id);
+            const nullInvoiceIds = allInvoiceIds.filter(id => !id);
+            const validInvoiceIds = [...new Set(allInvoiceIds.filter(Boolean))];
 
-            if (invoiceIds.length > 0) {
+            console.log('Payment allocations:', paymentAllocations);
+            console.log('Raw invoice IDs from allocations:', allInvoiceIds);
+            console.log('Null/missing invoice IDs:', nullInvoiceIds.length);
+            console.log('Valid invoice IDs:', validInvoiceIds);
+            console.log('Fetching invoice details for company:', companyId);
+            console.log('Total valid invoice IDs to fetch:', validInvoiceIds.length);
+
+            if (validInvoiceIds.length > 0) {
               // Filter by company_id AND invoice id to properly work with RLS policy
               const { data: invoiceData, error: invoiceError } = await supabase
                 .from('invoices')
                 .select('id, invoice_number, total_amount, company_id')
                 .eq('company_id', companyId)
-                .in('id', invoiceIds);
+                .in('id', validInvoiceIds);
 
               console.log('Invoice fetch result:', {
                 success: !invoiceError,
                 count: invoiceData?.length || 0,
                 error: invoiceError?.message,
                 companyId: companyId,
-                requestedInvoiceIds: invoiceIds,
-                invoices: invoiceData
+                requestedInvoiceIds: validInvoiceIds,
+                fetchedInvoices: invoiceData
               });
 
               if (!invoiceError && invoiceData) {
@@ -1012,9 +1017,17 @@ export const usePayments = (companyId?: string) => {
                   invoiceMap.set(invoice.id, invoice);
                 });
                 console.log('Invoice map after population:', Array.from(invoiceMap.entries()));
+
+                // Log which invoice IDs were not found
+                const notFoundIds = validInvoiceIds.filter(id => !invoiceMap.has(id));
+                if (notFoundIds.length > 0) {
+                  console.warn(`⚠️ ${notFoundIds.length} invoice(s) not found:`, notFoundIds);
+                }
               } else if (invoiceError) {
                 console.warn('⚠️ Could not fetch invoice details:', invoiceError.message);
               }
+            } else {
+              console.warn('⚠️ No valid invoice IDs to fetch (all are null or empty)');
             }
           }
         } catch (err) {
