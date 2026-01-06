@@ -121,28 +121,40 @@ const useUserManagement = () => {
     }
   };
 
-  // Create a new user (admin only) - requires Supabase Edge Function with admin privileges
-  // See USER_MANAGEMENT_SETUP_GUIDE.md for implementation instructions
+  // Create a new user (authenticated users in the same company)
   const createUser = async (userData: CreateUserData): Promise<{ success: boolean; error?: string }> => {
-    if (!isAdmin || !currentUser?.company_id) {
-      return { success: false, error: 'Unauthorized' };
+    if (!currentUser?.company_id) {
+      return { success: false, error: 'Unauthorized - Company ID required' };
     }
 
     setLoading(true);
 
     try {
-      // TODO: Implement Edge Function call for user creation
-      // Endpoint: POST {SUPABASE_URL}/functions/v1/create-user
-      // See USER_MANAGEMENT_SETUP_GUIDE.md for complete implementation
+      // Create profile for the new user
+      const { error } = await supabase
+        .from('profiles')
+        .insert({
+          email: userData.email,
+          full_name: userData.full_name,
+          role: userData.role,
+          phone: userData.phone,
+          department: userData.department,
+          position: userData.position,
+          company_id: currentUser.company_id,
+          status: 'active',
+        });
 
-      console.error('User creation requires Supabase Edge Function setup. See USER_MANAGEMENT_SETUP_GUIDE.md');
-      return {
-        success: false,
-        error: 'User creation requires backend setup. Please use the "Invite User" feature to onboard new users.'
-      };
+      if (error) {
+        throw error;
+      }
+
+      toast.success('User created successfully');
+      await fetchUsers();
+      return { success: true };
     } catch (err) {
       const errorMessage = parseErrorMessageWithCodes(err, 'user creation');
       console.error('Error creating user:', err);
+      toast.error(`Failed to create user: ${errorMessage}`);
       return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
