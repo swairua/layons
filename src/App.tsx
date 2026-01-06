@@ -10,6 +10,7 @@ import { setFavicon } from "@/utils/setFavicon";
 import { updateMetaTags } from "@/utils/updateMetaTags";
 import { verifyInvoiceCompanyIdColumn } from "@/utils/fixMissingInvoiceCompanyId";
 import { verifyInvoiceRLSFix } from "@/utils/fixInvoiceRLSPolicy";
+import { verifyRLSDisabled } from "@/utils/disableInvoiceRLS";
 
 // Lazy load the page components to reduce initial bundle size and startup time
 import { lazy, Suspense } from "react";
