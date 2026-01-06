@@ -19,8 +19,36 @@ export function AuditLogs() {
     );
   }
 
-  // Check if user is authenticated and is admin
-  if (!user || !isAdmin) {
+  // Check if user is authenticated
+  if (!user) {
+    return (
+      <div className="space-y-6 p-6">
+        <Alert className="border-red-200 bg-red-50">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-900">
+            You must be signed in to access audit logs.
+          </AlertDescription>
+        </Alert>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Authentication Required</CardTitle>
+            <CardDescription>Audit Log Viewer</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-slate-600">
+              Please sign in to access audit logs.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Check if user has admin permissions (admin, super_admin, or profile with role)
+  const hasAdminAccess = isAdmin || (profile && (profile.role === 'admin' || profile.role === 'super_admin'));
+
+  if (!hasAdminAccess) {
     return (
       <div className="space-y-6 p-6">
         <Alert className="border-red-200 bg-red-50">
