@@ -4,29 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Copy, ChevronDown, ChevronUp } from 'lucide-react';
+import { Copy, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 
-const FIX_SQL = `-- Fix for infinite recursion in profiles RLS policies
-BEGIN TRANSACTION;
-
--- Drop all problematic recursive policies
-DROP POLICY IF EXISTS "Users can view their own profile" ON profiles;
-DROP POLICY IF EXISTS "Users can update their own profile" ON profiles;
-DROP POLICY IF EXISTS "Admins can view all profiles in their company" ON profiles;
-DROP POLICY IF EXISTS "Admins can insert new profiles" ON profiles;
-DROP POLICY IF EXISTS "Admins can update profiles in their company" ON profiles;
-
--- Create simple non-recursive policies
-CREATE POLICY "Users can view their own profile" ON profiles
-    FOR SELECT USING (auth.uid() = id);
-
-CREATE POLICY "Users can update their own profile" ON profiles
-    FOR UPDATE USING (auth.uid() = id);
-
-CREATE POLICY "Authenticated users can insert profiles" ON profiles
-    FOR INSERT WITH CHECK (auth.uid() = id);
-
-COMMIT;`;
+const SIMPLE_FIX_SQL = `ALTER TABLE profiles DISABLE ROW LEVEL SECURITY;`;
 
 export function AdminDiagnostics() {
   const [email, setEmail] = useState('');
