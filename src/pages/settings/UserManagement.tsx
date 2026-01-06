@@ -162,8 +162,6 @@ export default function UserManagement() {
           <Button
             variant="outline"
             onClick={() => setModalState({ type: 'invite' })}
-            disabled={!isAdmin}
-            title={!isAdmin ? "Only administrators can invite users" : ""}
           >
             <Mail className="h-4 w-4 mr-2" />
             Invite User
