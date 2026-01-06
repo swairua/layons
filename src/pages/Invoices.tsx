@@ -50,6 +50,7 @@ import { ViewInvoiceModal } from '@/components/invoices/ViewInvoiceModal';
 import { RecordPaymentModal } from '@/components/payments/RecordPaymentModal';
 import { CreateDeliveryNoteModal } from '@/components/delivery/CreateDeliveryNoteModal';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
+import { RLSErrorDialog } from '@/components/RLSErrorDialog';
 import { downloadInvoicePDF } from '@/utils/pdfGenerator';
 import { fixInvoiceColumns, calculateInvoiceStatus } from '@/utils/fixInvoiceColumns';
 import { supabase } from '@/integrations/supabase/client';
@@ -98,6 +99,7 @@ export default function Invoices() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; invoice?: Invoice }>({ open: false });
   const [isFixingData, setIsFixingData] = useState(false);
+  const [showRLSErrorDialog, setShowRLSErrorDialog] = useState(false);
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState('all');
@@ -169,7 +171,15 @@ export default function Invoices() {
     } catch (err) {
       console.error('Delete failed', err);
       const errorMessage = parseErrorMessage(err);
-      toast.error(`Failed to delete invoice: ${errorMessage}`);
+
+      // Check if it's an RLS policy issue
+      const fullError = JSON.stringify(err);
+      if (fullError.includes('company_id') || fullError.includes('RLS policy issue')) {
+        console.log('🔧 RLS Policy Issue Detected - showing fix dialog');
+        setShowRLSErrorDialog(true);
+      } else {
+        toast.error(`Failed to delete invoice: ${errorMessage}`);
+      }
     }
   };
 
@@ -792,6 +802,16 @@ Website:`;
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteDialog({ open: false })}
         confirmText="Delete"
+      />
+
+      <RLSErrorDialog
+        open={showRLSErrorDialog}
+        onOpenChange={setShowRLSErrorDialog}
+        onSuccess={() => {
+          refetch();
+          setDeleteDialog({ open: false });
+        }}
+        invoiceName={deleteDialog.invoice?.invoice_number}
       />
     </div>
   );
