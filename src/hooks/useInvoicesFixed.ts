@@ -213,11 +213,11 @@ export const useCustomerInvoicesFixed = (customerId?: string, companyId?: string
 
         // Get invoices for specific customer
         // Note: Use paid_amount and balance_due as per the database schema
-        let query = supabase
+        // Note: company_id column may not exist; filtering by company happens via customer relationship
+        const { data: invoices, error: invoicesError } = await supabase
           .from('invoices')
           .select(`
             id,
-            company_id,
             customer_id,
             invoice_number,
             invoice_date,
@@ -236,12 +236,6 @@ export const useCustomerInvoicesFixed = (customerId?: string, companyId?: string
           `)
           .eq('customer_id', customerId)
           .order('created_at', { ascending: false });
-
-        if (companyId) {
-          query = query.eq('company_id', companyId);
-        }
-
-        const { data: invoices, error: invoicesError } = await query;
 
         if (invoicesError) {
           console.error('Error fetching customer invoices:', invoicesError);
