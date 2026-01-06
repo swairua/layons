@@ -121,7 +121,8 @@ const useUserManagement = () => {
     }
   };
 
-  // Create a new user (admin only) - requires backend API
+  // Create a new user (admin only) - requires Supabase Edge Function with admin privileges
+  // See USER_MANAGEMENT_SETUP_GUIDE.md for implementation instructions
   const createUser = async (userData: CreateUserData): Promise<{ success: boolean; error?: string }> => {
     if (!isAdmin || !currentUser?.company_id) {
       return { success: false, error: 'Unauthorized' };
@@ -130,12 +131,14 @@ const useUserManagement = () => {
     setLoading(true);
 
     try {
-      // This operation requires a backend API or Edge Function with admin privileges
-      // For now, we'll return a user-friendly error message
-      console.error('User creation not yet implemented. Please use the Invite User feature instead.');
+      // TODO: Implement Edge Function call for user creation
+      // Endpoint: POST {SUPABASE_URL}/functions/v1/create-user
+      // See USER_MANAGEMENT_SETUP_GUIDE.md for complete implementation
+
+      console.error('User creation requires Supabase Edge Function setup. See USER_MANAGEMENT_SETUP_GUIDE.md');
       return {
         success: false,
-        error: 'User creation requires a backend API. Please use the "Invite User" feature to onboard new users.'
+        error: 'User creation requires backend setup. Please use the "Invite User" feature to onboard new users.'
       };
     } catch (err) {
       const errorMessage = parseErrorMessageWithCodes(err, 'user creation');
