@@ -372,13 +372,13 @@ const useUserManagement = () => {
     };
   };
 
-  // Load data on mount
+  // Load data on mount (accessible to all authenticated users in the company)
   useEffect(() => {
-    if (isAdmin && currentUser?.company_id) {
+    if (currentUser?.company_id) {
       fetchUsers();
       fetchInvitations();
     }
-  }, [isAdmin, currentUser?.company_id]);
+  }, [currentUser?.company_id]);
 
   return {
     users,
