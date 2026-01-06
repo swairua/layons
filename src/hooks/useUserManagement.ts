@@ -180,7 +180,8 @@ const useUserManagement = () => {
     }
   };
 
-  // Delete user (admin only) - requires backend API
+  // Delete user (admin only) - requires Supabase Edge Function with admin privileges
+  // See USER_MANAGEMENT_SETUP_GUIDE.md for implementation instructions
   const deleteUser = async (userId: string): Promise<{ success: boolean; error?: string }> => {
     if (!isAdmin || userId === currentUser?.id) {
       return { success: false, error: 'Cannot delete yourself or unauthorized' };
@@ -189,12 +190,14 @@ const useUserManagement = () => {
     setLoading(true);
 
     try {
-      // This operation requires a backend API or Edge Function with admin privileges
-      // For now, we'll return a user-friendly error message
-      console.error('User deletion not yet implemented. This requires a backend API.');
+      // TODO: Implement Edge Function call for user deletion
+      // Endpoint: POST {SUPABASE_URL}/functions/v1/delete-user
+      // See USER_MANAGEMENT_SETUP_GUIDE.md for complete implementation
+
+      console.error('User deletion requires Supabase Edge Function setup. See USER_MANAGEMENT_SETUP_GUIDE.md');
       return {
         success: false,
-        error: 'User deletion requires a backend API. Please contact your system administrator.'
+        error: 'User deletion requires backend setup. Please contact your system administrator.'
       };
     } catch (err) {
       const errorMessage = parseErrorMessageWithCodes(err, 'user deletion');
