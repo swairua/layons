@@ -956,6 +956,9 @@ export const usePayments = (companyId?: string) => {
         // Step 3: Get payment allocations separately
         let paymentAllocations: any[] = [];
         try {
+          const paymentIds = payments.map(payment => payment.id);
+          console.log('Fetching payment allocations for payment IDs:', paymentIds.length > 0 ? paymentIds.slice(0, 3) + '...' : 'none');
+
           const { data, error } = await supabase
             .from('payment_allocations')
             .select(`
@@ -965,12 +968,13 @@ export const usePayments = (companyId?: string) => {
               allocated_amount,
               invoices(id, invoice_number, total_amount)
             `)
-            .in('payment_id', payments.map(payment => payment.id));
+            .in('payment_id', paymentIds);
 
           if (!error && data) {
+            console.log(`✅ Fetched ${data.length} payment allocations`);
             paymentAllocations = data;
           } else if (error) {
-            console.warn('Could not fetch payment allocations - table may not exist:', error.message);
+            console.warn('⚠️ Could not fetch payment allocations:', error.message);
           }
         } catch (err) {
           console.warn('Error fetching payment allocations:', err);
