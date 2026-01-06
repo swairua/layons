@@ -47,6 +47,8 @@ interface Payment {
     invoice_number: string;
     allocated_amount: number;
     invoice_total: number;
+    paid_amount?: number;
+    balance_due?: number;
   }[];
 }
 
