@@ -24,8 +24,9 @@ export async function initializePaymentSystem(): Promise<InitializationResult> {
     // Step 1: Create payment_allocations table if it doesn't exist
     try {
       console.log('Creating payment_allocations table...');
-      
-      const { error } = await supabase.rpc('exec_sql', {
+
+      // Try to execute SQL to create table
+      let result = await supabase.rpc('exec_sql', {
         sql: `
         CREATE TABLE IF NOT EXISTS payment_allocations (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
