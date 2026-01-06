@@ -10,16 +10,16 @@ async function executeSql(sql: string): Promise<{ success: boolean; error?: stri
 
   for (const method of methods) {
     try {
-      const { error } = await (supabase.rpc as any)(method.name, method.params);
-      if (!error) {
+      const result = await (supabase.rpc as any)(method.name, method.params);
+      if (!result.error) {
         return { success: true };
       }
       // If it's a "function not found" error, try next method
-      if (error?.code === '42883') {
+      if (result.error?.code === '42883') {
         continue;
       }
       // For other errors, return the error message
-      return { success: false, error: error?.message || 'Unknown error' };
+      return { success: false, error: result.error?.message || 'Unknown error' };
     } catch (err) {
       // Try next method on exception
       continue;
@@ -53,10 +53,8 @@ export async function initializePaymentSystem(): Promise<InitializationResult> {
     // Step 1: Create payment_allocations table if it doesn't exist
     try {
       console.log('Creating payment_allocations table...');
-
-      // Try to execute SQL to create table
-      let result = await supabase.rpc('exec_sql', {
-        sql: `
+      
+      const createTableSQL = `
         CREATE TABLE IF NOT EXISTS payment_allocations (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             payment_id UUID NOT NULL REFERENCES payments(id) ON DELETE CASCADE,
@@ -114,20 +112,15 @@ export async function initializePaymentSystem(): Promise<InitializationResult> {
               AND p.company_id = (SELECT company_id FROM profiles WHERE id = auth.uid())
             )
           );
-        `
-      });
+      `;
 
-      if (error) {
-        // Check if table already exists - that's ok
-        if (error.message?.includes('already exists')) {
-          console.log('✅ Table already exists');
-          details.tableCreated = true;
-        } else {
-          throw new Error(`Failed to create table: ${error.message}`);
-        }
-      } else {
-        console.log('✅ Table created successfully');
+      const result = await executeSql(createTableSQL);
+
+      if (result.success) {
+        console.log('✅ Table created or already exists');
         details.tableCreated = true;
+      } else {
+        throw new Error(`Failed to create table: ${result.error}`);
       }
     } catch (tableError) {
       const errorMsg = tableError instanceof Error ? tableError.message : String(tableError);
@@ -140,8 +133,7 @@ export async function initializePaymentSystem(): Promise<InitializationResult> {
     try {
       console.log('Creating record_payment_with_allocation function...');
       
-      const { error } = await supabase.rpc('exec_sql', {
-        sql: `
+      const createFunctionSQL = `
         CREATE OR REPLACE FUNCTION record_payment_with_allocation(
             p_company_id UUID,
             p_customer_id UUID,
@@ -227,15 +219,16 @@ export async function initializePaymentSystem(): Promise<InitializationResult> {
             );
         END;
         $$ LANGUAGE plpgsql;
-        `
-      });
+      `;
 
-      if (error) {
-        throw new Error(`Failed to create function: ${error.message}`);
+      const result = await executeSql(createFunctionSQL);
+
+      if (result.success) {
+        console.log('✅ Function created successfully');
+        details.functionCreated = true;
+      } else {
+        throw new Error(`Failed to create function: ${result.error}`);
       }
-      
-      console.log('✅ Function created successfully');
-      details.functionCreated = true;
     } catch (funcError) {
       const errorMsg = funcError instanceof Error ? funcError.message : String(funcError);
       console.error('Function creation error:', errorMsg);
