@@ -171,8 +171,6 @@ export default function UserManagement() {
           <Button
             variant="primary-gradient"
             size="lg"
-            disabled
-            title="Direct user creation requires backend setup. Use 'Invite User' instead."
             onClick={() => setModalState({ type: 'create' })}
           >
             <UserPlus className="h-4 w-4 mr-2" />
