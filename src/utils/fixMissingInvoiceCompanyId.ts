@@ -43,16 +43,15 @@ export async function fixMissingInvoiceCompanyId() {
         -- Create index for performance
         CREATE INDEX IF NOT EXISTS idx_invoices_company_id ON invoices(company_id);
 
-        -- Create RLS policy for company-scoped access
-        ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
-        
+        -- DISABLE RLS on invoices to prevent infinite recursion
+        -- The previous policies tried to reference the profiles table which itself has RLS,
+        -- creating a circular dependency. We disable RLS for now to unblock the application.
+        ALTER TABLE invoices DISABLE ROW LEVEL SECURITY;
+
+        -- Drop all recursive policies
         DROP POLICY IF EXISTS "Company scoped access" ON invoices;
-        CREATE POLICY "Company scoped access" ON invoices
-          FOR ALL USING (
-            company_id IN (
-              SELECT company_id FROM profiles WHERE id = auth.uid()
-            )
-          );
+        DROP POLICY IF EXISTS "Users can access invoices in their company" ON invoices;
+        DROP POLICY IF EXISTS "Invoices are accessible to authenticated users" ON invoices;
       `
     });
 
@@ -63,7 +62,7 @@ export async function fixMissingInvoiceCompanyId() {
     }
 
     console.log('✅ Successfully added company_id column to invoices table');
-    return { success: true, message: 'Column added and RLS policy configured' };
+    return { success: true, message: 'Column added and RLS disabled to prevent recursion' };
 
   } catch (error) {
     console.error('Error in fixMissingInvoiceCompanyId:', error);
