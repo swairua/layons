@@ -928,7 +928,10 @@ export const usePayments = (companyId?: string) => {
 
         const { data: payments, error: paymentsError } = await query;
 
-        if (paymentsError) throw paymentsError;
+        if (paymentsError) {
+          console.error('Error fetching payments from Supabase:', paymentsError);
+          throw paymentsError;
+        }
         if (!payments || payments.length === 0) return [];
 
         // Step 2: Get customers separately (filter out invalid UUIDs)
