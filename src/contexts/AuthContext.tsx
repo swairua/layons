@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/utils/safeToast';
 import { initializeAuth, clearAuthTokens, safeAuthOperation } from '@/utils/authHelpers';
 import { logError, getUserFriendlyErrorMessage, isErrorType } from '@/utils/errorLogger';
+import { associateUserWithCompany } from '@/utils/examineCompaniesTable';
 
 // Type definitions for user roles and statuses
 export type UserRole = 'admin' | 'super_admin' | 'accountant' | 'stock_manager' | 'user';
