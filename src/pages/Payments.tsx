@@ -462,8 +462,7 @@ export default function Payments() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Payment</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete payment <span className="font-semibold">{paymentToDelete?.payment_number}</span>?
-              This will also reverse the payment allocations and update the invoice balances. This action cannot be undone.
+              Are you sure you want to delete payment {paymentToDelete?.payment_number}? This will reverse all allocations and update invoice balances. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
