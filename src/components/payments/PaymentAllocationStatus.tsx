@@ -178,6 +178,7 @@ export function PaymentAllocationStatus() {
     { name: 'User Profile', status: 'checking' }
   ]);
   const [showSetupGuide, setShowSetupGuide] = useState(false);
+  const [isFixingProfile, setIsFixingProfile] = useState(false);
 
   const updateCheck = (index: number, updates: Partial<StatusCheck>) => {
     setChecks(prev => prev.map((check, i) => 
