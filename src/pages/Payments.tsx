@@ -235,17 +235,59 @@ export default function Payments() {
   }
 
   if (error) {
+    const errorMsg = parseErrorMessage(error);
+    const isNetworkError = errorMsg?.toLowerCase().includes('network') ||
+                          errorMsg?.toLowerCase().includes('failed to fetch') ||
+                          errorMsg?.toLowerCase().includes('unable to connect');
+
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Payments</h1>
-            <p className="text-destructive">Error loading payments: {parseErrorMessage(error)}</p>
           </div>
         </div>
 
-        {/* Show quick fix if there's an error */}
-        <PaymentAllocationQuickFix />
+        <Card className="border-destructive/50 bg-destructive/5">
+          <CardContent className="pt-6">
+            <div className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
+                <div>
+                  <h3 className="font-semibold text-destructive mb-1">
+                    {isNetworkError ? 'Connection Error' : 'Error Loading Payments'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {errorMsg}
+                  </p>
+
+                  {isNetworkError && (
+                    <div className="bg-background border border-muted rounded-md p-3 text-sm space-y-2">
+                      <p className="font-medium text-foreground">Troubleshooting steps:</p>
+                      <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Check your internet connection</li>
+                        <li>Try refreshing the page (Ctrl+R or Cmd+R)</li>
+                        <li>Clear your browser cache</li>
+                        <li>Wait a moment and try again</li>
+                        <li>If the problem persists, Supabase service may be temporarily unavailable</li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <Button
+                onClick={() => window.location.reload()}
+                className="w-full"
+              >
+                Retry Loading Payments
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Show quick fix if there's a database setup error */}
+        {!isNetworkError && <PaymentAllocationQuickFix />}
       </div>
     );
   }
