@@ -965,8 +965,7 @@ export const usePayments = (companyId?: string) => {
               id,
               payment_id,
               invoice_id,
-              allocated_amount,
-              invoices(id, invoice_number, total_amount)
+              allocated_amount
             `)
             .in('payment_id', paymentIds);
 
@@ -980,6 +979,33 @@ export const usePayments = (companyId?: string) => {
           console.warn('Error fetching payment allocations:', err);
         }
 
+        // Step 3b: Get invoice details separately to avoid RLS issues with relationships
+        let invoiceMap = new Map();
+        try {
+          if (paymentAllocations.length > 0) {
+            const invoiceIds = [...new Set(paymentAllocations.map(alloc => alloc.invoice_id).filter(Boolean))];
+            console.log('Fetching invoice details for IDs:', invoiceIds.length > 0 ? invoiceIds.slice(0, 3) + '...' : 'none');
+
+            if (invoiceIds.length > 0) {
+              const { data: invoiceData, error: invoiceError } = await supabase
+                .from('invoices')
+                .select('id, invoice_number, total_amount')
+                .in('id', invoiceIds);
+
+              if (!invoiceError && invoiceData) {
+                console.log(`✅ Fetched ${invoiceData.length} invoice details`);
+                invoiceData.forEach(invoice => {
+                  invoiceMap.set(invoice.id, invoice);
+                });
+              } else if (invoiceError) {
+                console.warn('⚠️ Could not fetch invoice details:', invoiceError.message);
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('Error fetching invoice details:', err);
+        }
+
         // Step 4: Create lookup maps
         const customerMap = new Map();
         (customers || []).forEach(customer => {
@@ -991,11 +1017,12 @@ export const usePayments = (companyId?: string) => {
           if (!allocationsMap.has(allocation.payment_id)) {
             allocationsMap.set(allocation.payment_id, []);
           }
+          const invoice = invoiceMap.get(allocation.invoice_id);
           allocationsMap.get(allocation.payment_id).push({
             id: allocation.id,
-            invoice_number: allocation.invoices?.invoice_number || 'N/A',
+            invoice_number: invoice?.invoice_number || 'N/A',
             allocated_amount: allocation.allocated_amount,
-            invoice_total: allocation.invoices?.total_amount || 0
+            invoice_total: invoice?.total_amount || 0
           });
         });
 
