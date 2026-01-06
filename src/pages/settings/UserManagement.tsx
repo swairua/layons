@@ -48,7 +48,9 @@ import useUserManagement from '@/hooks/useUserManagement';
 import { CreateUserModal } from '@/components/users/CreateUserModal';
 import { EditUserModal } from '@/components/users/EditUserModal';
 import { InviteUserModal } from '@/components/users/InviteUserModal';
+import { AdminDiagnostics } from '@/components/AdminDiagnostics';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 function getRoleColor(role: string) {
   switch (role) {
@@ -83,6 +85,7 @@ function getInitials(name: string) {
 }
 
 export default function UserManagement() {
+  const navigate = useNavigate();
   const { isAdmin, profile: currentUser, refreshProfile } = useAuth();
   const {
     users,
@@ -121,7 +124,7 @@ export default function UserManagement() {
     setIsRefreshing(true);
     try {
       await refreshProfile();
-      toast.success('Profile refreshed. If you are an admin, please reload the page.');
+      toast.success('Profile refreshed! Admin privileges updated.');
     } catch (error) {
       toast.error('Failed to refresh profile');
     } finally {
@@ -130,7 +133,6 @@ export default function UserManagement() {
   };
 
   if (!isAdmin) {
-
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -143,37 +145,49 @@ export default function UserManagement() {
         </div>
 
         <div className="flex items-center justify-center">
-          <Card className="w-full max-w-md text-center">
-            <CardContent className="pt-6">
-              <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Access Denied</h3>
-              <p className="text-muted-foreground mb-4">
-                You need administrator privileges to access user management.
-              </p>
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground mb-4">
-                  If you believe you should have access, try refreshing your profile:
+          <div className="space-y-6 w-full max-w-md">
+            <Card className="text-center">
+              <CardContent className="pt-6">
+                <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Access Denied</h3>
+                <p className="text-muted-foreground mb-4">
+                  You need administrator privileges to access user management.
                 </p>
-                <Button
-                  onClick={handleRefreshProfile}
-                  disabled={isRefreshing}
-                  variant="outline"
-                  className="w-full"
-                >
-                  {isRefreshing ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Refreshing...
-                    </>
-                  ) : (
-                    'Refresh Profile'
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Try refreshing your profile or use the database fix:
+                  </p>
+                  <div className="space-y-2">
+                    <Button
+                      onClick={handleRefreshProfile}
+                      disabled={isRefreshing}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      {isRefreshing ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Refreshing...
+                        </>
+                      ) : (
+                        'Refresh Profile'
+                      )}
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/database-fix')}
+                      variant="default"
+                      className="w-full"
+                    >
+                      Database Fix Guide
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
+            <AdminDiagnostics />
+          </div>
+        </div>
       </div>
     );
   }

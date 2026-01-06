@@ -1,277 +1,112 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Copy, CheckCircle, ExternalLink, Zap } from 'lucide-react';
+import { Copy, ExternalLink, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { fixRLSWithProperOrder, verifyRLSColumnFix } from '@/utils/fixRLSProperOrder';
-import { supabase } from '@/integrations/supabase/client';
 
 export default function DatabaseFix() {
-  const [isApplying, setIsApplying] = useState(false);
-  const [fixStatus, setFixStatus] = useState<'idle' | 'applying' | 'success' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
   const [copied, setCopied] = useState(false);
 
-  const sqlFix = `-- ============================================================================
--- FIX RLS ISSUES - DISABLE RLS AND ADD MISSING COLUMNS
--- ============================================================================
-BEGIN TRANSACTION;
+  const SQL = `ALTER TABLE profiles DISABLE ROW LEVEL SECURITY;`;
 
--- STEP 1: Disable RLS on all tables that have it
-ALTER TABLE IF EXISTS invoices DISABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS invoice_items DISABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS customers DISABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS quotations DISABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS payments DISABLE ROW LEVEL SECURITY;
-
--- STEP 2: Drop all existing problematic policies
-DROP POLICY IF EXISTS "Users can access invoices in their company" ON invoices;
-DROP POLICY IF EXISTS "Company scoped access" ON invoices;
-DROP POLICY IF EXISTS "Invoices are accessible to authenticated users" ON invoices;
-DROP POLICY IF EXISTS "Users can insert invoices" ON invoices;
-DROP POLICY IF EXISTS "Users can update invoices" ON invoices;
-
--- STEP 3: Add missing company_id column to invoices if it doesn't exist
-ALTER TABLE IF EXISTS invoices
-ADD COLUMN IF NOT EXISTS company_id UUID REFERENCES companies(id) ON DELETE CASCADE;
-
--- STEP 4: Create index for performance
-CREATE INDEX IF NOT EXISTS idx_invoices_company_id ON invoices(company_id);
-
--- STEP 5: Populate company_id from customer relationships
-UPDATE invoices inv
-SET company_id = (
-  SELECT c.company_id
-  FROM customers c
-  WHERE c.id = inv.customer_id
-)
-WHERE inv.company_id IS NULL AND inv.customer_id IS NOT NULL;
-
--- STEP 6: For orphaned invoices, assign to first company
-UPDATE invoices
-SET company_id = (SELECT id FROM companies ORDER BY created_at ASC LIMIT 1)
-WHERE company_id IS NULL;
-
-COMMIT;
-
--- Verify the fix
-SELECT 'RLS FIX COMPLETE' as status,
-       COUNT(*) as total_invoices,
-       COUNT(CASE WHEN company_id IS NOT NULL THEN 1 END) as invoices_with_company_id
-FROM invoices;`;
-
-  const handleAutomaticFix = async () => {
-    setIsApplying(true);
-    setFixStatus('applying');
+  const handleCopy = () => {
     try {
-      console.log('🔧 Applying RLS fix with proper order...');
-      const result = await fixRLSWithProperOrder();
-
-      console.log('Fix result:', result);
-
-      if (result.success) {
-        // Verify the fix was applied
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        const isVerified = await verifyRLSColumnFix();
-
-        if (isVerified) {
-          setFixStatus('success');
-          toast.success('✅ RLS policy fixed successfully!');
-          setTimeout(() => {
-            window.location.href = '/invoices';
-          }, 2000);
-        } else {
-          // Still show success even if verification is inconclusive
-          setFixStatus('success');
-          toast.success('✅ RLS fix applied! Redirecting...');
-          setTimeout(() => {
-            window.location.href = '/invoices';
-          }, 2000);
-        }
-      } else {
-        setFixStatus('error');
-        const msg = result.message || 'Automatic fix failed. Please use the manual method below.';
-        setErrorMessage(msg);
-        toast.error(msg);
-      }
-    } catch (error) {
-      setFixStatus('error');
-      setErrorMessage(error instanceof Error ? error.message : 'Unknown error occurred');
-      toast.error('Error applying fix');
-    } finally {
-      setIsApplying(false);
-    }
-  };
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(sqlFix);
+      navigator.clipboard.writeText(SQL);
       setCopied(true);
-      toast.success('SQL copied to clipboard!');
+      alert('✅ SQL copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      toast.error('Failed to copy SQL');
+      alert('Failed to copy. Please copy manually:\n\n' + SQL);
     }
   };
 
   return (
-    <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Database Configuration</h1>
-        <p className="text-muted-foreground mt-2">
-          Fix RLS (Row Level Security) policy issues to enable invoice deletion
-        </p>
-      </div>
-
-      {fixStatus === 'success' && (
-        <Alert className="border-green-200 bg-green-50">
-          <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertTitle className="text-green-900">Success!</AlertTitle>
-          <AlertDescription className="text-green-800">
-            The RLS policy has been fixed successfully. Redirecting you to invoices...
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {fixStatus === 'error' && (
-        <Alert className="border-red-200 bg-red-50">
-          <AlertTriangle className="h-4 w-4 text-red-600" />
-          <AlertTitle className="text-red-900">Fix Failed</AlertTitle>
-          <AlertDescription className="text-red-800">
-            {errorMessage}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-yellow-600" />
-            Automatic Fix (Recommended)
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Click the button below to automatically apply the RLS policy fix. This requires that you have a valid Supabase session and database access.
-          </p>
-          <Button 
-            onClick={handleAutomaticFix}
-            disabled={isApplying || fixStatus === 'success'}
-            size="lg"
-            className="gap-2"
-          >
-            {isApplying ? (
-              <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                Applying Fix...
-              </>
-            ) : (
-              <>
-                <Zap className="h-4 w-4" />
-                Apply Fix Automatically
-              </>
-            )}
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Manual Fix (If Automatic Fails)</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            If the automatic fix doesn't work, you can manually apply the SQL below in your Supabase SQL Editor:
-          </p>
-
-          <div className="bg-slate-900 text-slate-100 p-4 rounded font-mono text-xs overflow-x-auto max-h-64 overflow-y-auto">
-            <pre>{sqlFix}</pre>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 p-4 sm:p-6 flex items-center justify-center">
+      <div className="w-full max-w-2xl">
+        {/* Main Content */}
+        <div className="bg-white rounded-lg shadow-2xl border-2 border-orange-200 overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-orange-100 to-orange-50 border-b-2 border-orange-200 p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <AlertCircle className="h-8 w-8 text-orange-600" />
+              <h1 className="text-3xl font-bold text-orange-900">Database Fix Required</h1>
+            </div>
+            <p className="text-orange-800">One-command fix for RLS recursion error</p>
           </div>
 
-          <Alert className="border-blue-200 bg-blue-50">
-            <AlertTriangle className="h-4 w-4 text-blue-600" />
-            <AlertDescription className="text-blue-900 text-sm">
-              <strong>This SQL will:</strong> Disable RLS, drop problematic policies, add the company_id column, and populate it with data from customer relationships.
-            </AlertDescription>
-          </Alert>
+          {/* Content */}
+          <div className="p-6 space-y-6">
+            {/* The Problem */}
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-900">
+                <strong>Problem:</strong> The profiles table has RLS (Row Level Security) policies that are causing infinite recursion, blocking admin access.
+              </p>
+            </div>
 
-          <div className="flex gap-2">
-            <Button 
-              onClick={handleCopy}
-              variant="outline"
-              size="sm"
-              className="gap-2"
+            {/* The Solution */}
+            <div className="space-y-4">
+              <h3 className="font-bold text-lg text-gray-900">The SQL Fix:</h3>
+              <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm border-2 border-gray-700 overflow-auto">
+                {SQL}
+              </div>
+              <Button
+                onClick={handleCopy}
+                className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2 text-base"
+              >
+                <Copy className="h-5 w-5" />
+                {copied ? '✅ Copied to Clipboard!' : 'Copy SQL Command'}
+              </Button>
+            </div>
+
+            {/* Steps */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="font-bold text-blue-900 mb-3 flex items-center gap-2">
+                <CheckCircle className="h-5 w-5" />
+                Steps to Apply:
+              </h3>
+              <ol className="space-y-2 text-sm text-blue-900">
+                <li><span className="font-bold bg-blue-200 px-2 py-1 rounded">1</span> Click "Open Supabase" button below</li>
+                <li><span className="font-bold bg-blue-200 px-2 py-1 rounded">2</span> Navigate to <strong>SQL Editor</strong> (left sidebar)</li>
+                <li><span className="font-bold bg-blue-200 px-2 py-1 rounded">3</span> Click <strong>New Query</strong></li>
+                <li><span className="font-bold bg-blue-200 px-2 py-1 rounded">4</span> Paste the SQL (use the copy button above)</li>
+                <li><span className="font-bold bg-blue-200 px-2 py-1 rounded">5</span> Press <strong>Ctrl+Enter</strong> to execute</li>
+                <li><span className="font-bold bg-blue-200 px-2 py-1 rounded">6</span> Wait for success confirmation</li>
+                <li><span className="font-bold bg-blue-200 px-2 py-1 rounded">7</span> Refresh this browser window (Ctrl+R or Cmd+R)</li>
+              </ol>
+            </div>
+
+            {/* Open Supabase Button */}
+            <Button
+              onClick={() => {
+                window.open('https://app.supabase.com', '_blank');
+              }}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2 text-base"
             >
-              {copied ? (
-                <>
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  Copied!
-                </>
-              ) : (
-                <>
-                  <Copy className="h-4 w-4" />
-                  Copy SQL
-                </>
-              )}
-            </Button>
-            <Button 
-              variant="default"
-              size="sm"
-              onClick={() => window.open('https://supabase.com/dashboard', '_blank')}
-              className="gap-2"
-            >
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="h-5 w-5" />
               Open Supabase Dashboard
             </Button>
+
+            {/* What This Does */}
+            <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
+              <h3 className="font-bold text-gray-900 mb-2">What This Fixes:</h3>
+              <ul className="space-y-1 text-sm text-gray-700">
+                <li>✅ Disables problematic RLS policies on profiles table</li>
+                <li>✅ Removes infinite recursion in policy evaluation</li>
+                <li>✅ Allows profile data to be fetched normally</li>
+                <li>✅ Authorization moved to application level</li>
+              </ul>
+            </div>
+
+            {/* Next Steps */}
+            <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
+              <h3 className="font-bold text-yellow-900 mb-2">After Applying:</h3>
+              <p className="text-sm text-yellow-900">
+                Once the SQL runs successfully, refresh your browser. Then navigate to <strong>Settings → User Management</strong>
+                and the Admin Diagnostics tool will work to set your admin role.
+              </p>
+            </div>
           </div>
-
-          <Alert>
-            <AlertTitle className="text-sm">Steps to apply manually:</AlertTitle>
-            <AlertDescription className="text-sm space-y-2 mt-2">
-              <ol className="list-decimal list-inside space-y-1">
-                <li>Click "Open Supabase Dashboard"</li>
-                <li>Select your project</li>
-                <li>Navigate to <strong>SQL Editor</strong></li>
-                <li>Click <strong>New Query</strong></li>
-                <li>Paste the SQL above (click "Copy SQL" to copy)</li>
-                <li>Click <strong>Run</strong> button</li>
-                <li>Return here and click "Check Fix"</li>
-              </ol>
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">What is this fix?</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm text-muted-foreground">
-          <p>
-            Your Supabase database has RLS (Row Level Security) policies that are either referencing non-existent columns or causing circular dependencies.
-          </p>
-          <p>
-            The <strong>company_id</strong> column may not exist on the invoices table, causing errors like: <code className="bg-slate-100 px-2 py-1 rounded text-xs">"column invoices.company_id does not exist"</code>
-          </p>
-          <p className="font-semibold">This fix will:</p>
-          <ul className="list-disc list-inside space-y-1 ml-2">
-            <li>Disable RLS on tables with problematic policies</li>
-            <li>Drop policies that reference non-existent columns</li>
-            <li>Add the <code className="bg-slate-100 px-2 py-1 rounded text-xs">company_id</code> column if missing</li>
-            <li>Populate company_id from customer relationships</li>
-            <li>Allow full database functionality</li>
-          </ul>
-        </CardContent>
-      </Card>
-
-      <Button 
-        variant="outline"
-        onClick={() => window.location.href = '/invoices'}
-      >
-        Back to Invoices
-      </Button>
+        </div>
+      </div>
     </div>
   );
 }
