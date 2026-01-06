@@ -128,24 +128,24 @@ COMMIT;
 }
 
 /**
- * Verify that invoices table has company_id column properly configured
+ * Verify that invoices table is accessible (company_id column no longer exists in single-company system)
  */
 export async function verifyInvoiceCompanyIdColumn(): Promise<boolean> {
   try {
     const { data, error } = await supabase
       .from('invoices')
-      .select('id, company_id')
+      .select('id, invoice_number')
       .limit(1);
 
     if (error) {
-      console.error('❌ company_id column verification failed:', error);
+      console.error('❌ Invoices table verification failed:', error);
       return false;
     }
 
-    console.log('✅ company_id column verified in invoices table');
+    console.log('✅ Invoices table verified (company_id column removed for single-company system)');
     return true;
   } catch (error) {
-    console.error('Error verifying company_id column:', error);
+    console.error('Error verifying invoices table:', error);
     return false;
   }
 }
