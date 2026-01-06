@@ -4,6 +4,7 @@ import { parseErrorMessage } from '@/utils/errorHelpers';
 import { RecordPaymentModal } from '@/components/payments/RecordPaymentModal';
 import { ViewPaymentModal } from '@/components/payments/ViewPaymentModal';
 import { PaymentAllocationStatus } from '@/components/payments/PaymentAllocationStatus';
+import { PaymentAllocationQuickFix } from '@/components/payments/PaymentAllocationQuickFix';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
