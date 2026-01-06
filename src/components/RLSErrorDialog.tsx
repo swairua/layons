@@ -155,13 +155,18 @@ COMMIT;
               </AlertDialogTitle>
               <AlertDialogDescription className="space-y-3 mt-4">
                 <p>
-                  Your Supabase database has a Row Level Security (RLS) policy issue that prevents invoice deletion.
+                  Your Supabase database has a Row Level Security (RLS) issue preventing invoice operations.
                 </p>
                 <p className="text-sm">
-                  <strong>Error:</strong> "record 'old' has no field 'company_id'"
+                  <strong>Possible causes:</strong>
                 </p>
+                <ul className="text-sm list-disc list-inside space-y-1">
+                  <li>Missing <code className="bg-slate-100 px-1 rounded text-xs">company_id</code> column on invoices table</li>
+                  <li>RLS policies reference non-existent columns</li>
+                  <li>Circular dependencies in RLS policy definitions</li>
+                </ul>
                 <p>
-                  This happens when RLS policies reference columns or tables that don't exist or cause circular dependencies.
+                  We can fix this automatically by disabling problematic RLS policies and ensuring the required columns exist.
                 </p>
               </AlertDialogDescription>
             </AlertDialogHeader>
