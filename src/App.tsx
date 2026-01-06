@@ -395,6 +395,15 @@ const App = () => {
           {/* Database Fix - No protection needed for setup */}
           <Route path="/database-fix" element={<DatabaseFix />} />
 
+          {/* Audit Logs */}
+          <Route
+            path="/audit-logs"
+            element={
+              <ProtectedRoute>
+                <AuditLogs />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Payment Synchronization - No protection needed for setup */}
           <Route path="/payment-sync" element={<PaymentSynchronizationPage />} />
