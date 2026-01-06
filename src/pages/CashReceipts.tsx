@@ -204,7 +204,7 @@ export default function CashReceipts() {
   const filteredReceipts = receipts.filter(receipt => {
     const matchesSearch =
       receipt.receipt_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      receipt.customers?.name.toLowerCase().includes(searchTerm.toLowerCase());
+      (receipt.customers?.name ?? '').toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
