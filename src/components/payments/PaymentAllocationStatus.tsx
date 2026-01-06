@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { associateUserWithCompany } from '@/utils/examineCompaniesTable';
 
 interface StatusCheck {
   name: string;
@@ -177,11 +178,34 @@ export function PaymentAllocationStatus() {
     { name: 'User Profile', status: 'checking' }
   ]);
   const [showSetupGuide, setShowSetupGuide] = useState(false);
+  const [isFixingProfile, setIsFixingProfile] = useState(false);
 
   const updateCheck = (index: number, updates: Partial<StatusCheck>) => {
-    setChecks(prev => prev.map((check, i) => 
+    setChecks(prev => prev.map((check, i) =>
       i === index ? { ...check, ...updates } : check
     ));
+  };
+
+  const handleFixProfile = async () => {
+    setIsFixingProfile(true);
+    try {
+      const result = await associateUserWithCompany();
+      if (result.success) {
+        toast.success('Profile fixed! Updating status checks...');
+        // Wait a moment for the database to update, then refresh checks
+        setTimeout(() => {
+          runStatusChecks();
+          setIsFixingProfile(false);
+        }, 1000);
+      } else {
+        toast.error(`Failed to fix profile: ${result.message}`);
+        setIsFixingProfile(false);
+      }
+    } catch (error) {
+      toast.error('Error fixing profile. Please try again.');
+      console.error('Error fixing profile:', error);
+      setIsFixingProfile(false);
+    }
   };
 
   const copySQL = () => {
@@ -439,6 +463,23 @@ export function PaymentAllocationStatus() {
             </Alert>
 
             <div className="flex flex-wrap gap-2">
+              {checks[2]?.status === 'error' && (
+                <Button
+                  size="sm"
+                  onClick={handleFixProfile}
+                  disabled={isFixingProfile}
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
+                >
+                  {isFixingProfile ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Fixing Profile...
+                    </>
+                  ) : (
+                    'Fix Profile'
+                  )}
+                </Button>
+              )}
               <Button
                 size="sm"
                 onClick={() => setShowSetupGuide(!showSetupGuide)}
