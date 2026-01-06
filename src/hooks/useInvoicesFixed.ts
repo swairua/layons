@@ -24,7 +24,7 @@ export const useInvoicesFixed = (companyId?: string) => {
 
         // Step 1: Get invoices without embedded relationships
         // Note: Use paid_amount and balance_due as per the database schema
-        const { data: invoices, error: invoicesError } = await supabase
+        let query = supabase
           .from('invoices')
           .select(`
             id,
@@ -45,6 +45,8 @@ export const useInvoicesFixed = (companyId?: string) => {
             updated_at
           `)
           .order('created_at', { ascending: false });
+
+        const { data: invoices, error: invoicesError } = await query;
 
         if (invoicesError) {
           const errorMsg = invoicesError?.message || JSON.stringify(invoicesError);
@@ -211,11 +213,11 @@ export const useCustomerInvoicesFixed = (customerId?: string, companyId?: string
 
         // Get invoices for specific customer
         // Note: Use paid_amount and balance_due as per the database schema
-        let query = supabase
+        // Note: company_id column may not exist; filtering by company happens via customer relationship
+        const { data: invoices, error: invoicesError } = await supabase
           .from('invoices')
           .select(`
             id,
-            company_id,
             customer_id,
             invoice_number,
             invoice_date,
@@ -235,12 +237,6 @@ export const useCustomerInvoicesFixed = (customerId?: string, companyId?: string
           .eq('customer_id', customerId)
           .order('created_at', { ascending: false });
 
-        if (companyId) {
-          query = query.eq('company_id', companyId);
-        }
-
-        const { data: invoices, error: invoicesError } = await query;
-
         if (invoicesError) {
           console.error('Error fetching customer invoices:', invoicesError);
           throw new Error(`Failed to fetch customer invoices: ${invoicesError.message}`);
@@ -250,10 +246,10 @@ export const useCustomerInvoicesFixed = (customerId?: string, companyId?: string
           return [];
         }
 
-        // Get customer data
+        // Get customer data (including company_id to fetch company details)
         const { data: customer, error: customerError } = await supabase
           .from('customers')
-          .select('id, name, email, phone, address, city, country')
+          .select('id, name, email, phone, address, city, country, company_id')
           .eq('id', customerId)
           .single();
 
@@ -261,19 +257,23 @@ export const useCustomerInvoicesFixed = (customerId?: string, companyId?: string
           console.error('Error fetching customer:', customerError);
         }
 
-        // Get company details
+        // Get company details through customer relationship
         let company = null;
-        if (invoices && invoices.length > 0) {
-          const { data: companyData, error: companyError } = await supabase
-            .from('companies')
-            .select('id, name, address, city, country, phone, email, tax_number')
-            .eq('id', invoices[0].company_id)
-            .single();
+        if (customer && customer.company_id) {
+          try {
+            const { data: companyData, error: companyError } = await supabase
+              .from('companies')
+              .select('id, name, address, city, country, phone, email, tax_number')
+              .eq('id', customer.company_id)
+              .single();
 
-          if (companyError) {
-            console.error('Error fetching company (non-fatal):', companyError);
-          } else {
-            company = companyData;
+            if (companyError) {
+              console.error('Error fetching company (non-fatal):', companyError);
+            } else {
+              company = companyData;
+            }
+          } catch (err) {
+            console.error('Error fetching company (non-fatal):', err);
           }
         }
 

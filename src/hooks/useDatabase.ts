@@ -1576,6 +1576,15 @@ export const useDeleteInvoice = () => {
         .eq('id', id);
       if (error) {
         const errorMessage = parseErrorMessage(error);
+
+        // Check if this is the company_id RLS policy issue
+        const fullError = JSON.stringify(error);
+        if (fullError.includes('company_id') || fullError.includes('has no field')) {
+          console.error('🔧 RLS Policy Issue Detected');
+          console.error('Go to: /database-fix for automatic or manual fix options');
+          throw new Error(`Delete failed - RLS policy issue detected. Please visit /database-fix to resolve this.`);
+        }
+
         throw new Error(errorMessage);
       }
     },
