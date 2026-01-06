@@ -1241,16 +1241,21 @@ export const useDeletePayment = () => {
         }
 
         // Step 2: Get payment allocations separately
-        const { data: allocations, error: allocError } = await supabase
-          .from('payment_allocations')
-          .select('id, invoice_id, allocated_amount')
-          .eq('payment_id', paymentId);
+        let allocationsList = [];
+        try {
+          const { data: allocations, error: allocError } = await supabase
+            .from('payment_allocations')
+            .select('id, invoice_id, allocated_amount')
+            .eq('payment_id', paymentId);
 
-        if (allocError) {
-          console.warn('Could not fetch allocations (non-fatal):', allocError.message);
+          if (allocError) {
+            console.warn('Could not fetch allocations (non-fatal):', allocError.message);
+          } else if (allocations) {
+            allocationsList = allocations;
+          }
+        } catch (err) {
+          console.warn('Error fetching allocations:', err);
         }
-
-        const allocationsList = allocations || [];
 
         // Step 3: Reverse invoice adjustments for each allocation
         if (allocationsList.length > 0) {
@@ -1258,8 +1263,9 @@ export const useDeletePayment = () => {
             // Fetch the invoice for this allocation
             const { data: invoice, error: invoiceError } = await supabase
               .from('invoices')
-              .select('id, total_amount, paid_amount, balance_due, status')
+              .select('id, total_amount, paid_amount, balance_due, status, company_id')
               .eq('id', allocation.invoice_id)
+              .eq('company_id', companyId)
               .single();
 
             if (invoice && !invoiceError) {
