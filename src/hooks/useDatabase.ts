@@ -1184,38 +1184,6 @@ export const useCreatePayment = () => {
           allocation_error: allocationError ? JSON.stringify(allocationError) : null
         };
       }
-
-      // If other error, throw it
-      if (error) {
-        console.error('Database function error:', error);
-
-        let errorMessage = 'Failed to record payment';
-
-        // Handle network errors
-        if (error instanceof TypeError) {
-          if ((error as any).message?.includes('Failed to fetch')) {
-            errorMessage = 'Network error: Unable to connect to server. Please check your internet connection and try again.';
-          } else {
-            errorMessage = `Network error: ${(error as any).message || 'Failed to fetch'}`;
-          }
-        } else if (error instanceof Error) {
-          errorMessage = error.message;
-        } else if (typeof error === 'string') {
-          errorMessage = error;
-        } else if (error && typeof error === 'object' && 'message' in error) {
-          errorMessage = (error as any).message;
-        } else if (error && typeof error === 'object' && 'hint' in error) {
-          errorMessage = `Database error: ${(error as any).hint || (error as any).details || 'Unknown error'}`;
-        }
-
-        throw new Error(errorMessage);
-      }
-
-      if (!data || !data.success) {
-        throw new Error(data?.error || 'Failed to record payment');
-      }
-
-      return data;
     },
     onSuccess: (result) => {
       // Invalidate multiple cache keys to refresh UI
