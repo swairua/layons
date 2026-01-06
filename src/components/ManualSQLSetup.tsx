@@ -7,6 +7,7 @@ import { AlertTriangle, Copy, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { verifyInvoiceCompanyIdColumn } from '@/utils/fixMissingInvoiceCompanyId';
 import { verifyInvoiceRLSFix, getFallbackRLSPolicySql } from '@/utils/fixInvoiceRLSPolicy';
+import { verifyRLSDisabled, getDisableRLSSql } from '@/utils/disableInvoiceRLS';
 
 interface DatabaseFix {
   id: string;
