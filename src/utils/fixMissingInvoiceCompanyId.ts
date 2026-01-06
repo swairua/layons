@@ -76,7 +76,7 @@ export async function fixMissingInvoiceCompanyId() {
  */
 async function fixViaDirectSQL() {
   console.log('RPC method not available, providing manual SQL fix...');
-  
+
   const sqlFix = `
 -- Manual SQL fix for missing company_id in invoices table
 -- Run this in Supabase SQL Editor
@@ -104,27 +104,21 @@ WHERE company_id IS NULL;
 -- Step 4: Create index for query performance
 CREATE INDEX IF NOT EXISTS idx_invoices_company_id ON invoices(company_id);
 
--- Step 5: Make company_id NOT NULL since all should be populated now
-ALTER TABLE invoices
-ALTER COLUMN company_id SET NOT NULL;
+-- Step 5: DISABLE RLS on invoices to prevent infinite recursion
+-- The recursive policies that reference profiles table cause circular dependencies
+ALTER TABLE invoices DISABLE ROW LEVEL SECURITY;
 
--- Step 6: Ensure RLS is enabled and policy is set
-ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
-
+-- Step 6: Drop all problematic recursive policies
 DROP POLICY IF EXISTS "Company scoped access" ON invoices;
-CREATE POLICY "Company scoped access" ON invoices
-  FOR ALL USING (
-    company_id IN (
-      SELECT company_id FROM profiles WHERE id = auth.uid()
-    )
-  );
+DROP POLICY IF EXISTS "Users can access invoices in their company" ON invoices;
+DROP POLICY IF EXISTS "Invoices are accessible to authenticated users" ON invoices;
 
 COMMIT;
 `;
 
   console.log('SQL Fix Required:');
   console.log(sqlFix);
-  
+
   return {
     success: false,
     requiresManualFix: true,
