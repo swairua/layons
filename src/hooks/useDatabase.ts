@@ -1196,15 +1196,30 @@ export const useCreatePayment = () => {
           }
         }
 
-        return {
+        const result = {
           success: true,
           payment_id: paymentResult.id,
           invoice_id: invoice_id,
           amount_allocated: paymentData.amount,
+          allocation_created: allocationCreated,
           fallback_used: true,
-          allocation_failed: !!allocationError,
-          allocation_error: allocationError ? JSON.stringify(allocationError) : null
+          allocation_failed: !allocationCreated,
+          allocation_error: allocationError ? {
+            message: allocationError?.message || String(allocationError),
+            code: (allocationError as any)?.code,
+            details: (allocationError as any)?.details
+          } : null
         };
+
+        console.log('Payment creation result:', {
+          success: result.success,
+          payment_id: result.payment_id,
+          allocation_created: result.allocation_created,
+          allocation_failed: result.allocation_failed,
+          invoice_id: result.invoice_id
+        });
+
+        return result;
       }
     },
     onSuccess: (result) => {
