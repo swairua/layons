@@ -3131,15 +3131,55 @@ export const generatePDF = async (data: DocumentData) => {
         <!-- Payment Details Section (for receipts) -->
         ${data.type === 'receipt' ? `
         <div class="payment-section" style="margin-top: 25px; border-top: 2px solid #000; padding-top: 15px;">
-          <table class="payment-details-table" style="width: 100%; border-collapse: collapse;">
+          <!-- Invoice Particulars Table -->
+          ${data.items && data.items.length > 0 ? `
+          <div style="margin-bottom: 20px;">
+            <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 10px; margin-top: 0;">Invoice Particulars</h3>
+            <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+              <thead>
+                <tr style="background-color: #f5f5f5;">
+                  <th style="padding: 8px; text-align: left; border: 1px solid #ddd; font-weight: bold; font-size: 10px;">Invoice No</th>
+                  <th style="padding: 8px; text-align: right; border: 1px solid #ddd; font-weight: bold; font-size: 10px;">Previous Balance</th>
+                  <th style="padding: 8px; text-align: right; border: 1px solid #ddd; font-weight: bold; font-size: 10px;">Amount Paid</th>
+                  <th style="padding: 8px; text-align: right; border: 1px solid #ddd; font-weight: bold; font-size: 10px;">Current Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${(data.items as any[]).map((item: any) => item.invoice_number ? `
+                <tr style="border: 1px solid #ddd;">
+                  <td style="padding: 8px; text-align: left; border: 1px solid #ddd; font-size: 10px;">${item.invoice_number || ''}</td>
+                  <td style="padding: 8px; text-align: right; border: 1px solid #ddd; font-size: 10px;">${formatCurrency((item as any).previous_balance || 0)}</td>
+                  <td style="padding: 8px; text-align: right; border: 1px solid #ddd; font-size: 10px; font-weight: 600;">${formatCurrency((item as any).allocated_amount || 0)}</td>
+                  <td style="padding: 8px; text-align: right; border: 1px solid #ddd; font-size: 10px;">${formatCurrency((item as any).current_balance || 0)}</td>
+                </tr>
+                ` : '').join('')}
+              </tbody>
+            </table>
+          </div>
+          ` : ''}
+
+          <!-- Payment Summary -->
+          <table class="payment-details-table" style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+            <tr style="border-bottom: 1px solid #e9ecef;">
+              <td style="padding: 10px 0; font-weight: 600; width: 50%;">Total Amount Paid:</td>
+              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${formatCurrency(data.total_amount)}</td>
+            </tr>
+            ${(data as any).value_tendered !== undefined && (data as any).value_tendered > 0 ? `
             <tr style="border-bottom: 1px solid #e9ecef;">
               <td style="padding: 10px 0; font-weight: 600; width: 50%;">Amount Tendered:</td>
-              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${formatCurrency((data as any).value_tendered || 0)}</td>
+              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${formatCurrency((data as any).value_tendered)}</td>
             </tr>
+            ` : ''}
             ${(data as any).change !== undefined && (data as any).change > 0 ? `
             <tr style="border-bottom: 1px solid #e9ecef;">
               <td style="padding: 10px 0; font-weight: 600; width: 50%;">Change:</td>
               <td style="padding: 10px 0; text-align: right; font-weight: 600;">${formatCurrency((data as any).change)}</td>
+            </tr>
+            ` : ''}
+            ${(data as any).payment_method ? `
+            <tr style="border-bottom: 1px solid #e9ecef;">
+              <td style="padding: 10px 0; font-weight: 600; width: 50%;">Payment Method:</td>
+              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${(data as any).payment_method}</td>
             </tr>
             ` : ''}
           </table>
@@ -3672,6 +3712,24 @@ export const generateCustomerStatementPDF = async (customer: any, invoices: any[
 
 // Function for generating payment receipt PDF
 export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyDetails) => {
+  // Extract invoice particulars from payment allocations
+  const invoiceParticulars = payment.payment_allocations && payment.payment_allocations.length > 0
+    ? payment.payment_allocations.map((alloc: any) => ({
+        invoice_number: alloc.invoice_number || 'N/A',
+        invoice_total: alloc.invoice_total || 0,
+        allocated_amount: alloc.allocated_amount || 0,
+        // Previous balance = total invoice amount (before this payment)
+        previous_balance: alloc.invoice_total || 0,
+      }))
+    : [];
+
+  // Calculate current balance for each invoice (invoice total - allocated amount from this payment)
+  const invoicesToDisplay = invoiceParticulars.map((inv: any) => ({
+    ...inv,
+    // Current balance = total invoice amount - amount paid in this payment
+    current_balance: Math.max(0, inv.invoice_total - inv.allocated_amount),
+  }));
+
   const documentData: DocumentData = {
     type: 'receipt', // Use receipt type for payment receipts
     number: payment.number || payment.payment_number || `REC-${Date.now()}`,
@@ -3685,8 +3743,25 @@ export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyD
     total_amount: typeof payment.amount === 'string' ?
       parseFloat(payment.amount.replace('$', '').replace(',', '')) :
       payment.amount,
-    notes: `Payment received via ${payment.payment_method?.replace('_', ' ') || payment.method?.replace('_', ' ') || 'Unknown method'}\n\nReference: ${payment.reference_number || 'N/A'}\nInvoice: ${payment.payment_allocations?.[0]?.invoice_number || 'N/A'}`,
+    // Add invoice particulars and balance information
+    items: invoicesToDisplay.map((inv: any) => ({
+      description: `Invoice ${inv.invoice_number}`,
+      quantity: 1,
+      unit_price: 0,
+      tax_percentage: 0,
+      tax_amount: 0,
+      tax_inclusive: false,
+      line_total: 0,
+      // Custom fields for receipt display
+      invoice_number: inv.invoice_number,
+      invoice_total: inv.invoice_total,
+      allocated_amount: inv.allocated_amount,
+      previous_balance: inv.previous_balance,
+      current_balance: inv.current_balance,
+    })),
+    notes: `Payment received via ${payment.payment_method?.replace('_', ' ') || payment.method?.replace('_', ' ') || 'Unknown method'}\n\nReference: ${payment.reference_number || 'N/A'}`,
     terms_and_conditions: 'Thank you for your payment. This receipt confirms that payment has been received and processed.',
+    payment_method: payment.payment_method?.replace('_', ' ') || payment.method?.replace('_', ' ') || 'Unknown',
   };
 
   return generatePDF(documentData);

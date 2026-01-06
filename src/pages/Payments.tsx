@@ -4,6 +4,7 @@ import { parseErrorMessage } from '@/utils/errorHelpers';
 import { RecordPaymentModal } from '@/components/payments/RecordPaymentModal';
 import { ViewPaymentModal } from '@/components/payments/ViewPaymentModal';
 import { PaymentAllocationStatus } from '@/components/payments/PaymentAllocationStatus';
+import { PaymentAllocationQuickFix } from '@/components/payments/PaymentAllocationQuickFix';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -128,9 +129,9 @@ export default function Payments() {
   // Removed inline PDF generation function - now using utility function
 
   const filteredPayments = payments.filter(payment =>
-    payment.customers?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    payment.payment_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    payment.payment_allocations?.some(alloc => alloc.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()))
+    (payment.customers?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+    (payment.payment_number?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+    (payment.payment_allocations?.some(alloc => alloc.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase())) ?? false)
   );
 
   if (isLoading) {
@@ -156,8 +157,8 @@ export default function Payments() {
           </div>
         </div>
 
-        {/* Show auto-fix if there's an error */}
-        <PaymentAllocationAutoFix />
+        {/* Show quick fix if there's an error */}
+        <PaymentAllocationQuickFix />
       </div>
     );
   }

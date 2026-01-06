@@ -928,27 +928,53 @@ export const usePayments = (companyId?: string) => {
 
         const { data: payments, error: paymentsError } = await query;
 
-        if (paymentsError) throw paymentsError;
+        if (paymentsError) {
+          console.error('Error fetching payments from Supabase:', paymentsError);
+          throw paymentsError;
+        }
         if (!payments || payments.length === 0) return [];
 
         // Step 2: Get customers separately (filter out invalid UUIDs)
-        const customerIds = [...new Set(payments.map(payment => payment.customer_id).filter(id => id && typeof id === 'string' && id.length === 36))];
-        const { data: customers } = customerIds.length > 0 ? await supabase
-          .from('customers')
-          .select('id, name, email, phone, address, city, country')
-          .in('id', customerIds) : { data: [] };
+        let customers: any[] = [];
+        try {
+          const customerIds = [...new Set(payments.map(payment => payment.customer_id).filter(id => id && typeof id === 'string' && id.length === 36))];
+          if (customerIds.length > 0) {
+            const { data, error } = await supabase
+              .from('customers')
+              .select('id, name, email, phone, address, city, country')
+              .in('id', customerIds);
+            if (!error && data) {
+              customers = data;
+            } else if (error) {
+              console.warn('Could not fetch customers (non-fatal):', error.message);
+            }
+          }
+        } catch (err) {
+          console.warn('Error fetching customers:', err);
+        }
 
         // Step 3: Get payment allocations separately
-        const { data: paymentAllocations } = await supabase
-          .from('payment_allocations')
-          .select(`
-            id,
-            payment_id,
-            invoice_id,
-            amount_allocated,
-            invoices(id, invoice_number, total_amount)
-          `)
-          .in('payment_id', payments.map(payment => payment.id));
+        let paymentAllocations: any[] = [];
+        try {
+          const { data, error } = await supabase
+            .from('payment_allocations')
+            .select(`
+              id,
+              payment_id,
+              invoice_id,
+              allocated_amount,
+              invoices(id, invoice_number, total_amount)
+            `)
+            .in('payment_id', payments.map(payment => payment.id));
+
+          if (!error && data) {
+            paymentAllocations = data;
+          } else if (error) {
+            console.warn('Could not fetch payment allocations - table may not exist:', error.message);
+          }
+        } catch (err) {
+          console.warn('Error fetching payment allocations:', err);
+        }
 
         // Step 4: Create lookup maps
         const customerMap = new Map();
@@ -964,7 +990,7 @@ export const usePayments = (companyId?: string) => {
           allocationsMap.get(allocation.payment_id).push({
             id: allocation.id,
             invoice_number: allocation.invoices?.invoice_number || 'N/A',
-            allocated_amount: allocation.amount_allocated,
+            allocated_amount: allocation.allocated_amount,
             invoice_total: allocation.invoices?.total_amount || 0
           });
         });
@@ -988,6 +1014,9 @@ export const usePayments = (companyId?: string) => {
         throw new Error(errorMessage);
       }
     },
+    enabled: !!companyId,
+    retry: 3,
+    retryDelay: 1000,
   });
 };
 
