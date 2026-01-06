@@ -1029,6 +1029,7 @@ export const usePayments = (companyId?: string) => {
             allocationsMap.set(allocation.payment_id, []);
           }
           const invoice = invoiceMap.get(allocation.invoice_id);
+          console.log(`Allocation ${allocation.id}: invoice_id=${allocation.invoice_id}, found_invoice=${!!invoice}, invoice_number=${invoice?.invoice_number || 'N/A'}`);
           allocationsMap.get(allocation.payment_id).push({
             id: allocation.id,
             invoice_number: invoice?.invoice_number || 'N/A',
