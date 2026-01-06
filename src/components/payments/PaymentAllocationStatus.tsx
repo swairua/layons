@@ -181,9 +181,31 @@ export function PaymentAllocationStatus() {
   const [isFixingProfile, setIsFixingProfile] = useState(false);
 
   const updateCheck = (index: number, updates: Partial<StatusCheck>) => {
-    setChecks(prev => prev.map((check, i) => 
+    setChecks(prev => prev.map((check, i) =>
       i === index ? { ...check, ...updates } : check
     ));
+  };
+
+  const handleFixProfile = async () => {
+    setIsFixingProfile(true);
+    try {
+      const result = await associateUserWithCompany();
+      if (result.success) {
+        toast.success('Profile fixed! Updating status checks...');
+        // Wait a moment for the database to update, then refresh checks
+        setTimeout(() => {
+          runStatusChecks();
+          setIsFixingProfile(false);
+        }, 1000);
+      } else {
+        toast.error(`Failed to fix profile: ${result.message}`);
+        setIsFixingProfile(false);
+      }
+    } catch (error) {
+      toast.error('Error fixing profile. Please try again.');
+      console.error('Error fixing profile:', error);
+      setIsFixingProfile(false);
+    }
   };
 
   const copySQL = () => {
