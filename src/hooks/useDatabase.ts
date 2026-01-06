@@ -1079,22 +1079,12 @@ export const useCreatePayment = () => {
         throw new Error('Invalid invoice ID. Please select a valid invoice.');
       }
 
-      // Try using the database function first
-      const { data, error } = await supabase.rpc('record_payment_with_allocation', {
-        p_company_id: paymentData.company_id,
-        p_customer_id: paymentData.customer_id,
-        p_invoice_id: paymentData.invoice_id,
-        p_payment_number: paymentData.payment_number,
-        p_payment_date: paymentData.payment_date,
-        p_amount: paymentData.amount,
-        p_payment_method: paymentData.payment_method,
-        p_reference_number: paymentData.reference_number || paymentData.payment_number,
-        p_notes: paymentData.notes || null
-      });
+      // Skip the database function call and use manual approach directly
+      // The record_payment_with_allocation function doesn't exist, so we use fallback
+      console.log('Using manual payment recording with allocation');
 
-      // If function doesn't exist (PGRST202), fall back to manual approach
-      if (error && error.code === 'PGRST202') {
-        console.warn('Database function not found, using fallback method');
+      // Manual approach (fallback method)
+      {
 
         // Fallback: Manual payment recording with invoice updates
         const { invoice_id, ...paymentFields } = paymentData;
