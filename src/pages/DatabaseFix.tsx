@@ -183,12 +183,19 @@ FROM invoices;`;
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            If the automatic fix doesn't work, you can manually apply the SQL in Supabase SQL Editor:
+            If the automatic fix doesn't work, you can manually apply the SQL below in your Supabase SQL Editor:
           </p>
 
-          <div className="bg-slate-900 text-slate-100 p-4 rounded font-mono text-xs overflow-x-auto max-h-96 overflow-y-auto">
+          <div className="bg-slate-900 text-slate-100 p-4 rounded font-mono text-xs overflow-x-auto max-h-64 overflow-y-auto">
             <pre>{sqlFix}</pre>
           </div>
+
+          <Alert className="border-blue-200 bg-blue-50">
+            <AlertTriangle className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-900 text-sm">
+              <strong>This SQL will:</strong> Disable RLS, drop problematic policies, add the company_id column, and populate it with data from customer relationships.
+            </AlertDescription>
+          </Alert>
 
           <div className="flex gap-2">
             <Button 
