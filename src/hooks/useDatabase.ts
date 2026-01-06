@@ -1100,43 +1100,65 @@ export const useCreatePayment = () => {
 
         // 2. Create payment allocation with enhanced error handling
         let allocationError: any = null;
+        let allocationCreated = false;
+
         try {
           // First check if payment_allocations table exists
+          console.log('Checking if payment_allocations table exists...');
           const { error: tableCheckError } = await supabase
             .from('payment_allocations')
             .select('id')
             .limit(1);
 
-          if (tableCheckError && tableCheckError.message.includes('relation') && tableCheckError.message.includes('does not exist')) {
+          if (tableCheckError && tableCheckError.message?.includes('relation') && tableCheckError.message?.includes('does not exist')) {
             allocationError = new Error('payment_allocations table does not exist. Please run the table setup SQL.');
+            console.error('RLS/Setup Error:', allocationError.message);
           } else {
             // Table exists, try to insert allocation
-            const { error: insertError } = await supabase
+            console.log('Inserting allocation:', {
+              payment_id: paymentResult.id,
+              invoice_id: invoice_id,
+              amount_allocated: paymentData.amount
+            });
+
+            const { data: insertedAllocation, error: insertError } = await supabase
               .from('payment_allocations')
               .insert([{
                 payment_id: paymentResult.id,
                 invoice_id: invoice_id,
                 amount_allocated: paymentData.amount
-              }]);
+              }])
+              .select();
 
-            allocationError = insertError;
+            if (insertError) {
+              console.error('Allocation insert error:', insertError);
+              allocationError = insertError;
+            } else if (insertedAllocation && insertedAllocation.length > 0) {
+              console.log('Allocation created successfully:', insertedAllocation[0]);
+              allocationCreated = true;
+            } else {
+              console.warn('Allocation insert returned no data');
+              allocationError = new Error('Allocation was not created - no response from server');
+            }
           }
         } catch (err) {
+          console.error('Exception during allocation creation:', err);
           allocationError = err;
         }
 
         if (allocationError) {
-          console.error('Failed to create allocation:', allocationError);
+          console.error('❌ Failed to create allocation:', allocationError);
           console.error('Allocation error details:', JSON.stringify(allocationError, null, 2));
           console.error('Payment was recorded successfully, but allocation failed');
+          console.error('Payment ID:', paymentResult.id);
+          console.error('Invoice ID:', invoice_id);
 
           // If it's an RLS error, provide specific guidance
-          if (allocationError.message?.includes('row-level security') || allocationError.message?.includes('permission denied')) {
-            console.error('RLS Error: User profile may not be linked to a company or RLS policies are blocking the insert');
+          if (allocationError?.message?.includes('row-level security') || allocationError?.message?.includes('permission denied')) {
+            console.error('⚠️ RLS Error: User profile may not be linked to a company or RLS policies are blocking the insert');
           }
-
-          // Continue anyway - payment was recorded
-          // The UI should show this as a warning, not a complete failure
+        } else if (allocationCreated) {
+          console.log('✅ Allocation created and linked successfully');
         }
 
         // 3. Get current invoice data and update balances
