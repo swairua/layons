@@ -51,6 +51,15 @@ const App = () => {
   useEffect(() => {
     // Initialize on app startup
     // Non-blocking async initialization
+    (async () => {
+      try {
+        // Verify invoice company_id column exists
+        // This fixes issues with delete operations
+        await verifyInvoiceCompanyIdColumn();
+      } catch (error) {
+        console.warn('Database schema verification completed with issues (non-critical)', error);
+      }
+    })();
   }, []);
 
   useEffect(() => {
