@@ -1,0 +1,294 @@
+import { useState } from 'react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  AlertTriangle, 
+  Copy, 
+  CheckCircle, 
+  ExternalLink, 
+  Zap,
+  Loader2
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { 
+  applyComprehensiveRLSFix, 
+  getComprehensiveRLSFixSQL,
+  verifyRLSFixApplied 
+} from '@/utils/applyComprehensiveRLSFix';
+
+interface RLSErrorDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
+  invoiceName?: string;
+}
+
+export function RLSErrorDialog({ 
+  open, 
+  onOpenChange, 
+  onSuccess,
+  invoiceName = 'Invoice'
+}: RLSErrorDialogProps) {
+  const [isApplying, setIsApplying] = useState(false);
+  const [showManualMode, setShowManualMode] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [step, setStep] = useState<'initial' | 'fixing' | 'success' | 'error'>('initial');
+
+  const sqlFix = getComprehensiveRLSFixSQL();
+
+  const handleAutomaticFix = async () => {
+    setIsApplying(true);
+    setStep('fixing');
+    
+    try {
+      console.log('Applying RLS fix...');
+      const result = await applyComprehensiveRLSFix();
+      
+      if (result.success) {
+        console.log('✅ RLS fix applied successfully');
+        
+        // Verify the fix
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const isFixed = await verifyRLSFixApplied();
+        
+        if (isFixed) {
+          setStep('success');
+          toast.success('✅ RLS issue fixed! You can now delete invoices.');
+          setTimeout(() => {
+            onOpenChange(false);
+            onSuccess?.();
+          }, 2000);
+          return;
+        }
+      }
+      
+      // Fix didn't work, show manual option
+      setStep('error');
+      setShowManualMode(true);
+      toast.error('Automatic fix failed. Please use manual method below.');
+    } catch (err) {
+      console.error('Error applying fix:', err);
+      setStep('error');
+      setShowManualMode(true);
+      toast.error('Error applying fix. Please use manual method.');
+    } finally {
+      setIsApplying(false);
+    }
+  };
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(sqlFix);
+      setCopied(true);
+      toast.success('SQL copied to clipboard!');
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error('Failed to copy SQL');
+    }
+  };
+
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        {step === 'initial' && (
+          <>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                RLS Policy Issue Detected
+              </AlertDialogTitle>
+              <AlertDialogDescription className="space-y-3 mt-4">
+                <p>
+                  Your Supabase database has a Row Level Security (RLS) policy issue that prevents invoice deletion.
+                </p>
+                <p className="text-sm">
+                  <strong>Error:</strong> "record 'old' has no field 'company_id'"
+                </p>
+                <p>
+                  This happens when RLS policies reference columns or tables that don't exist or cause circular dependencies.
+                </p>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <div className="space-y-4 py-4">
+              <Alert className="border-blue-200 bg-blue-50">
+                <Zap className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-blue-900">
+                  <strong>We can fix this automatically!</strong> Click "Apply Automatic Fix" below to resolve the issue instantly.
+                </AlertDescription>
+              </Alert>
+
+              <Card className="bg-slate-50">
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-yellow-600" />
+                    What will be fixed
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm space-y-2">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>Disable problematic RLS policies on all tables</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>Add missing company_id column to invoices if needed</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>Populate company_id data for all invoices</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>Enable full database functionality</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <AlertDialogFooter className="gap-2">
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <Button
+                onClick={handleAutomaticFix}
+                disabled={isApplying}
+                className="gap-2 bg-blue-600 hover:bg-blue-700"
+              >
+                {isApplying ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Applying Fix...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="h-4 w-4" />
+                    Apply Automatic Fix
+                  </>
+                )}
+              </Button>
+            </AlertDialogFooter>
+          </>
+        )}
+
+        {step === 'fixing' && (
+          <>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                Applying RLS Fix...
+              </AlertDialogTitle>
+            </AlertDialogHeader>
+            <div className="py-8 text-center">
+              <p className="text-muted-foreground">
+                Please wait while we fix your database RLS policies...
+              </p>
+            </div>
+          </>
+        )}
+
+        {step === 'success' && (
+          <>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                Success! RLS Issue Fixed
+              </AlertDialogTitle>
+            </AlertDialogHeader>
+            <div className="py-4">
+              <Alert className="border-green-200 bg-green-50">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-900">
+                  ✅ Your database has been successfully fixed. You can now delete invoices and perform other operations.
+                </AlertDescription>
+              </Alert>
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogAction className="bg-green-600 hover:bg-green-700">
+                Done
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </>
+        )}
+
+        {step === 'error' && (
+          <>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                Manual Fix Required
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                The automatic fix couldn't be applied. Please use the manual method below.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <h4 className="font-semibold text-sm">SQL to Execute:</h4>
+                <div className="bg-slate-900 text-slate-100 p-4 rounded font-mono text-xs overflow-x-auto max-h-64 overflow-y-auto border border-slate-700">
+                  <pre>{sqlFix}</pre>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-semibold text-sm">Steps to apply manually:</h4>
+                <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+                  <li>Copy the SQL above (use the button below)</li>
+                  <li>Open your <a 
+                    href="https://supabase.com/dashboard" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    Supabase Dashboard
+                  </a></li>
+                  <li>Go to SQL Editor → New Query</li>
+                  <li>Paste the SQL and click Run</li>
+                  <li>Return here and close this dialog</li>
+                </ol>
+              </div>
+            </div>
+
+            <AlertDialogFooter className="gap-2">
+              <AlertDialogCancel>Close</AlertDialogCancel>
+              <Button
+                onClick={handleCopy}
+                variant="outline"
+                className="gap-2"
+              >
+                {copied ? (
+                  <>
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4" />
+                    Copy SQL
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={() => window.open('https://supabase.com/dashboard', '_blank')}
+                className="gap-2"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Open Supabase
+              </Button>
+            </AlertDialogFooter>
+          </>
+        )}
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
