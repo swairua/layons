@@ -4,12 +4,23 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function AuditLogs() {
-  const { user, profile } = useAuth();
+  const { user, profile, loading, isAdmin } = useAuth();
 
-  // Check if user is admin
-  if (profile?.role !== 'admin' && profile?.role !== 'super_admin') {
+  // Show loading state while profile is being fetched
+  if (loading) {
+    return (
+      <div className="space-y-6 p-6">
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
+
+  // Check if user is authenticated and is admin
+  if (!user || !isAdmin) {
     return (
       <div className="space-y-6 p-6">
         <Alert className="border-red-200 bg-red-50">
