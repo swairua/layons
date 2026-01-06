@@ -12,6 +12,7 @@ import { verifyInvoiceCompanyIdColumn } from "@/utils/fixMissingInvoiceCompanyId
 import { verifyInvoiceRLSFix } from "@/utils/fixInvoiceRLSPolicy";
 import { verifyRLSDisabled } from "@/utils/disableInvoiceRLS";
 import { fixDeleteInvoiceRLS, verifyDeleteInvoiceRLSFix } from "@/utils/fixDeleteInvoiceRLS";
+import { applyComprehensiveRLSFix, verifyRLSFixApplied } from "@/utils/applyComprehensiveRLSFix";
 
 // Lazy load the page components to reduce initial bundle size and startup time
 import { lazy, Suspense } from "react";
@@ -87,19 +88,20 @@ const App = () => {
 
         // Fix RLS policy for invoice deletion (handles company_id column issue)
         try {
-          const isFixed = await verifyDeleteInvoiceRLSFix();
+          const isFixed = await verifyRLSFixApplied();
           if (!isFixed) {
-            console.log('Attempting to fix RLS policy for invoice deletion...');
-            const fixResult = await fixDeleteInvoiceRLS();
+            console.log('🔧 RLS policy issue detected. Attempting comprehensive fix...');
+            const fixResult = await applyComprehensiveRLSFix();
             if (fixResult.success) {
-              console.log('✅ RLS policy fixed successfully');
+              console.log('✅ RLS policies fixed successfully');
             } else if (fixResult.requiresManualFix) {
-              console.warn('⚠️ Manual RLS policy fix required. Run this SQL in Supabase:');
+              console.warn('⚠️ Manual RLS policy fix required. The user will see a fix dialog when they try to delete an invoice.');
+              console.warn('SQL to run in Supabase SQL Editor:');
               console.warn(fixResult.sql);
             }
           }
         } catch (err) {
-          console.warn('⚠️ Could not fix RLS policy', err);
+          console.warn('⚠️ Could not automatically fix RLS policy', err);
         }
 
         // Verify invoice RLS policy doesn't have infinite recursion
