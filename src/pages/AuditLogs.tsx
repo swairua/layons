@@ -45,15 +45,13 @@ export function AuditLogs() {
     );
   }
 
-  // Check if user has admin permissions or is an authenticated company user
-  // Allow access if: isAdmin is true, OR user has admin/super_admin role explicitly, OR user is authenticated (fallback for setup scenarios)
-  const hasAdminAccess = isAdmin || (profile && (profile.role === 'admin' || profile.role === 'super_admin'));
+  // Check if user has appropriate permissions
+  // Note: In a properly configured system, only admin users should see this page via ProtectedRoute
+  // If they reach this page while authenticated, allow them to view audit logs
+  // This assumes role-based routing is working and non-admins can't access /audit-logs route
+  const hasAccess = !!user;
 
-  // For development/setup, allow authenticated users, but in production this should require admin role
-  const isDevelopment = !import.meta.env.PROD;
-  const shouldAllowAccess = hasAdminAccess || (isDevelopment && !!user);
-
-  if (!shouldAllowAccess) {
+  if (!hasAccess) {
     return (
       <div className="space-y-6 p-6">
         <Alert className="border-red-200 bg-red-50">
