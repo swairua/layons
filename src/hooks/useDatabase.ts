@@ -945,7 +945,7 @@ export const usePayments = (companyId?: string) => {
             id,
             payment_id,
             invoice_id,
-            amount_allocated,
+            allocated_amount,
             invoices(id, invoice_number, total_amount)
           `)
           .in('payment_id', payments.map(payment => payment.id));
