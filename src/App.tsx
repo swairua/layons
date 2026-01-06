@@ -72,11 +72,15 @@ const App = () => {
           console.log('✅ RLS check passed - database is accessible');
         }
 
-        // Verify invoice company_id column exists
-        // This fixes issues with delete operations
-        const companyIdExists = await verifyInvoiceCompanyIdColumn();
-        if (!companyIdExists) {
-          console.warn('⚠️ company_id column verification issue - will be fixed by RLS SQL fix');
+        // Verify invoices table is accessible
+        // Note: company_id column may not exist - invoices are linked through customers
+        try {
+          const companyIdExists = await verifyInvoiceCompanyIdColumn();
+          if (!companyIdExists) {
+            console.warn('⚠️ invoices table verification issue - attempting to continue');
+          }
+        } catch (err) {
+          console.warn('⚠️ could not verify invoices table - will attempt normal operation', err);
         }
 
         // Verify invoice RLS policy doesn't have infinite recursion
