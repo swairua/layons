@@ -82,7 +82,7 @@ function getInitials(name: string) {
 }
 
 export default function UserManagement() {
-  const { isAdmin, profile: currentUser } = useAuth();
+  const { isAdmin, profile: currentUser, refreshProfile } = useAuth();
   const {
     users,
     invitations,
