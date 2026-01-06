@@ -151,12 +151,21 @@ export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: R
       if (result.fallback_used) {
         if (result.allocation_failed) {
           setAllocationFailed(true);
-          toast.success(`Payment of ${formatCurrency(paymentData.amount)} recorded successfully!`, {
-            description: "However, payment allocation failed. See the fix options below."
+          toast.error(`Payment recorded but invoice allocation failed!`, {
+            duration: 8000,
+            description: `Payment amount: ${formatCurrency(paymentData.amount)}. Invoice was not linked. Click below to fix this.`
           });
+
+          // Log detailed error info
+          if (result.allocation_error) {
+            console.error('Allocation error details:', result.allocation_error);
+          }
+        } else if (result.allocation_created) {
+          toast.success(`Payment of ${formatCurrency(paymentData.amount)} recorded and allocated successfully!`);
+          setAllocationFailed(false);
         } else {
           toast.success(`Payment of ${formatCurrency(paymentData.amount)} recorded successfully!`, {
-            description: "Payment allocation may require manual setup. Check the payments list."
+            description: "Invoice allocation status is pending. Check the payments list."
           });
         }
       } else {
