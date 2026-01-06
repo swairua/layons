@@ -84,6 +84,23 @@ const App = () => {
           console.warn('⚠️ could not verify invoices table - will attempt normal operation', err);
         }
 
+        // Fix RLS policy for invoice deletion (handles company_id column issue)
+        try {
+          const isFixed = await verifyDeleteInvoiceRLSFix();
+          if (!isFixed) {
+            console.log('Attempting to fix RLS policy for invoice deletion...');
+            const fixResult = await fixDeleteInvoiceRLS();
+            if (fixResult.success) {
+              console.log('✅ RLS policy fixed successfully');
+            } else if (fixResult.requiresManualFix) {
+              console.warn('⚠️ Manual RLS policy fix required. Run this SQL in Supabase:');
+              console.warn(fixResult.sql);
+            }
+          }
+        } catch (err) {
+          console.warn('⚠️ Could not fix RLS policy', err);
+        }
+
         // Verify invoice RLS policy doesn't have infinite recursion
         await verifyInvoiceRLSFix();
       } catch (error) {
