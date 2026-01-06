@@ -35,7 +35,7 @@ export interface UpdateUserData {
   position?: string;
 }
 
-export const useUserManagement = () => {
+const useUserManagement = () => {
   const { profile: currentUser, isAdmin } = useAuth();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [invitations, setInvitations] = useState<UserInvitation[]>([]);
