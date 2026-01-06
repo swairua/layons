@@ -117,6 +117,25 @@ export default function Payments() {
     setShowViewModal(true);
   };
 
+  const handleDeleteClick = (payment: Payment) => {
+    setPaymentToDelete(payment);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!paymentToDelete) return;
+
+    try {
+      await deletePayment.mutateAsync(paymentToDelete.id);
+      toast.success(`Payment ${paymentToDelete.payment_number} deleted successfully`);
+      setShowDeleteConfirm(false);
+      setPaymentToDelete(null);
+    } catch (error) {
+      const errorMessage = parseErrorMessage(error);
+      toast.error(`Failed to delete payment: ${errorMessage}`);
+    }
+  };
+
   const handleDownloadReceipt = (payment: Payment) => {
     try {
       // Debug: Log the payment data
