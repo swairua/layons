@@ -121,11 +121,7 @@ export default function UserManagement() {
     setIsRefreshing(true);
     try {
       await refreshProfile();
-      toast.success('Profile refreshed successfully! Reloading...');
-      // Wait a moment for the toast to display, then reload the page
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
+      toast.success('Profile refreshed! Admin privileges updated.');
     } catch (error) {
       toast.error('Failed to refresh profile');
     } finally {
