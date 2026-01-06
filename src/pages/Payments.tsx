@@ -34,7 +34,8 @@ import {
   Eye,
   DollarSign,
   Download,
-  Trash2
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { usePayments, useCompanies, useDeletePayment } from '@/hooks/useDatabase';
 import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
