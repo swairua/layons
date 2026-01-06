@@ -51,6 +51,7 @@ import { RecordPaymentModal } from '@/components/payments/RecordPaymentModal';
 import { CreateDeliveryNoteModal } from '@/components/delivery/CreateDeliveryNoteModal';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { RLSErrorDialog } from '@/components/RLSErrorDialog';
+import { fixRLSWithProperOrder } from '@/utils/fixRLSProperOrder';
 import { downloadInvoicePDF } from '@/utils/pdfGenerator';
 import { fixInvoiceColumns, calculateInvoiceStatus } from '@/utils/fixInvoiceColumns';
 import { supabase } from '@/integrations/supabase/client';
@@ -171,11 +172,14 @@ export default function Invoices() {
     } catch (err) {
       console.error('Delete failed', err);
       const errorMessage = parseErrorMessage(err);
+      const fullError = JSON.stringify(err).toLowerCase();
 
-      // Check if it's an RLS policy issue
-      const fullError = JSON.stringify(err);
-      if (fullError.includes('company_id') || fullError.includes('RLS policy issue')) {
-        console.log('🔧 RLS Policy Issue Detected - showing fix dialog');
+      // Check for RLS or column-related issues
+      if (fullError.includes('company_id') ||
+          fullError.includes('rls') ||
+          fullError.includes('does not exist') ||
+          fullError.includes('policy')) {
+        console.log('🔧 RLS/Column Issue Detected - showing fix dialog');
         setShowRLSErrorDialog(true);
       } else {
         toast.error(`Failed to delete invoice: ${errorMessage}`);
