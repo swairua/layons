@@ -436,46 +436,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                         context: 'profileRetry'
                       });
 
-                      // Auto-associate user with company on retry failure too
-                      console.warn('⚠️ Profile retry failed, auto-associating user with company');
-                      associateUserWithCompany().then(result => {
-                        if (mountedRef.current) {
-                          if (result.success) {
-                            console.log('✅ User associated with company, creating profile with company_id');
-                            setProfile({
-                              id: quickSession.user.id,
-                              email: quickSession.user.email || '',
-                              company_id: result.companyId,
-                              role: 'user',
-                              status: 'active',
-                              created_at: new Date().toISOString(),
-                              updated_at: new Date().toISOString()
-                            } as UserProfile);
-                          } else {
-                            console.warn('⚠️ Auto-association failed, creating minimal profile');
-                            setProfile({
-                              id: quickSession.user.id,
-                              email: quickSession.user.email || '',
-                              role: 'user',
-                              status: 'active',
-                              created_at: new Date().toISOString(),
-                              updated_at: new Date().toISOString()
-                            } as UserProfile);
-                          }
-                        }
-                      }).catch(err => {
-                        console.error('Error during auto-association:', err);
-                        if (mountedRef.current) {
-                          setProfile({
-                            id: quickSession.user.id,
-                            email: quickSession.user.email || '',
-                            role: 'user',
-                            status: 'active',
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString()
-                          } as UserProfile);
-                        }
-                      });
+                      // Create minimal profile to allow app to work
+                      if (mountedRef.current) {
+                        setProfile({
+                          id: quickSession.user.id,
+                          email: quickSession.user.email || '',
+                          role: 'user', // Default to user role, may be updated when profile loads
+                          status: 'active',
+                          created_at: new Date().toISOString(),
+                          updated_at: new Date().toISOString()
+                        } as UserProfile);
+                      }
                     });
                 }
               }
