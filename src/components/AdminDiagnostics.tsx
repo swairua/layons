@@ -4,12 +4,36 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Copy, ChevronDown, ChevronUp } from 'lucide-react';
+
+const FIX_SQL = `-- Fix for infinite recursion in profiles RLS policies
+BEGIN TRANSACTION;
+
+-- Drop all problematic recursive policies
+DROP POLICY IF EXISTS "Users can view their own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update their own profile" ON profiles;
+DROP POLICY IF EXISTS "Admins can view all profiles in their company" ON profiles;
+DROP POLICY IF EXISTS "Admins can insert new profiles" ON profiles;
+DROP POLICY IF EXISTS "Admins can update profiles in their company" ON profiles;
+
+-- Create simple non-recursive policies
+CREATE POLICY "Users can view their own profile" ON profiles
+    FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Users can update their own profile" ON profiles
+    FOR UPDATE USING (auth.uid() = id);
+
+CREATE POLICY "Authenticated users can insert profiles" ON profiles
+    FOR INSERT WITH CHECK (auth.uid() = id);
+
+COMMIT;`;
 
 export function AdminDiagnostics() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState('');
+  const [showSqlFix, setShowSqlFix] = useState(false);
 
   const diagnose = async () => {
     if (!email) {
@@ -93,22 +117,55 @@ export function AdminDiagnostics() {
             <div className="space-y-3">
               <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
                 <p className="font-semibold mb-2">Error: {error}</p>
-
-                {error.includes('infinite recursion') && (
-                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-xs">
-                    <p className="font-semibold mb-2">🔧 How to Fix This:</p>
-                    <ol className="list-decimal list-inside space-y-1 mb-3">
-                      <li>Go to your Supabase Dashboard</li>
-                      <li>Navigate to SQL Editor (left sidebar)</li>
-                      <li>Create a new SQL query</li>
-                      <li>Copy and paste the SQL from <code className="bg-white px-1 rounded">FIX_PROFILES_RLS_RECURSION.sql</code> in the project root</li>
-                      <li>Click "Run" or press Ctrl+Enter</li>
-                      <li>Wait for completion, then refresh your browser</li>
-                    </ol>
-                    <p className="text-xs">This will remove the problematic RLS policies that are causing infinite recursion.</p>
-                  </div>
-                )}
               </div>
+
+              {error.includes('infinite recursion') && (
+                <Card className="border-yellow-200 bg-yellow-50">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm text-yellow-900">🔧 Database RLS Fix Required</CardTitle>
+                      <button
+                        onClick={() => setShowSqlFix(!showSqlFix)}
+                        className="text-yellow-700 hover:text-yellow-900"
+                      >
+                        {showSqlFix ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </CardHeader>
+
+                  {showSqlFix && (
+                    <CardContent className="space-y-3">
+                      <div>
+                        <p className="text-sm text-yellow-900 mb-2">The database has conflicting RLS policies. Follow these steps:</p>
+                        <ol className="list-decimal list-inside space-y-2 text-xs text-yellow-800">
+                          <li>Go to your <a href="https://app.supabase.com" target="_blank" rel="noopener noreferrer" className="underline font-semibold">Supabase Dashboard</a></li>
+                          <li>Select your project</li>
+                          <li>Go to <strong>SQL Editor</strong> (left sidebar)</li>
+                          <li>Click <strong>New Query</strong></li>
+                          <li>Copy the SQL below and paste it</li>
+                          <li>Click <strong>Run</strong> (or press Ctrl+Enter)</li>
+                          <li>Wait for success, then refresh this page</li>
+                        </ol>
+                      </div>
+
+                      <div className="bg-gray-900 text-gray-100 p-3 rounded text-xs font-mono overflow-auto max-h-48">
+                        {FIX_SQL}
+                      </div>
+
+                      <Button
+                        onClick={() => {
+                          navigator.clipboard.writeText(FIX_SQL);
+                          toast.success('SQL copied to clipboard!');
+                        }}
+                        className="w-full bg-yellow-600 hover:bg-yellow-700 text-white"
+                      >
+                        <Copy className="h-4 w-4 mr-2" />
+                        Copy SQL to Clipboard
+                      </Button>
+                    </CardContent>
+                  )}
+                </Card>
+              )}
             </div>
           )}
 
