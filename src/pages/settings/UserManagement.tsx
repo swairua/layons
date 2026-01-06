@@ -98,6 +98,7 @@ export default function UserManagement() {
   } = useUserManagement();
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [modalState, setModalState] = useState<{
     type: 'create' | 'edit' | 'invite' | null;
     user?: UserProfile | null;
@@ -116,20 +117,19 @@ export default function UserManagement() {
     user.department?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (!isAdmin) {
-    const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefreshProfile = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshProfile();
+      toast.success('Profile refreshed. If you are an admin, please reload the page.');
+    } catch (error) {
+      toast.error('Failed to refresh profile');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
-    const handleRefreshProfile = async () => {
-      setIsRefreshing(true);
-      try {
-        await refreshProfile();
-        toast.success('Profile refreshed. If you are an admin, please reload the page.');
-      } catch (error) {
-        toast.error('Failed to refresh profile');
-      } finally {
-        setIsRefreshing(false);
-      }
-    };
+  if (!isAdmin) {
 
     return (
       <div className="space-y-6">
