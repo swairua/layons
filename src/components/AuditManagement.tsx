@@ -23,69 +23,6 @@ export function AuditManagement() {
         </AlertDescription>
       </Alert>
 
-      {/* Tabs */}
-      <Tabs defaultValue="dashboard" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 lg:w-fit">
-          <TabsTrigger value="dashboard" className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4" />
-            <span className="hidden sm:inline">Dashboard</span>
-          </TabsTrigger>
-          <TabsTrigger value="audit-trail" className="flex items-center gap-2">
-            <Eye className="w-4 h-4" />
-            <span className="hidden sm:inline">Audit Trail</span>
-          </TabsTrigger>
-          <TabsTrigger value="deletions" className="flex items-center gap-2">
-            <Info className="w-4 h-4" />
-            <span className="hidden sm:inline">Deletions</span>
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Dashboard Tab */}
-        <TabsContent value="dashboard" className="space-y-4">
-          <Card className="border-slate-200">
-            <CardHeader>
-              <CardTitle>Activity Overview</CardTitle>
-              <CardDescription>
-                Real-time statistics and insights about system activity
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <AuditDashboard />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Audit Trail Tab */}
-        <TabsContent value="audit-trail" className="space-y-4">
-          <Card className="border-slate-200">
-            <CardHeader>
-              <CardTitle>Complete Audit Trail</CardTitle>
-              <CardDescription>
-                View all create, update, delete, and restore actions across your system
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <AuditTrailViewer />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Deletions Tab */}
-        <TabsContent value="deletions" className="space-y-4">
-          <Card className="border-slate-200">
-            <CardHeader>
-              <CardTitle>Deletion History</CardTitle>
-              <CardDescription>
-                Detailed log of all deleted records with complete data backup for recovery
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <DeleteAuditLog />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
       {/* Footer Info */}
       <Card className="border-slate-200 bg-slate-50">
         <CardHeader>
