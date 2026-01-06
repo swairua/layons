@@ -5,6 +5,10 @@ import { toast } from '@/utils/safeToast';
 import { initializeAuth, clearAuthTokens, safeAuthOperation } from '@/utils/authHelpers';
 import { logError, getUserFriendlyErrorMessage, isErrorType } from '@/utils/errorLogger';
 
+// Type definitions for user roles and statuses
+export type UserRole = 'admin' | 'super_admin' | 'accountant' | 'stock_manager' | 'user';
+export type UserStatus = 'active' | 'inactive' | 'pending';
+
 // Helper function to safely format error for display
 const formatErrorForDisplay = (error: unknown): string => {
   if (!error) return 'Unknown error occurred';
