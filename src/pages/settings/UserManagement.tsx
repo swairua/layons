@@ -491,6 +491,38 @@ export default function UserManagement() {
         </Card>
       )}
 
+      {/* Implementation Guide */}
+      <Card className="border-amber-200 bg-amber-50">
+        <CardHeader>
+          <CardTitle className="text-amber-900">Need Full User Management?</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <div>
+              <h4 className="font-semibold text-amber-900 mb-2">Currently Available</h4>
+              <ul className="text-sm text-amber-800 space-y-1 ml-4 list-disc">
+                <li>Invite users via email</li>
+                <li>Edit user roles and status</li>
+                <li>View pending invitations</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold text-amber-900 mb-2">Requires Backend Setup</h4>
+              <ul className="text-sm text-amber-800 space-y-1 ml-4 list-disc">
+                <li>Direct user creation (requires Supabase admin API)</li>
+                <li>User deletion (requires Supabase admin API)</li>
+                <li>Email invitations (requires email service integration)</li>
+              </ul>
+            </div>
+            <div className="pt-2">
+              <p className="text-sm text-amber-800">
+                To enable these features, you'll need to set up Supabase Edge Functions with admin privileges or integrate with a backend API.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Modals */}
       <CreateUserModal
         open={modalState.type === 'create'}
