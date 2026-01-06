@@ -528,12 +528,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                   setSession(bgSession);
                   setUser(bgSession.user);
 
-                  // Fetch profile (non-critical if it fails)
-                  const userProfile = await fetchProfile(bgSession.user.id);
+                  // Fetch profile with extended timeout (non-critical if it fails)
+                  const bgProfileTimeoutPromise = new Promise<UserProfile | null>((resolve) => {
+                    setTimeout(() => {
+                      console.warn('⏱️ Background profile fetch timeout');
+                      resolve(null);
+                    }, 10000); // 10 second timeout
+                  });
+
+                  const userProfile = await Promise.race([
+                    fetchProfile(bgSession.user.id),
+                    bgProfileTimeoutPromise
+                  ]);
+
                   if (mountedRef.current) {
                     setProfile(userProfile || {
                       id: bgSession.user.id,
                       email: bgSession.user.email || '',
+                      role: 'user',
+                      status: 'active',
                       created_at: new Date().toISOString(),
                       updated_at: new Date().toISOString()
                     } as UserProfile);
