@@ -1316,7 +1316,8 @@ export const useDeletePayment = () => {
         const { error: deletePaymentError } = await supabase
           .from('payments')
           .delete()
-          .eq('id', paymentId);
+          .eq('id', paymentId)
+          .eq('company_id', companyId);
 
         if (deletePaymentError) {
           console.error('Failed to delete payment:', deletePaymentError);
