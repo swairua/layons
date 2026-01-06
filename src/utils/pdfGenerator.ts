@@ -3672,6 +3672,23 @@ export const generateCustomerStatementPDF = async (customer: any, invoices: any[
 
 // Function for generating payment receipt PDF
 export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyDetails) => {
+  // Extract invoice particulars from payment allocations
+  const invoiceParticulars = payment.payment_allocations && payment.payment_allocations.length > 0
+    ? payment.payment_allocations.map((alloc: any) => ({
+        invoice_number: alloc.invoice_number || 'N/A',
+        invoice_total: alloc.invoice_total || 0,
+        allocated_amount: alloc.allocated_amount || 0,
+        previous_balance: (alloc.invoice_total || 0) - (alloc.allocated_amount || 0),
+        current_balance: 0, // This will be calculated after payment
+      }))
+    : [];
+
+  // Calculate current balance for each invoice (invoice total - payment amount)
+  const invoicesToDisplay = invoiceParticulars.map((inv: any) => ({
+    ...inv,
+    current_balance: Math.max(0, inv.invoice_total - payment.amount),
+  }));
+
   const documentData: DocumentData = {
     type: 'receipt', // Use receipt type for payment receipts
     number: payment.number || payment.payment_number || `REC-${Date.now()}`,
@@ -3685,8 +3702,25 @@ export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyD
     total_amount: typeof payment.amount === 'string' ?
       parseFloat(payment.amount.replace('$', '').replace(',', '')) :
       payment.amount,
-    notes: `Payment received via ${payment.payment_method?.replace('_', ' ') || payment.method?.replace('_', ' ') || 'Unknown method'}\n\nReference: ${payment.reference_number || 'N/A'}\nInvoice: ${payment.payment_allocations?.[0]?.invoice_number || 'N/A'}`,
+    // Add invoice particulars and balance information
+    items: invoicesToDisplay.map((inv: any) => ({
+      description: `Invoice ${inv.invoice_number}`,
+      quantity: 1,
+      unit_price: 0,
+      tax_percentage: 0,
+      tax_amount: 0,
+      tax_inclusive: false,
+      line_total: 0,
+      // Custom fields for receipt display
+      invoice_number: inv.invoice_number,
+      invoice_total: inv.invoice_total,
+      allocated_amount: inv.allocated_amount,
+      previous_balance: inv.previous_balance,
+      current_balance: inv.current_balance,
+    })),
+    notes: `Payment received via ${payment.payment_method?.replace('_', ' ') || payment.method?.replace('_', ' ') || 'Unknown method'}\n\nReference: ${payment.reference_number || 'N/A'}`,
     terms_and_conditions: 'Thank you for your payment. This receipt confirms that payment has been received and processed.',
+    payment_method: payment.payment_method?.replace('_', ' ') || payment.method?.replace('_', ' ') || 'Unknown',
   };
 
   return generatePDF(documentData);
