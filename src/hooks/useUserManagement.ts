@@ -220,10 +220,10 @@ const useUserManagement = () => {
     }
   };
 
-  // Invite user via email
+  // Invite user via email (authenticated users in the same company)
   const inviteUser = async (email: string, role: UserRole): Promise<{ success: boolean; error?: string }> => {
-    if (!isAdmin || !currentUser?.company_id) {
-      return { success: false, error: 'Unauthorized' };
+    if (!currentUser?.company_id) {
+      return { success: false, error: 'Unauthorized - Company ID required' };
     }
 
     setLoading(true);
