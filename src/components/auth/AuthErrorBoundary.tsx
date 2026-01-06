@@ -59,8 +59,23 @@ export class AuthErrorBoundary extends Component<Props, State> {
   }
 
   handleRetry = () => {
+    this.retryCount++;
+
+    if (this.retryCount > this.maxRetries) {
+      // After max retries, hard reload
+      window.location.href = window.location.href;
+      return;
+    }
+
+    // Just clear error state and let the app continue
     this.setState({ hasError: false, error: undefined, showDiagnostics: false });
-    window.location.reload();
+
+    // If it's a network error, don't force reload - let app continue
+    const errorMsg = this.state.error?.message || '';
+    if (!errorMsg.includes('Failed to fetch') && !errorMsg.includes('Network')) {
+      // For non-network errors, reload after a short delay
+      setTimeout(() => window.location.reload(), 500);
+    }
   };
 
   toggleDiagnostics = () => {
