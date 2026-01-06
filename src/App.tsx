@@ -46,7 +46,6 @@ const CustomerPerformanceOptimizerPage = lazy(() => import("./pages/CustomerPerf
 const SetupAndTest = lazy(() => import("./components/SetupAndTest"));
 const AuthTest = lazy(() => import("./components/AuthTest"));
 const AdminRecreate = lazy(() => import("./pages/AdminRecreate"));
-const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const DatabaseFix = lazy(() => import("./pages/DatabaseFix"));
 
 const App = () => {
