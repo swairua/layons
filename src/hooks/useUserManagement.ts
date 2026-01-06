@@ -149,9 +149,9 @@ const useUserManagement = () => {
     }
   };
 
-  // Update user (admin only)
+  // Update user (authenticated users in the same company can edit)
   const updateUser = async (userId: string, userData: UpdateUserData): Promise<{ success: boolean; error?: string }> => {
-    if (!isAdmin) {
+    if (!currentUser?.company_id) {
       return { success: false, error: 'Unauthorized' };
     }
 
