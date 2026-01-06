@@ -157,8 +157,8 @@ export default function Payments() {
           </div>
         </div>
 
-        {/* Show auto-fix if there's an error */}
-        <PaymentAllocationAutoFix />
+        {/* Show quick fix if there's an error */}
+        <PaymentAllocationQuickFix />
       </div>
     );
   }
