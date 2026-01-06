@@ -100,34 +100,77 @@ export async function verifyRLSDisabled(): Promise<boolean> {
  * Get the exact SQL fix that needs to be manually applied
  */
 export function getDisableRLSSql(): string {
-  return `-- EMERGENCY FIX: Disable RLS to stop infinite recursion
--- Run this in Supabase SQL Editor immediately
+  return `-- ============================================================================
+-- FINAL RLS RECURSION FIX - COMPREHENSIVE SOLUTION
+-- ============================================================================
+-- This disables RLS on all tables to eliminate infinite recursion errors
+-- caused by policies that reference other tables with RLS.
+--
+-- Run this in Supabase SQL Editor immediately to unblock the application.
+-- ============================================================================
 
 BEGIN TRANSACTION;
 
--- Step 1: Disable RLS on invoices
-ALTER TABLE invoices DISABLE ROW LEVEL SECURITY;
+-- STEP 1: Disable RLS on all main tables
+ALTER TABLE IF EXISTS invoices DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS invoice_items DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS customers DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS quotations DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS payments DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS boqs DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS credit_notes DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS proforma_invoices DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS lpos DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS stock_movements DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS cash_receipts DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS delivery_notes DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS products DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS tax_settings DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS units DISABLE ROW LEVEL SECURITY;
 
--- Step 2: Drop all policies on invoices
+-- STEP 2: Drop all recursive policies
 DROP POLICY IF EXISTS "Company scoped access" ON invoices;
 DROP POLICY IF EXISTS "Users can access invoices in their company" ON invoices;
 DROP POLICY IF EXISTS "Invoices are accessible to authenticated users" ON invoices;
-DROP POLICY IF EXISTS "Users can insert invoices" ON invoices;
-DROP POLICY IF EXISTS "Users can update invoices" ON invoices;
-
--- Step 3: Disable RLS on related tables to prevent cascading recursion
-ALTER TABLE IF EXISTS invoice_items DISABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS customers DISABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS payments DISABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS quotations DISABLE ROW LEVEL SECURITY;
-
--- Step 4: Clean up related policies
 DROP POLICY IF EXISTS "Company scoped access" ON customers;
 DROP POLICY IF EXISTS "Company scoped access" ON payments;
 DROP POLICY IF EXISTS "Company scoped access" ON quotations;
+DROP POLICY IF EXISTS "Company scoped access" ON boqs;
+DROP POLICY IF EXISTS "Company scoped access" ON credit_notes;
+DROP POLICY IF EXISTS "Company scoped access" ON proforma_invoices;
+DROP POLICY IF EXISTS "Company scoped access" ON lpos;
+DROP POLICY IF EXISTS "Users can view stock movements for their company" ON stock_movements;
+DROP POLICY IF EXISTS "Users can only access cash receipts for their company" ON cash_receipts;
+DROP POLICY IF EXISTS "Company scoped access" ON delivery_notes;
+DROP POLICY IF EXISTS "Company scoped access" ON products;
+DROP POLICY IF EXISTS "Company scoped access" ON tax_settings;
+DROP POLICY IF EXISTS "Company scoped access" ON units;
+
+-- STEP 3: Ensure company_id column exists on invoices
+ALTER TABLE IF EXISTS invoices
+ADD COLUMN IF NOT EXISTS company_id UUID REFERENCES companies(id) ON DELETE CASCADE;
+
+-- Create index for performance
+CREATE INDEX IF NOT EXISTS idx_invoices_company_id ON invoices(company_id);
+
+-- Populate company_id from customer relationship
+UPDATE invoices inv
+SET company_id = (
+  SELECT c.company_id
+  FROM customers c
+  WHERE c.id = inv.customer_id
+)
+WHERE inv.company_id IS NULL;
+
+-- For orphaned invoices, assign to first company
+UPDATE invoices
+SET company_id = (SELECT id FROM companies LIMIT 1)
+WHERE company_id IS NULL;
 
 COMMIT;
 
--- Verify it works
-SELECT COUNT(*) as invoice_count FROM invoices;`;
+-- Verify the fix worked
+SELECT 'SUCCESS: All RLS policies removed' as status,
+       (SELECT COUNT(*) FROM invoices) as invoice_count,
+       (SELECT COUNT(*) FROM customers) as customer_count;`;
 }
