@@ -168,7 +168,8 @@ export default function Invoices() {
       setDeleteDialog({ open: false });
     } catch (err) {
       console.error('Delete failed', err);
-      toast.error('Failed to delete invoice');
+      const errorMessage = parseErrorMessage(err);
+      toast.error(`Failed to delete invoice: ${errorMessage}`);
     }
   };
 
