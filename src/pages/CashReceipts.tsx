@@ -194,7 +194,8 @@ export default function CashReceipts() {
       setDeleteDialog({ open: false });
     } catch (err) {
       console.error('Delete failed', err);
-      toast.error('Failed to delete cash receipt');
+      const errorMessage = parseErrorMessage(err);
+      toast.error(`Failed to delete cash receipt: ${errorMessage}`);
     } finally {
       setIsDeleting(false);
     }
