@@ -50,6 +50,7 @@ import { EditUserModal } from '@/components/users/EditUserModal';
 import { InviteUserModal } from '@/components/users/InviteUserModal';
 import { AdminDiagnostics } from '@/components/AdminDiagnostics';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 function getRoleColor(role: string) {
   switch (role) {
@@ -84,6 +85,7 @@ function getInitials(name: string) {
 }
 
 export default function UserManagement() {
+  const navigate = useNavigate();
   const { isAdmin, profile: currentUser, refreshProfile } = useAuth();
   const {
     users,
@@ -153,23 +155,32 @@ export default function UserManagement() {
                 </p>
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground mb-4">
-                    Use the tool below to diagnose and fix admin access:
+                    Try refreshing your profile or use the database fix:
                   </p>
-                  <Button
-                    onClick={handleRefreshProfile}
-                    disabled={isRefreshing}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    {isRefreshing ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Refreshing...
-                      </>
-                    ) : (
-                      'Refresh Profile'
-                    )}
-                  </Button>
+                  <div className="space-y-2">
+                    <Button
+                      onClick={handleRefreshProfile}
+                      disabled={isRefreshing}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      {isRefreshing ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Refreshing...
+                        </>
+                      ) : (
+                        'Refresh Profile'
+                      )}
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/database-fix')}
+                      variant="default"
+                      className="w-full"
+                    >
+                      Database Fix Guide
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
