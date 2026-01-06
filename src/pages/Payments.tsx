@@ -129,9 +129,9 @@ export default function Payments() {
   // Removed inline PDF generation function - now using utility function
 
   const filteredPayments = payments.filter(payment =>
-    payment.customers?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    payment.payment_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    payment.payment_allocations?.some(alloc => alloc.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()))
+    (payment.customers?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+    (payment.payment_number?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+    (payment.payment_allocations?.some(alloc => alloc.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase())) ?? false)
   );
 
   if (isLoading) {
