@@ -48,6 +48,7 @@ import useUserManagement from '@/hooks/useUserManagement';
 import { CreateUserModal } from '@/components/users/CreateUserModal';
 import { EditUserModal } from '@/components/users/EditUserModal';
 import { InviteUserModal } from '@/components/users/InviteUserModal';
+import { AdminDiagnostics } from '@/components/AdminDiagnostics';
 import { toast } from 'sonner';
 
 function getRoleColor(role: string) {
@@ -130,7 +131,6 @@ export default function UserManagement() {
   };
 
   if (!isAdmin) {
-
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -143,37 +143,40 @@ export default function UserManagement() {
         </div>
 
         <div className="flex items-center justify-center">
-          <Card className="w-full max-w-md text-center">
-            <CardContent className="pt-6">
-              <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Access Denied</h3>
-              <p className="text-muted-foreground mb-4">
-                You need administrator privileges to access user management.
-              </p>
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground mb-4">
-                  If you believe you should have access, try refreshing your profile:
+          <div className="space-y-6 w-full max-w-md">
+            <Card className="text-center">
+              <CardContent className="pt-6">
+                <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Access Denied</h3>
+                <p className="text-muted-foreground mb-4">
+                  You need administrator privileges to access user management.
                 </p>
-                <Button
-                  onClick={handleRefreshProfile}
-                  disabled={isRefreshing}
-                  variant="outline"
-                  className="w-full"
-                >
-                  {isRefreshing ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Refreshing...
-                    </>
-                  ) : (
-                    'Refresh Profile'
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Use the tool below to diagnose and fix admin access:
+                  </p>
+                  <Button
+                    onClick={handleRefreshProfile}
+                    disabled={isRefreshing}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {isRefreshing ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Refreshing...
+                      </>
+                    ) : (
+                      'Refresh Profile'
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
+            <AdminDiagnostics />
+          </div>
+        </div>
       </div>
     );
   }
