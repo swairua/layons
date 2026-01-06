@@ -168,13 +168,29 @@ export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: R
       resetForm();
     } catch (error) {
       console.error('Error recording payment:', error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
 
-      const errorMessage = parseErrorMessageWithCodes(error, 'payment');
+      let errorMessage = 'Failed to record payment';
+
+      // Handle network errors first
+      if (error instanceof TypeError) {
+        if ((error as any).message?.includes('Failed to fetch')) {
+          errorMessage = 'Network error: Unable to connect to server. Please check your internet connection and try again. If the problem persists, Supabase may be temporarily unavailable.';
+        } else {
+          errorMessage = `Network error: ${(error as any).message || 'Failed to fetch data'}`;
+        }
+      } else if (error instanceof Error) {
+        // Try to use the custom error parser first
+        const parsedMessage = parseErrorMessageWithCodes(error, 'payment');
+        errorMessage = parsedMessage;
+      } else {
+        // Fallback for unknown error types
+        console.error('Error details:', JSON.stringify(error, null, 2));
+        const fallback = parseErrorMessageWithCodes(error, 'payment');
+        errorMessage = fallback;
+      }
 
       toast.error(errorMessage, {
-        duration: 6000,
-        description: 'Check the console for technical details'
+        duration: 6000
       });
     } finally {
       setIsSubmitting(false);
