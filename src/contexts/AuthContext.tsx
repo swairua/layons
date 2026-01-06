@@ -830,7 +830,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Compute derived state
   const isAuthenticated = !!user;
-  const isAdmin = profile?.role === 'admin';
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
 
   const value: AuthContextType = {
     user,
