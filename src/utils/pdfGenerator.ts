@@ -3718,17 +3718,20 @@ export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyD
         invoice_number: alloc.invoice_number || 'N/A',
         invoice_total: alloc.invoice_total || 0,
         allocated_amount: alloc.allocated_amount || 0,
-        // Previous balance = total invoice amount (before this payment)
-        previous_balance: alloc.invoice_total || 0,
+        // Use enriched previous_balance if available, otherwise calculate
+        previous_balance: alloc.previous_balance !== undefined ? alloc.previous_balance : (alloc.invoice_total || 0),
       }))
     : [];
 
-  // Calculate current balance for each invoice (invoice total - allocated amount from this payment)
-  const invoicesToDisplay = invoiceParticulars.map((inv: any) => ({
-    ...inv,
-    // Current balance = total invoice amount - amount paid in this payment
-    current_balance: Math.max(0, inv.invoice_total - inv.allocated_amount),
-  }));
+  // Ensure current balance is properly calculated or use enriched data
+  const invoicesToDisplay = invoiceParticulars.map((inv: any) => {
+    const currentBalance = inv.previous_balance - inv.allocated_amount;
+    return {
+      ...inv,
+      // Current balance = previous balance - amount paid in this payment
+      current_balance: Math.max(0, currentBalance),
+    };
+  });
 
   const documentData: DocumentData = {
     type: 'receipt', // Use receipt type for payment receipts
