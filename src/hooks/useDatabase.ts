@@ -1111,7 +1111,7 @@ export const useCreatePayment = () => {
               .insert([{
                 payment_id: paymentResult.id,
                 invoice_id: invoice_id,
-                allocated_amount: paymentData.amount
+                amount_allocated: paymentData.amount
               }]);
 
             allocationError = insertError;
