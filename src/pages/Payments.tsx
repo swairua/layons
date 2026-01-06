@@ -123,9 +123,13 @@ export default function Payments() {
   };
 
   const handleConfirmDelete = async () => {
-    if (!paymentToDelete || !currentCompany?.id) return;
+    if (!paymentToDelete || !currentCompany?.id) {
+      toast.error('Missing required information for deletion');
+      return;
+    }
 
     try {
+      console.log('Initiating payment deletion:', paymentToDelete.id);
       await deletePayment.mutateAsync({
         paymentId: paymentToDelete.id,
         companyId: currentCompany.id
@@ -134,7 +138,12 @@ export default function Payments() {
       setShowDeleteConfirm(false);
       setPaymentToDelete(null);
     } catch (error) {
-      const errorMessage = parseErrorMessage(error);
+      console.error('Delete error caught:', error);
+      const errorMessage = error instanceof Error
+        ? error.message
+        : typeof error === 'string'
+        ? error
+        : 'Unknown error occurred';
       toast.error(`Failed to delete payment: ${errorMessage}`);
     }
   };
