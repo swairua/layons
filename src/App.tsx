@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useCurrentCompany } from "@/contexts/CompanyContext";
 import { setFavicon } from "@/utils/setFavicon";
 import { updateMetaTags } from "@/utils/updateMetaTags";
+import { verifyInvoiceCompanyIdColumn } from "@/utils/fixMissingInvoiceCompanyId";
 
 // Lazy load the page components to reduce initial bundle size and startup time
 import { lazy, Suspense } from "react";
