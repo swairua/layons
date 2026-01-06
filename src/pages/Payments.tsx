@@ -47,6 +47,8 @@ interface Payment {
     invoice_number: string;
     allocated_amount: number;
     invoice_total: number;
+    paid_amount?: number;
+    balance_due?: number;
   }[];
 }
 
@@ -103,6 +105,30 @@ export default function Payments() {
 
   const handleDownloadReceipt = (payment: Payment) => {
     try {
+      // Enrich payment data with invoice balance information
+      const enrichedPayment = {
+        ...payment,
+        payment_allocations: payment.payment_allocations?.map(alloc => {
+          // Find the corresponding invoice to get balance information
+          const invoice = invoices.find(inv => inv.invoice_number === alloc.invoice_number);
+
+          // Calculate previous balance (balance before this payment)
+          const currentBalanceDue = invoice?.balance_due || 0;
+          const previousBalance = currentBalanceDue + alloc.allocated_amount;
+
+          // Calculate due amount after this payment
+          const dueAmount = Math.max(0, previousBalance - alloc.allocated_amount);
+
+          return {
+            ...alloc,
+            paid_amount: invoice?.paid_amount || 0,
+            balance_due: invoice?.balance_due || 0,
+            previous_balance: previousBalance,
+            due_amount: dueAmount
+          };
+        }) || []
+      };
+
       // Use the utility function with company details
       const companyDetails = currentCompany ? {
         name: currentCompany.name,
@@ -118,7 +144,7 @@ export default function Payments() {
         company_services: currentCompany.company_services
       } : undefined;
 
-      generatePaymentReceiptPDF(payment, companyDetails);
+      generatePaymentReceiptPDF(enrichedPayment, companyDetails);
       toast.success(`Receipt downloaded for payment ${payment.payment_number}`);
     } catch (error) {
       console.error('Error downloading receipt:', error);
