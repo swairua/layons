@@ -9,10 +9,10 @@ import {
   AlertTriangle,
   Database,
   Loader2,
-  Zap
+  Copy,
+  ExternalLink
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { initializePaymentSystem } from '@/utils/initializePaymentSystem';
 import { toast } from 'sonner';
 
 interface StatusCheck {
@@ -22,13 +22,161 @@ interface StatusCheck {
   suggestion?: string;
 }
 
+const SETUP_SQL = `-- Payment Allocations Setup
+-- Copy and paste this into your Supabase SQL Editor
+
+CREATE TABLE IF NOT EXISTS payment_allocations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    payment_id UUID NOT NULL REFERENCES payments(id) ON DELETE CASCADE,
+    invoice_id UUID NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
+    amount_allocated DECIMAL(15,2) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_payment_allocations_payment_id ON payment_allocations(payment_id);
+CREATE INDEX IF NOT EXISTS idx_payment_allocations_invoice_id ON payment_allocations(invoice_id);
+
+ALTER TABLE payment_allocations ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view payment allocations for their company" ON payment_allocations;
+DROP POLICY IF EXISTS "Users can create payment allocations for their company" ON payment_allocations;
+DROP POLICY IF EXISTS "Users can update payment allocations for their company" ON payment_allocations;
+DROP POLICY IF EXISTS "Users can delete payment allocations for their company" ON payment_allocations;
+
+CREATE POLICY "Users can view payment allocations for their company"
+  ON payment_allocations FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM payments p
+      WHERE p.id = payment_allocations.payment_id
+      AND p.company_id = (SELECT company_id FROM profiles WHERE id = auth.uid())
+    )
+  );
+
+CREATE POLICY "Users can create payment allocations for their company"
+  ON payment_allocations FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM payments p
+      WHERE p.id = payment_allocations.payment_id
+      AND p.company_id = (SELECT company_id FROM profiles WHERE id = auth.uid())
+    )
+  );
+
+CREATE POLICY "Users can update payment allocations for their company"
+  ON payment_allocations FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM payments p
+      WHERE p.id = payment_allocations.payment_id
+      AND p.company_id = (SELECT company_id FROM profiles WHERE id = auth.uid())
+    )
+  );
+
+CREATE POLICY "Users can delete payment allocations for their company"
+  ON payment_allocations FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM payments p
+      WHERE p.id = payment_allocations.payment_id
+      AND p.company_id = (SELECT company_id FROM profiles WHERE id = auth.uid())
+    )
+  );
+
+-- Database Function for Payment Recording
+CREATE OR REPLACE FUNCTION record_payment_with_allocation(
+    p_company_id UUID,
+    p_customer_id UUID,
+    p_invoice_id UUID,
+    p_payment_number VARCHAR(50),
+    p_payment_date DATE,
+    p_amount DECIMAL(15,2),
+    p_payment_method TEXT,
+    p_reference_number VARCHAR(100),
+    p_notes TEXT
+) RETURNS JSON AS $$
+DECLARE
+    v_payment_id UUID;
+    v_invoice_record RECORD;
+BEGIN
+    -- Validate invoice exists
+    SELECT id, total_amount, paid_amount, balance_due 
+    INTO v_invoice_record
+    FROM invoices 
+    WHERE id = p_invoice_id AND company_id = p_company_id;
+    
+    IF NOT FOUND THEN
+        RETURN json_build_object(
+            'success', false, 
+            'error', 'Invoice not found or does not belong to this company'
+        );
+    END IF;
+    
+    -- Insert payment
+    INSERT INTO payments (
+        company_id,
+        customer_id,
+        payment_number,
+        payment_date,
+        amount,
+        payment_method,
+        reference_number,
+        notes
+    ) VALUES (
+        p_company_id,
+        p_customer_id,
+        p_payment_number,
+        p_payment_date,
+        p_amount,
+        p_payment_method,
+        p_reference_number,
+        p_notes
+    ) RETURNING id INTO v_payment_id;
+    
+    -- Create allocation
+    INSERT INTO payment_allocations (
+        payment_id,
+        invoice_id,
+        amount_allocated
+    ) VALUES (
+        v_payment_id,
+        p_invoice_id,
+        p_amount
+    );
+    
+    -- Update invoice
+    UPDATE invoices SET
+        paid_amount = COALESCE(paid_amount, 0) + p_amount,
+        balance_due = total_amount - (COALESCE(paid_amount, 0) + p_amount),
+        status = CASE 
+            WHEN (COALESCE(paid_amount, 0) + p_amount) >= total_amount THEN 'paid'
+            WHEN (COALESCE(paid_amount, 0) + p_amount) > 0 THEN 'partial'
+            ELSE status 
+        END,
+        updated_at = NOW()
+    WHERE id = p_invoice_id;
+    
+    RETURN json_build_object(
+        'success', true,
+        'payment_id', v_payment_id,
+        'amount_allocated', p_amount
+    );
+    
+EXCEPTION WHEN OTHERS THEN
+    RETURN json_build_object(
+        'success', false,
+        'error', SQLERRM
+    );
+END;
+$$ LANGUAGE plpgsql;`;
+
 export function PaymentAllocationStatus() {
   const [checks, setChecks] = useState<StatusCheck[]>([
     { name: 'Payment Allocations Table', status: 'checking' },
     { name: 'Database Function', status: 'checking' },
     { name: 'User Profile', status: 'checking' }
   ]);
-  const [isInitializing, setIsInitializing] = useState(false);
+  const [showSetupGuide, setShowSetupGuide] = useState(false);
 
   const updateCheck = (index: number, updates: Partial<StatusCheck>) => {
     setChecks(prev => prev.map((check, i) => 
@@ -36,25 +184,9 @@ export function PaymentAllocationStatus() {
     ));
   };
 
-  const handleInitialize = async () => {
-    setIsInitializing(true);
-    try {
-      const result = await initializePaymentSystem();
-      
-      if (result.success) {
-        toast.success('Payment system initialized successfully!');
-        // Re-run checks
-        runStatusChecks();
-      } else {
-        toast.error(result.message);
-        console.error('Initialization details:', result.details);
-      }
-    } catch (error) {
-      console.error('Initialization error:', error);
-      toast.error('Failed to initialize payment system');
-    } finally {
-      setIsInitializing(false);
-    }
+  const copySQL = () => {
+    navigator.clipboard.writeText(SETUP_SQL);
+    toast.success('Setup SQL copied to clipboard!');
   };
 
   const runStatusChecks = async () => {
@@ -77,7 +209,7 @@ export function PaymentAllocationStatus() {
           updateCheck(0, { 
             status: 'error', 
             details: 'Table missing',
-            suggestion: 'Click "Initialize System" to create the table'
+            suggestion: 'Click "View Setup Guide" to create the table'
           });
         } else if (error.message?.includes('permission') || error.message?.includes('policy')) {
           updateCheck(0, { 
@@ -89,7 +221,7 @@ export function PaymentAllocationStatus() {
           updateCheck(0, { 
             status: 'error', 
             details: error.message || 'Unknown error',
-            suggestion: 'Click "Initialize System" to fix'
+            suggestion: 'Click "View Setup Guide" to fix'
           });
         }
       } else {
@@ -122,7 +254,7 @@ export function PaymentAllocationStatus() {
           updateCheck(1, { 
             status: 'error', 
             details: 'Function missing',
-            suggestion: 'Click "Initialize System" to create the function'
+            suggestion: 'Click "View Setup Guide" to create the function'
           });
         } else if (error.message?.includes('Invoice not found')) {
           updateCheck(1, { status: 'working', details: 'Function available' });
@@ -136,7 +268,7 @@ export function PaymentAllocationStatus() {
           updateCheck(1, { 
             status: 'error', 
             details: error.message || 'Function error',
-            suggestion: 'Click "Initialize System" to fix'
+            suggestion: 'Click "View Setup Guide" to fix'
           });
         }
       } else {
@@ -302,38 +434,63 @@ export function PaymentAllocationStatus() {
               <AlertDescription className="text-warning">
                 <strong>⚠️ Some Issues Detected</strong>
                 <br />
-                Payment allocation may not work correctly. Try the options below to fix.
+                Payment allocation may not work correctly. Follow the setup guide below.
               </AlertDescription>
             </Alert>
 
             <div className="flex flex-wrap gap-2">
               <Button
                 size="sm"
-                onClick={handleInitialize}
-                disabled={isInitializing}
+                onClick={() => setShowSetupGuide(!showSetupGuide)}
                 className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
               >
-                {isInitializing ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Initializing...
-                  </>
-                ) : (
-                  <>
-                    <Zap className="h-4 w-4 mr-2" />
-                    Initialize System
-                  </>
-                )}
+                {showSetupGuide ? '✓ Hide' : 'View'} Setup Guide
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={runStatusChecks}
-                disabled={isInitializing}
               >
                 Refresh Status
               </Button>
             </div>
+
+            {showSetupGuide && (
+              <div className="space-y-3 p-4 bg-muted rounded-lg border border-muted-foreground/20">
+                <h4 className="font-semibold text-sm">Setup Instructions:</h4>
+                <ol className="text-xs space-y-2 list-decimal list-inside text-muted-foreground">
+                  <li>Click "Copy SQL" button below to copy the setup script</li>
+                  <li>Go to your Supabase Dashboard → SQL Editor</li>
+                  <li>Create a new query and paste the SQL</li>
+                  <li>Click "Run" to execute the setup</li>
+                  <li>Return here and click "Refresh Status" to verify</li>
+                </ol>
+
+                <div className="flex gap-2 pt-2">
+                  <Button
+                    size="sm"
+                    onClick={copySQL}
+                    variant="default"
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy SQL
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => window.open('https://supabase.com/dashboard/project/_/sql/new', '_blank')}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Open SQL Editor
+                  </Button>
+                </div>
+
+                <div className="text-xs text-amber-700 bg-amber-50 p-2 rounded border border-amber-200 mt-3">
+                  <strong>Note:</strong> Make sure you're logged in to your Supabase project before opening the SQL Editor. The SQL will create the payment allocation system with proper security policies.
+                </div>
+              </div>
+            )}
           </>
         )}
       </CardContent>
