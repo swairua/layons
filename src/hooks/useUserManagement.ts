@@ -42,9 +42,9 @@ const useUserManagement = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch all users in the same company
+  // Fetch all users in the same company (accessible to all authenticated users)
   const fetchUsers = async () => {
-    if (!currentUser?.company_id || !isAdmin) {
+    if (!currentUser?.company_id) {
       return;
     }
 
@@ -73,9 +73,9 @@ const useUserManagement = () => {
     }
   };
 
-  // Fetch pending invitations
+  // Fetch pending invitations (accessible to all authenticated users)
   const fetchInvitations = async () => {
-    if (!currentUser?.company_id || !isAdmin) {
+    if (!currentUser?.company_id) {
       return;
     }
 
