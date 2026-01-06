@@ -182,7 +182,6 @@ export function AuditTrailViewer() {
                 <SelectValue placeholder="All Types" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
                 {entityTypes.map((type) => (
                   <SelectItem key={type} value={type}>
                     {type}
