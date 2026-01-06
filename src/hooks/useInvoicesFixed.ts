@@ -257,19 +257,23 @@ export const useCustomerInvoicesFixed = (customerId?: string, companyId?: string
           console.error('Error fetching customer:', customerError);
         }
 
-        // Get company details
+        // Get company details through customer relationship
         let company = null;
-        if (invoices && invoices.length > 0) {
-          const { data: companyData, error: companyError } = await supabase
-            .from('companies')
-            .select('id, name, address, city, country, phone, email, tax_number')
-            .eq('id', invoices[0].company_id)
-            .single();
+        if (customer && customer.company_id) {
+          try {
+            const { data: companyData, error: companyError } = await supabase
+              .from('companies')
+              .select('id, name, address, city, country, phone, email, tax_number')
+              .eq('id', customer.company_id)
+              .single();
 
-          if (companyError) {
-            console.error('Error fetching company (non-fatal):', companyError);
-          } else {
-            company = companyData;
+            if (companyError) {
+              console.error('Error fetching company (non-fatal):', companyError);
+            } else {
+              company = companyData;
+            }
+          } catch (err) {
+            console.error('Error fetching company (non-fatal):', err);
           }
         }
 
