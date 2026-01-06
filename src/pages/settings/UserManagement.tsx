@@ -116,6 +116,20 @@ export default function UserManagement() {
   );
 
   if (!isAdmin) {
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
+    const handleRefreshProfile = async () => {
+      setIsRefreshing(true);
+      try {
+        await refreshProfile();
+        toast.success('Profile refreshed. If you are an admin, please reload the page.');
+      } catch (error) {
+        toast.error('Failed to refresh profile');
+      } finally {
+        setIsRefreshing(false);
+      }
+    };
+
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -135,6 +149,26 @@ export default function UserManagement() {
               <p className="text-muted-foreground mb-4">
                 You need administrator privileges to access user management.
               </p>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground mb-4">
+                  If you believe you should have access, try refreshing your profile:
+                </p>
+                <Button
+                  onClick={handleRefreshProfile}
+                  disabled={isRefreshing}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {isRefreshing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Refreshing...
+                    </>
+                  ) : (
+                    'Refresh Profile'
+                  )}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
