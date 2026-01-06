@@ -281,10 +281,10 @@ const useUserManagement = () => {
     }
   };
 
-  // Revoke invitation
+  // Revoke invitation (authenticated users can revoke invitations in their company)
   const revokeInvitation = async (invitationId: string): Promise<{ success: boolean; error?: string }> => {
-    if (!isAdmin) {
-      return { success: false, error: 'Unauthorized' };
+    if (!currentUser?.company_id) {
+      return { success: false, error: 'Unauthorized - Company ID required' };
     }
 
     setLoading(true);
