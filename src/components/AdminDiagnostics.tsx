@@ -35,6 +35,13 @@ export function AdminDiagnostics() {
   const [error, setError] = useState('');
   const [showSqlFix, setShowSqlFix] = useState(false);
 
+  // Auto-expand the SQL fix panel when recursion error is detected
+  React.useEffect(() => {
+    if (error.includes('infinite recursion')) {
+      setShowSqlFix(true);
+    }
+  }, [error]);
+
   const diagnose = async () => {
     if (!email) {
       toast.error('Please enter an email address');
