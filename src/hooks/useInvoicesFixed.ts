@@ -28,7 +28,6 @@ export const useInvoicesFixed = (companyId?: string) => {
           .from('invoices')
           .select(`
             id,
-            company_id,
             customer_id,
             invoice_number,
             invoice_date,
@@ -45,7 +44,6 @@ export const useInvoicesFixed = (companyId?: string) => {
             created_at,
             updated_at
           `)
-          .eq('company_id', companyId)
           .order('created_at', { ascending: false });
 
         if (invoicesError) {
