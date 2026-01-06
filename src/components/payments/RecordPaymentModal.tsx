@@ -151,12 +151,21 @@ export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: R
       if (result.fallback_used) {
         if (result.allocation_failed) {
           setAllocationFailed(true);
-          toast.success(`Payment of ${formatCurrency(paymentData.amount)} recorded successfully!`, {
-            description: "However, payment allocation failed. See the fix options below."
+          toast.error(`Payment recorded but invoice allocation failed!`, {
+            duration: 8000,
+            description: `Payment amount: ${formatCurrency(paymentData.amount)}. Invoice was not linked. Click below to fix this.`
           });
+
+          // Log detailed error info
+          if (result.allocation_error) {
+            console.error('Allocation error details:', result.allocation_error);
+          }
+        } else if (result.allocation_created) {
+          toast.success(`Payment of ${formatCurrency(paymentData.amount)} recorded and allocated successfully!`);
+          setAllocationFailed(false);
         } else {
           toast.success(`Payment of ${formatCurrency(paymentData.amount)} recorded successfully!`, {
-            description: "Payment allocation may require manual setup. Check the payments list."
+            description: "Invoice allocation status is pending. Check the payments list."
           });
         }
       } else {
@@ -168,13 +177,29 @@ export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: R
       resetForm();
     } catch (error) {
       console.error('Error recording payment:', error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
 
-      const errorMessage = parseErrorMessageWithCodes(error, 'payment');
+      let errorMessage = 'Failed to record payment';
+
+      // Handle network errors first
+      if (error instanceof TypeError) {
+        if ((error as any).message?.includes('Failed to fetch')) {
+          errorMessage = 'Network error: Unable to connect to server. Please check your internet connection and try again. If the problem persists, Supabase may be temporarily unavailable.';
+        } else {
+          errorMessage = `Network error: ${(error as any).message || 'Failed to fetch data'}`;
+        }
+      } else if (error instanceof Error) {
+        // Try to use the custom error parser first
+        const parsedMessage = parseErrorMessageWithCodes(error, 'payment');
+        errorMessage = parsedMessage;
+      } else {
+        // Fallback for unknown error types
+        console.error('Error details:', JSON.stringify(error, null, 2));
+        const fallback = parseErrorMessageWithCodes(error, 'payment');
+        errorMessage = fallback;
+      }
 
       toast.error(errorMessage, {
-        duration: 6000,
-        description: 'Check the console for technical details'
+        duration: 6000
       });
     } finally {
       setIsSubmitting(false);

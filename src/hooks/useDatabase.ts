@@ -956,6 +956,9 @@ export const usePayments = (companyId?: string) => {
         // Step 3: Get payment allocations separately
         let paymentAllocations: any[] = [];
         try {
+          const paymentIds = payments.map(payment => payment.id);
+          console.log('Fetching payment allocations for payment IDs:', paymentIds.length > 0 ? paymentIds.slice(0, 3) + '...' : 'none');
+
           const { data, error } = await supabase
             .from('payment_allocations')
             .select(`
@@ -965,12 +968,13 @@ export const usePayments = (companyId?: string) => {
               allocated_amount,
               invoices(id, invoice_number, total_amount)
             `)
-            .in('payment_id', payments.map(payment => payment.id));
+            .in('payment_id', paymentIds);
 
           if (!error && data) {
+            console.log(`✅ Fetched ${data.length} payment allocations`);
             paymentAllocations = data;
           } else if (error) {
-            console.warn('Could not fetch payment allocations - table may not exist:', error.message);
+            console.warn('⚠️ Could not fetch payment allocations:', error.message);
           }
         } catch (err) {
           console.warn('Error fetching payment allocations:', err);
@@ -1008,9 +1012,24 @@ export const usePayments = (companyId?: string) => {
 
       } catch (error) {
         console.error('Error in usePayments:', error);
-        const errorMessage = typeof error === 'string' ? error :
-                            (error as any)?.message ||
-                            'Failed to load payments';
+
+        let errorMessage = 'Failed to load payments';
+
+        // Handle network/fetch errors
+        if (error instanceof TypeError) {
+          if ((error as any).message?.includes('Failed to fetch')) {
+            errorMessage = 'Unable to connect to the server. Please check your internet connection and try again. If the problem persists, the Supabase service may be temporarily unavailable.';
+          } else {
+            errorMessage = `Network error: ${(error as any).message || 'Failed to fetch data'}`;
+          }
+        } else if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        } else if (error && typeof error === 'object') {
+          errorMessage = (error as any)?.message || JSON.stringify(error);
+        }
+
         throw new Error(errorMessage);
       }
     },
@@ -1064,22 +1083,12 @@ export const useCreatePayment = () => {
         throw new Error('Invalid invoice ID. Please select a valid invoice.');
       }
 
-      // Try using the database function first
-      const { data, error } = await supabase.rpc('record_payment_with_allocation', {
-        p_company_id: paymentData.company_id,
-        p_customer_id: paymentData.customer_id,
-        p_invoice_id: paymentData.invoice_id,
-        p_payment_number: paymentData.payment_number,
-        p_payment_date: paymentData.payment_date,
-        p_amount: paymentData.amount,
-        p_payment_method: paymentData.payment_method,
-        p_reference_number: paymentData.reference_number || paymentData.payment_number,
-        p_notes: paymentData.notes || null
-      });
+      // Skip the database function call and use manual approach directly
+      // The record_payment_with_allocation function doesn't exist, so we use fallback
+      console.log('Using manual payment recording with allocation');
 
-      // If function doesn't exist (PGRST202), fall back to manual approach
-      if (error && error.code === 'PGRST202') {
-        console.warn('Database function not found, using fallback method');
+      // Manual approach (fallback method)
+      {
 
         // Fallback: Manual payment recording with invoice updates
         const { invoice_id, ...paymentFields } = paymentData;
@@ -1095,43 +1104,65 @@ export const useCreatePayment = () => {
 
         // 2. Create payment allocation with enhanced error handling
         let allocationError: any = null;
+        let allocationCreated = false;
+
         try {
           // First check if payment_allocations table exists
+          console.log('Checking if payment_allocations table exists...');
           const { error: tableCheckError } = await supabase
             .from('payment_allocations')
             .select('id')
             .limit(1);
 
-          if (tableCheckError && tableCheckError.message.includes('relation') && tableCheckError.message.includes('does not exist')) {
+          if (tableCheckError && tableCheckError.message?.includes('relation') && tableCheckError.message?.includes('does not exist')) {
             allocationError = new Error('payment_allocations table does not exist. Please run the table setup SQL.');
+            console.error('RLS/Setup Error:', allocationError.message);
           } else {
             // Table exists, try to insert allocation
-            const { error: insertError } = await supabase
+            console.log('Inserting allocation:', {
+              payment_id: paymentResult.id,
+              invoice_id: invoice_id,
+              amount_allocated: paymentData.amount
+            });
+
+            const { data: insertedAllocation, error: insertError } = await supabase
               .from('payment_allocations')
               .insert([{
                 payment_id: paymentResult.id,
                 invoice_id: invoice_id,
-                allocated_amount: paymentData.amount
-              }]);
+                amount_allocated: paymentData.amount
+              }])
+              .select();
 
-            allocationError = insertError;
+            if (insertError) {
+              console.error('Allocation insert error:', insertError);
+              allocationError = insertError;
+            } else if (insertedAllocation && insertedAllocation.length > 0) {
+              console.log('Allocation created successfully:', insertedAllocation[0]);
+              allocationCreated = true;
+            } else {
+              console.warn('Allocation insert returned no data');
+              allocationError = new Error('Allocation was not created - no response from server');
+            }
           }
         } catch (err) {
+          console.error('Exception during allocation creation:', err);
           allocationError = err;
         }
 
         if (allocationError) {
-          console.error('Failed to create allocation:', allocationError);
+          console.error('❌ Failed to create allocation:', allocationError);
           console.error('Allocation error details:', JSON.stringify(allocationError, null, 2));
           console.error('Payment was recorded successfully, but allocation failed');
+          console.error('Payment ID:', paymentResult.id);
+          console.error('Invoice ID:', invoice_id);
 
           // If it's an RLS error, provide specific guidance
-          if (allocationError.message?.includes('row-level security') || allocationError.message?.includes('permission denied')) {
-            console.error('RLS Error: User profile may not be linked to a company or RLS policies are blocking the insert');
+          if (allocationError?.message?.includes('row-level security') || allocationError?.message?.includes('permission denied')) {
+            console.error('⚠️ RLS Error: User profile may not be linked to a company or RLS policies are blocking the insert');
           }
-
-          // Continue anyway - payment was recorded
-          // The UI should show this as a warning, not a complete failure
+        } else if (allocationCreated) {
+          console.log('✅ Allocation created and linked successfully');
         }
 
         // 3. Get current invoice data and update balances
@@ -1169,28 +1200,31 @@ export const useCreatePayment = () => {
           }
         }
 
-        return {
+        const result = {
           success: true,
           payment_id: paymentResult.id,
           invoice_id: invoice_id,
           amount_allocated: paymentData.amount,
+          allocation_created: allocationCreated,
           fallback_used: true,
-          allocation_failed: !!allocationError,
-          allocation_error: allocationError ? JSON.stringify(allocationError) : null
+          allocation_failed: !allocationCreated,
+          allocation_error: allocationError ? {
+            message: allocationError?.message || String(allocationError),
+            code: (allocationError as any)?.code,
+            details: (allocationError as any)?.details
+          } : null
         };
-      }
 
-      // If other error, throw it
-      if (error) {
-        console.error('Database function error:', error);
-        throw error;
-      }
+        console.log('Payment creation result:', {
+          success: result.success,
+          payment_id: result.payment_id,
+          allocation_created: result.allocation_created,
+          allocation_failed: result.allocation_failed,
+          invoice_id: result.invoice_id
+        });
 
-      if (!data || !data.success) {
-        throw new Error(data?.error || 'Failed to record payment');
+        return result;
       }
-
-      return data;
     },
     onSuccess: (result) => {
       // Invalidate multiple cache keys to refresh UI
@@ -1219,6 +1253,26 @@ export const useDeletePayment = () => {
       }
 
       try {
+        // Verify payment exists and belongs to this company before deletion
+        console.log('Verifying payment exists:', paymentId);
+        const { data: paymentExists, error: verifyError } = await supabase
+          .from('payments')
+          .select('id, company_id')
+          .eq('id', paymentId)
+          .eq('company_id', companyId)
+          .single();
+
+        if (verifyError) {
+          const errorMsg = verifyError?.message || 'Unknown error';
+          if (errorMsg.includes('No rows found')) {
+            throw new Error('Payment not found or you do not have permission to delete it');
+          }
+          throw verifyError;
+        }
+
+        if (!paymentExists) {
+          throw new Error('Payment not found. It may have been deleted already.');
+        }
         // Step 1: Get payment allocations to reverse invoices
         console.log('Fetching allocations for payment:', paymentId);
         const { data: allocations, error: allocError } = await supabase
@@ -1279,6 +1333,7 @@ export const useDeletePayment = () => {
           }
 
           // Step 3: Delete payment allocations
+          console.log('Deleting payment allocations for payment:', paymentId);
           const { error: deleteAllocError } = await supabase
             .from('payment_allocations')
             .delete()
@@ -1286,7 +1341,11 @@ export const useDeletePayment = () => {
 
           if (deleteAllocError) {
             console.error('Failed to delete payment allocations:', deleteAllocError);
-            throw new Error(`Failed to delete allocations: ${deleteAllocError.message}`);
+            const errorMsg = deleteAllocError?.message || 'Unknown error';
+            if (errorMsg.includes('row-level security') || errorMsg.includes('permission denied')) {
+              throw new Error(`You don't have permission to delete payment allocations. Please check your access settings.`);
+            }
+            throw new Error(`Failed to delete allocations: ${errorMsg}`);
           }
         }
 
@@ -1299,7 +1358,20 @@ export const useDeletePayment = () => {
 
         if (deletePaymentError) {
           console.error('Failed to delete payment:', deletePaymentError);
-          throw new Error(`Failed to delete payment: ${deletePaymentError.message}`);
+          const errorMsg = deletePaymentError?.message || 'Unknown error';
+
+          // Handle specific error types
+          if (errorMsg.includes('row-level security') || errorMsg.includes('permission denied')) {
+            throw new Error(`You don't have permission to delete this payment. Please check your access settings.`);
+          }
+          if (errorMsg.includes('FOREIGN KEY') || errorMsg.includes('constraint')) {
+            throw new Error(`Cannot delete this payment. It may be referenced by other records. Please try again or contact support.`);
+          }
+          if (errorMsg.includes('Failed to fetch') || errorMsg.includes('network')) {
+            throw new Error(`Network error while deleting payment. Please check your connection and try again.`);
+          }
+
+          throw new Error(`Failed to delete payment: ${errorMsg}`);
         }
 
         console.log('Payment deleted successfully:', paymentId);
@@ -1310,7 +1382,26 @@ export const useDeletePayment = () => {
         };
       } catch (error) {
         console.error('Error in useDeletePayment:', error);
-        throw error;
+
+        // Handle different types of errors
+        let errorMessage = 'Failed to delete payment';
+
+        if (error instanceof TypeError) {
+          // Handle network/fetch errors
+          if (error.message.includes('Failed to fetch')) {
+            errorMessage = 'Network error: Could not connect to the server. Please check your internet connection and try again.';
+          } else {
+            errorMessage = `Network error: ${error.message}`;
+          }
+        } else if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        } else if (error && typeof error === 'object') {
+          errorMessage = (error as any).message || 'Unknown error occurred';
+        }
+
+        throw new Error(errorMessage);
       }
     },
     onSuccess: () => {
