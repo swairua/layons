@@ -237,6 +237,24 @@ export default function UserManagement() {
         </div>
       </div>
 
+      {/* Info Banner */}
+      <Card className="border-blue-200 bg-blue-50">
+        <CardContent className="pt-6">
+          <div className="flex space-x-4">
+            <Mail className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="space-y-2">
+              <p className="font-medium text-blue-900">How to Add Users</p>
+              <p className="text-sm text-blue-800">
+                Use the <span className="font-semibold">"Invite User"</span> button to send invitation emails to new team members.
+                They'll receive an email with a link to accept the invitation and create their account.
+              </p>
+              <p className="text-sm text-blue-800">
+                Once users are invited, you can manage their roles and permissions from the table below.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
