@@ -411,11 +411,11 @@ export default function CashReceipts() {
 
       <ConfirmationDialog
         open={deleteDialog.open}
-        onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
+        onCancel={() => setDeleteDialog({ open: false })}
         title="Delete Cash Receipt"
         description={`Are you sure you want to delete receipt ${deleteDialog.receipt?.receipt_number}? This action cannot be undone.`}
         onConfirm={handleDeleteConfirm}
-        isDestructive={true}
+        isDangerous={true}
         isLoading={isDeleting}
       />
     </div>
