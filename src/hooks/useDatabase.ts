@@ -1576,6 +1576,26 @@ export const useDeleteInvoice = () => {
         .eq('id', id);
       if (error) {
         const errorMessage = parseErrorMessage(error);
+
+        // Check if this is the company_id RLS policy issue
+        const fullError = JSON.stringify(error);
+        if (fullError.includes('company_id') || fullError.includes('has no field')) {
+          console.error('🔧 RLS Policy Issue Detected - run this SQL in Supabase SQL Editor:');
+          const fixSql = `
+BEGIN TRANSACTION;
+DROP POLICY IF EXISTS "Users can access invoices in their company" ON invoices;
+DROP POLICY IF EXISTS "Company scoped access" ON invoices;
+DROP POLICY IF EXISTS "Invoices are accessible to authenticated users" ON invoices;
+ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Authenticated users can manage invoices" ON invoices
+  FOR ALL TO authenticated
+  USING (true)
+  WITH CHECK (true);
+COMMIT;`;
+          console.error(fixSql);
+          throw new Error(`Delete failed - RLS policy issue: ${errorMessage}\n\nPlease run the SQL fix in Supabase SQL Editor (see console logs)`);
+        }
+
         throw new Error(errorMessage);
       }
     },
