@@ -1008,9 +1008,24 @@ export const usePayments = (companyId?: string) => {
 
       } catch (error) {
         console.error('Error in usePayments:', error);
-        const errorMessage = typeof error === 'string' ? error :
-                            (error as any)?.message ||
-                            'Failed to load payments';
+
+        let errorMessage = 'Failed to load payments';
+
+        // Handle network/fetch errors
+        if (error instanceof TypeError) {
+          if ((error as any).message?.includes('Failed to fetch')) {
+            errorMessage = 'Unable to connect to the server. Please check your internet connection and try again. If the problem persists, the Supabase service may be temporarily unavailable.';
+          } else {
+            errorMessage = `Network error: ${(error as any).message || 'Failed to fetch data'}`;
+          }
+        } else if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        } else if (error && typeof error === 'object') {
+          errorMessage = (error as any)?.message || JSON.stringify(error);
+        }
+
         throw new Error(errorMessage);
       }
     },
