@@ -3131,15 +3131,55 @@ export const generatePDF = async (data: DocumentData) => {
         <!-- Payment Details Section (for receipts) -->
         ${data.type === 'receipt' ? `
         <div class="payment-section" style="margin-top: 25px; border-top: 2px solid #000; padding-top: 15px;">
-          <table class="payment-details-table" style="width: 100%; border-collapse: collapse;">
+          <!-- Invoice Particulars Table -->
+          ${data.items && data.items.length > 0 ? `
+          <div style="margin-bottom: 20px;">
+            <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 10px; margin-top: 0;">Invoice Particulars</h3>
+            <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+              <thead>
+                <tr style="background-color: #f5f5f5;">
+                  <th style="padding: 8px; text-align: left; border: 1px solid #ddd; font-weight: bold; font-size: 10px;">Invoice No</th>
+                  <th style="padding: 8px; text-align: right; border: 1px solid #ddd; font-weight: bold; font-size: 10px;">Previous Balance</th>
+                  <th style="padding: 8px; text-align: right; border: 1px solid #ddd; font-weight: bold; font-size: 10px;">Amount Paid</th>
+                  <th style="padding: 8px; text-align: right; border: 1px solid #ddd; font-weight: bold; font-size: 10px;">Current Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${(data.items as any[]).map((item: any) => item.invoice_number ? `
+                <tr style="border: 1px solid #ddd;">
+                  <td style="padding: 8px; text-align: left; border: 1px solid #ddd; font-size: 10px;">${item.invoice_number || ''}</td>
+                  <td style="padding: 8px; text-align: right; border: 1px solid #ddd; font-size: 10px;">${formatCurrency((item as any).previous_balance || 0)}</td>
+                  <td style="padding: 8px; text-align: right; border: 1px solid #ddd; font-size: 10px; font-weight: 600;">${formatCurrency((item as any).allocated_amount || 0)}</td>
+                  <td style="padding: 8px; text-align: right; border: 1px solid #ddd; font-size: 10px;">${formatCurrency((item as any).current_balance || 0)}</td>
+                </tr>
+                ` : '').join('')}
+              </tbody>
+            </table>
+          </div>
+          ` : ''}
+
+          <!-- Payment Summary -->
+          <table class="payment-details-table" style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+            <tr style="border-bottom: 1px solid #e9ecef;">
+              <td style="padding: 10px 0; font-weight: 600; width: 50%;">Total Amount Paid:</td>
+              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${formatCurrency(data.total_amount)}</td>
+            </tr>
+            ${(data as any).value_tendered !== undefined && (data as any).value_tendered > 0 ? `
             <tr style="border-bottom: 1px solid #e9ecef;">
               <td style="padding: 10px 0; font-weight: 600; width: 50%;">Amount Tendered:</td>
-              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${formatCurrency((data as any).value_tendered || 0)}</td>
+              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${formatCurrency((data as any).value_tendered)}</td>
             </tr>
+            ` : ''}
             ${(data as any).change !== undefined && (data as any).change > 0 ? `
             <tr style="border-bottom: 1px solid #e9ecef;">
               <td style="padding: 10px 0; font-weight: 600; width: 50%;">Change:</td>
               <td style="padding: 10px 0; text-align: right; font-weight: 600;">${formatCurrency((data as any).change)}</td>
+            </tr>
+            ` : ''}
+            ${(data as any).payment_method ? `
+            <tr style="border-bottom: 1px solid #e9ecef;">
+              <td style="padding: 10px 0; font-weight: 600; width: 50%;">Payment Method:</td>
+              <td style="padding: 10px 0; text-align: right; font-weight: 600;">${(data as any).payment_method}</td>
             </tr>
             ` : ''}
           </table>
