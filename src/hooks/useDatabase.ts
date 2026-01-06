@@ -999,6 +999,9 @@ export const usePayments = (companyId?: string) => {
         throw new Error(errorMessage);
       }
     },
+    enabled: !!companyId,
+    retry: 3,
+    retryDelay: 1000,
   });
 };
 
