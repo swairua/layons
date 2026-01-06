@@ -1348,8 +1348,25 @@ export const useDeletePayment = () => {
         };
       } catch (error) {
         console.error('Error in useDeletePayment:', error);
-        // Convert error to string properly
-        const errorMessage = error instanceof Error ? error.message : String(error);
+
+        // Handle different types of errors
+        let errorMessage = 'Failed to delete payment';
+
+        if (error instanceof TypeError) {
+          // Handle network/fetch errors
+          if (error.message.includes('Failed to fetch')) {
+            errorMessage = 'Network error: Could not connect to the server. Please check your internet connection and try again.';
+          } else {
+            errorMessage = `Network error: ${error.message}`;
+          }
+        } else if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        } else if (error && typeof error === 'object') {
+          errorMessage = (error as any).message || 'Unknown error occurred';
+        }
+
         throw new Error(errorMessage);
       }
     },
