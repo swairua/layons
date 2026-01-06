@@ -123,10 +123,13 @@ export default function Payments() {
   };
 
   const handleConfirmDelete = async () => {
-    if (!paymentToDelete) return;
+    if (!paymentToDelete || !currentCompany?.id) return;
 
     try {
-      await deletePayment.mutateAsync(paymentToDelete.id);
+      await deletePayment.mutateAsync({
+        paymentId: paymentToDelete.id,
+        companyId: currentCompany.id
+      });
       toast.success(`Payment ${paymentToDelete.payment_number} deleted successfully`);
       setShowDeleteConfirm(false);
       setPaymentToDelete(null);
