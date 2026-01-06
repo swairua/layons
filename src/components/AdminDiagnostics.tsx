@@ -107,50 +107,58 @@ export function AdminDiagnostics() {
               </div>
 
               {error.includes('infinite recursion') && (
-                <Card className="border-yellow-200 bg-yellow-50">
+                <Card className="border-orange-200 bg-orange-50">
                   <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm text-yellow-900">🔧 Database RLS Fix Required</CardTitle>
-                      <button
-                        onClick={() => setShowSqlFix(!showSqlFix)}
-                        className="text-yellow-700 hover:text-yellow-900"
-                      >
-                        {showSqlFix ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                      </button>
-                    </div>
+                    <CardTitle className="text-sm text-orange-900">⚠️ Database Fix Required</CardTitle>
                   </CardHeader>
 
-                  {showSqlFix && (
-                    <CardContent className="space-y-3">
-                      <div>
-                        <p className="text-sm text-yellow-900 mb-2">The database has conflicting RLS policies. Follow these steps:</p>
-                        <ol className="list-decimal list-inside space-y-2 text-xs text-yellow-800">
-                          <li>Go to your <a href="https://app.supabase.com" target="_blank" rel="noopener noreferrer" className="underline font-semibold">Supabase Dashboard</a></li>
-                          <li>Select your project</li>
-                          <li>Go to <strong>SQL Editor</strong> (left sidebar)</li>
-                          <li>Click <strong>New Query</strong></li>
-                          <li>Copy the SQL below and paste it</li>
-                          <li>Click <strong>Run</strong> (or press Ctrl+Enter)</li>
-                          <li>Wait for success, then refresh this page</li>
-                        </ol>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <p className="text-sm text-orange-900 mb-3">The profiles table has RLS policies causing conflicts. This is a 1-command fix:</p>
+
+                      <div className="bg-gray-900 text-green-400 p-3 rounded text-sm font-mono mb-3">
+                        {SIMPLE_FIX_SQL}
                       </div>
 
-                      <div className="bg-gray-900 text-gray-100 p-3 rounded text-xs font-mono overflow-auto max-h-48">
-                        {FIX_SQL}
-                      </div>
+                      <div className="space-y-2">
+                        <Button
+                          onClick={() => {
+                            navigator.clipboard.writeText(SIMPLE_FIX_SQL);
+                            toast.success('SQL copied! Go to Supabase SQL Editor and paste it.');
+                          }}
+                          className="w-full bg-orange-600 hover:bg-orange-700 text-white"
+                        >
+                          <Copy className="h-4 w-4 mr-2" />
+                          Copy SQL Command
+                        </Button>
 
-                      <Button
-                        onClick={() => {
-                          navigator.clipboard.writeText(FIX_SQL);
-                          toast.success('SQL copied to clipboard!');
-                        }}
-                        className="w-full bg-yellow-600 hover:bg-yellow-700 text-white"
-                      >
-                        <Copy className="h-4 w-4 mr-2" />
-                        Copy SQL to Clipboard
-                      </Button>
-                    </CardContent>
-                  )}
+                        <Button
+                          onClick={() => {
+                            window.open('https://app.supabase.com/project', '_blank');
+                            toast.info('Open your Supabase project, go to SQL Editor');
+                          }}
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                          variant="default"
+                        >
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Open Supabase Dashboard
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="text-xs text-orange-800 bg-white p-2 rounded border border-orange-200">
+                      <p className="font-semibold mb-1">Steps:</p>
+                      <ol className="list-decimal list-inside space-y-1">
+                        <li>Click "Open Supabase Dashboard" ☝️</li>
+                        <li>Go to SQL Editor (left sidebar)</li>
+                        <li>Click "New Query"</li>
+                        <li>Paste the SQL command (click copy button)</li>
+                        <li>Press Ctrl+Enter to run</li>
+                        <li>Refresh this page</li>
+                        <li>Click "Diagnose & Fix" again</li>
+                      </ol>
+                    </div>
+                  </CardContent>
                 </Card>
               )}
             </div>
