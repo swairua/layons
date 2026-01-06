@@ -21,12 +21,12 @@ createRoot(document.getElementById("root")!).render(
     <AuthErrorBoundary>
       <AuthProvider>
         <AuthStatusIndicator />
+        <CompanyProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </CompanyProvider>
       </AuthProvider>
     </AuthErrorBoundary>
-    <CompanyProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </CompanyProvider>
   </QueryClientProvider>
 );
