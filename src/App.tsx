@@ -11,8 +11,7 @@ import { updateMetaTags } from "@/utils/updateMetaTags";
 import { verifyInvoiceCompanyIdColumn } from "@/utils/fixMissingInvoiceCompanyId";
 import { verifyInvoiceRLSFix } from "@/utils/fixInvoiceRLSPolicy";
 import { verifyRLSDisabled } from "@/utils/disableInvoiceRLS";
-import { fixDeleteInvoiceRLS, verifyDeleteInvoiceRLSFix } from "@/utils/fixDeleteInvoiceRLS";
-import { applyComprehensiveRLSFix, verifyRLSFixApplied } from "@/utils/applyComprehensiveRLSFix";
+import { fixRLSWithProperOrder, verifyRLSColumnFix } from "@/utils/fixRLSProperOrder";
 
 // Lazy load the page components to reduce initial bundle size and startup time
 import { lazy, Suspense } from "react";
@@ -88,20 +87,20 @@ const App = () => {
 
         // Fix RLS policy for invoice deletion (handles company_id column issue)
         try {
-          const isFixed = await verifyRLSFixApplied();
+          const isFixed = await verifyRLSColumnFix();
           if (!isFixed) {
-            console.log('🔧 RLS policy issue detected. Attempting comprehensive fix...');
-            const fixResult = await applyComprehensiveRLSFix();
+            console.log('🔧 RLS column issue detected. Attempting to fix (disable → add column → re-enable)...');
+            const fixResult = await fixRLSWithProperOrder();
             if (fixResult.success) {
-              console.log('✅ RLS policies fixed successfully');
+              console.log('✅ RLS column fix applied successfully');
             } else if (fixResult.requiresManualFix) {
-              console.warn('⚠️ Manual RLS policy fix required. The user will see a fix dialog when they try to delete an invoice.');
-              console.warn('SQL to run in Supabase SQL Editor:');
-              console.warn(fixResult.sql);
+              console.warn('⚠️ Manual RLS fix required. User will see a fix dialog when they try to delete an invoice.');
             }
+          } else {
+            console.log('✅ RLS column verification passed - database is ready');
           }
         } catch (err) {
-          console.warn('⚠️ Could not automatically fix RLS policy', err);
+          console.warn('⚠️ Could not automatically fix RLS column issue', err);
         }
 
         // Verify invoice RLS policy doesn't have infinite recursion
