@@ -246,10 +246,10 @@ export const useCustomerInvoicesFixed = (customerId?: string, companyId?: string
           return [];
         }
 
-        // Get customer data
+        // Get customer data (including company_id to fetch company details)
         const { data: customer, error: customerError } = await supabase
           .from('customers')
-          .select('id, name, email, phone, address, city, country')
+          .select('id, name, email, phone, address, city, country, company_id')
           .eq('id', customerId)
           .single();
 
