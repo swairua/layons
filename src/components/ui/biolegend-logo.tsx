@@ -40,10 +40,10 @@ export function BiolegendLogo({ className, size = "md", showText = true }: Biole
       {showText && (
         <div className="flex flex-col">
           <span className={cn("font-bold text-primary", textSizeClasses[size])}>
-            {companyName.split(' ')[0]?.toUpperCase() || 'COMPANY'}
+            {companyName.split(' ')[0]?.toUpperCase() || 'LAYONS'}
           </span>
           <span className={cn("text-xs text-secondary font-medium -mt-1", size === "sm" && "text-[10px]")}>
-            {(companyName.split(' ').slice(1).join(' ') || 'MANAGEMENT').toUpperCase()}
+            {(companyName.split(' ').slice(1).join(' ') || 'CONSTRUCTION LIMITED').toUpperCase()}
           </span>
         </div>
       )}
