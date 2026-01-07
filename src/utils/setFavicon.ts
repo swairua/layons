@@ -20,8 +20,8 @@ export function setFavicon(logoUrl?: string | null) {
       faviconElement.href = logoUrl;
     }
   } else {
-    // Fall back to default favicon
-    faviconElement.href = '/favicon.ico';
-    faviconElement.type = 'image/x-icon';
+    // Fall back to default company logo
+    faviconElement.href = '/company-logo.svg';
+    faviconElement.type = 'image/svg+xml';
   }
 }
