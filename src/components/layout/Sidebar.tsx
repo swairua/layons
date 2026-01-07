@@ -19,6 +19,7 @@ import {
   History,
 } from 'lucide-react';
 import { BiolegendLogo } from '@/components/ui/biolegend-logo';
+import { useCurrentCompany } from '@/contexts/CompanyContext';
 
 interface SidebarItem {
   title: string;
