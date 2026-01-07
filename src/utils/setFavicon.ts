@@ -21,7 +21,7 @@ export function setFavicon(logoUrl?: string | null) {
     }
   } else {
     // Fall back to default company logo
-    faviconElement.href = '/company-logo.svg';
-    faviconElement.type = 'image/svg+xml';
+    faviconElement.href = 'https://cdn.builder.io/api/v1/image/assets%2Ff42eafb1b7184ff9bc71811d79efa0f8%2Fb4608012e7fa4083a708e27b18ed304e?format=webp&width=800';
+    faviconElement.type = 'image/webp';
   }
 }
