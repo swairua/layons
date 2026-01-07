@@ -1,0 +1,16 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="200" height="200" fill="#1e3a8a" rx="20"/>
+  
+  <!-- Company initial "C" -->
+  <g transform="translate(100, 100)">
+    <!-- Outer circle -->
+    <circle cx="0" cy="0" r="70" fill="none" stroke="#ffffff" stroke-width="8"/>
+    
+    <!-- Inner "C" shape -->
+    <path d="M -40 -50 A 60 60 0 0 1 -40 50" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Decorative accent line -->
+  <rect x="40" y="170" width="120" height="3" fill="#3b82f6" rx="1.5"/>
+</svg>
