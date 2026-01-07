@@ -11,11 +11,11 @@ export function updateMetaTags(companyData?: {
   city?: string;
   country?: string;
 } | null) {
-  const companyName = companyData?.name || 'Management System';
+  const companyName = companyData?.name || 'Company';
   const companyServices =
     companyData?.company_services ||
     'Professional Management System with Quotations, Invoices, Payments, Inventory, and Multi-Company Support';
-  const logoUrl = companyData?.logo_url || '/favicon.ico';
+  const logoUrl = companyData?.logo_url || '/company-logo.svg';
   const companyLocation = [companyData?.address, companyData?.city, companyData?.country]
     .filter(Boolean)
     .join(', ');
