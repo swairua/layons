@@ -11,11 +11,11 @@ export function updateMetaTags(companyData?: {
   city?: string;
   country?: string;
 } | null) {
-  const companyName = companyData?.name || 'Company';
+  const companyName = companyData?.name || 'Layons Construction Limited';
   const companyServices =
     companyData?.company_services ||
     'Professional Management System with Quotations, Invoices, Payments, Inventory, and Multi-Company Support';
-  const logoUrl = companyData?.logo_url || '/company-logo.svg';
+  const logoUrl = companyData?.logo_url || 'https://cdn.builder.io/api/v1/image/assets%2Ff42eafb1b7184ff9bc71811d79efa0f8%2Fb4608012e7fa4083a708e27b18ed304e?format=webp&width=800';
   const companyLocation = [companyData?.address, companyData?.city, companyData?.country]
     .filter(Boolean)
     .join(', ');
