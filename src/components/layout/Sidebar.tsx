@@ -195,9 +195,9 @@ export function Sidebar() {
         <div className="space-y-2">
           <div className="flex items-center space-x-3 px-3 py-2 text-sm text-sidebar-foreground">
             <Building2 className="h-4 w-4 text-sidebar-primary" />
-            <div>
-              <div className="font-medium">Layons Construction Limited</div>
-              <div className="text-xs text-sidebar-foreground/60">Construction</div>
+            <div className="min-w-0">
+              <div className="font-medium truncate">{currentCompany?.name || 'Company'}</div>
+              <div className="text-xs text-sidebar-foreground/60 truncate">{currentCompany?.city || currentCompany?.country || 'Management'}</div>
             </div>
           </div>
         </div>
