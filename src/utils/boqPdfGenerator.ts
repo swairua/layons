@@ -150,7 +150,7 @@ export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string;
   // Apply customizations if provided
   const multiplier = options?.amountMultiplier ?? 1;
   const paymentPercentageText = options?.specialPaymentPercentage
-    ? `- Being payment of ${options.specialPaymentPercentage}%`
+    ? `- Being payment of ${options.specialPaymentPercentage}% ... of the total`
     : null;
 
   const customizedItems = flatItems.map(item => ({
