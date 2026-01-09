@@ -42,6 +42,7 @@ import {
 import { useCustomers, useCreateCustomer, useCompanies, useCustomerInvoices, useCustomerPayments } from '@/hooks/useDatabase';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { formatCurrency } from '@/utils/currencyFormatter';
 import { EditCustomerModal } from '@/components/customers/EditCustomerModal';
 import { ViewCustomerModal } from '@/components/customers/ViewCustomerModal';
 import { CreateCustomerModal } from '@/components/customers/CreateCustomerModal';
