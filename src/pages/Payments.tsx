@@ -40,6 +40,7 @@ import {
 import { usePayments, useCompanies, useDeletePayment } from '@/hooks/useDatabase';
 import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
 import { generatePaymentReceiptPDF } from '@/utils/pdfGenerator';
+import { formatCurrency as formatCurrencyUtil } from '@/utils/currencyFormatter';
 
 interface Payment {
   id: string;
