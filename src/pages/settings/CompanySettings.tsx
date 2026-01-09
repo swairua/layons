@@ -1188,11 +1188,18 @@ export default function CompanySettings() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="currency">Default Currency</Label>
-                <Input
-                  id="currency"
-                  value={companyData.currency || ''}
-                  onChange={(e) => setCompanyData(prev => ({ ...prev, currency: e.target.value }))}
-                />
+                <Select value={companyData.currency || 'KES'} onValueChange={(value) => setCompanyData(prev => ({ ...prev, currency: value }))}>
+                  <SelectTrigger id="currency">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CURRENCY_SELECT_OPTIONS.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="fiscal-year">Fiscal Year Start (Month)</Label>
