@@ -6,6 +6,7 @@ import { RestockItemModal } from '@/components/inventory/RestockItemModal';
 import { StockAdjustmentModal } from '@/components/inventory/StockAdjustmentModal';
 import { useProducts, useCompanies } from '@/hooks/useDatabase';
 import { toast } from 'sonner';
+import { formatCurrency as formatCurrencyUtil } from '@/utils/currencyFormatter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
