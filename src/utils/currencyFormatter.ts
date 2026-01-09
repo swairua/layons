@@ -1,11 +1,12 @@
 /**
- * Currency formatter utility with support for KES, USD, EUR
+ * Currency formatter utility with support for KES, USD, EUR, GBP
  */
 
 export const SUPPORTED_CURRENCIES = {
   KES: { code: 'KES', symbol: 'Ksh', locale: 'en-KE', name: 'Kenyan Shilling' },
   USD: { code: 'USD', symbol: '$', locale: 'en-US', name: 'US Dollar' },
-  EUR: { code: 'EUR', symbol: '€', locale: 'en-GB', name: 'Euro' }
+  EUR: { code: 'EUR', symbol: '€', locale: 'en-GB', name: 'Euro' },
+  GBP: { code: 'GBP', symbol: '£', locale: 'en-GB', name: 'British Pound' }
 };
 
 export type CurrencyCode = keyof typeof SUPPORTED_CURRENCIES;
