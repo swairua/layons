@@ -16,6 +16,7 @@ import { useAuditLog } from '@/hooks/useAuditLog';
 import { useAuditedDeleteOperations } from '@/hooks/useAuditedDeleteOperations';
 import { useConvertBoqToInvoice } from '@/hooks/useBOQ';
 import { downloadBOQPDF } from '@/utils/boqPdfGenerator';
+import { generateUniqueInvoiceNumber } from '@/utils/invoiceNumberGenerator';
 import { toast } from 'sonner';
 
 export default function BOQs() {
