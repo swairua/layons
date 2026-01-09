@@ -38,7 +38,7 @@ export default function BOQs() {
   const [convertDialog, setConvertDialog] = useState<{ open: boolean; boqId?: string; boqNumber?: string }>({ open: false });
   const convertToInvoice = useConvertBoqToInvoice();
 
-  const handleDownloadPDF = async (boq: any, options?: { customTitle?: string; amountMultiplier?: number; forceCurrency?: string }) => {
+  const handleDownloadPDF = async (boq: any, options?: { customTitle?: string; amountMultiplier?: number; forceCurrency?: string; customClient?: any; stampImageUrl?: string; specialPaymentPercentage?: number; invoiceNumber?: string; useCurrentDate?: boolean }) => {
     try {
       if (!boq || !boq.data) {
         toast.error('BOQ data is not available');
