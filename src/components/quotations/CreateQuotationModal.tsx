@@ -34,6 +34,7 @@ import { useCustomers, useProducts, useGenerateDocumentNumber, useTaxSettings, u
 import { useCreateQuotationWithItems } from '@/hooks/useQuotationItems';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { CURRENCY_SELECT_OPTIONS } from '@/utils/getCurrencySelectOptions';
 
 interface QuotationItem {
   id: string;
