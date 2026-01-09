@@ -496,6 +496,7 @@ export default function BOQs() {
           onOpenChange={setPercentageRateOpen}
           boq={percentageRateBoq}
           onDownload={async (data: { percentage: number; multiplier: number }) => {
+            const invoiceNumber = companyId ? await generateUniqueInvoiceNumber(companyId) : undefined;
             await handleDownloadPDF(percentageRateBoq, {
               customTitle: 'INVOICE',
               amountMultiplier: data.multiplier,
@@ -507,7 +508,9 @@ export default function BOQs() {
                 country: 'Germany'
               },
               stampImageUrl: 'https://cdn.builder.io/api/v1/image/assets%2F431212e7a441426cb89fb9ab85eaab25%2F3742605378df401d9078c76d81877fea?format=webp&width=800',
-              specialPaymentPercentage: data.percentage
+              specialPaymentPercentage: data.percentage,
+              invoiceNumber: invoiceNumber,
+              useCurrentDate: true
             });
           }}
         />
