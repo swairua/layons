@@ -36,6 +36,7 @@ import { useCustomers, useGenerateDocumentNumber, useTaxSettings, useCompanies, 
 import { useCreateInvoiceWithItems } from '@/hooks/useQuotationItems';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { CURRENCY_SELECT_OPTIONS } from '@/utils/getCurrencySelectOptions';
 
 interface InvoiceItem {
   id: string;
@@ -576,9 +577,11 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="KES">Ksh - Kenyan Shilling</SelectItem>
-                      <SelectItem value="USD">$ - US Dollar</SelectItem>
-                      <SelectItem value="GBP">£ - British Pound</SelectItem>
+                      {CURRENCY_SELECT_OPTIONS.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

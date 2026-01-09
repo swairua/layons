@@ -35,6 +35,7 @@ import { useCustomers, useProducts, useTaxSettings, useCompanies } from '@/hooks
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
+import { CURRENCY_SELECT_OPTIONS } from '@/utils/getCurrencySelectOptions';
 
 interface QuotationItem {
   id: string;
@@ -599,9 +600,11 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="KES">Ksh - Kenyan Shilling</SelectItem>
-                      <SelectItem value="USD">$ - US Dollar</SelectItem>
-                      <SelectItem value="GBP">£ - British Pound</SelectItem>
+                      {CURRENCY_SELECT_OPTIONS.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

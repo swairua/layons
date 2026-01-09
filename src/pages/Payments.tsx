@@ -40,6 +40,7 @@ import {
 import { usePayments, useCompanies, useDeletePayment } from '@/hooks/useDatabase';
 import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
 import { generatePaymentReceiptPDF } from '@/utils/pdfGenerator';
+import { formatCurrency as formatCurrencyUtil } from '@/utils/currencyFormatter';
 
 interface Payment {
   id: string;
@@ -83,13 +84,8 @@ function getMethodColor(method: string) {
   }
 }
 
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('en-KE', {
-    style: 'currency',
-    currency: 'KES',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(amount);
+function formatCurrency(amount: number, currency: string = 'KES') {
+  return formatCurrencyUtil(amount, currency);
 }
 
 export default function Payments() {

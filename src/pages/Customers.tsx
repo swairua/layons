@@ -42,6 +42,7 @@ import {
 import { useCustomers, useCreateCustomer, useCompanies, useCustomerInvoices, useCustomerPayments } from '@/hooks/useDatabase';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { formatCurrency } from '@/utils/currencyFormatter';
 import { EditCustomerModal } from '@/components/customers/EditCustomerModal';
 import { ViewCustomerModal } from '@/components/customers/ViewCustomerModal';
 import { CreateCustomerModal } from '@/components/customers/CreateCustomerModal';
@@ -111,13 +112,8 @@ export default function Customers() {
     return matchesSearch && matchesStatus && matchesCity && matchesCreditLimit;
   }) || [];
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-KE', {
-      style: 'currency',
-      currency: 'KES',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
+  const displayCurrency = (amount: number) => {
+    return formatCurrency(amount, currentCompany?.currency || 'KES');
   };
 
 
@@ -452,7 +448,7 @@ export default function Customers() {
                       </div>
                     </TableCell>
                     <TableCell className="font-medium hidden lg:table-cell">
-                      {formatCurrency(customer.credit_limit || 0)}
+                      {displayCurrency(customer.credit_limit || 0)}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       {customer.payment_terms || 30} days
