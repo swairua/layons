@@ -84,13 +84,8 @@ function getMethodColor(method: string) {
   }
 }
 
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('en-KE', {
-    style: 'currency',
-    currency: 'KES',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(amount);
+function formatCurrency(amount: number, currency: string = 'KES') {
+  return formatCurrencyUtil(amount, currency);
 }
 
 export default function Payments() {
