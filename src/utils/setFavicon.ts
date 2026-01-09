@@ -20,8 +20,8 @@ export function setFavicon(logoUrl?: string | null) {
       faviconElement.href = logoUrl;
     }
   } else {
-    // Fall back to default company logo
-    faviconElement.href = 'https://cdn.builder.io/api/v1/image/assets%2Ff42eafb1b7184ff9bc71811d79efa0f8%2Fb4608012e7fa4083a708e27b18ed304e?format=webp&width=800';
+    // Fall back to Layons Construction Limited logo
+    faviconElement.href = 'https://cdn.builder.io/api/v1/image/assets%2Fe2eb9e788fdb405b8eda593a40e178b5%2F23073e29015745f6bebad21080caefe4?format=webp&width=256';
     faviconElement.type = 'image/webp';
   }
 }
