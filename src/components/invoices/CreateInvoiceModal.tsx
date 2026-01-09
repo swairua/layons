@@ -36,6 +36,7 @@ import { useCustomers, useGenerateDocumentNumber, useTaxSettings, useCompanies, 
 import { useCreateInvoiceWithItems } from '@/hooks/useQuotationItems';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { CURRENCY_SELECT_OPTIONS } from '@/utils/getCurrencySelectOptions';
 
 interface InvoiceItem {
   id: string;
