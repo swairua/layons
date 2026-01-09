@@ -44,6 +44,9 @@ export interface BoqPdfOptions {
   customClient?: { name: string; email?: string; phone?: string; address?: string; city?: string; country?: string };
   stampImageUrl?: string;
   specialPaymentPercentage?: number;
+  invoiceNumber?: string;
+  invoiceDate?: string;
+  useCurrentDate?: boolean;
 }
 
 export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string; logo_url?: string; address?: string; city?: string; country?: string; phone?: string; email?: string }, options?: BoqPdfOptions) {
@@ -147,7 +150,7 @@ export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string;
   // Apply customizations if provided
   const multiplier = options?.amountMultiplier ?? 1;
   const paymentPercentageText = options?.specialPaymentPercentage
-    ? `Payment of ${options.specialPaymentPercentage}% of the total`
+    ? `- Being payment of ${options.specialPaymentPercentage}%`
     : null;
 
   const customizedItems = flatItems.map(item => ({
@@ -163,10 +166,18 @@ export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string;
   const currency = options?.forceCurrency || doc.currency || 'KES';
   const customer = options?.customClient || doc.client;
 
+  // Use current date if requested, otherwise use document date
+  const pdfDate = options?.useCurrentDate
+    ? new Date().toISOString().split('T')[0]
+    : (options?.invoiceDate || doc.date);
+
+  // Use invoice number if provided, otherwise use BOQ number
+  const pdfNumber = options?.invoiceNumber || doc.number;
+
   return await generatePDF({
     type: 'boq',
-    number: doc.number,
-    date: doc.date,
+    number: pdfNumber,
+    date: pdfDate,
     company,
     customer: customer,
     items: customizedItems,
