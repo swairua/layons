@@ -448,7 +448,7 @@ export default function Customers() {
                       </div>
                     </TableCell>
                     <TableCell className="font-medium hidden lg:table-cell">
-                      {formatCurrency(customer.credit_limit || 0)}
+                      {displayCurrency(customer.credit_limit || 0)}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       {customer.payment_terms || 30} days
