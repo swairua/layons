@@ -189,7 +189,8 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
     const currencyLocales: { [key: string]: { locale: string; code: string } } = {
       KES: { locale: 'en-KE', code: 'KES' },
       USD: { locale: 'en-US', code: 'USD' },
-      EUR: { locale: 'en-GB', code: 'EUR' }
+      EUR: { locale: 'en-GB', code: 'EUR' },
+      GBP: { locale: 'en-GB', code: 'GBP' }
     };
     const curr = currencyLocales[currency] || currencyLocales.KES;
     return new Intl.NumberFormat(curr.locale, { style: 'currency', currency: curr.code, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
@@ -382,6 +383,7 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
                   <SelectItem value="KES">KES - Kenyan Shilling</SelectItem>
                   <SelectItem value="USD">USD - US Dollar</SelectItem>
                   <SelectItem value="EUR">EUR - Euro</SelectItem>
+                  <SelectItem value="GBP">GBP - British Pound</SelectItem>
                 </SelectContent>
               </Select>
             </div>
