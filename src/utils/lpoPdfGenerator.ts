@@ -14,6 +14,7 @@ export interface LPOPDFData {
   delivery_address?: string;
   contact_person?: string;
   contact_phone?: string;
+  currency?: string;
   suppliers?: {
     name: string;
     email?: string;
@@ -75,10 +76,17 @@ const formatDate = (dateString: string) => {
   });
 };
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-KE', {
+const formatCurrency = (amount: number, currency: string = 'KES') => {
+  const localeMap: { [key: string]: string } = {
+    'KES': 'en-KE',
+    'USD': 'en-US',
+    'EUR': 'en-GB',
+    'GBP': 'en-GB',
+  };
+
+  return new Intl.NumberFormat(localeMap[currency] || 'en-KE', {
     style: 'currency',
-    currency: 'KES',
+    currency: currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(amount);

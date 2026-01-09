@@ -16,6 +16,7 @@ import { useAuditLog } from '@/hooks/useAuditLog';
 import { useAuditedDeleteOperations } from '@/hooks/useAuditedDeleteOperations';
 import { useConvertBoqToInvoice } from '@/hooks/useBOQ';
 import { downloadBOQPDF } from '@/utils/boqPdfGenerator';
+import { generateUniqueInvoiceNumber } from '@/utils/invoiceNumberGenerator';
 import { toast } from 'sonner';
 
 export default function BOQs() {
@@ -37,7 +38,7 @@ export default function BOQs() {
   const [convertDialog, setConvertDialog] = useState<{ open: boolean; boqId?: string; boqNumber?: string }>({ open: false });
   const convertToInvoice = useConvertBoqToInvoice();
 
-  const handleDownloadPDF = async (boq: any, options?: { customTitle?: string; amountMultiplier?: number; forceCurrency?: string }) => {
+  const handleDownloadPDF = async (boq: any, options?: { customTitle?: string; amountMultiplier?: number; forceCurrency?: string; customClient?: any; stampImageUrl?: string; specialPaymentPercentage?: number; invoiceNumber?: string; useCurrentDate?: boolean }) => {
     try {
       if (!boq || !boq.data) {
         toast.error('BOQ data is not available');
@@ -132,7 +133,8 @@ export default function BOQs() {
         const mapping: { [key: string]: { locale: string; code: string } } = {
           KES: { locale: 'en-KE', code: 'KES' },
           USD: { locale: 'en-US', code: 'USD' },
-          EUR: { locale: 'en-GB', code: 'EUR' }
+          EUR: { locale: 'en-GB', code: 'EUR' },
+          GBP: { locale: 'en-GB', code: 'GBP' }
         };
         return mapping[curr] || mapping.KES;
       };
@@ -326,7 +328,8 @@ export default function BOQs() {
           const mapping: { [key: string]: { locale: string; code: string } } = {
             KES: { locale: 'en-KE', code: 'KES' },
             USD: { locale: 'en-US', code: 'USD' },
-            EUR: { locale: 'en-GB', code: 'EUR' }
+            EUR: { locale: 'en-GB', code: 'EUR' },
+            GBP: { locale: 'en-GB', code: 'GBP' }
           };
           return mapping[curr] || mapping.KES;
         };
@@ -495,6 +498,7 @@ export default function BOQs() {
           onOpenChange={setPercentageRateOpen}
           boq={percentageRateBoq}
           onDownload={async (data: { percentage: number; multiplier: number }) => {
+            const invoiceNumber = companyId ? await generateUniqueInvoiceNumber(companyId) : undefined;
             await handleDownloadPDF(percentageRateBoq, {
               customTitle: 'INVOICE',
               amountMultiplier: data.multiplier,
@@ -506,7 +510,9 @@ export default function BOQs() {
                 country: 'Germany'
               },
               stampImageUrl: 'https://cdn.builder.io/api/v1/image/assets%2F431212e7a441426cb89fb9ab85eaab25%2F3742605378df401d9078c76d81877fea?format=webp&width=800',
-              specialPaymentPercentage: data.percentage
+              specialPaymentPercentage: data.percentage,
+              invoiceNumber: invoiceNumber,
+              useCurrentDate: true
             });
           }}
         />
