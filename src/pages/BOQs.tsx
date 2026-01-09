@@ -133,7 +133,8 @@ export default function BOQs() {
         const mapping: { [key: string]: { locale: string; code: string } } = {
           KES: { locale: 'en-KE', code: 'KES' },
           USD: { locale: 'en-US', code: 'USD' },
-          EUR: { locale: 'en-GB', code: 'EUR' }
+          EUR: { locale: 'en-GB', code: 'EUR' },
+          GBP: { locale: 'en-GB', code: 'GBP' }
         };
         return mapping[curr] || mapping.KES;
       };
@@ -327,7 +328,8 @@ export default function BOQs() {
           const mapping: { [key: string]: { locale: string; code: string } } = {
             KES: { locale: 'en-KE', code: 'KES' },
             USD: { locale: 'en-US', code: 'USD' },
-            EUR: { locale: 'en-GB', code: 'EUR' }
+            EUR: { locale: 'en-GB', code: 'EUR' },
+            GBP: { locale: 'en-GB', code: 'GBP' }
           };
           return mapping[curr] || mapping.KES;
         };
