@@ -587,9 +587,11 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="KES">Ksh - Kenyan Shilling</SelectItem>
-                      <SelectItem value="USD">$ - US Dollar</SelectItem>
-                      <SelectItem value="GBP">£ - British Pound</SelectItem>
+                      {CURRENCY_SELECT_OPTIONS.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
