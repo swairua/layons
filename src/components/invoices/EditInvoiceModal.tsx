@@ -35,6 +35,7 @@ import { useCustomers, useProducts, useTaxSettings } from '@/hooks/useDatabase';
 import { useUpdateInvoiceWithItems } from '@/hooks/useQuotationItems';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { toast } from 'sonner';
+import { CURRENCY_SELECT_OPTIONS } from '@/utils/getCurrencySelectOptions';
 
 interface InvoiceItem {
   id: string;
