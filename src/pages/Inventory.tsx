@@ -56,13 +56,8 @@ const getStockStatus = (currentStock: number, minStock: number): 'in_stock' | 'l
 };
 
 // Helper function to format currency
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-KE', {
-    style: 'currency',
-    currency: 'KES',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(amount);
+const formatCurrency = (amount: number, currency: string = 'KES') => {
+  return formatCurrencyUtil(amount, currency);
 };
 
 function getStatusColor(status: InventoryItem['status']) {
