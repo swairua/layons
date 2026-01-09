@@ -14,6 +14,7 @@ export interface LPOPDFData {
   delivery_address?: string;
   contact_person?: string;
   contact_phone?: string;
+  currency?: string;
   suppliers?: {
     name: string;
     email?: string;
