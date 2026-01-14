@@ -1833,7 +1833,7 @@ export const useCreateQuotation = () => {
 export const useDeleteQuotation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id, companyId }: { id: string; companyId: string }) => {
       // Delete quotation items first (if any)
       try {
         const { error: itemsError } = await supabase
@@ -1852,7 +1852,8 @@ export const useDeleteQuotation = () => {
       const { error } = await supabase
         .from('quotations')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('company_id', companyId);
 
       if (error) {
         // If deletion fails due to schema differences (e.g., missing company_id) or RLS, attempt soft-delete fallback
