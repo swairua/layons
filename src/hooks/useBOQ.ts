@@ -220,7 +220,9 @@ export const useConvertBoqToInvoice = () => {
         .single();
 
       if (invoiceError) {
-        throw new Error(`Failed to create invoice: ${invoiceError.message}`);
+        const errorMsg = invoiceError?.message || invoiceError?.details || JSON.stringify(invoiceError);
+        console.error('Invoice creation error:', { invoiceError, invoiceData });
+        throw new Error(`Failed to create invoice: ${errorMsg}`);
       }
 
       if (!invoice) throw new Error('Invoice creation returned empty result');
