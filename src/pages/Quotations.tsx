@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense, lazy } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -32,7 +32,9 @@ import { CreateQuotationModal } from '@/components/quotations/CreateQuotationMod
 import { ViewQuotationModal } from '@/components/quotations/ViewQuotationModal';
 import { EditQuotationModal } from '@/components/quotations/EditQuotationModal';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
-import { downloadQuotationPDF } from '@/utils/pdfGenerator';
+
+// Lazy load the PDF generator to avoid module loading issues
+const downloadQuotationPDFModule = lazy(() => import('@/utils/pdfGenerator').then(m => ({ default: m.downloadQuotationPDF })));
 
 interface Quotation {
   id: string;
