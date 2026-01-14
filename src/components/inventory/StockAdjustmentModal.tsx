@@ -244,7 +244,7 @@ export function StockAdjustmentModal({ open, onOpenChange, onSuccess, item }: St
               <Input
                 id="quantity"
                 type="number"
-                value={quantity || ''}
+                value={quantity ?? ''}
                 onChange={(e) => {
                   const value = e.target.value;
                   if (value === '') {
