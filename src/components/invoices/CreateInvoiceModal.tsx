@@ -870,7 +870,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                   </div>
                                   <div className="flex justify-between">
                                     <span>Labor Cost:</span>
-                                    <span className="font-semibold">{formatCurrency(section.labor_cost)}</span>
+                                    <span className="font-semibold">{formatCurrency(toNumber(section.labor_cost, 0))}</span>
                                   </div>
                                   <div className="flex justify-between border-t pt-1 font-bold">
                                     <span>Section Total:</span>
