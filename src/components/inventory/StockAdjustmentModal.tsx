@@ -49,17 +49,19 @@ export function StockAdjustmentModal({ open, onOpenChange, onSuccess, item }: St
   const handleSubmit = async () => {
     if (!item) return;
 
-    if (quantity <= 0 && adjustmentType !== 'set') {
+    const numQuantity = toInteger(quantity, 0);
+
+    if (numQuantity <= 0 && adjustmentType !== 'set') {
       toast.error('Quantity must be greater than 0');
       return;
     }
 
-    if (adjustmentType === 'set' && quantity < 0) {
+    if (adjustmentType === 'set' && numQuantity < 0) {
       toast.error('Stock quantity cannot be negative');
       return;
     }
 
-    if (adjustmentType === 'decrease' && quantity > item.stock_quantity) {
+    if (adjustmentType === 'decrease' && numQuantity > item.stock_quantity) {
       toast.error('Cannot decrease stock below zero');
       return;
     }
@@ -70,19 +72,19 @@ export function StockAdjustmentModal({ open, onOpenChange, onSuccess, item }: St
     }
 
     setIsSubmitting(true);
-    
+
     try {
       // Calculate new stock quantity
       let newQuantity: number;
       switch (adjustmentType) {
         case 'increase':
-          newQuantity = item.stock_quantity + quantity;
+          newQuantity = item.stock_quantity + numQuantity;
           break;
         case 'decrease':
-          newQuantity = item.stock_quantity - quantity;
+          newQuantity = item.stock_quantity - numQuantity;
           break;
         case 'set':
-          newQuantity = quantity;
+          newQuantity = numQuantity;
           break;
         default:
           newQuantity = item.stock_quantity;
@@ -91,29 +93,29 @@ export function StockAdjustmentModal({ open, onOpenChange, onSuccess, item }: St
       // TODO: Implement actual stock adjustment API call
       // For now, simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       const adjustmentData = {
         item_id: item.id,
         product_code: item.product_code,
         adjustment_type: adjustmentType,
         old_quantity: item.stock_quantity,
-        adjustment_quantity: adjustmentType === 'set' ? quantity : quantity,
+        adjustment_quantity: adjustmentType === 'set' ? numQuantity : numQuantity,
         new_quantity: newQuantity,
         reason,
         notes,
-        cost_impact: adjustmentType === 'increase' ? quantity * item.cost_price : 
-                    adjustmentType === 'decrease' ? -quantity * item.cost_price :
-                    (quantity - item.stock_quantity) * item.cost_price,
+        cost_impact: adjustmentType === 'increase' ? numQuantity * item.cost_price :
+                    adjustmentType === 'decrease' ? -numQuantity * item.cost_price :
+                    (numQuantity - item.stock_quantity) * item.cost_price,
         adjustment_date: new Date().toISOString(),
       };
 
       console.log('Stock adjustment data:', adjustmentData);
-      
-      const actionText = adjustmentType === 'increase' ? 'increased by' : 
-                        adjustmentType === 'decrease' ? 'decreased by' : 
+
+      const actionText = adjustmentType === 'increase' ? 'increased by' :
+                        adjustmentType === 'decrease' ? 'decreased by' :
                         'set to';
-      
-      toast.success(`Stock for ${item.name} ${actionText} ${quantity} ${item.unit_of_measure}`);
+
+      toast.success(`Stock for ${item.name} ${actionText} ${numQuantity} ${item.unit_of_measure}`);
       onSuccess();
       handleClose();
       
