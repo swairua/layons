@@ -188,8 +188,8 @@ export default function Quotations() {
         company_services: currentCompany.company_services
       } : undefined;
 
-      const downloadFunction = await getPDFDownloader();
-      await downloadFunction(quotation, companyDetails);
+      const pdfDownloader = await getDownloadPDFFunction();
+      await pdfDownloader(quotation, companyDetails);
       toast.success(`Quotation ${quotation.quotation_number} PDF downloaded`);
     } catch (error) {
       console.error('Error downloading PDF:', error);
