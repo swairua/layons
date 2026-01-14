@@ -36,6 +36,7 @@ import { useUpdateInvoiceWithItems } from '@/hooks/useQuotationItems';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { toast } from 'sonner';
 import { CURRENCY_SELECT_OPTIONS } from '@/utils/getCurrencySelectOptions';
+import { toNumber, toInteger } from '@/utils/numericFormHelpers';
 
 interface InvoiceItem {
   id: string;
