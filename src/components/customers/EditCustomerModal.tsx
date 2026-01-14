@@ -111,8 +111,15 @@ export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: E
     try {
       await updateCustomer.mutateAsync({
         id: customer.id,
-        ...formData,
-        payment_terms: formData.payment_terms === '' ? 0 : parseInt(formData.payment_terms)
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        country: formData.country,
+        credit_limit: toNumber(formData.credit_limit, 0),
+        payment_terms: toInteger(formData.payment_terms, 0),
+        is_active: formData.is_active
       });
 
       toast.success(`Customer ${formData.name} updated successfully!`);
