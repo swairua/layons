@@ -93,7 +93,8 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
         company_id: currentCompany.id,
         customer_code: customerCode,
         ...formData,
-        payment_terms: formData.payment_terms === '' ? 0 : parseInt(formData.payment_terms)
+        credit_limit: toNumber(formData.credit_limit, 0),
+        payment_terms: toInteger(formData.payment_terms, 0)
       });
       
       toast.success(`Customer ${formData.name} created successfully!`);
