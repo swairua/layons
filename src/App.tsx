@@ -43,9 +43,6 @@ const OptimizedInventory = lazy(() => import("./pages/OptimizedInventory"));
 const PerformanceOptimizerPage = lazy(() => import("./pages/PerformanceOptimizerPage"));
 const OptimizedCustomers = lazy(() => import("./pages/OptimizedCustomers"));
 const CustomerPerformanceOptimizerPage = lazy(() => import("./pages/CustomerPerformanceOptimizerPage"));
-const SetupAndTest = lazy(() => import("./components/SetupAndTest"));
-const AuthTest = lazy(() => import("./components/AuthTest"));
-const AdminRecreate = lazy(() => import("./pages/AdminRecreate"));
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const DatabaseFix = lazy(() => import("./pages/DatabaseFix"));
 
