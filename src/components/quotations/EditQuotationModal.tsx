@@ -299,7 +299,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
       return sec;
     });
     if (movedItem) {
-      setSections(next.map(sec => sec.id === toSectionId ? { ...sec, items: [...sec.items, { ...movedItem!, section_name: sec.name, section_labor_cost: sec.labor_cost }] } : sec));
+      setSections(next.map(sec => sec.id === toSectionId ? { ...sec, items: [...sec.items, { ...movedItem!, section_name: sec.name, section_labor_cost: toNumber(sec.labor_cost, 0) }] } : sec));
     } else {
       setSections(next);
     }
