@@ -62,11 +62,14 @@ export function RestockItemModal({ open, onOpenChange, onSuccess, item }: Restoc
     }));
   };
 
-  const newStockLevel = (item?.currentStock || 0) + restockData.quantity;
-  const totalCost = restockData.quantity * restockData.cost_per_unit;
+  const quantity = toInteger(restockData.quantity, 0);
+  const costPerUnit = toNumber(restockData.cost_per_unit, 0);
+
+  const newStockLevel = (item?.currentStock || 0) + quantity;
+  const totalCost = quantity * costPerUnit;
 
   const handleSubmit = async () => {
-    if (!restockData.quantity || restockData.quantity <= 0) {
+    if (!quantity || quantity <= 0) {
       toast.error('Please enter a valid restock quantity');
       return;
     }
