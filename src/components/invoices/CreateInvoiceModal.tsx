@@ -57,7 +57,7 @@ interface InvoiceSection {
   id: string;
   name: string;
   items: InvoiceItem[];
-  labor_cost: number;
+  labor_cost: number | '';
   expanded: boolean;
 }
 
