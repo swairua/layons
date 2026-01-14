@@ -272,7 +272,29 @@ export const CreateDeliveryNoteModal = ({
     } catch (error: any) {
       console.error('Error creating delivery note:', error);
       const message = typeof error?.message === 'string' ? error.message : 'Failed to create delivery note';
-      toast.error(message);
+
+      // Handle specific error cases
+      if (message.includes('not found')) {
+        toast.error('Data Mismatch Error', {
+          description: message + '. The invoice or customer may have been deleted. Please refresh and try again.',
+          duration: 6000
+        });
+      } else if (message.includes('customer must match')) {
+        toast.error('Customer Mismatch', {
+          description: 'The delivery note customer does not match the invoice customer. Please select the correct customer.',
+          duration: 6000
+        });
+      } else if (message.includes('exceed')) {
+        toast.error('Quantity Error', {
+          description: message,
+          duration: 5000
+        });
+      } else {
+        toast.error('Failed to Create Delivery Note', {
+          description: message,
+          duration: 5000
+        });
+      }
     }
   };
 
