@@ -99,7 +99,10 @@ export default function Quotations() {
   const handleDeleteConfirm = async () => {
     if (!deleteDialog.quotation) return;
     try {
-      await deleteQuotation.mutateAsync(deleteDialog.quotation.id);
+      await deleteQuotation.mutateAsync({
+        id: deleteDialog.quotation.id,
+        companyId: currentCompany?.id || ''
+      });
       toast.success('Quotation deleted successfully');
       refetch();
       setDeleteDialog({ open: false });
@@ -274,6 +277,7 @@ Website: www.biolegendscientific.co.ke`;
       try {
         await convertQuotationMutation.mutateAsync({ quotationId: quotation.id, companyId: currentCompany.id });
         toast.success(`Quotation ${quotation.quotation_number} converted to invoice successfully!`);
+        refetch();
       } finally {
         setConvertingQuotationId(null);
       }
@@ -315,7 +319,7 @@ Website: www.biolegendscientific.co.ke`;
         <Card className="shadow-card">
           <CardContent className="pt-6">
             <div className="text-center py-8">
-              <p className="text-destructive">Error loading quotations: {error.message}</p>
+              <p className="text-destructive">Error loading quotations: {(error as any).message}</p>
               <Button 
                 variant="outline" 
                 onClick={() => window.location.reload()}
