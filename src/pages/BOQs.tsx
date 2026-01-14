@@ -184,7 +184,13 @@ export default function BOQs() {
           errorMessage = 'Failed to generate a unique invoice number. Please try again or contact support.';
         } else if (errorMessage.includes('customer')) {
           errorTitle = 'Customer Setup Issue';
-          errorMessage = 'There was an issue with the customer data. The invoice was created without a customer. Please assign one manually.';
+          if (errorMessage.includes('Could not create unique customer code')) {
+            errorMessage = 'Could not generate a unique customer code. The invoice was created without a customer. Please assign a customer manually from the invoice view.';
+          } else if (errorMessage.includes('row level security') || errorMessage.includes('permission')) {
+            errorMessage = 'Permission denied when creating customer. The invoice was created without a customer. Please check your access permissions or assign a customer manually.';
+          } else {
+            errorMessage = 'There was an issue with the customer data. The invoice was created without a customer. Please assign one manually.';
+          }
         }
       }
 
