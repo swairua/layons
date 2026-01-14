@@ -783,8 +783,24 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                     <TableCell>
                                       <Input
                                         type="number"
-                                        value={item.quantity}
-                                        onChange={(e) => updateItemQuantity(section.id, item.id, parseInt(e.target.value) || 0)}
+                                        value={item.quantity || ''}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            // Don't update on empty, wait for blur
+                                          } else {
+                                            const num = parseInt(value);
+                                            if (!isNaN(num) && num > 0) {
+                                              updateItemQuantity(section.id, item.id, num);
+                                            }
+                                          }
+                                        }}
+                                        onBlur={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '' || parseInt(value) <= 0) {
+                                            updateItemQuantity(section.id, item.id, 1);
+                                          }
+                                        }}
                                         className="w-16 h-8"
                                         min="1"
                                         placeholder="1"
@@ -793,8 +809,24 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                     <TableCell>
                                       <Input
                                         type="number"
-                                        value={item.unit_price}
-                                        onChange={(e) => updateItemPrice(section.id, item.id, parseFloat(e.target.value) || 0)}
+                                        value={item.unit_price || ''}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            // Don't update on empty, wait for blur
+                                          } else {
+                                            const num = parseFloat(value);
+                                            if (!isNaN(num) && num >= 0) {
+                                              updateItemPrice(section.id, item.id, num);
+                                            }
+                                          }
+                                        }}
+                                        onBlur={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            updateItemPrice(section.id, item.id, 0);
+                                          }
+                                        }}
                                         className="w-24 h-8"
                                         step="0.01"
                                         placeholder="0.00"
@@ -803,8 +835,24 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                     <TableCell>
                                       <Input
                                         type="number"
-                                        value={item.vat_percentage}
-                                        onChange={(e) => updateItemVAT(section.id, item.id, parseFloat(e.target.value) || 0)}
+                                        value={item.vat_percentage || ''}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            // Don't update on empty, wait for blur
+                                          } else {
+                                            const num = parseFloat(value);
+                                            if (!isNaN(num) && num >= 0 && num <= 100) {
+                                              updateItemVAT(section.id, item.id, num);
+                                            }
+                                          }
+                                        }}
+                                        onBlur={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            updateItemVAT(section.id, item.id, 0);
+                                          }
+                                        }}
                                         className="w-20 h-8"
                                         min="0"
                                         max="100"
