@@ -103,13 +103,13 @@ export const useProformas = (companyId?: string) => {
 /**
  * Hook to fetch a single proforma invoice
  */
-export const useProforma = (proformaId?: string) => {
+export const useProforma = (proformaId?: string, companyId?: string) => {
   return useQuery({
-    queryKey: ['proforma_invoice', proformaId],
+    queryKey: ['proforma_invoice', proformaId, companyId],
     queryFn: async () => {
       if (!proformaId) return null;
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('proforma_invoices')
         .select(`
           *,
@@ -127,8 +127,13 @@ export const useProforma = (proformaId?: string) => {
             )
           )
         `)
-        .eq('id', proformaId)
-        .single();
+        .eq('id', proformaId);
+
+      if (companyId) {
+        query = query.eq('company_id', companyId);
+      }
+
+      const { data, error } = await query.single();
 
       if (error) {
         console.error('Error fetching proforma:', error);
@@ -334,14 +339,16 @@ export const useUpdateProforma = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      proformaId, 
-      proforma, 
-      items 
-    }: { 
-      proformaId: string; 
-      proforma: Partial<ProformaInvoice>; 
-      items?: ProformaItem[] 
+    mutationFn: async ({
+      proformaId,
+      companyId,
+      proforma,
+      items
+    }: {
+      proformaId: string;
+      companyId: string;
+      proforma: Partial<ProformaInvoice>;
+      items?: ProformaItem[]
     }) => {
       // If items are provided, recalculate totals
       if (items) {
@@ -370,6 +377,7 @@ export const useUpdateProforma = () => {
         .from('proforma_invoices')
         .update(proforma)
         .eq('id', proformaId)
+        .eq('company_id', companyId)
         .select()
         .single();
 

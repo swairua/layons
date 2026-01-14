@@ -77,6 +77,7 @@ export function useAuditedDeleteOperations() {
           .from('customers')
           .select('*')
           .eq('id', id)
+          .eq('company_id', companyId)
           .single();
 
         // Perform audited delete
@@ -112,6 +113,7 @@ export function useAuditedDeleteOperations() {
           .from('invoices')
           .select('*')
           .eq('id', id)
+          .eq('company_id', companyId)
           .single();
 
         // Perform audited delete
@@ -149,6 +151,7 @@ export function useAuditedDeleteOperations() {
           .from('quotations')
           .select('*')
           .eq('id', id)
+          .eq('company_id', companyId)
           .single();
 
         // Perform audited delete
@@ -185,6 +188,7 @@ export function useAuditedDeleteOperations() {
           .from('credit_notes')
           .select('*')
           .eq('id', id)
+          .eq('company_id', companyId)
           .single();
 
         // Perform audited delete
@@ -221,6 +225,7 @@ export function useAuditedDeleteOperations() {
           .from('proforma_invoices')
           .select('*')
           .eq('id', id)
+          .eq('company_id', companyId)
           .single();
 
         // Perform audited delete
@@ -257,6 +262,7 @@ export function useAuditedDeleteOperations() {
           .from('lpos')
           .select('*')
           .eq('id', id)
+          .eq('company_id', companyId)
           .single();
 
         // Perform audited delete
@@ -293,6 +299,7 @@ export function useAuditedDeleteOperations() {
           .from('boqs')
           .select('*')
           .eq('id', id)
+          .eq('company_id', companyId)
           .single();
 
         if (fetchError) {

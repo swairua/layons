@@ -366,14 +366,15 @@ export const useUpdateCustomer = () => {
 
 export const useDeleteCustomer = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id, companyId }: { id: string; companyId: string }) => {
       const { error } = await supabase
         .from('customers')
         .delete()
-        .eq('id', id);
-      
+        .eq('id', id)
+        .eq('company_id', companyId);
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -1832,7 +1833,7 @@ export const useCreateQuotation = () => {
 export const useDeleteQuotation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id, companyId }: { id: string; companyId: string }) => {
       // Delete quotation items first (if any)
       try {
         const { error: itemsError } = await supabase
@@ -1851,7 +1852,8 @@ export const useDeleteQuotation = () => {
       const { error } = await supabase
         .from('quotations')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('company_id', companyId);
 
       if (error) {
         // If deletion fails due to schema differences (e.g., missing company_id) or RLS, attempt soft-delete fallback
@@ -1864,7 +1866,8 @@ export const useDeleteQuotation = () => {
           const { error: updateError } = await supabase
             .from('quotations')
             .update({ status: 'deleted' })
-            .eq('id', id);
+            .eq('id', id)
+            .eq('company_id', companyId);
 
           if (updateError) {
             // If update also fails, throw an error with the proper message
@@ -2034,11 +2037,12 @@ export const useUpdateDeliveryNote = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...deliveryNote }: Partial<DeliveryNote> & { id: string }) => {
+    mutationFn: async ({ id, companyId, ...deliveryNote }: Partial<DeliveryNote> & { id: string; companyId: string }) => {
       const { data, error } = await supabase
         .from('delivery_notes')
         .update(deliveryNote)
         .eq('id', id)
+        .eq('company_id', companyId)
         .select()
         .single();
 
@@ -2127,19 +2131,24 @@ export const useLPOs = (companyId?: string) => {
   });
 };
 
-export const useLPO = (lpoId?: string) => {
+export const useLPO = (lpoId?: string, companyId?: string) => {
   return useQuery({
-    queryKey: ['lpo', lpoId],
+    queryKey: ['lpo', lpoId, companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('lpos')
         .select(`
           *,
           suppliers:customers!supplier_id(name, email, phone, address, city, country),
           lpo_items(*, products(name, product_code, unit_of_measure))
         `)
-        .eq('id', lpoId)
-        .single();
+        .eq('id', lpoId);
+
+      if (companyId) {
+        query = query.eq('company_id', companyId);
+      }
+
+      const { data, error } = await query.single();
 
       if (error) throw error;
       return data;

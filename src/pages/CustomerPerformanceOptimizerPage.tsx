@@ -53,18 +53,18 @@ export default function CustomerPerformanceOptimizerPage() {
           </div>
 
           <div className="flex items-center justify-center gap-4">
-            <Link to="/customers">
-              <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center gap-2" asChild>
+              <Link to="/customers">
                 Current Customers Page
                 <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            <Link to="/optimized-customers">
-              <Button className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600">
+              </Link>
+            </Button>
+            <Button className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600" asChild>
+              <Link to="/optimized-customers">
                 Try Optimized Customers
                 <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </CardContent>
       </Card>

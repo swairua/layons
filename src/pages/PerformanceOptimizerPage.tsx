@@ -43,12 +43,12 @@ export default function PerformanceOptimizerPage() {
             </div>
             
             <div className="mt-4 flex items-center justify-center gap-4">
-              <Link to="/optimized-inventory">
-                <Button className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600">
+              <Button className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600" asChild>
+                <Link to="/optimized-inventory">
                   Try Optimized Inventory
                   <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </CardContent>
