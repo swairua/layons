@@ -742,8 +742,24 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                             <Label>Labor Cost</Label>
                             <Input
                               type="number"
-                              value={section.labor_cost}
-                              onChange={(e) => updateSectionLaborCost(section.id, parseFloat(e.target.value) || 0)}
+                              value={section.labor_cost || ''}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                if (value === '') {
+                                  updateSectionLaborCost(section.id, '');
+                                } else {
+                                  const num = parseFloat(value);
+                                  if (!isNaN(num)) {
+                                    updateSectionLaborCost(section.id, num);
+                                  }
+                                }
+                              }}
+                              onBlur={(e) => {
+                                const value = e.target.value;
+                                if (value === '') {
+                                  updateSectionLaborCost(section.id, 0);
+                                }
+                              }}
                               placeholder="0.00"
                               step="0.01"
                             />
