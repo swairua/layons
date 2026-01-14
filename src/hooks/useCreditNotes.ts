@@ -146,13 +146,13 @@ export function useCustomerCreditNotes(customerId: string | undefined, companyId
 }
 
 // Fetch a single credit note by ID
-export function useCreditNote(creditNoteId: string | undefined) {
+export function useCreditNote(creditNoteId: string | undefined, companyId: string | undefined) {
   return useQuery({
-    queryKey: ['creditNote', creditNoteId],
+    queryKey: ['creditNote', creditNoteId, companyId],
     queryFn: async () => {
       if (!creditNoteId) throw new Error('Credit Note ID is required');
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('credit_notes')
         .select(`
           *,
@@ -175,8 +175,13 @@ export function useCreditNote(creditNoteId: string | undefined) {
             total_amount
           )
         `)
-        .eq('id', creditNoteId)
-        .single();
+        .eq('id', creditNoteId);
+
+      if (companyId) {
+        query = query.eq('company_id', companyId);
+      }
+
+      const { data, error } = await query.single();
 
       if (error) throw error;
       return data as CreditNote;
