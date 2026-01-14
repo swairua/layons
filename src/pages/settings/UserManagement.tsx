@@ -48,7 +48,6 @@ import useUserManagement from '@/hooks/useUserManagement';
 import { CreateUserModal } from '@/components/users/CreateUserModal';
 import { EditUserModal } from '@/components/users/EditUserModal';
 import { InviteUserModal } from '@/components/users/InviteUserModal';
-import { AdminDiagnostics } from '@/components/AdminDiagnostics';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
