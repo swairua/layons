@@ -260,8 +260,24 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
                 <Input
                   id="credit_limit"
                   type="number"
-                  value={formData.credit_limit}
-                  onChange={(e) => handleInputChange('credit_limit', parseFloat(e.target.value) || 0)}
+                  value={formData.credit_limit || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('credit_limit', '');
+                    } else {
+                      const num = parseFloat(value);
+                      if (!isNaN(num)) {
+                        handleInputChange('credit_limit', num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('credit_limit', 0);
+                    }
+                  }}
                   placeholder="100000"
                   min="0"
                   step="1000"
@@ -273,8 +289,24 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
                 <Input
                   id="payment_terms"
                   type="number"
-                  value={formData.payment_terms}
-                  onChange={(e) => handleInputChange('payment_terms', parseInt(e.target.value) || 0)}
+                  value={formData.payment_terms || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('payment_terms', '');
+                    } else {
+                      const num = parseInt(value);
+                      if (!isNaN(num)) {
+                        handleInputChange('payment_terms', num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('payment_terms', 0);
+                    }
+                  }}
                   placeholder="e.g., 0 for cash, 30 for Net 30"
                   min="0"
                   step="1"
