@@ -520,7 +520,7 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
                                 <Input type="number" min={0} value={row.rate || ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', e.target.value === '' ? '' : Number(e.target.value))} />
                               </TableCell>
                               <TableCell className="text-right">
-                                {formatCurrency((row.quantity || 0) * (row.rate || 0))}
+                                {formatCurrency((row.quantity === '' ? 0 : Number(row.quantity)) * (row.rate === '' ? 0 : Number(row.rate)))}
                               </TableCell>
                               <TableCell className="text-right">
                                 <Button variant="ghost" size="icon" onClick={() => removeItem(section.id, subsection.id, row.id)}>
