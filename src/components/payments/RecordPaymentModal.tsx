@@ -31,6 +31,7 @@ import {
 import { toast } from 'sonner';
 import { parseErrorMessageWithCodes } from '@/utils/errorHelpers';
 import { useCreatePayment } from '@/hooks/useDatabase';
+import { toNumber } from '@/utils/numericFormHelpers';
 import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { PaymentAllocationQuickFix } from './PaymentAllocationQuickFix';
