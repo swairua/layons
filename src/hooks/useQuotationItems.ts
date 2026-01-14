@@ -360,7 +360,8 @@ export const useConvertQuotationToInvoice = () => {
       await supabase
         .from('quotations')
         .update({ status: 'processed' })
-        .eq('id', quotationId);
+        .eq('id', quotationId)
+        .eq('company_id', companyId);
       
       return invoice;
     },
