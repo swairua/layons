@@ -33,6 +33,7 @@ interface EditCreditNoteModalProps {
   onOpenChange: (open: boolean) => void;
   creditNote: CreditNote | null;
   onSuccess: () => void;
+  companyId?: string;
 }
 
 export function EditCreditNoteModal({ 
