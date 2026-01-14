@@ -54,7 +54,7 @@ interface QuotationSection {
   id: string;
   name: string;
   items: QuotationItem[];
-  labor_cost: number;
+  labor_cost: number | '';
   expanded: boolean;
 }
 
@@ -152,7 +152,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
     ));
   };
 
-  const updateSectionLaborCost = (sectionId: string, laborCost: number) => {
+  const updateSectionLaborCost = (sectionId: string, laborCost: number | '') => {
     setSections(sections.map(s =>
       s.id === sectionId ? { ...s, labor_cost: laborCost } : s
     ));
@@ -319,7 +319,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
   };
 
   const calculateSectionTotalWithLabor = (section: QuotationSection) => {
-    return calculateSectionMaterialsTotal(section) + section.labor_cost;
+    return calculateSectionMaterialsTotal(section) + toNumber(section.labor_cost, 0);
   };
 
   const calculateGrandTotal = () => {
@@ -331,7 +331,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
   };
 
   const calculateTotalLabor = () => {
-    return sections.reduce((sum, section) => sum + section.labor_cost, 0);
+    return sections.reduce((sum, section) => sum + toNumber(section.labor_cost, 0), 0);
   };
 
   const getTotalTax = () => {
