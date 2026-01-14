@@ -489,7 +489,7 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
                                 <Input value={row.description} onChange={e => updateItem(section.id, subsection.id, row.id, 'description', e.target.value)} placeholder="Describe item" />
                               </TableCell>
                               <TableCell>
-                                <Input type="number" min={0} value={row.quantity || ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', e.target.value === '' ? '' : Number(e.target.value))} />
+                                <Input type="number" min={0} value={row.quantity ?? ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', e.target.value === '' ? '' : Number(e.target.value))} />
                               </TableCell>
                               <TableCell>
                                 <Select value={row.unit} onValueChange={(val) => {
@@ -519,7 +519,7 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
                                 }} />
                               </TableCell>
                               <TableCell>
-                                <Input type="number" min={0} value={row.rate || ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', e.target.value === '' ? '' : Number(e.target.value))} />
+                                <Input type="number" min={0} value={row.rate ?? ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', e.target.value === '' ? '' : Number(e.target.value))} />
                               </TableCell>
                               <TableCell className="text-right">
                                 {formatCurrency((row.quantity === '' ? 0 : Number(row.quantity)) * (row.rate === '' ? 0 : Number(row.rate)))}
