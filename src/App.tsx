@@ -43,9 +43,6 @@ const OptimizedInventory = lazy(() => import("./pages/OptimizedInventory"));
 const PerformanceOptimizerPage = lazy(() => import("./pages/PerformanceOptimizerPage"));
 const OptimizedCustomers = lazy(() => import("./pages/OptimizedCustomers"));
 const CustomerPerformanceOptimizerPage = lazy(() => import("./pages/CustomerPerformanceOptimizerPage"));
-const SetupAndTest = lazy(() => import("./components/SetupAndTest"));
-const AuthTest = lazy(() => import("./components/AuthTest"));
-const AdminRecreate = lazy(() => import("./pages/AdminRecreate"));
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const DatabaseFix = lazy(() => import("./pages/DatabaseFix"));
 
@@ -374,25 +371,7 @@ const App = () => {
             }
           />
 
-          <Route
-            path="/setup-test"
-            element={
-              <ProtectedRoute>
-                <SetupAndTest />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Authentication Test - No protection needed */}
-          <Route path="/auth-test" element={<AuthTest />} />
-
           {/* Database Fix - No protection needed (for troubleshooting) */}
-          <Route path="/database-fix" element={<DatabaseFix />} />
-
-          {/* Admin recreate (one-time utility) - No protection needed */}
-          <Route path="/admin-recreate" element={<AdminRecreate />} />
-
-          {/* Database Fix - No protection needed for setup */}
           <Route path="/database-fix" element={<DatabaseFix />} />
 
           {/* Audit Logs */}

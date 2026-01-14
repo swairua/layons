@@ -36,7 +36,6 @@ import { downloadLPOPDF } from '@/utils/pdfGenerator';
 import { CreateLPOModal } from '@/components/lpo/CreateLPOModal';
 import { ViewLPOModal } from '@/components/lpo/ViewLPOModal';
 import { EditLPOModal } from '@/components/lpo/EditLPOModal';
-import { DatabaseAuditPanel } from '@/components/DatabaseAuditPanel';
 import { DirectForceMigration } from '@/components/DirectForceMigration';
 import { LPOCustomerSupplierAudit } from '@/components/LPOCustomerSupplierAudit';
 
@@ -46,7 +45,6 @@ export default function LPOs() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedLPO, setSelectedLPO] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showAuditPanel, setShowAuditPanel] = useState(false);
   const [showCustomerSupplierAudit, setShowCustomerSupplierAudit] = useState(false);
 
   // Database hooks
@@ -254,11 +252,6 @@ export default function LPOs() {
           New LPO
         </Button>
       </div>
-
-      {/* Database Audit Panel */}
-      {showAuditPanel && (
-        <DatabaseAuditPanel />
-      )}
 
       {/* Customer vs Supplier Audit Panel */}
       {showCustomerSupplierAudit && (
