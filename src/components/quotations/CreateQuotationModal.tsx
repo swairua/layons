@@ -434,7 +434,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
             tax_inclusive: item.vat_inclusive || false,
             line_total: item.line_total,
             section_name: section.name,
-            section_labor_cost: section.labor_cost,
+            section_labor_cost: toNumber(section.labor_cost, 0),
             sort_order: sectionIndex,
             unit_of_measure: item.unit_of_measure || 'Each'
           };
