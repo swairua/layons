@@ -41,7 +41,17 @@ interface CreateCustomerModalProps {
 }
 
 export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCustomerModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    city: string;
+    country: string;
+    credit_limit: number | '';
+    payment_terms: number | '';
+    is_active: boolean;
+  }>({
     name: '',
     email: '',
     phone: '',
