@@ -1893,12 +1893,16 @@ export const useDeleteInvoice = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('invoices')
-        .delete()
-        .eq('id', id);
-      if (error) {
+      // Import the handler that will deal with BOQ reversal and inventory
+      const { handleInvoiceDelete } = await import('@/utils/handleInvoiceDelete');
+
+      try {
+        const result = await handleInvoiceDelete(id);
+        console.log('✅ Invoice deletion completed:', result);
+        return result;
+      } catch (err) {
         // Check if this is an RLS policy issue
+        const error = err as any;
         const fullError = JSON.stringify(error);
         const msgLower = (error?.message || '').toLowerCase();
 
@@ -1922,6 +1926,8 @@ export const useDeleteInvoice = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices_fixed'] });
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['boqs'] });
+      queryClient.invalidateQueries({ queryKey: ['stock_movements'] });
     },
   });
 };

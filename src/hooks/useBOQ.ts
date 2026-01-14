@@ -386,7 +386,8 @@ export const useConvertBoqToInvoice = () => {
         .from('boqs')
         .update({
           converted_to_invoice_id: invoice.id,
-          converted_at: new Date().toISOString()
+          converted_at: new Date().toISOString(),
+          status: 'converted'
         })
         .eq('id', boqId)
         .eq('company_id', companyId);
