@@ -33,10 +33,20 @@ import { ViewQuotationModal } from '@/components/quotations/ViewQuotationModal';
 import { EditQuotationModal } from '@/components/quotations/EditQuotationModal';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 
-// Lazy load to avoid circular dependencies
-const getPDFDownloader = async () => {
-  const module = await import('@/utils/pdfGenerator');
-  return module.downloadQuotationPDF;
+let downloadQuotationPDF: any = null;
+
+// Lazy load PDF generator on first use to avoid module loading issues
+const getDownloadPDFFunction = async () => {
+  if (!downloadQuotationPDF) {
+    try {
+      const module = await import('@/utils/pdfGenerator');
+      downloadQuotationPDF = module.downloadQuotationPDF;
+    } catch (error) {
+      console.error('Failed to load PDF generator:', error);
+      throw new Error('PDF generation module failed to load');
+    }
+  }
+  return downloadQuotationPDF;
 };
 
 interface Quotation {
