@@ -328,40 +328,59 @@ export const useConvertBoqToInvoice = () => {
 
       // Create invoice items with proper validation
       if (invoiceItems.length > 0) {
-        const itemsToInsert = invoiceItems.map((item, index) => {
-          // Validate item data
-          if (!item.description || item.description.trim() === '') {
-            throw new Error(`Item ${index + 1} has missing description`);
+        try {
+          const itemsToInsert = invoiceItems.map((item, index) => {
+            // Validate item data
+            if (!item.description || item.description.trim() === '') {
+              throw new Error(`Item ${index + 1} has missing description`);
+            }
+
+            return {
+              invoice_id: invoice.id,
+              product_id: null, // BOQ items don't map to products
+              description: item.description,
+              quantity: item.quantity,
+              unit_price: item.unit_price,
+              line_total: item.line_total,
+              unit_of_measure: item.unit_of_measure,
+              section_name: item.section_name || 'General',
+              sort_order: index,
+              tax_percentage: 0,
+              tax_amount: 0,
+              tax_inclusive: false,
+              discount_percentage: 0,
+              discount_before_vat: false
+            };
+          });
+
+          const { error: itemsError } = await supabase
+            .from('invoice_items')
+            .insert(itemsToInsert);
+
+          if (itemsError) {
+            // Try to clean up the invoice if items insertion fails
+            console.error('Invoice items creation failed, attempting cleanup...');
+            await supabase.from('invoices').delete().eq('id', invoice.id).catch((cleanupErr) => {
+              console.error('Failed to clean up invoice after items error:', cleanupErr);
+            });
+
+            const errorMsg = itemsError?.message || itemsError?.details || JSON.stringify(itemsError);
+            console.error('Invoice items creation error:', {
+              itemsError,
+              itemCount: itemsToInsert.length,
+              invoice_id: invoice.id
+            });
+
+            if (errorMsg.includes('row level security') || errorMsg.includes('permission')) {
+              throw new Error(`Cannot create invoice items: Permission denied (RLS policy). Please check your database configuration.`);
+            } else {
+              throw new Error(`Failed to create invoice items: ${errorMsg}`);
+            }
           }
-
-          return {
-            invoice_id: invoice.id,
-            product_id: null, // BOQ items don't map to products
-            description: item.description,
-            quantity: item.quantity,
-            unit_price: item.unit_price,
-            line_total: item.line_total,
-            unit_of_measure: item.unit_of_measure,
-            section_name: item.section_name || 'General',
-            sort_order: index,
-            tax_percentage: 0,
-            tax_amount: 0,
-            tax_inclusive: false,
-            discount_percentage: 0,
-            discount_before_vat: false
-          };
-        });
-
-        const { error: itemsError } = await supabase
-          .from('invoice_items')
-          .insert(itemsToInsert);
-
-        if (itemsError) {
-          // Try to clean up the invoice if items insertion fails
-          await supabase.from('invoices').delete().eq('id', invoice.id).catch(() => {});
-          const errorMsg = itemsError?.message || itemsError?.details || JSON.stringify(itemsError);
-          console.error('Invoice items creation error:', { itemsError, itemCount: itemsToInsert.length });
-          throw new Error(`Failed to create invoice items: ${errorMsg}`);
+        } catch (err) {
+          const errorMsg = err instanceof Error ? err.message : String(err);
+          console.error('Invoice items operation error:', errorMsg);
+          throw err;
         }
       }
 
