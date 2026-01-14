@@ -339,7 +339,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
   };
 
   const calculateSectionTotalWithLabor = (section: InvoiceSection) => {
-    return calculateSectionMaterialsTotal(section) + section.labor_cost;
+    return calculateSectionMaterialsTotal(section) + toNumber(section.labor_cost, 0);
   };
 
   const calculateGrandTotal = () => {
