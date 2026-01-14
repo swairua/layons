@@ -23,6 +23,7 @@ import {
 import { toast } from 'sonner';
 import { useRestockProduct } from '@/hooks/useQuotationItems';
 import { useCompanies } from '@/hooks/useDatabase';
+import { toNumber, toInteger } from '@/utils/numericFormHelpers';
 
 interface RestockItemModalProps {
   open: boolean;
