@@ -331,8 +331,8 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
                 <h4 className="font-medium mb-2">Customer Preview</h4>
                 <div className="space-y-1 text-sm text-muted-foreground">
                   <p>Code: {generateCustomerCode()}</p>
-                  <p>Credit Limit: KES {formData.credit_limit.toLocaleString()}</p>
-                  <p>Payment Terms: {formData.payment_terms === '' ? '0 (cash)' : `${formData.payment_terms} days`}</p>
+                  <p>Credit Limit: KES {toNumber(formData.credit_limit, 0).toLocaleString()}</p>
+                  <p>Payment Terms: {toInteger(formData.payment_terms, 0) === 0 ? '0 (cash)' : `${toInteger(formData.payment_terms, 0)} days`}</p>
                   <p>Status: {formData.is_active ? 'Active' : 'Inactive'}</p>
                 </div>
               </div>
