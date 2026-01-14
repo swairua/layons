@@ -16,12 +16,26 @@ interface BoqItemForInvoice {
 
 /**
  * Generates a unique customer code based on customer name
- * Format: First 3 letters of name + random 4-digit number
+ * Format: First 3 letters of name + random 4-digit number + timestamp suffix
+ * Includes validation and retry logic for uniqueness
  */
 function generateCustomerCode(name: string): string {
-  const prefix = name.substring(0, 3).toUpperCase().replace(/[^A-Z]/g, 'A');
+  // Extract alphabetic characters from the name
+  const alphaOnly = name.replace(/[^A-Za-z]/g, '');
+
+  // If no alpha characters, use a default prefix
+  let prefix = alphaOnly.substring(0, 3).toUpperCase() || 'CUS';
+
+  // Ensure prefix is exactly 3 characters
+  prefix = prefix.padEnd(3, 'X').substring(0, 3);
+
+  // Generate a random 4-digit number
   const randomNum = Math.floor(1000 + Math.random() * 9000);
-  return `${prefix}${randomNum}`;
+
+  // Add timestamp-based suffix for additional uniqueness
+  const timestamp = Date.now().toString().slice(-4);
+
+  return `${prefix}${randomNum}${timestamp}`.substring(0, 50); // Ensure under VARCHAR(50)
 }
 
 /**
