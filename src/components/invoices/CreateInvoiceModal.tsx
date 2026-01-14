@@ -37,6 +37,7 @@ import { useCreateInvoiceWithItems } from '@/hooks/useQuotationItems';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { CURRENCY_SELECT_OPTIONS } from '@/utils/getCurrencySelectOptions';
+import { toNumber, toInteger } from '@/utils/numericFormHelpers';
 
 interface InvoiceItem {
   id: string;
