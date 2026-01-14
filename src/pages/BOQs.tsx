@@ -25,6 +25,7 @@ export default function BOQs() {
   const [percentageCopyOpen, setPercentageCopyOpen] = useState(false);
   const [percentageRateOpen, setPercentageRateOpen] = useState(false);
   const [percentageRateBoq, setPercentageRateBoq] = useState<any | null>(null);
+  const [schemaError, setSchemaError] = useState(false);
   const { currentCompany } = useCurrentCompany();
   const companyId = currentCompany?.id;
   const { data: boqs = [], isLoading, refetch: refetchBOQs } = useBOQs(companyId);
