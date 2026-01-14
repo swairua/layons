@@ -649,7 +649,12 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
 
                   {searchProduct && (
                     <div className="max-h-64 overflow-y-auto border rounded-lg">
-                      {loadingProducts ? (
+                      {sections.length === 0 ? (
+                        <div className="p-4 text-center text-amber-600 bg-amber-50 border-t">
+                          <div className="font-medium mb-1">No sections yet</div>
+                          <div className="text-sm">Create a section below before adding products</div>
+                        </div>
+                      ) : loadingProducts ? (
                         <div className="p-4 text-center text-muted-foreground">Loading products...</div>
                       ) : filteredProducts.length === 0 ? (
                         <div className="p-4 text-center text-muted-foreground">No products found</div>
@@ -657,7 +662,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                         filteredProducts.map((product) => (
                           <div
                             key={product.id}
-                            className="p-3 hover:bg-muted/50 cursor-pointer border-b last:border-b-0 transition-smooth"
+                            className="p-3 hover:bg-muted/50 border-b last:border-b-0 transition-smooth"
                           >
                             <div className="flex justify-between items-start">
                               <div>
