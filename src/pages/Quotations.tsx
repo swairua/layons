@@ -1,4 +1,4 @@
-import { useEffect, useState, Suspense, lazy } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -33,8 +33,11 @@ import { ViewQuotationModal } from '@/components/quotations/ViewQuotationModal';
 import { EditQuotationModal } from '@/components/quotations/EditQuotationModal';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 
-// Lazy load the PDF generator to avoid module loading issues
-const downloadQuotationPDFModule = lazy(() => import('@/utils/pdfGenerator').then(m => ({ default: m.downloadQuotationPDF })));
+// Lazy load to avoid circular dependencies
+const getPDFDownloader = async () => {
+  const module = await import('@/utils/pdfGenerator');
+  return module.downloadQuotationPDF;
+};
 
 interface Quotation {
   id: string;
