@@ -346,9 +346,9 @@ export function StockAdjustmentModal({ open, onOpenChange, onSuccess, item }: St
           <Button variant="outline" onClick={handleClose} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={isSubmitting || quantity <= 0 || !reason}
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting || toInteger(quantity, 0) <= 0 || !reason}
             className="min-w-[120px]"
           >
             {isSubmitting ? 'Processing...' : 'Apply Adjustment'}
