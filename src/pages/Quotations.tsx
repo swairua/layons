@@ -104,7 +104,10 @@ export default function Quotations() {
   const handleDeleteConfirm = async () => {
     if (!deleteDialog.quotation) return;
     try {
-      await deleteQuotation.mutateAsync(deleteDialog.quotation.id);
+      await deleteQuotation.mutateAsync({
+        id: deleteDialog.quotation.id,
+        companyId: currentCompany?.id || ''
+      });
       toast.success('Quotation deleted successfully');
       refetch();
       setDeleteDialog({ open: false });
