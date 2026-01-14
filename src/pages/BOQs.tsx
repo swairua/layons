@@ -159,7 +159,11 @@ export default function BOQs() {
 
       setConvertDialog({ open: false });
       // Refetch to update the BOQ list and show converted status
-      setTimeout(() => refetchBOQs(), 500);
+      // Wait for mutation's onSuccess to invalidate cache, then refetch
+      setTimeout(() => {
+        console.log('🔄 Refetching BOQs after conversion');
+        refetchBOQs();
+      }, 1000);
     } catch (err) {
       console.error('BOQ conversion failed:', err);
 
