@@ -137,13 +137,14 @@ export function StockAdjustmentModal({ open, onOpenChange, onSuccess, item }: St
 
   const getNewQuantity = () => {
     if (!item) return 0;
+    const numQuantity = toInteger(quantity, 0);
     switch (adjustmentType) {
       case 'increase':
-        return item.stock_quantity + quantity;
+        return item.stock_quantity + numQuantity;
       case 'decrease':
-        return Math.max(0, item.stock_quantity - quantity);
+        return Math.max(0, item.stock_quantity - numQuantity);
       case 'set':
-        return quantity;
+        return numQuantity;
       default:
         return item.stock_quantity;
     }
