@@ -202,7 +202,7 @@ export function RestockItemModal({ open, onOpenChange, onSuccess, item }: Restoc
                 <Input
                   id="quantity"
                   type="number"
-                  value={restockData.quantity || ''}
+                  value={restockData.quantity ?? ''}
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value === '') {
@@ -233,7 +233,7 @@ export function RestockItemModal({ open, onOpenChange, onSuccess, item }: Restoc
                 <Input
                   id="cost_per_unit"
                   type="number"
-                  value={restockData.cost_per_unit || ''}
+                  value={restockData.cost_per_unit ?? ''}
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value === '') {
