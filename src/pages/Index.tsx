@@ -1,14 +1,7 @@
 import { DashboardStats } from '@/components/dashboard/DashboardStats';
 import { RecentActivity } from '@/components/dashboard/RecentActivity';
 import { QuickActions } from '@/components/dashboard/QuickActions';
-import { AuthPerformanceTest } from '@/components/auth/AuthPerformanceTest';
-import { Button } from '@/components/ui/button';
-import { FileText, BarChart3 } from 'lucide-react';
-import { DatabaseStatusBanner } from '@/components/DatabaseStatusBanner';
-import { downloadQuotationPDF } from '@/utils/pdfGenerator';
-import { useQuotations, useCompanies } from '@/hooks/useDatabase';
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { useCompanies } from '@/hooks/useDatabase';
 
 const Index = () => {
   const { data: companies } = useCompanies();
