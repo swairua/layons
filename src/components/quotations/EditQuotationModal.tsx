@@ -36,6 +36,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { CURRENCY_SELECT_OPTIONS } from '@/utils/getCurrencySelectOptions';
+import { toNumber, toInteger } from '@/utils/numericFormHelpers';
 
 interface QuotationItem {
   id: string;
