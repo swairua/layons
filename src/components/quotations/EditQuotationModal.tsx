@@ -482,7 +482,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
           tax_inclusive: item.tax_inclusive || false,
           line_total: item.line_total || 0,
           section_name: section.name,
-          section_labor_cost: section.labor_cost,
+          section_labor_cost: toNumber(section.labor_cost, 0),
           sort_order: sectionIndex * 100 + itemIndex,
           unit_of_measure: item.unit_of_measure || 'Each'
         }))
