@@ -259,7 +259,11 @@ export function CreateCreditNoteModal({
     }).format(amount);
   };
 
-  const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+  const subtotal = items.reduce((sum, item) => {
+    const qty = item.quantity === '' ? 0 : Number(item.quantity);
+    const price = item.unit_price === '' ? 0 : Number(item.unit_price);
+    return sum + (qty * price);
+  }, 0);
   const taxAmount = items.reduce((sum, item) => sum + (item.tax_amount || 0), 0);
   const totalAmount = items.reduce((sum, item) => sum + item.line_total, 0);
 
