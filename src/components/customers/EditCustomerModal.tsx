@@ -21,7 +21,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { CountrySelect } from '@/components/ui/country-select';
-import { 
+import {
   User,
   Mail,
   Phone,
@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUpdateCustomer } from '@/hooks/useDatabase';
+import { toNumber, toInteger } from '@/utils/numericFormHelpers';
 
 interface Customer {
   id: string;
