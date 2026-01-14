@@ -807,8 +807,24 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                     <TableCell>
                                       <Input
                                         type="number"
-                                        value={item.quantity}
-                                        onChange={(e) => updateItemQuantity(section.id, item.id, parseInt(e.target.value) || 0)}
+                                        value={item.quantity || ''}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            // Don't update on empty, wait for blur
+                                          } else {
+                                            const num = parseInt(value);
+                                            if (!isNaN(num) && num > 0) {
+                                              updateItemQuantity(section.id, item.id, num);
+                                            }
+                                          }
+                                        }}
+                                        onBlur={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '' || parseInt(value) <= 0) {
+                                            updateItemQuantity(section.id, item.id, 1);
+                                          }
+                                        }}
                                         className="w-16 h-8"
                                         min="1"
                                         placeholder="1"
