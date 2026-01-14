@@ -795,20 +795,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                         value={item.quantity || ''}
                                         onChange={(e) => {
                                           const value = e.target.value;
-                                          if (value === '') {
-                                            // Don't update on empty, wait for blur
-                                          } else {
-                                            const num = parseInt(value);
-                                            if (!isNaN(num) && num > 0) {
-                                              updateItemQuantity(section.id, item.id, num);
-                                            }
-                                          }
-                                        }}
-                                        onBlur={(e) => {
-                                          const value = e.target.value;
-                                          if (value === '' || parseInt(value) <= 0) {
-                                            updateItemQuantity(section.id, item.id, 1);
-                                          }
+                                          updateItemQuantity(section.id, item.id, value === '' ? '' : parseInt(value) || 0);
                                         }}
                                         className="w-16 h-8"
                                         min="1"
