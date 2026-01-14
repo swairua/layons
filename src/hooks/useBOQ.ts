@@ -139,6 +139,7 @@ export const useConvertBoqToInvoice = () => {
 
       // Check if customer exists or create a new one
       let customerId: string | null = null;
+      let customerCreationError: string | null = null;
 
       if (customerData?.name) {
         // Try to find existing customer by name and company - use limit without .single() to handle no results
@@ -152,34 +153,66 @@ export const useConvertBoqToInvoice = () => {
         if (existingCustomers && existingCustomers.length > 0) {
           customerId = existingCustomers[0].id;
         } else if (!searchError) {
-          // No customer found, create a new one
-          const customerPayload = {
-            company_id: boq.company_id,
-            name: customerData.name,
-            customer_code: generateCustomerCode(customerData.name),
-            email: customerData.email || null,
-            phone: customerData.phone || null,
-            address: customerData.address || null,
-            city: customerData.city || null,
-            country: customerData.country || null,
-            is_active: true
-          };
+          // No customer found, create a new one - with retry logic for code conflicts
+          let customerCreated = false;
+          let retryCount = 0;
+          const maxRetries = 3;
 
-          const { data: newCustomer, error: customerError } = await supabase
-            .from('customers')
-            .insert([customerPayload])
-            .select()
-            .single();
+          while (!customerCreated && retryCount < maxRetries) {
+            try {
+              const customerPayload = {
+                company_id: boq.company_id,
+                name: customerData.name,
+                customer_code: generateCustomerCode(customerData.name),
+                email: customerData.email || null,
+                phone: customerData.phone || null,
+                address: customerData.address || null,
+                city: customerData.city || null,
+                country: customerData.country || null,
+                is_active: true
+              };
 
-          if (customerError) {
-            // Log but continue - invoice can be created without customer
-            console.warn('Could not create customer from BOQ data:', customerError);
-          } else if (newCustomer) {
-            customerId = newCustomer.id;
+              // Validate customer code is not empty
+              if (!customerPayload.customer_code || customerPayload.customer_code.trim() === '') {
+                throw new Error('Failed to generate valid customer code');
+              }
+
+              const { data: newCustomer, error: customerError } = await supabase
+                .from('customers')
+                .insert([customerPayload])
+                .select()
+                .single();
+
+              if (customerError) {
+                // Check if it's a unique constraint violation (code already exists)
+                if (customerError.message?.includes('duplicate key') || customerError.message?.includes('unique constraint')) {
+                  retryCount++;
+                  if (retryCount >= maxRetries) {
+                    customerCreationError = `Could not create unique customer code after ${maxRetries} attempts: ${customerError.message}`;
+                    console.warn('Customer code conflict - invoice will be created without customer:', customerCreationError);
+                  }
+                  // Retry with a new code
+                  continue;
+                } else {
+                  // Other error (RLS, permission, etc.)
+                  customerCreationError = customerError.message || JSON.stringify(customerError);
+                  console.warn('Could not create customer from BOQ data:', customerCreationError);
+                  break;
+                }
+              } else if (newCustomer) {
+                customerId = newCustomer.id;
+                customerCreated = true;
+              }
+            } catch (err) {
+              customerCreationError = err instanceof Error ? err.message : String(err);
+              console.warn('Error during customer creation:', customerCreationError);
+              break;
+            }
           }
         } else {
           // Unexpected error searching for customer
-          console.warn('Error searching for existing customer:', searchError);
+          customerCreationError = searchError?.message || JSON.stringify(searchError);
+          console.warn('Error searching for existing customer:', customerCreationError);
         }
       }
 
