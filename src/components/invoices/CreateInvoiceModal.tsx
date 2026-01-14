@@ -219,8 +219,9 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
     setSearchProduct('');
   };
 
-  const updateItemQuantity = (sectionId: string, itemId: string, quantity: number) => {
-    if (quantity <= 0) {
+  const updateItemQuantity = (sectionId: string, itemId: string, quantity: number | '') => {
+    const numQuantity = quantity === '' ? 0 : Number(quantity);
+    if (numQuantity < 0) {
       removeItem(sectionId, itemId);
       return;
     }
@@ -232,8 +233,10 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(quantity, item.unit_price, item.tax_percentage, item.tax_inclusive);
-            const taxAmount = calculateTaxAmount({ ...item, quantity });
+            const price = item.unit_price === '' ? 0 : Number(item.unit_price);
+            const tax = item.tax_percentage === '' ? 0 : Number(item.tax_percentage);
+            const lineTotal = calculateItemTotal(numQuantity, price, tax, item.tax_inclusive);
+            const taxAmount = calculateTaxAmount({ ...item, quantity: numQuantity });
             return { ...item, quantity, line_total: lineTotal, tax_amount: taxAmount };
           }
           return item;
@@ -242,7 +245,8 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
     }));
   };
 
-  const updateItemPrice = (sectionId: string, itemId: string, unitPrice: number) => {
+  const updateItemPrice = (sectionId: string, itemId: string, unitPrice: number | '') => {
+    const numPrice = unitPrice === '' ? 0 : Number(unitPrice);
     setSections(sections.map(section => {
       if (section.id !== sectionId) return section;
 
@@ -250,8 +254,10 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(item.quantity, unitPrice, item.tax_percentage, item.tax_inclusive);
-            const taxAmount = calculateTaxAmount({ ...item, unit_price: unitPrice });
+            const qty = item.quantity === '' ? 0 : Number(item.quantity);
+            const tax = item.tax_percentage === '' ? 0 : Number(item.tax_percentage);
+            const lineTotal = calculateItemTotal(qty, numPrice, tax, item.tax_inclusive);
+            const taxAmount = calculateTaxAmount({ ...item, unit_price: numPrice });
             return { ...item, unit_price: unitPrice, line_total: lineTotal, tax_amount: taxAmount };
           }
           return item;
@@ -260,7 +266,8 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
     }));
   };
 
-  const updateItemTax = (sectionId: string, itemId: string, taxPercentage: number) => {
+  const updateItemTax = (sectionId: string, itemId: string, taxPercentage: number | '') => {
+    const numTax = taxPercentage === '' ? 0 : Number(taxPercentage);
     setSections(sections.map(section => {
       if (section.id !== sectionId) return section;
 
@@ -268,8 +275,10 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, taxPercentage, item.tax_inclusive);
-            const taxAmount = calculateTaxAmount({ ...item, tax_percentage: taxPercentage });
+            const qty = item.quantity === '' ? 0 : Number(item.quantity);
+            const price = item.unit_price === '' ? 0 : Number(item.unit_price);
+            const lineTotal = calculateItemTotal(qty, price, numTax, item.tax_inclusive);
+            const taxAmount = calculateTaxAmount({ ...item, tax_percentage: numTax });
             return { ...item, tax_percentage: taxPercentage, line_total: lineTotal, tax_amount: taxAmount };
           }
           return item;
