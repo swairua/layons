@@ -166,7 +166,8 @@ export const useConvertBoqToInvoice = () => {
       });
 
       if (invoiceNumberError) {
-        throw new Error(`Failed to generate invoice number: ${invoiceNumberError.message}`);
+        const errorMsg = invoiceNumberError?.message || invoiceNumberError?.details || JSON.stringify(invoiceNumberError);
+        throw new Error(`Failed to generate invoice number: ${errorMsg}`);
       }
 
       if (!invoiceNumber) throw new Error('Failed to generate invoice number: empty response');
