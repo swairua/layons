@@ -318,31 +318,43 @@ export const CreateDeliveryNoteModal = ({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="invoice_id">Related Invoice *</Label>
+              <Label htmlFor="invoice_id">Related Invoice * <span className="text-destructive">(Required)</span></Label>
               <Select value={formData.invoice_id} onValueChange={(value) => {
                 setFormData(prev => ({ ...prev, invoice_id: value }));
                 if (value) {
-                  toast.info('Loading items from selected invoice...');
+                  const selectedInv = invoices?.find(inv => inv.id === value);
+                  if (selectedInv) {
+                    toast.success(`Selected invoice ${selectedInv.invoice_number} - loading items...`);
+                  }
                 }
               }}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select invoice to load items" />
+                  <SelectValue placeholder={invoices && invoices.length > 0 ? "Select invoice to load items" : "No invoices available"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {invoices?.filter(inv => !formData.customer_id || inv.customer_id === formData.customer_id)
-                    .map((invoice) => (
-                    <SelectItem key={invoice.id} value={invoice.id}>
-                      {invoice.invoice_number} - ${invoice.total_amount?.toFixed(2)}
-                      {invoice.invoice_items && invoice.invoice_items.length > 0 ?
-                        ` (${invoice.invoice_items.length} items)` :
-                        ' (no items)'
-                      }
-                    </SelectItem>
-                  ))}
+                  {(!invoices || invoices.length === 0) ? (
+                    <div className="p-2 text-sm text-muted-foreground">
+                      No invoices available. Create an invoice first.
+                    </div>
+                  ) : (
+                    invoices.filter(inv => !formData.customer_id || inv.customer_id === formData.customer_id)
+                      .map((invoice) => (
+                      <SelectItem key={invoice.id} value={invoice.id}>
+                        {invoice.invoice_number} - {new Intl.NumberFormat('en-KE', { style: 'currency', currency: invoice.currency || 'KES' }).format(invoice.total_amount?.toFixed(2) || 0)}
+                        {invoice.invoice_items && invoice.invoice_items.length > 0 ?
+                          ` (${invoice.invoice_items.length} items)` :
+                          ' (no items)'
+                        }
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
               {formData.invoice_id && (
-                <p className="text-xs text-success">✅ Invoice selected - items will be auto-populated</p>
+                <p className="text-xs text-success">✅ Invoice selected - items auto-populated from invoice</p>
+              )}
+              {!formData.invoice_id && (
+                <p className="text-xs text-muted-foreground">Select an invoice to automatically load its items</p>
               )}
             </div>
           </div>
