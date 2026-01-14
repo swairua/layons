@@ -289,19 +289,42 @@ export const useConvertBoqToInvoice = () => {
         paid_amount: 0
       };
 
-      const { data: invoice, error: invoiceError } = await supabase
-        .from('invoices')
-        .insert([invoiceData])
-        .select()
-        .single();
+      let invoice;
+      try {
+        const { data: createdInvoice, error: invoiceError } = await supabase
+          .from('invoices')
+          .insert([invoiceData])
+          .select()
+          .single();
 
-      if (invoiceError) {
-        const errorMsg = invoiceError?.message || invoiceError?.details || JSON.stringify(invoiceError);
-        console.error('Invoice creation error:', { invoiceError, invoiceData });
-        throw new Error(`Failed to create invoice: ${errorMsg}`);
+        if (invoiceError) {
+          const errorMsg = invoiceError?.message || invoiceError?.details || JSON.stringify(invoiceError);
+          console.error('Invoice creation error:', {
+            error: invoiceError,
+            invoiceData,
+            company_id: boq.company_id,
+            customer_id: invoiceData.customer_id,
+            customer_error: customerCreationError
+          });
+
+          // Provide specific error messages based on the error type
+          if (errorMsg.includes('row level security') || errorMsg.includes('violates') || errorMsg.includes('permission')) {
+            throw new Error(`Invoice creation blocked: ${errorMsg}. This may be a permissions issue. Please try again or contact support.`);
+          } else {
+            throw new Error(`Failed to create invoice: ${errorMsg}`);
+          }
+        }
+
+        if (!createdInvoice) {
+          throw new Error('Invoice creation returned empty result');
+        }
+
+        invoice = createdInvoice;
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        console.error('Invoice creation failed:', errorMsg);
+        throw err;
       }
-
-      if (!invoice) throw new Error('Invoice creation returned empty result');
 
       // Create invoice items with proper validation
       if (invoiceItems.length > 0) {
