@@ -1866,7 +1866,8 @@ export const useDeleteQuotation = () => {
           const { error: updateError } = await supabase
             .from('quotations')
             .update({ status: 'deleted' })
-            .eq('id', id);
+            .eq('id', id)
+            .eq('company_id', companyId);
 
           if (updateError) {
             // If update also fails, throw an error with the proper message
