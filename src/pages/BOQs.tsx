@@ -175,6 +175,16 @@ export default function BOQs() {
       if (err instanceof Error) {
         errorMessage = err.message;
 
+        // Check for schema cache error (missing converted_at column)
+        if (errorMessage.includes('converted_at') && errorMessage.includes('schema cache')) {
+          setSchemaError(true);
+          toast.error('Schema Error', {
+            description: 'The database schema needs to be updated. Please use the fix guide below.',
+            duration: 8000
+          });
+          return;
+        }
+
         // Provide specific guidance based on error type
         if (errorMessage.includes('BOQ has no sections')) {
           errorTitle = 'Empty BOQ';
