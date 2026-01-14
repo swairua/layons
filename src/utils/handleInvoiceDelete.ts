@@ -42,6 +42,31 @@ export async function handleInvoiceDelete(invoiceId: string) {
       console.warn('⚠️ Error checking for related BOQ:', boqError);
     }
 
+    // Step 1.5: Delete all delivery notes related to this invoice
+    const { data: deliveryNotes, error: deliveryError } = await supabase
+      .from('delivery_notes')
+      .select('id')
+      .eq('invoice_id', invoiceId);
+
+    if (deliveryNotes && deliveryNotes.length > 0) {
+      console.log('🚚 Found', deliveryNotes.length, 'delivery notes to delete');
+
+      // Delete delivery notes (delivery_note_items will cascade delete)
+      const { error: deleteDeliveryError } = await supabase
+        .from('delivery_notes')
+        .delete()
+        .eq('invoice_id', invoiceId);
+
+      if (deleteDeliveryError) {
+        console.error('⚠️ Failed to delete delivery notes:', deleteDeliveryError);
+        throw new Error(`Failed to delete delivery notes: ${deleteDeliveryError.message}`);
+      }
+
+      console.log('✅ Delivery notes deleted');
+    } else if (deliveryError && deliveryError.code !== 'PGRST116') {
+      console.warn('⚠️ Error checking for related delivery notes:', deliveryError);
+    }
+
     // Step 2: Find and reverse all stock movements for this invoice
     const { data: stockMovements, error: stockError } = await supabase
       .from('stock_movements')
