@@ -91,12 +91,13 @@ export const useConvertBoqToInvoice = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (boqId: string) => {
+    mutationFn: async ({ boqId, companyId }: { boqId: string; companyId: string }) => {
       // Get BOQ data
       const { data: boq, error: boqError } = await supabase
         .from('boqs')
         .select('*')
         .eq('id', boqId)
+        .eq('company_id', companyId)
         .single();
 
       if (boqError) throw boqError;
