@@ -492,36 +492,49 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
       console.error('Error details:', JSON.stringify(error, null, 2));
 
       let errorMessage = 'Unknown error occurred';
+      let fullErrorDetail = '';
 
       if (error instanceof Error) {
         errorMessage = error.message;
+        fullErrorDetail = error.message;
       } else if (error && typeof error === 'object') {
         const supabaseError = error as any;
         if (supabaseError.message) {
           errorMessage = supabaseError.message;
+          fullErrorDetail = supabaseError.message;
         } else if (supabaseError.details) {
           errorMessage = supabaseError.details;
+          fullErrorDetail = supabaseError.details;
         } else if (supabaseError.hint) {
           errorMessage = supabaseError.hint;
+          fullErrorDetail = `${supabaseError.message || ''} - ${supabaseError.hint}`;
         } else if (supabaseError.error?.message) {
           errorMessage = supabaseError.error.message;
+          fullErrorDetail = supabaseError.error.message;
         } else if (supabaseError.statusText) {
           errorMessage = supabaseError.statusText;
+          fullErrorDetail = supabaseError.statusText;
         } else if (supabaseError.data?.message) {
           errorMessage = supabaseError.data.message;
+          fullErrorDetail = supabaseError.data.message;
         } else {
           const errorStr = JSON.stringify(error);
-          if (errorStr.length > 50) {
-            errorMessage = 'Database operation failed. Please check your data and try again.';
+          if (errorStr.length > 200) {
+            errorMessage = 'Database operation failed. See console for details.';
+            fullErrorDetail = errorStr.substring(0, 500);
           } else {
             errorMessage = errorStr;
+            fullErrorDetail = errorStr;
           }
         }
       } else if (typeof error === 'string') {
         errorMessage = error;
+        fullErrorDetail = error;
       }
 
-      toast.error(`Failed to create quotation: ${errorMessage}`);
+      // Show detailed error message
+      const detailedMessage = fullErrorDetail ? `Failed to create quotation:\n\n${fullErrorDetail}` : `Failed to create quotation: ${errorMessage}`;
+      toast.error(detailedMessage, { duration: 5000 });
     } finally {
       setIsSubmitting(false);
     }
