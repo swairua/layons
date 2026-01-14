@@ -143,9 +143,11 @@ export async function handleInvoiceDelete(invoiceId: string) {
       invoiceDeleted: true,
       boqReversed: boqWasReversed,
       inventoryReversed: inventoryReversed,
+      deliveryNotesDeleted: (deliveryNotes?.length || 0) > 0,
       stockMovementsReverted: stockMovements?.length || 0,
       message: [
         'Invoice deleted successfully',
+        (deliveryNotes?.length || 0) > 0 ? `✅ ${deliveryNotes?.length || 0} delivery notes deleted` : null,
         boqWasReversed ? '✅ BOQ status reversed to draft' : null,
         inventoryReversed ? `✅ ${stockMovements?.length || 0} inventory movements reversed` : null
       ]
