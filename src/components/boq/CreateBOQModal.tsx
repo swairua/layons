@@ -39,9 +39,9 @@ interface CreateBOQModalProps {
 interface BOQItemRow {
   id: string;
   description: string;
-  quantity: number;
+  quantity: number | '';
   unit: string; // will store unit id
-  rate: number;
+  rate: number | '';
 }
 
 interface BOQSubsectionRow {
