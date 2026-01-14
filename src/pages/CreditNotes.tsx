@@ -511,6 +511,7 @@ export default function CreditNotes() {
         onOpenChange={setShowEditModal}
         creditNote={selectedCreditNote}
         onSuccess={handleCreateSuccess}
+        companyId={currentCompany?.id}
       />
 
       {/* Apply Credit Note Modal */}
