@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCreateCustomer, useCustomers, useCompanies } from '@/hooks/useDatabase';
+import { toNumber, toInteger } from '@/utils/numericFormHelpers';
 
 interface CreateCustomerModalProps {
   open: boolean;
