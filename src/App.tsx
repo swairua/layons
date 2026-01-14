@@ -371,25 +371,7 @@ const App = () => {
             }
           />
 
-          <Route
-            path="/setup-test"
-            element={
-              <ProtectedRoute>
-                <SetupAndTest />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Authentication Test - No protection needed */}
-          <Route path="/auth-test" element={<AuthTest />} />
-
           {/* Database Fix - No protection needed (for troubleshooting) */}
-          <Route path="/database-fix" element={<DatabaseFix />} />
-
-          {/* Admin recreate (one-time utility) - No protection needed */}
-          <Route path="/admin-recreate" element={<AdminRecreate />} />
-
-          {/* Database Fix - No protection needed for setup */}
           <Route path="/database-fix" element={<DatabaseFix />} />
 
           {/* Audit Logs */}
