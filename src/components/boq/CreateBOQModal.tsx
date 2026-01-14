@@ -205,7 +205,11 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
   };
 
   const calculateSubsectionTotal = (subsection: BOQSubsectionRow): number => {
-    return subsection.items.reduce((sum, item) => sum + ((item.quantity || 0) * (item.rate || 0)), 0);
+    return subsection.items.reduce((sum, item) => {
+      const qty = item.quantity === '' ? 0 : Number(item.quantity);
+      const rate = item.rate === '' ? 0 : Number(item.rate);
+      return sum + (qty * rate);
+    }, 0);
   };
 
   const calculateSectionTotal = (section: BOQSectionRow): number => {
