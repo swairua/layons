@@ -186,35 +186,38 @@ export function CreateCreditNoteModal({
     return { lineTotal, taxAmount };
   };
 
-  const updateItemQuantity = (itemId: string, quantity: number) => {
-    if (quantity <= 0) {
+  const updateItemQuantity = (itemId: string, quantity: number | '') => {
+    const numQuantity = quantity === '' ? 0 : Number(quantity);
+    if (numQuantity < 0) {
       removeItem(itemId);
       return;
     }
 
     setItems(items.map(item => {
       if (item.id === itemId) {
-        const { lineTotal, taxAmount } = calculateLineTotal(item, quantity);
+        const { lineTotal, taxAmount } = calculateLineTotal(item, numQuantity);
         return { ...item, quantity, line_total: lineTotal, tax_amount: taxAmount };
       }
       return item;
     }));
   };
 
-  const updateItemPrice = (itemId: string, unitPrice: number) => {
+  const updateItemPrice = (itemId: string, unitPrice: number | '') => {
+    const numPrice = unitPrice === '' ? 0 : Number(unitPrice);
     setItems(items.map(item => {
       if (item.id === itemId) {
-        const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, unitPrice);
+        const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, numPrice);
         return { ...item, unit_price: unitPrice, line_total: lineTotal, tax_amount: taxAmount };
       }
       return item;
     }));
   };
 
-  const updateItemTax = (itemId: string, taxPercentage: number) => {
+  const updateItemTax = (itemId: string, taxPercentage: number | '') => {
+    const numTax = taxPercentage === '' ? 0 : Number(taxPercentage);
     setItems(items.map(item => {
       if (item.id === itemId) {
-        const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, undefined, taxPercentage);
+        const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, undefined, numTax);
         return { ...item, tax_percentage: taxPercentage, line_total: lineTotal, tax_amount: taxAmount };
       }
       return item;
