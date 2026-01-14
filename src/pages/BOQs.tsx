@@ -77,7 +77,8 @@ export default function BOQs() {
       const { error } = await supabase
         .from('boqs')
         .delete()
-        .eq('id', deleteDialog.boqId);
+        .eq('id', deleteDialog.boqId)
+        .eq('company_id', companyId);
 
       if (error) {
         throw error;
