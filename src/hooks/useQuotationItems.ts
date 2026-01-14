@@ -780,7 +780,8 @@ export const useCreateDeliveryNote = () => {
       console.log('✅ Invoice verified:', invoiceData.id);
 
       // Verify customer matches
-      if (invoice.customer_id !== deliveryNote.customer_id) {
+      if (invoiceData.customer_id !== deliveryNote.customer_id) {
+        console.warn('⚠️ Customer mismatch - invoice customer:', invoiceData.customer_id, 'delivery note customer:', deliveryNote.customer_id);
         throw new Error('Delivery note customer must match the invoice customer.');
       }
 
