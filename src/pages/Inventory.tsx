@@ -224,7 +224,7 @@ export default function Inventory() {
                 <Package className="h-5 w-5 text-primary" />
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Total Items</p>
               </div>
-              <p className="text-3xl font-bold text-primary pl-7">{inventory.length}</p>
+              <p className="text-xl font-bold text-primary pl-7">{inventory.length}</p>
             </div>
           </CardContent>
         </Card>
@@ -236,7 +236,7 @@ export default function Inventory() {
                 <TrendingUp className="h-5 w-5 text-success" />
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Total Value</p>
               </div>
-              <p className="text-3xl font-bold text-success pl-7">{formatCurrency(totalValue)}</p>
+              <p className="text-xl font-bold text-success pl-7">{formatCurrency(totalValue)}</p>
             </div>
           </CardContent>
         </Card>
@@ -248,7 +248,7 @@ export default function Inventory() {
                 <AlertTriangle className="h-5 w-5 text-warning" />
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Low Stock</p>
               </div>
-              <p className="text-3xl font-bold text-warning pl-7">{lowStockItems}</p>
+              <p className="text-xl font-bold text-warning pl-7">{lowStockItems}</p>
             </div>
           </CardContent>
         </Card>
@@ -260,7 +260,7 @@ export default function Inventory() {
                 <TrendingDown className="h-5 w-5 text-destructive" />
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Out of Stock</p>
               </div>
-              <p className="text-3xl font-bold text-destructive pl-7">{outOfStockItems}</p>
+              <p className="text-xl font-bold text-destructive pl-7">{outOfStockItems}</p>
             </div>
           </CardContent>
         </Card>
