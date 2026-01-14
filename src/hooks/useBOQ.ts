@@ -260,7 +260,9 @@ export const useConvertBoqToInvoice = () => {
         if (itemsError) {
           // Try to clean up the invoice if items insertion fails
           await supabase.from('invoices').delete().eq('id', invoice.id).catch(() => {});
-          throw new Error(`Failed to create invoice items: ${itemsError.message}`);
+          const errorMsg = itemsError?.message || itemsError?.details || JSON.stringify(itemsError);
+          console.error('Invoice items creation error:', { itemsError, itemCount: itemsToInsert.length });
+          throw new Error(`Failed to create invoice items: ${errorMsg}`);
         }
       }
 
