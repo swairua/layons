@@ -170,10 +170,14 @@ export const EditProformaModal = ({
   };
 
   const calculateItemTotals = (item: ProformaItem): ProformaItem => {
-    const baseAmount = item.quantity * item.unit_price;
+    const qty = item.quantity === '' ? 0 : Number(item.quantity);
+    const price = item.unit_price === '' ? 0 : Number(item.unit_price);
+    const tax = item.tax_percentage === '' ? 0 : Number(item.tax_percentage);
+
+    const baseAmount = qty * price;
 
     // Both inclusive and exclusive now add VAT on top
-    const taxAmount = baseAmount * (item.tax_percentage / 100);
+    const taxAmount = baseAmount * (tax / 100);
 
     return {
       ...item,
@@ -190,7 +194,9 @@ export const EditProformaModal = ({
     const subtotal = items.reduce((sum, item) => {
       // Always use base amount for subtotal (unit price × quantity)
       // VAT is calculated separately and added for exclusive, or extracted for inclusive
-      return sum + (item.quantity * item.unit_price);
+      const qty = item.quantity === '' ? 0 : Number(item.quantity);
+      const price = item.unit_price === '' ? 0 : Number(item.unit_price);
+      return sum + (qty * price);
     }, 0);
 
     const totalTax = items.reduce((sum, item) => sum + item.tax_amount, 0);
