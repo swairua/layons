@@ -261,6 +261,7 @@ export default function BOQs() {
                 <TableHead>Client</TableHead>
                 <TableHead>Project</TableHead>
                 <TableHead>Currency</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Total</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
