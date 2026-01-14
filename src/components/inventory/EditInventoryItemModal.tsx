@@ -330,8 +330,24 @@ export function EditInventoryItemModal({ open, onOpenChange, onSuccess, item }: 
                 <Input
                   id="cost_price"
                   type="number"
-                  value={formData.cost_price}
-                  onChange={(e) => handleInputChange('cost_price', parseFloat(e.target.value) || 0)}
+                  value={formData.cost_price || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('cost_price', '');
+                    } else {
+                      const num = parseFloat(value);
+                      if (!isNaN(num)) {
+                        handleInputChange('cost_price', num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('cost_price', 0);
+                    }
+                  }}
                   placeholder="0.00"
                   min="0"
                   step="0.01"
@@ -343,8 +359,24 @@ export function EditInventoryItemModal({ open, onOpenChange, onSuccess, item }: 
                 <Input
                   id="selling_price"
                   type="number"
-                  value={formData.selling_price}
-                  onChange={(e) => handleInputChange('selling_price', parseFloat(e.target.value) || 0)}
+                  value={formData.selling_price || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('selling_price', '');
+                    } else {
+                      const num = parseFloat(value);
+                      if (!isNaN(num)) {
+                        handleInputChange('selling_price', num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('selling_price', 0);
+                    }
+                  }}
                   placeholder="0.00"
                   min="0"
                   step="0.01"
