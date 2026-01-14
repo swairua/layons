@@ -241,8 +241,24 @@ export function StockAdjustmentModal({ open, onOpenChange, onSuccess, item }: St
               <Input
                 id="quantity"
                 type="number"
-                value={quantity}
-                onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
+                value={quantity || ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    setQuantity('');
+                  } else {
+                    const num = parseInt(value);
+                    if (!isNaN(num)) {
+                      setQuantity(num);
+                    }
+                  }
+                }}
+                onBlur={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    setQuantity(0);
+                  }
+                }}
                 placeholder={adjustmentType === 'set' ? 'Enter exact quantity' : 'Enter adjustment quantity'}
                 min="0"
               />
