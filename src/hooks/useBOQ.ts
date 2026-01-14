@@ -217,16 +217,27 @@ export const useConvertBoqToInvoice = () => {
       }
 
       // Generate invoice number
-      const { data: invoiceNumber, error: invoiceNumberError } = await supabase.rpc('generate_invoice_number', {
-        company_uuid: boq.company_id
-      });
+      let invoiceNumber: string;
+      try {
+        const { data: genNumber, error: invoiceNumberError } = await supabase.rpc('generate_invoice_number', {
+          company_uuid: boq.company_id
+        });
 
-      if (invoiceNumberError) {
-        const errorMsg = invoiceNumberError?.message || invoiceNumberError?.details || JSON.stringify(invoiceNumberError);
+        if (invoiceNumberError) {
+          const errorMsg = invoiceNumberError?.message || invoiceNumberError?.details || JSON.stringify(invoiceNumberError);
+          throw new Error(`Failed to generate invoice number: ${errorMsg}`);
+        }
+
+        if (!genNumber || typeof genNumber !== 'string') {
+          throw new Error('Failed to generate invoice number: received invalid response');
+        }
+
+        invoiceNumber = genNumber;
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        console.error('Invoice number generation error:', { errorMsg, company_id: boq.company_id });
         throw new Error(`Failed to generate invoice number: ${errorMsg}`);
       }
-
-      if (!invoiceNumber) throw new Error('Failed to generate invoice number: empty response');
 
       // Get current user
       let createdBy: string | null = null;
