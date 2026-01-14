@@ -374,7 +374,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
   };
 
   const calculateSectionTotalWithLabor = (section: InvoiceSection) => {
-    return calculateSectionMaterialsTotal(section) + section.labor_cost;
+    return calculateSectionMaterialsTotal(section) + toNumber(section.labor_cost, 0);
   };
 
   const calculateGrandTotal = () => {
@@ -386,7 +386,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
   };
 
   const calculateTotalLabor = () => {
-    return sections.reduce((sum, section) => sum + section.labor_cost, 0);
+    return sections.reduce((sum, section) => sum + toNumber(section.labor_cost, 0), 0);
   };
 
   const getTotalTax = () => {
@@ -871,7 +871,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                                   </div>
                                   <div className="flex justify-between">
                                     <span>Labor Cost:</span>
-                                    <span className="font-semibold">{formatCurrency(section.labor_cost)}</span>
+                                    <span className="font-semibold">{formatCurrency(toNumber(section.labor_cost, 0))}</span>
                                   </div>
                                   <div className="flex justify-between border-t pt-1 font-bold">
                                     <span>Section Total:</span>
