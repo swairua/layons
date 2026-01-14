@@ -32,22 +32,7 @@ import { CreateQuotationModal } from '@/components/quotations/CreateQuotationMod
 import { ViewQuotationModal } from '@/components/quotations/ViewQuotationModal';
 import { EditQuotationModal } from '@/components/quotations/EditQuotationModal';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
-
-let downloadQuotationPDF: any = null;
-
-// Lazy load PDF generator on first use to avoid module loading issues
-const getDownloadPDFFunction = async () => {
-  if (!downloadQuotationPDF) {
-    try {
-      const module = await import('@/utils/pdfGenerator');
-      downloadQuotationPDF = module.downloadQuotationPDF;
-    } catch (error) {
-      console.error('Failed to load PDF generator:', error);
-      throw new Error('PDF generation module failed to load');
-    }
-  }
-  return downloadQuotationPDF;
-};
+import { downloadQuotationPDF } from '@/utils/pdfGenerator';
 
 interface Quotation {
   id: string;
@@ -188,8 +173,7 @@ export default function Quotations() {
         company_services: currentCompany.company_services
       } : undefined;
 
-      const pdfDownloader = await getDownloadPDFFunction();
-      await pdfDownloader(quotation, companyDetails);
+      await downloadQuotationPDF(quotation, companyDetails);
       toast.success(`Quotation ${quotation.quotation_number} PDF downloaded`);
     } catch (error) {
       console.error('Error downloading PDF:', error);
@@ -293,6 +277,7 @@ Website: www.biolegendscientific.co.ke`;
       try {
         await convertQuotationMutation.mutateAsync({ quotationId: quotation.id, companyId: currentCompany.id });
         toast.success(`Quotation ${quotation.quotation_number} converted to invoice successfully!`);
+        refetch();
       } finally {
         setConvertingQuotationId(null);
       }
@@ -334,7 +319,7 @@ Website: www.biolegendscientific.co.ke`;
         <Card className="shadow-card">
           <CardContent className="pt-6">
             <div className="text-center py-8">
-              <p className="text-destructive">Error loading quotations: {error.message}</p>
+              <p className="text-destructive">Error loading quotations: {(error as any).message}</p>
               <Button 
                 variant="outline" 
                 onClick={() => window.location.reload()}
