@@ -219,18 +219,23 @@ export const useCreateQuotationWithItems = () => {
 // Convert quotation to invoice
 export const useConvertQuotationToInvoice = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: async (quotationId: string) => {
+    mutationFn: async ({ quotationId, companyId }: { quotationId: string; companyId: string }) => {
       // Get quotation data
-      const { data: quotation, error: quotationError } = await supabase
+      let query = supabase
         .from('quotations')
         .select(`
           *,
           quotation_items(*)
         `)
-        .eq('id', quotationId)
-        .single();
+        .eq('id', quotationId);
+
+      if (companyId) {
+        query = query.eq('company_id', companyId);
+      }
+
+      const { data: quotation, error: quotationError } = await query.single();
       
       if (quotationError) throw quotationError;
       
@@ -355,7 +360,8 @@ export const useConvertQuotationToInvoice = () => {
       await supabase
         .from('quotations')
         .update({ status: 'processed' })
-        .eq('id', quotationId);
+        .eq('id', quotationId)
+        .eq('company_id', companyId);
       
       return invoice;
     },

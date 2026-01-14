@@ -139,7 +139,11 @@ export default function Proforma() {
 
   const handleCreateInvoice = async (proforma: ProformaWithItems) => {
     try {
-      await convertToInvoice.mutateAsync(proforma.id!);
+      if (!currentCompany?.id) {
+        toast.error('Company ID is required');
+        return;
+      }
+      await convertToInvoice.mutateAsync({ proformaId: proforma.id!, companyId: currentCompany.id });
     } catch (error) {
       console.error('Error converting proforma to invoice:', error);
     }

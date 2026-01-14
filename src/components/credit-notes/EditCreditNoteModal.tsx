@@ -33,13 +33,15 @@ interface EditCreditNoteModalProps {
   onOpenChange: (open: boolean) => void;
   creditNote: CreditNote | null;
   onSuccess: () => void;
+  companyId?: string;
 }
 
-export function EditCreditNoteModal({ 
-  open, 
-  onOpenChange, 
+export function EditCreditNoteModal({
+  open,
+  onOpenChange,
   creditNote,
-  onSuccess 
+  onSuccess,
+  companyId
 }: EditCreditNoteModalProps) {
   const [creditNoteDate, setCreditNoteDate] = useState('');
   const [reason, setReason] = useState('');
@@ -93,6 +95,11 @@ export function EditCreditNoteModal({
       return;
     }
 
+    if (!companyId) {
+      toast.error('Company ID is required');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const updates = {
@@ -105,6 +112,7 @@ export function EditCreditNoteModal({
 
       await updateCreditNote.mutateAsync({
         id: creditNote.id,
+        companyId,
         updates
       });
 

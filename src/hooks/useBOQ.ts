@@ -91,22 +91,32 @@ export const useConvertBoqToInvoice = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (boqId: string) => {
+    mutationFn: async ({ boqId, companyId }: { boqId: string; companyId: string }) => {
       // Get BOQ data
       const { data: boq, error: boqError } = await supabase
         .from('boqs')
         .select('*')
         .eq('id', boqId)
+        .eq('company_id', companyId)
         .single();
 
-      if (boqError) throw boqError;
+      if (boqError) {
+        const errorMsg = boqError?.message || boqError?.details || JSON.stringify(boqError);
+        console.error('BOQ fetch error:', { boqError, boqId, companyId });
+        throw new Error(`Failed to fetch BOQ: ${errorMsg}`);
+      }
+
       if (!boq) throw new Error('BOQ not found');
 
       const boqData = boq.data as BoqDocument;
-      if (!boqData) throw new Error('BOQ data is invalid or missing');
+      if (!boqData) {
+        console.error('BOQ data invalid:', { boq });
+        throw new Error('BOQ data is invalid or missing');
+      }
 
       // Validate BOQ has sections and items
       if (!boqData.sections || boqData.sections.length === 0) {
+        console.error('BOQ has no sections:', { boqData });
         throw new Error('BOQ has no sections. Cannot convert empty BOQ.');
       }
 
@@ -117,20 +127,18 @@ export const useConvertBoqToInvoice = () => {
       let customerId: string | null = null;
 
       if (customerData?.name) {
-        // Try to find existing customer by name and company
-        const { data: existingCustomer, error: searchError } = await supabase
+        // Try to find existing customer by name and company - use limit without .single() to handle no results
+        const { data: existingCustomers, error: searchError } = await supabase
           .from('customers')
           .select('id')
           .eq('company_id', boq.company_id)
           .eq('name', customerData.name)
-          .limit(1)
-          .single();
+          .limit(1);
 
-        if (existingCustomer) {
-          customerId = existingCustomer.id;
-        } else if (!searchError || searchError.code === 'PGRST116') {
-          // PGRST116 = no rows returned (expected)
-          // Create new customer from BOQ client data with proper validation
+        if (existingCustomers && existingCustomers.length > 0) {
+          customerId = existingCustomers[0].id;
+        } else if (!searchError) {
+          // No customer found, create a new one
           const customerPayload = {
             company_id: boq.company_id,
             name: customerData.name,
@@ -156,7 +164,7 @@ export const useConvertBoqToInvoice = () => {
             customerId = newCustomer.id;
           }
         } else {
-          // Unexpected error
+          // Unexpected error searching for customer
           console.warn('Error searching for existing customer:', searchError);
         }
       }
@@ -167,7 +175,8 @@ export const useConvertBoqToInvoice = () => {
       });
 
       if (invoiceNumberError) {
-        throw new Error(`Failed to generate invoice number: ${invoiceNumberError.message}`);
+        const errorMsg = invoiceNumberError?.message || invoiceNumberError?.details || JSON.stringify(invoiceNumberError);
+        throw new Error(`Failed to generate invoice number: ${errorMsg}`);
       }
 
       if (!invoiceNumber) throw new Error('Failed to generate invoice number: empty response');
@@ -183,9 +192,18 @@ export const useConvertBoqToInvoice = () => {
       }
 
       // Flatten BOQ items and calculate subtotal
-      const { invoiceItems, subtotal } = flattenBoqItems(boqData);
+      let invoiceItems, subtotal;
+      try {
+        const result = flattenBoqItems(boqData);
+        invoiceItems = result.invoiceItems;
+        subtotal = result.subtotal;
+      } catch (flattenError) {
+        console.error('Error flattening BOQ items:', { flattenError, boqData });
+        throw new Error(`Failed to process BOQ items: ${flattenError instanceof Error ? flattenError.message : JSON.stringify(flattenError)}`);
+      }
 
       if (invoiceItems.length === 0) {
+        console.error('No items resulted from BOQ conversion:', { boqData });
         throw new Error('BOQ conversion resulted in no items. Please check BOQ structure.');
       }
 
@@ -220,7 +238,9 @@ export const useConvertBoqToInvoice = () => {
         .single();
 
       if (invoiceError) {
-        throw new Error(`Failed to create invoice: ${invoiceError.message}`);
+        const errorMsg = invoiceError?.message || invoiceError?.details || JSON.stringify(invoiceError);
+        console.error('Invoice creation error:', { invoiceError, invoiceData });
+        throw new Error(`Failed to create invoice: ${errorMsg}`);
       }
 
       if (!invoice) throw new Error('Invoice creation returned empty result');
@@ -258,7 +278,9 @@ export const useConvertBoqToInvoice = () => {
         if (itemsError) {
           // Try to clean up the invoice if items insertion fails
           await supabase.from('invoices').delete().eq('id', invoice.id).catch(() => {});
-          throw new Error(`Failed to create invoice items: ${itemsError.message}`);
+          const errorMsg = itemsError?.message || itemsError?.details || JSON.stringify(itemsError);
+          console.error('Invoice items creation error:', { itemsError, itemCount: itemsToInsert.length });
+          throw new Error(`Failed to create invoice items: ${errorMsg}`);
         }
       }
 
@@ -269,18 +291,22 @@ export const useConvertBoqToInvoice = () => {
           converted_to_invoice_id: invoice.id,
           converted_at: new Date().toISOString()
         })
-        .eq('id', boqId);
+        .eq('id', boqId)
+        .eq('company_id', companyId);
 
       if (updateError) {
-        console.warn('Warning: Failed to mark BOQ as converted:', updateError);
+        const errorMsg = updateError?.message || updateError?.details || JSON.stringify(updateError);
+        console.warn('Warning: Failed to mark BOQ as converted:', { updateError, errorMsg });
         // This is not critical, invoice was created successfully
       }
 
       return invoice;
     },
     onSuccess: () => {
+      // Invalidate relevant queries to refetch data
       queryClient.invalidateQueries({ queryKey: ['boqs'] });
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['invoices_fixed'] });
     }
   });
 };

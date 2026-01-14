@@ -146,13 +146,13 @@ export function useCustomerCreditNotes(customerId: string | undefined, companyId
 }
 
 // Fetch a single credit note by ID
-export function useCreditNote(creditNoteId: string | undefined) {
+export function useCreditNote(creditNoteId: string | undefined, companyId: string | undefined) {
   return useQuery({
-    queryKey: ['creditNote', creditNoteId],
+    queryKey: ['creditNote', creditNoteId, companyId],
     queryFn: async () => {
       if (!creditNoteId) throw new Error('Credit Note ID is required');
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('credit_notes')
         .select(`
           *,
@@ -175,8 +175,13 @@ export function useCreditNote(creditNoteId: string | undefined) {
             total_amount
           )
         `)
-        .eq('id', creditNoteId)
-        .single();
+        .eq('id', creditNoteId);
+
+      if (companyId) {
+        query = query.eq('company_id', companyId);
+      }
+
+      const { data, error } = await query.single();
 
       if (error) throw error;
       return data as CreditNote;
@@ -217,11 +222,12 @@ export function useUpdateCreditNote() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<CreditNote> }) => {
+    mutationFn: async ({ id, companyId, updates }: { id: string; companyId: string; updates: Partial<CreditNote> }) => {
       const { data, error } = await supabase
         .from('credit_notes')
         .update(updates)
         .eq('id', id)
+        .eq('company_id', companyId)
         .select()
         .single();
 
@@ -246,11 +252,12 @@ export function useDeleteCreditNote() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id, companyId }: { id: string; companyId: string }) => {
       const { error } = await supabase
         .from('credit_notes')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('company_id', companyId);
 
       if (error) throw error;
       return id;
