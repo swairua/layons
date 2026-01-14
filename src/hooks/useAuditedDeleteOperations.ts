@@ -77,6 +77,7 @@ export function useAuditedDeleteOperations() {
           .from('customers')
           .select('*')
           .eq('id', id)
+          .eq('company_id', companyId)
           .single();
 
         // Perform audited delete
