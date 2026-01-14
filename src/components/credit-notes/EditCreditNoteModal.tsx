@@ -95,6 +95,11 @@ export function EditCreditNoteModal({
       return;
     }
 
+    if (!companyId) {
+      toast.error('Company ID is required');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const updates = {
@@ -107,6 +112,7 @@ export function EditCreditNoteModal({
 
       await updateCreditNote.mutateAsync({
         id: creditNote.id,
+        companyId,
         updates
       });
 
