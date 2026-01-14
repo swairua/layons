@@ -36,11 +36,12 @@ interface EditCreditNoteModalProps {
   companyId?: string;
 }
 
-export function EditCreditNoteModal({ 
-  open, 
-  onOpenChange, 
+export function EditCreditNoteModal({
+  open,
+  onOpenChange,
   creditNote,
-  onSuccess 
+  onSuccess,
+  companyId
 }: EditCreditNoteModalProps) {
   const [creditNoteDate, setCreditNoteDate] = useState('');
   const [reason, setReason] = useState('');
