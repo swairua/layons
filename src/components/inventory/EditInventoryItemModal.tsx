@@ -389,8 +389,24 @@ export function EditInventoryItemModal({ open, onOpenChange, onSuccess, item }: 
               <Input
                 id="stock_quantity"
                 type="number"
-                value={formData.stock_quantity}
-                onChange={(e) => handleInputChange('stock_quantity', parseInt(e.target.value) || 0)}
+                value={formData.stock_quantity || ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    handleInputChange('stock_quantity', '');
+                  } else {
+                    const num = parseInt(value);
+                    if (!isNaN(num)) {
+                      handleInputChange('stock_quantity', num);
+                    }
+                  }
+                }}
+                onBlur={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    handleInputChange('stock_quantity', 0);
+                  }
+                }}
                 placeholder="0"
                 min="0"
               />
@@ -402,8 +418,24 @@ export function EditInventoryItemModal({ open, onOpenChange, onSuccess, item }: 
                 <Input
                   id="min_stock_level"
                   type="number"
-                  value={formData.min_stock_level}
-                  onChange={(e) => handleInputChange('min_stock_level', parseInt(e.target.value) || 0)}
+                  value={formData.min_stock_level || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('min_stock_level', '');
+                    } else {
+                      const num = parseInt(value);
+                      if (!isNaN(num)) {
+                        handleInputChange('min_stock_level', num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('min_stock_level', 0);
+                    }
+                  }}
                   placeholder="10"
                   min="0"
                 />
@@ -414,8 +446,24 @@ export function EditInventoryItemModal({ open, onOpenChange, onSuccess, item }: 
                 <Input
                   id="max_stock_level"
                   type="number"
-                  value={formData.max_stock_level}
-                  onChange={(e) => handleInputChange('max_stock_level', parseInt(e.target.value) || 0)}
+                  value={formData.max_stock_level || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('max_stock_level', '');
+                    } else {
+                      const num = parseInt(value);
+                      if (!isNaN(num)) {
+                        handleInputChange('max_stock_level', num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('max_stock_level', 0);
+                    }
+                  }}
                   placeholder="100"
                   min="0"
                 />
