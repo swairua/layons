@@ -294,8 +294,6 @@ export default function Payments() {
           </CardContent>
         </Card>
 
-        {/* Show quick fix if there's a database setup error */}
-        {!isNetworkError && <PaymentAllocationQuickFix />}
       </div>
     );
   }
