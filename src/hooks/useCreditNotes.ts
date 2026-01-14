@@ -222,11 +222,12 @@ export function useUpdateCreditNote() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<CreditNote> }) => {
+    mutationFn: async ({ id, companyId, updates }: { id: string; companyId: string; updates: Partial<CreditNote> }) => {
       const { data, error } = await supabase
         .from('credit_notes')
         .update(updates)
         .eq('id', id)
+        .eq('company_id', companyId)
         .select()
         .single();
 
