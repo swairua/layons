@@ -271,7 +271,9 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
       filledSections.forEach(sec => {
         sec.subsections.forEach(sub => {
           sub.items.forEach(item => {
-            filledSubtotal += (item.quantity || 0) * (item.rate || 0);
+            const qty = item.quantity === '' ? 0 : Number(item.quantity);
+            const rate = item.rate === '' ? 0 : Number(item.rate);
+            filledSubtotal += qty * rate;
           });
         });
       });
