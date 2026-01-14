@@ -470,6 +470,17 @@ export function ViewInvoiceModal({
           </CardContent>
         </Card>
 
+        {invoice.notes && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Notes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm whitespace-pre-wrap">{invoice.notes}</p>
+            </CardContent>
+          </Card>
+        )}
+
         {invoice.terms_and_conditions && (
           <Card>
             <CardHeader>
