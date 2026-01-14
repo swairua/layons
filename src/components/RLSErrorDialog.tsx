@@ -153,23 +153,33 @@ COMMIT;
                 <AlertTriangle className="h-5 w-5 text-destructive" />
                 RLS Policy Issue Detected
               </AlertDialogTitle>
-              <AlertDialogDescription className="space-y-3 mt-4">
-                <p>
-                  Your Supabase database has a Row Level Security (RLS) issue preventing invoice operations.
-                </p>
-                <p className="text-sm">
-                  <strong>Possible causes:</strong>
-                </p>
-                <ul className="text-sm list-disc list-inside space-y-1">
-                  <li>Missing <code className="bg-slate-100 px-1 rounded text-xs">company_id</code> column on invoices table</li>
-                  <li>RLS policies reference non-existent columns</li>
-                  <li>Circular dependencies in RLS policy definitions</li>
-                </ul>
-                <p>
-                  We can fix this automatically by disabling problematic RLS policies and ensuring the required columns exist.
-                </p>
-              </AlertDialogDescription>
             </AlertDialogHeader>
+
+            <div className="space-y-3 mt-4">
+              <div className="text-sm">
+                Your Supabase database has a Row Level Security (RLS) issue preventing invoice operations.
+              </div>
+              <div className="text-sm">
+                <strong>Possible causes:</strong>
+              </div>
+              <div className="text-sm list-disc list-inside space-y-1 ml-4">
+                <div className="flex gap-2">
+                  <span>•</span>
+                  <span>Missing <code className="bg-slate-100 px-1 rounded text-xs">company_id</code> column on invoices table</span>
+                </div>
+                <div className="flex gap-2">
+                  <span>•</span>
+                  <span>RLS policies reference non-existent columns</span>
+                </div>
+                <div className="flex gap-2">
+                  <span>•</span>
+                  <span>Circular dependencies in RLS policy definitions</span>
+                </div>
+              </div>
+              <div className="text-sm">
+                We can fix this automatically by disabling problematic RLS policies and ensuring the required columns exist.
+              </div>
+            </div>
 
             <div className="space-y-4 py-4">
               <Alert className="border-blue-200 bg-blue-50">
