@@ -159,7 +159,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
     ));
   };
 
-  const updateSectionLaborCost = (sectionId: string, laborCost: number) => {
+  const updateSectionLaborCost = (sectionId: string, laborCost: number | '') => {
     setSections(sections.map(s =>
       s.id === sectionId ? { ...s, labor_cost: laborCost } : s
     ));
