@@ -859,8 +859,24 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                     <TableCell>
                                       <Input
                                         type="number"
-                                        value={item.tax_percentage}
-                                        onChange={(e) => updateItemTax(section.id, item.id, parseFloat(e.target.value) || 0)}
+                                        value={item.tax_percentage || ''}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            // Don't update on empty, wait for blur
+                                          } else {
+                                            const num = parseFloat(value);
+                                            if (!isNaN(num) && num >= 0 && num <= 100) {
+                                              updateItemTax(section.id, item.id, num);
+                                            }
+                                          }
+                                        }}
+                                        onBlur={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            updateItemTax(section.id, item.id, 0);
+                                          }
+                                        }}
                                         className="w-14 h-8"
                                         placeholder="0"
                                         min="0"
