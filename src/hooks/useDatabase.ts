@@ -366,14 +366,15 @@ export const useUpdateCustomer = () => {
 
 export const useDeleteCustomer = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id, companyId }: { id: string; companyId: string }) => {
       const { error } = await supabase
         .from('customers')
         .delete()
-        .eq('id', id);
-      
+        .eq('id', id)
+        .eq('company_id', companyId);
+
       if (error) throw error;
     },
     onSuccess: () => {
