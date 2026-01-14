@@ -32,7 +32,6 @@ import { toast } from 'sonner';
 import { CreateProformaModalOptimized } from '@/components/proforma/CreateProformaModalOptimized';
 import { EditProformaModal } from '@/components/proforma/EditProformaModal';
 import { ViewProformaModal } from '@/components/proforma/ViewProformaModal';
-import { ProformaSetupBanner } from '@/components/proforma/ProformaSetupBanner';
 import { downloadInvoicePDF, downloadQuotationPDF } from '@/utils/pdfGenerator';
 import { formatCurrency } from '@/utils/taxCalculation';
 import { ensureProformaSchema } from '@/utils/proformaDatabaseSetup';
@@ -168,8 +167,6 @@ export default function Proforma() {
 
   return (
     <div className="space-y-6">
-      {/* Database Setup Banner */}
-      <ProformaSetupBanner />
 
       <div className="flex items-center justify-between">
         <div>
