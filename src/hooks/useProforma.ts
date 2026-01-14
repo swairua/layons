@@ -377,6 +377,7 @@ export const useUpdateProforma = () => {
         .from('proforma_invoices')
         .update(proforma)
         .eq('id', proformaId)
+        .eq('company_id', companyId)
         .select()
         .single();
 
