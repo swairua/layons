@@ -87,6 +87,20 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
   const { data: products, isLoading: loadingProducts } = useProducts(currentCompany?.id);
   const { data: taxSettings } = useTaxSettings(currentCompany?.id);
 
+  // Initialize with a default section when modal opens
+  useEffect(() => {
+    if (open && sections.length === 0) {
+      const defaultSection: QuotationSection = {
+        id: `section-${Date.now()}`,
+        name: 'Materials',
+        items: [],
+        labor_cost: 0,
+        expanded: true
+      };
+      setSections([defaultSection]);
+    }
+  }, [open]);
+
   // Log for debugging if needed
   if (process.env.NODE_ENV === 'development') {
     console.log('Company:', currentCompany?.name, 'Customers:', customers?.length || 0);
