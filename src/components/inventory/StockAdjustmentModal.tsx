@@ -301,42 +301,45 @@ export function StockAdjustmentModal({ open, onOpenChange, onSuccess, item }: St
           </div>
 
           {/* Preview */}
-          {quantity > 0 && (
-            <Card className="border-primary/20 bg-primary/5">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  {getAdjustmentIcon()}
-                  Adjustment Preview
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <Label className="text-sm text-muted-foreground">Current Stock</Label>
-                    <p className="text-lg font-medium">{item.stock_quantity}</p>
+          {(() => {
+            const numQuantity = toInteger(quantity, 0);
+            return numQuantity > 0 ? (
+              <Card className="border-primary/20 bg-primary/5">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    {getAdjustmentIcon()}
+                    Adjustment Preview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <Label className="text-sm text-muted-foreground">Current Stock</Label>
+                      <p className="text-lg font-medium">{item.stock_quantity}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-muted-foreground">Adjustment</Label>
+                      <p className="text-lg font-medium">
+                        {adjustmentType === 'increase' ? '+' : adjustmentType === 'decrease' ? '-' : '→'} {numQuantity}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-muted-foreground">New Stock</Label>
+                      <p className="text-lg font-medium text-primary">{getNewQuantity()}</p>
+                    </div>
                   </div>
-                  <div>
-                    <Label className="text-sm text-muted-foreground">Adjustment</Label>
-                    <p className="text-lg font-medium">
-                      {adjustmentType === 'increase' ? '+' : adjustmentType === 'decrease' ? '-' : '→'} {quantity}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-sm text-muted-foreground">New Stock</Label>
-                    <p className="text-lg font-medium text-primary">{getNewQuantity()}</p>
-                  </div>
-                </div>
-                {adjustmentType !== 'set' && (
-                  <div className="mt-4 text-center">
-                    <Label className="text-sm text-muted-foreground">Cost Impact</Label>
-                    <p className="text-lg font-medium">
-                      {adjustmentType === 'increase' ? '+' : '-'}${(quantity * item.cost_price).toFixed(2)}
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+                  {adjustmentType !== 'set' && (
+                    <div className="mt-4 text-center">
+                      <Label className="text-sm text-muted-foreground">Cost Impact</Label>
+                      <p className="text-lg font-medium">
+                        {adjustmentType === 'increase' ? '+' : '-'}${(numQuantity * item.cost_price).toFixed(2)}
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ) : null;
+          })()}
         </div>
 
         <DialogFooter>
