@@ -3,7 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 /**
  * Handle invoice deletion with all related cleanup:
  * 1. Reverse BOQ status if invoice came from BOQ
+ * 1.5. Delete related delivery notes (before invoice deletion due to FK constraint)
  * 2. Reverse inventory movements
+ * 3. Delete the invoice
  */
 export async function handleInvoiceDelete(invoiceId: string) {
   console.log('🗑️ Starting invoice deletion process for invoice:', invoiceId);
