@@ -15,9 +15,17 @@ console.log('✅ Supabase client initializing with URL:', SUPABASE_URL.substring
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
+// Safely get localStorage only if in browser environment
+const getStorage = () => {
+  if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+    return window.localStorage;
+  }
+  return undefined;
+};
+
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    storage: localStorage,
+    storage: getStorage(),
     storageKey: 'sb-auth-token',
     persistSession: true,
     autoRefreshToken: true,
