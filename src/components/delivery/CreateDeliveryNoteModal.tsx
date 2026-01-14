@@ -176,18 +176,38 @@ export const CreateDeliveryNoteModal = ({
       return;
     }
 
+    // Check invoice selection first with detailed error
     if (!formData.invoice_id) {
-      toast.error('Please select an invoice. Delivery notes must be linked to an invoice to auto-populate items.');
+      toast.error('Invoice Required', {
+        description: 'Please select an invoice. Delivery notes must be linked to an existing invoice.',
+        duration: 5000
+      });
+      return;
+    }
+
+    // Verify selected invoice still exists
+    const selectedInvoice = invoices?.find(inv => inv.id === formData.invoice_id);
+    if (!selectedInvoice) {
+      toast.error('Invoice Not Found', {
+        description: 'The selected invoice may have been deleted. Please select a different invoice.',
+        duration: 5000
+      });
       return;
     }
 
     if (!formData.customer_id) {
-      toast.error('Please select a customer');
+      toast.error('Customer Required', {
+        description: 'Please select a customer for this delivery',
+        duration: 4000
+      });
       return;
     }
 
     if (items.length === 0) {
-      toast.error('Please add at least one item');
+      toast.error('Items Required', {
+        description: 'Please add at least one item to deliver',
+        duration: 4000
+      });
       return;
     }
 
@@ -197,7 +217,10 @@ export const CreateDeliveryNoteModal = ({
     );
 
     if (invalidItems.length > 0) {
-      toast.error(`Please ensure all items have valid delivery quantities greater than 0`);
+      toast.error('Invalid Quantities', {
+        description: 'All items must have a delivery quantity greater than 0',
+        duration: 4000
+      });
       return;
     }
 
