@@ -24,6 +24,7 @@ import {
 import { toast } from 'sonner';
 import { Package, Edit, Plus } from 'lucide-react';
 import { CreateCategoryModalBasic } from '@/components/categories/CreateCategoryModalBasic';
+import { toNumber, toInteger } from '@/utils/numericFormHelpers';
 
 interface InventoryItem {
   id?: string;
