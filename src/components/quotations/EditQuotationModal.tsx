@@ -163,8 +163,9 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
     return { lineTotal, taxAmount };
   };
 
-  const updateItemQuantity = (sectionId: string, itemId: string, quantity: number) => {
-    if (quantity <= 0) {
+  const updateItemQuantity = (sectionId: string, itemId: string, quantity: number | '') => {
+    const numQuantity = quantity === '' ? 0 : Number(quantity);
+    if (numQuantity < 0) {
       removeItem(sectionId, itemId);
       return;
     }
@@ -175,7 +176,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const { lineTotal, taxAmount } = calculateLineTotal(item, quantity);
+            const { lineTotal, taxAmount } = calculateLineTotal(item, numQuantity);
             return { ...item, quantity, line_total: lineTotal, tax_amount: taxAmount };
           }
           return item;
@@ -184,14 +185,15 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
     }));
   };
 
-  const updateItemPrice = (sectionId: string, itemId: string, unitPrice: number) => {
+  const updateItemPrice = (sectionId: string, itemId: string, unitPrice: number | '') => {
     setSections(sections.map(section => {
       if (section.id !== sectionId) return section;
       return {
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, unitPrice);
+            const price = unitPrice === '' ? 0 : Number(unitPrice);
+            const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, price);
             return { ...item, unit_price: unitPrice, line_total: lineTotal, tax_amount: taxAmount };
           }
           return item;
@@ -200,14 +202,15 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
     }));
   };
 
-  const updateItemVAT = (sectionId: string, itemId: string, vatPercentage: number) => {
+  const updateItemVAT = (sectionId: string, itemId: string, vatPercentage: number | '') => {
     setSections(sections.map(section => {
       if (section.id !== sectionId) return section;
       return {
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, undefined, vatPercentage);
+            const vat = vatPercentage === '' ? 0 : Number(vatPercentage);
+            const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, undefined, vat);
             return { ...item, tax_percentage: vatPercentage, line_total: lineTotal, tax_amount: taxAmount };
           }
           return item;
