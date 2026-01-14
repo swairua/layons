@@ -60,9 +60,9 @@ interface BOQSectionRow {
 const defaultItem = (): BOQItemRow => ({
   id: `item-${crypto.randomUUID()}`,
   description: '',
-  quantity: 1,
+  quantity: '',
   unit: '',
-  rate: 0,
+  rate: '',
 });
 
 const defaultSubsection = (name: string, label: string): BOQSubsectionRow => ({
@@ -151,7 +151,14 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
           if (sub.id !== subsectionId) return sub;
           return {
             ...sub,
-            items: sub.items.map(i => i.id === itemId ? { ...i, [field]: field === 'description' || field === 'unit' ? String(value) : Number(value) } : i)
+            items: sub.items.map(i => {
+              if (i.id !== itemId) return i;
+              if (field === 'description' || field === 'unit') {
+                return { ...i, [field]: String(value) };
+              }
+              // For numeric fields (quantity, rate), allow empty string
+              return { ...i, [field]: value === '' ? '' : Number(value) };
+            })
           };
         })
       };
