@@ -8,6 +8,7 @@ import { CreateBOQModal } from '@/components/boq/CreateBOQModal';
 import { CreatePercentageCopyModal } from '@/components/boq/CreatePercentageCopyModal';
 import { EditBOQModal } from '@/components/boq/EditBOQModal';
 import { ChangePercentageRateModal } from '@/components/boq/ChangePercentageRateModal';
+import { BOQConversionFix } from '@/components/boq/BOQConversionFix';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
