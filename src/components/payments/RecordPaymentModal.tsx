@@ -44,7 +44,15 @@ interface RecordPaymentModalProps {
 }
 
 export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: RecordPaymentModalProps) {
-  const [paymentData, setPaymentData] = useState({
+  const [paymentData, setPaymentData] = useState<{
+    invoice_id: string;
+    amount: number | '';
+    payment_date: string;
+    payment_method: string;
+    reference_number: string;
+    notes: string;
+    customer_name: string;
+  }>({
     invoice_id: invoice?.id || '',
     amount: invoice?.balance_due || 0,
     payment_date: new Date().toISOString().split('T')[0],
