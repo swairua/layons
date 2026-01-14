@@ -89,8 +89,8 @@ export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: E
         address: customer.address || '',
         city: customer.city || '',
         country: customer.country || 'Kenya',
-        credit_limit: customer.credit_limit || 0,
-        payment_terms: customer.payment_terms ? String(customer.payment_terms) : '',
+        credit_limit: customer.credit_limit ? customer.credit_limit : '',
+        payment_terms: customer.payment_terms ? customer.payment_terms : '',
         is_active: customer.is_active !== false,
       });
     }
