@@ -219,13 +219,13 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
   }, [sections]);
 
   const isItemEmpty = (item: BOQItemRow): boolean => {
-    return !item.description.trim() && item.quantity === 1 && item.rate === 0;
+    return !item.description.trim() && (item.quantity === '' || item.quantity === 0) && (item.rate === '' || item.rate === 0);
   };
 
   const isItemPartiallyFilled = (item: BOQItemRow): boolean => {
     const hasDescription = item.description.trim().length > 0;
-    const hasQuantity = item.quantity > 0;
-    const hasRate = item.rate >= 0;
+    const hasQuantity = item.quantity !== '' && Number(item.quantity) > 0;
+    const hasRate = item.rate !== '' && Number(item.rate) > 0;
     const filledFields = [hasDescription, hasQuantity, hasRate].filter(Boolean).length;
     return filledFields > 0 && filledFields < 3;
   };
