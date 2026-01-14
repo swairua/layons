@@ -268,9 +268,9 @@ export default function BOQs() {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow><TableCell colSpan={7}>Loading...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8}>Loading...</TableCell></TableRow>
               ) : boqs.length === 0 ? (
-                <TableRow><TableCell colSpan={7}>No BOQs found</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8}>No BOQs found</TableCell></TableRow>
               ) : boqs.map((b: any) => (
                 <TableRow key={b.id}>
                   <TableCell>{b.number}</TableCell>
@@ -278,6 +278,11 @@ export default function BOQs() {
                   <TableCell>{b.client_name}</TableCell>
                   <TableCell>{b.project_title || '-'}</TableCell>
                   <TableCell><Badge variant="outline">{b.currency || 'KES'}</Badge></TableCell>
+                  <TableCell>
+                    <Badge variant={b.status === 'converted' ? 'default' : b.status === 'cancelled' ? 'destructive' : 'secondary'}>
+                      {b.status === 'draft' ? 'Draft' : b.status === 'converted' ? 'Converted' : 'Cancelled'}
+                    </Badge>
+                  </TableCell>
                   <TableCell className="text-right">{new Intl.NumberFormat('en-KE', { style: 'currency', currency: b.currency || 'KES' }).format(Number(b.total_amount || b.subtotal || 0))}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
