@@ -270,7 +270,8 @@ export const useConvertBoqToInvoice = () => {
           converted_to_invoice_id: invoice.id,
           converted_at: new Date().toISOString()
         })
-        .eq('id', boqId);
+        .eq('id', boqId)
+        .eq('company_id', companyId);
 
       if (updateError) {
         console.warn('Warning: Failed to mark BOQ as converted:', updateError);
