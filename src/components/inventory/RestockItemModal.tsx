@@ -345,9 +345,9 @@ export function RestockItemModal({ open, onOpenChange, onSuccess, item }: Restoc
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={isSubmitting || !restockData.quantity || !restockData.supplier.trim()}
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting || !quantity || !restockData.supplier.trim()}
             className="bg-warning hover:bg-warning/90"
           >
             <Package className="h-4 w-4 mr-2" />
