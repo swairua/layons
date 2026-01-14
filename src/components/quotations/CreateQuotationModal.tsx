@@ -821,20 +821,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                         value={item.vat_percentage || ''}
                                         onChange={(e) => {
                                           const value = e.target.value;
-                                          if (value === '') {
-                                            // Don't update on empty, wait for blur
-                                          } else {
-                                            const num = parseFloat(value);
-                                            if (!isNaN(num) && num >= 0 && num <= 100) {
-                                              updateItemVAT(section.id, item.id, num);
-                                            }
-                                          }
-                                        }}
-                                        onBlur={(e) => {
-                                          const value = e.target.value;
-                                          if (value === '') {
-                                            updateItemVAT(section.id, item.id, 0);
-                                          }
+                                          updateItemVAT(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
                                         className="w-20 h-8"
                                         min="0"
