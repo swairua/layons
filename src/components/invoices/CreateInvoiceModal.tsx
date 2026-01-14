@@ -37,6 +37,7 @@ import { useCreateInvoiceWithItems } from '@/hooks/useQuotationItems';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { CURRENCY_SELECT_OPTIONS } from '@/utils/getCurrencySelectOptions';
+import { toNumber, toInteger } from '@/utils/numericFormHelpers';
 
 interface InvoiceItem {
   id: string;
@@ -56,7 +57,7 @@ interface InvoiceSection {
   id: string;
   name: string;
   items: InvoiceItem[];
-  labor_cost: number;
+  labor_cost: number | '';
   expanded: boolean;
 }
 
@@ -158,7 +159,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
     ));
   };
 
-  const updateSectionLaborCost = (sectionId: string, laborCost: number) => {
+  const updateSectionLaborCost = (sectionId: string, laborCost: number | '') => {
     setSections(sections.map(s =>
       s.id === sectionId ? { ...s, labor_cost: laborCost } : s
     ));
@@ -338,7 +339,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
   };
 
   const calculateSectionTotalWithLabor = (section: InvoiceSection) => {
-    return calculateSectionMaterialsTotal(section) + section.labor_cost;
+    return calculateSectionMaterialsTotal(section) + toNumber(section.labor_cost, 0);
   };
 
   const calculateGrandTotal = () => {
@@ -350,7 +351,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
   };
 
   const calculateTotalLabor = () => {
-    return sections.reduce((sum, section) => sum + section.labor_cost, 0);
+    return sections.reduce((sum, section) => sum + toNumber(section.labor_cost, 0), 0);
   };
 
   const getTotalTax = () => {
@@ -741,8 +742,24 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                             <Label>Labor Cost</Label>
                             <Input
                               type="number"
-                              value={section.labor_cost}
-                              onChange={(e) => updateSectionLaborCost(section.id, parseFloat(e.target.value) || 0)}
+                              value={section.labor_cost || ''}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                if (value === '') {
+                                  updateSectionLaborCost(section.id, '');
+                                } else {
+                                  const num = parseFloat(value);
+                                  if (!isNaN(num)) {
+                                    updateSectionLaborCost(section.id, num);
+                                  }
+                                }
+                              }}
+                              onBlur={(e) => {
+                                const value = e.target.value;
+                                if (value === '') {
+                                  updateSectionLaborCost(section.id, 0);
+                                }
+                              }}
                               placeholder="0.00"
                               step="0.01"
                             />
@@ -790,8 +807,24 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                     <TableCell>
                                       <Input
                                         type="number"
-                                        value={item.quantity}
-                                        onChange={(e) => updateItemQuantity(section.id, item.id, parseInt(e.target.value) || 0)}
+                                        value={item.quantity || ''}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            // Don't update on empty, wait for blur
+                                          } else {
+                                            const num = parseInt(value);
+                                            if (!isNaN(num) && num > 0) {
+                                              updateItemQuantity(section.id, item.id, num);
+                                            }
+                                          }
+                                        }}
+                                        onBlur={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '' || parseInt(value) <= 0) {
+                                            updateItemQuantity(section.id, item.id, 1);
+                                          }
+                                        }}
                                         className="w-16 h-8"
                                         min="1"
                                         placeholder="1"
@@ -800,8 +833,24 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                     <TableCell>
                                       <Input
                                         type="number"
-                                        value={item.unit_price}
-                                        onChange={(e) => updateItemPrice(section.id, item.id, parseFloat(e.target.value) || 0)}
+                                        value={item.unit_price || ''}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            // Don't update on empty, wait for blur
+                                          } else {
+                                            const num = parseFloat(value);
+                                            if (!isNaN(num) && num >= 0) {
+                                              updateItemPrice(section.id, item.id, num);
+                                            }
+                                          }
+                                        }}
+                                        onBlur={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            updateItemPrice(section.id, item.id, 0);
+                                          }
+                                        }}
                                         className="w-20 h-8"
                                         step="0.01"
                                         placeholder="0.00"
@@ -810,8 +859,24 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                     <TableCell>
                                       <Input
                                         type="number"
-                                        value={item.tax_percentage}
-                                        onChange={(e) => updateItemTax(section.id, item.id, parseFloat(e.target.value) || 0)}
+                                        value={item.tax_percentage || ''}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            // Don't update on empty, wait for blur
+                                          } else {
+                                            const num = parseFloat(value);
+                                            if (!isNaN(num) && num >= 0 && num <= 100) {
+                                              updateItemTax(section.id, item.id, num);
+                                            }
+                                          }
+                                        }}
+                                        onBlur={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            updateItemTax(section.id, item.id, 0);
+                                          }
+                                        }}
                                         className="w-14 h-8"
                                         placeholder="0"
                                         min="0"
@@ -853,7 +918,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                   </div>
                                   <div className="flex justify-between">
                                     <span>Labor Cost:</span>
-                                    <span className="font-semibold">{formatCurrency(section.labor_cost)}</span>
+                                    <span className="font-semibold">{formatCurrency(toNumber(section.labor_cost, 0))}</span>
                                   </div>
                                   <div className="flex justify-between border-t pt-1 font-bold">
                                     <span>Section Total:</span>

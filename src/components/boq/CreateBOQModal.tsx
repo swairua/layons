@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { toNumber, toInteger } from '@/utils/numericFormHelpers';
 import {
   Dialog,
   DialogContent,
@@ -38,9 +39,9 @@ interface CreateBOQModalProps {
 interface BOQItemRow {
   id: string;
   description: string;
-  quantity: number;
+  quantity: number | '';
   unit: string; // will store unit id
-  rate: number;
+  rate: number | '';
 }
 
 interface BOQSubsectionRow {

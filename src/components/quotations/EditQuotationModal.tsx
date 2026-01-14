@@ -36,6 +36,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { CURRENCY_SELECT_OPTIONS } from '@/utils/getCurrencySelectOptions';
+import { toNumber, toInteger } from '@/utils/numericFormHelpers';
 
 interface QuotationItem {
   id: string;
@@ -57,7 +58,7 @@ interface QuotationSection {
   id: string;
   name: string;
   items: QuotationItem[];
-  labor_cost: number;
+  labor_cost: number | '';
   expanded: boolean;
 }
 
@@ -261,7 +262,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
     ));
   };
 
-  const updateSectionLaborCost = (sectionId: string, laborCost: number) => {
+  const updateSectionLaborCost = (sectionId: string, laborCost: number | '') => {
     setSections(sections.map(s =>
       s.id === sectionId ? { ...s, labor_cost: laborCost } : s
     ));
@@ -298,7 +299,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
       return sec;
     });
     if (movedItem) {
-      setSections(next.map(sec => sec.id === toSectionId ? { ...sec, items: [...sec.items, { ...movedItem!, section_name: sec.name, section_labor_cost: sec.labor_cost }] } : sec));
+      setSections(next.map(sec => sec.id === toSectionId ? { ...sec, items: [...sec.items, { ...movedItem!, section_name: sec.name, section_labor_cost: toNumber(sec.labor_cost, 0) }] } : sec));
     } else {
       setSections(next);
     }
@@ -360,7 +361,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
         tax_inclusive: false,
         line_total: lineTotal,
         section_name: section.name,
-        section_labor_cost: section.labor_cost,
+        section_labor_cost: toNumber(section.labor_cost, 0),
         unit_of_measure: product.unit_of_measure || 'Each',
       };
 
@@ -397,7 +398,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
   };
 
   const calculateSectionTotalWithLabor = (section: QuotationSection) => {
-    return calculateSectionMaterialsTotal(section) + section.labor_cost;
+    return calculateSectionMaterialsTotal(section) + toNumber(section.labor_cost, 0);
   };
 
   const calculateGrandTotal = () => {
@@ -409,7 +410,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
   };
 
   const calculateTotalLabor = () => {
-    return sections.reduce((sum, section) => sum + section.labor_cost, 0);
+    return sections.reduce((sum, section) => sum + toNumber(section.labor_cost, 0), 0);
   };
 
   const getTotalTax = () => {
@@ -481,7 +482,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
           tax_inclusive: item.tax_inclusive || false,
           line_total: item.line_total || 0,
           section_name: section.name,
-          section_labor_cost: section.labor_cost,
+          section_labor_cost: toNumber(section.labor_cost, 0),
           sort_order: sectionIndex * 100 + itemIndex,
           unit_of_measure: item.unit_of_measure || 'Each'
         }))
@@ -795,8 +796,24 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                                     <TableCell>
                                       <Input
                                         type="number"
-                                        value={item.quantity}
-                                        onChange={(e) => updateItemQuantity(section.id, item.id, parseInt(e.target.value) || 0)}
+                                        value={item.quantity || ''}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            // Don't update on empty, wait for blur
+                                          } else {
+                                            const num = parseInt(value);
+                                            if (!isNaN(num) && num > 0) {
+                                              updateItemQuantity(section.id, item.id, num);
+                                            }
+                                          }
+                                        }}
+                                        onBlur={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '' || parseInt(value) <= 0) {
+                                            updateItemQuantity(section.id, item.id, 1);
+                                          }
+                                        }}
                                         className="w-16 h-8"
                                         min="1"
                                         placeholder="1"
@@ -805,8 +822,24 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                                     <TableCell>
                                       <Input
                                         type="number"
-                                        value={item.unit_price}
-                                        onChange={(e) => updateItemPrice(section.id, item.id, parseFloat(e.target.value) || 0)}
+                                        value={item.unit_price || ''}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            // Don't update on empty, wait for blur
+                                          } else {
+                                            const num = parseFloat(value);
+                                            if (!isNaN(num) && num >= 0) {
+                                              updateItemPrice(section.id, item.id, num);
+                                            }
+                                          }
+                                        }}
+                                        onBlur={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            updateItemPrice(section.id, item.id, 0);
+                                          }
+                                        }}
                                         className="w-24 h-8"
                                         step="0.01"
                                         placeholder="0.00"
@@ -815,8 +848,24 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                                     <TableCell>
                                       <Input
                                         type="number"
-                                        value={item.tax_percentage}
-                                        onChange={(e) => updateItemVAT(section.id, item.id, parseFloat(e.target.value) || 0)}
+                                        value={item.tax_percentage || ''}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            // Don't update on empty, wait for blur
+                                          } else {
+                                            const num = parseFloat(value);
+                                            if (!isNaN(num) && num >= 0 && num <= 100) {
+                                              updateItemVAT(section.id, item.id, num);
+                                            }
+                                          }
+                                        }}
+                                        onBlur={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '') {
+                                            updateItemVAT(section.id, item.id, 0);
+                                          }
+                                        }}
                                         className="w-20 h-8"
                                         min="0"
                                         max="100"
@@ -860,8 +909,24 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                               <Input
                                 id={`labor-${section.id}`}
                                 type="number"
-                                value={section.labor_cost}
-                                onChange={(e) => updateSectionLaborCost(section.id, parseFloat(e.target.value) || 0)}
+                                value={section.labor_cost || ''}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  if (value === '') {
+                                    updateSectionLaborCost(section.id, '');
+                                  } else {
+                                    const num = parseFloat(value);
+                                    if (!isNaN(num)) {
+                                      updateSectionLaborCost(section.id, num);
+                                    }
+                                  }
+                                }}
+                                onBlur={(e) => {
+                                  const value = e.target.value;
+                                  if (value === '') {
+                                    updateSectionLaborCost(section.id, 0);
+                                  }
+                                }}
                                 className="w-32 h-8"
                                 step="0.01"
                                 min="0"

@@ -21,7 +21,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { CountrySelect } from '@/components/ui/country-select';
-import { 
+import {
   User,
   Mail,
   Phone,
@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUpdateCustomer } from '@/hooks/useDatabase';
+import { toNumber, toInteger } from '@/utils/numericFormHelpers';
 
 interface Customer {
   id: string;
@@ -54,15 +55,25 @@ interface EditCustomerModalProps {
 }
 
 export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: EditCustomerModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    city: string;
+    country: string;
+    credit_limit: number | '';
+    payment_terms: number | '';
+    is_active: boolean;
+  }>({
     name: '',
     email: '',
     phone: '',
     address: '',
     city: '',
     country: 'Kenya',
-    credit_limit: 0,
-    payment_terms: 0,
+    credit_limit: '',
+    payment_terms: '',
     is_active: true,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,8 +89,8 @@ export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: E
         address: customer.address || '',
         city: customer.city || '',
         country: customer.country || 'Kenya',
-        credit_limit: customer.credit_limit || 0,
-        payment_terms: customer.payment_terms ? String(customer.payment_terms) : '',
+        credit_limit: customer.credit_limit ? customer.credit_limit : '',
+        payment_terms: customer.payment_terms ? customer.payment_terms : '',
         is_active: customer.is_active !== false,
       });
     }
@@ -100,8 +111,15 @@ export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: E
     try {
       await updateCustomer.mutateAsync({
         id: customer.id,
-        ...formData,
-        payment_terms: formData.payment_terms === '' ? 0 : parseInt(formData.payment_terms)
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        country: formData.country,
+        credit_limit: toNumber(formData.credit_limit, 0),
+        payment_terms: toInteger(formData.payment_terms, 0),
+        is_active: formData.is_active
       });
 
       toast.success(`Customer ${formData.name} updated successfully!`);
@@ -238,8 +256,24 @@ export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: E
                 <Input
                   id="credit_limit"
                   type="number"
-                  value={formData.credit_limit}
-                  onChange={(e) => handleInputChange('credit_limit', parseFloat(e.target.value) || 0)}
+                  value={formData.credit_limit || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('credit_limit', '');
+                    } else {
+                      const num = parseFloat(value);
+                      if (!isNaN(num)) {
+                        handleInputChange('credit_limit', num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('credit_limit', 0);
+                    }
+                  }}
                   placeholder="100000"
                   min="0"
                   step="1000"
@@ -251,8 +285,24 @@ export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: E
                 <Input
                   id="payment_terms"
                   type="number"
-                  value={formData.payment_terms}
-                  onChange={(e) => handleInputChange('payment_terms', parseInt(e.target.value) || 0)}
+                  value={formData.payment_terms || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('payment_terms', '');
+                    } else {
+                      const num = parseInt(value);
+                      if (!isNaN(num)) {
+                        handleInputChange('payment_terms', num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('payment_terms', 0);
+                    }
+                  }}
                   placeholder="e.g., 0 for cash, 30 for Net 30"
                   min="0"
                   step="1"
@@ -277,8 +327,8 @@ export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: E
                 <h4 className="font-medium mb-2">Customer Summary</h4>
                 <div className="space-y-1 text-sm text-muted-foreground">
                   <p>Code: {customer?.customer_code}</p>
-                  <p>Credit Limit: KES {formData.credit_limit.toLocaleString()}</p>
-                  <p>Payment Terms: {formData.payment_terms === '' ? '0 (cash)' : `${formData.payment_terms} days`}</p>
+                  <p>Credit Limit: KES {toNumber(formData.credit_limit, 0).toLocaleString()}</p>
+                  <p>Payment Terms: {toInteger(formData.payment_terms, 0) === 0 ? '0 (cash)' : `${toInteger(formData.payment_terms, 0)} days`}</p>
                   <p>Status: {formData.is_active ? 'Active' : 'Inactive'}</p>
                 </div>
               </div>
