@@ -23,6 +23,7 @@ import {
 import { toast } from 'sonner';
 import { useRestockProduct } from '@/hooks/useQuotationItems';
 import { useCompanies } from '@/hooks/useDatabase';
+import { toNumber, toInteger } from '@/utils/numericFormHelpers';
 
 interface RestockItemModalProps {
   open: boolean;
@@ -32,7 +33,14 @@ interface RestockItemModalProps {
 }
 
 export function RestockItemModal({ open, onOpenChange, onSuccess, item }: RestockItemModalProps) {
-  const [restockData, setRestockData] = useState({
+  const [restockData, setRestockData] = useState<{
+    quantity: number | '';
+    cost_per_unit: number | '';
+    supplier: string;
+    restock_date: string;
+    reference_number: string;
+    notes: string;
+  }>({
     quantity: item?.minStock * 2 || 50,
     cost_per_unit: 0,
     supplier: item?.supplier || '',
@@ -54,11 +62,14 @@ export function RestockItemModal({ open, onOpenChange, onSuccess, item }: Restoc
     }));
   };
 
-  const newStockLevel = (item?.currentStock || 0) + restockData.quantity;
-  const totalCost = restockData.quantity * restockData.cost_per_unit;
+  const quantity = toInteger(restockData.quantity, 0);
+  const costPerUnit = toNumber(restockData.cost_per_unit, 0);
+
+  const newStockLevel = (item?.currentStock || 0) + quantity;
+  const totalCost = quantity * costPerUnit;
 
   const handleSubmit = async () => {
-    if (!restockData.quantity || restockData.quantity <= 0) {
+    if (!quantity || quantity <= 0) {
       toast.error('Please enter a valid restock quantity');
       return;
     }
@@ -78,8 +89,8 @@ export function RestockItemModal({ open, onOpenChange, onSuccess, item }: Restoc
       // Create restock record with stock movement and product update
       await restockProduct.mutateAsync({
         productId: item.id,
-        quantity: restockData.quantity,
-        costPerUnit: restockData.cost_per_unit,
+        quantity: quantity,
+        costPerUnit: costPerUnit,
         companyId: currentCompany.id,
         supplier: restockData.supplier,
         notes: restockData.notes ?
@@ -87,7 +98,7 @@ export function RestockItemModal({ open, onOpenChange, onSuccess, item }: Restoc
           `Restock from ${restockData.supplier}${restockData.reference_number ? ` (Ref: ${restockData.reference_number})` : ''}`
       });
 
-      toast.success(`${item?.name} restocked with ${restockData.quantity} units successfully!`);
+      toast.success(`${item?.name} restocked with ${quantity} units successfully!`);
       onSuccess();
       onOpenChange(false);
       resetForm();
@@ -191,8 +202,24 @@ export function RestockItemModal({ open, onOpenChange, onSuccess, item }: Restoc
                 <Input
                   id="quantity"
                   type="number"
-                  value={restockData.quantity}
-                  onChange={(e) => handleInputChange('quantity', parseInt(e.target.value) || 0)}
+                  value={restockData.quantity || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('quantity', '');
+                    } else {
+                      const num = parseInt(value);
+                      if (!isNaN(num)) {
+                        handleInputChange('quantity', num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('quantity', item?.minStock * 2 || 50);
+                    }
+                  }}
                   min="1"
                   placeholder="Enter quantity to add"
                 />
@@ -206,8 +233,24 @@ export function RestockItemModal({ open, onOpenChange, onSuccess, item }: Restoc
                 <Input
                   id="cost_per_unit"
                   type="number"
-                  value={restockData.cost_per_unit}
-                  onChange={(e) => handleInputChange('cost_per_unit', parseFloat(e.target.value) || 0)}
+                  value={restockData.cost_per_unit || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('cost_per_unit', '');
+                    } else {
+                      const num = parseFloat(value);
+                      if (!isNaN(num)) {
+                        handleInputChange('cost_per_unit', num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('cost_per_unit', 0);
+                    }
+                  }}
                   min="0"
                   step="0.01"
                   placeholder="0.00"
@@ -271,7 +314,7 @@ export function RestockItemModal({ open, onOpenChange, onSuccess, item }: Restoc
               </div>
               <div className="text-center p-4 bg-muted/50 rounded-lg">
                 <div className="text-sm text-muted-foreground">Restock Quantity</div>
-                <div className="text-2xl font-bold text-primary">+{restockData.quantity}</div>
+                <div className="text-2xl font-bold text-primary">+{quantity}</div>
               </div>
               <div className="text-center p-4 bg-muted/50 rounded-lg">
                 <div className="text-sm text-muted-foreground">New Stock Level</div>
@@ -302,9 +345,9 @@ export function RestockItemModal({ open, onOpenChange, onSuccess, item }: Restoc
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={isSubmitting || !restockData.quantity || !restockData.supplier.trim()}
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting || !quantity || !restockData.supplier.trim()}
             className="bg-warning hover:bg-warning/90"
           >
             <Package className="h-4 w-4 mr-2" />

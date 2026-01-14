@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCreateCustomer, useCustomers, useCompanies } from '@/hooks/useDatabase';
+import { toNumber, toInteger } from '@/utils/numericFormHelpers';
 
 interface CreateCustomerModalProps {
   open: boolean;
@@ -40,7 +41,17 @@ interface CreateCustomerModalProps {
 }
 
 export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCustomerModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    city: string;
+    country: string;
+    credit_limit: number | '';
+    payment_terms: number | '';
+    is_active: boolean;
+  }>({
     name: '',
     email: '',
     phone: '',
@@ -82,7 +93,8 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
         company_id: currentCompany.id,
         customer_code: customerCode,
         ...formData,
-        payment_terms: formData.payment_terms === '' ? 0 : parseInt(formData.payment_terms)
+        credit_limit: toNumber(formData.credit_limit, 0),
+        payment_terms: toInteger(formData.payment_terms, 0)
       });
       
       toast.success(`Customer ${formData.name} created successfully!`);
@@ -248,8 +260,24 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
                 <Input
                   id="credit_limit"
                   type="number"
-                  value={formData.credit_limit}
-                  onChange={(e) => handleInputChange('credit_limit', parseFloat(e.target.value) || 0)}
+                  value={formData.credit_limit || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('credit_limit', '');
+                    } else {
+                      const num = parseFloat(value);
+                      if (!isNaN(num)) {
+                        handleInputChange('credit_limit', num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('credit_limit', 0);
+                    }
+                  }}
                   placeholder="100000"
                   min="0"
                   step="1000"
@@ -261,8 +289,24 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
                 <Input
                   id="payment_terms"
                   type="number"
-                  value={formData.payment_terms}
-                  onChange={(e) => handleInputChange('payment_terms', parseInt(e.target.value) || 0)}
+                  value={formData.payment_terms || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('payment_terms', '');
+                    } else {
+                      const num = parseInt(value);
+                      if (!isNaN(num)) {
+                        handleInputChange('payment_terms', num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('payment_terms', 0);
+                    }
+                  }}
                   placeholder="e.g., 0 for cash, 30 for Net 30"
                   min="0"
                   step="1"
@@ -287,8 +331,8 @@ export function CreateCustomerModal({ open, onOpenChange, onSuccess }: CreateCus
                 <h4 className="font-medium mb-2">Customer Preview</h4>
                 <div className="space-y-1 text-sm text-muted-foreground">
                   <p>Code: {generateCustomerCode()}</p>
-                  <p>Credit Limit: KES {formData.credit_limit.toLocaleString()}</p>
-                  <p>Payment Terms: {formData.payment_terms === '' ? '0 (cash)' : `${formData.payment_terms} days`}</p>
+                  <p>Credit Limit: KES {toNumber(formData.credit_limit, 0).toLocaleString()}</p>
+                  <p>Payment Terms: {toInteger(formData.payment_terms, 0) === 0 ? '0 (cash)' : `${toInteger(formData.payment_terms, 0)} days`}</p>
                   <p>Status: {formData.is_active ? 'Active' : 'Inactive'}</p>
                 </div>
               </div>

@@ -21,6 +21,7 @@ import {
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, RotateCcw, Calculator } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toInteger } from '@/utils/numericFormHelpers';
 
 interface InventoryItem {
   id?: string;
@@ -40,7 +41,7 @@ interface StockAdjustmentModalProps {
 
 export function StockAdjustmentModal({ open, onOpenChange, onSuccess, item }: StockAdjustmentModalProps) {
   const [adjustmentType, setAdjustmentType] = useState<'increase' | 'decrease' | 'set'>('increase');
-  const [quantity, setQuantity] = useState<number>(0);
+  const [quantity, setQuantity] = useState<number | ''>(0);
   const [reason, setReason] = useState('');
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,17 +49,19 @@ export function StockAdjustmentModal({ open, onOpenChange, onSuccess, item }: St
   const handleSubmit = async () => {
     if (!item) return;
 
-    if (quantity <= 0 && adjustmentType !== 'set') {
+    const numQuantity = toInteger(quantity, 0);
+
+    if (numQuantity <= 0 && adjustmentType !== 'set') {
       toast.error('Quantity must be greater than 0');
       return;
     }
 
-    if (adjustmentType === 'set' && quantity < 0) {
+    if (adjustmentType === 'set' && numQuantity < 0) {
       toast.error('Stock quantity cannot be negative');
       return;
     }
 
-    if (adjustmentType === 'decrease' && quantity > item.stock_quantity) {
+    if (adjustmentType === 'decrease' && numQuantity > item.stock_quantity) {
       toast.error('Cannot decrease stock below zero');
       return;
     }
@@ -69,19 +72,19 @@ export function StockAdjustmentModal({ open, onOpenChange, onSuccess, item }: St
     }
 
     setIsSubmitting(true);
-    
+
     try {
       // Calculate new stock quantity
       let newQuantity: number;
       switch (adjustmentType) {
         case 'increase':
-          newQuantity = item.stock_quantity + quantity;
+          newQuantity = item.stock_quantity + numQuantity;
           break;
         case 'decrease':
-          newQuantity = item.stock_quantity - quantity;
+          newQuantity = item.stock_quantity - numQuantity;
           break;
         case 'set':
-          newQuantity = quantity;
+          newQuantity = numQuantity;
           break;
         default:
           newQuantity = item.stock_quantity;
@@ -90,29 +93,29 @@ export function StockAdjustmentModal({ open, onOpenChange, onSuccess, item }: St
       // TODO: Implement actual stock adjustment API call
       // For now, simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       const adjustmentData = {
         item_id: item.id,
         product_code: item.product_code,
         adjustment_type: adjustmentType,
         old_quantity: item.stock_quantity,
-        adjustment_quantity: adjustmentType === 'set' ? quantity : quantity,
+        adjustment_quantity: adjustmentType === 'set' ? numQuantity : numQuantity,
         new_quantity: newQuantity,
         reason,
         notes,
-        cost_impact: adjustmentType === 'increase' ? quantity * item.cost_price : 
-                    adjustmentType === 'decrease' ? -quantity * item.cost_price :
-                    (quantity - item.stock_quantity) * item.cost_price,
+        cost_impact: adjustmentType === 'increase' ? numQuantity * item.cost_price :
+                    adjustmentType === 'decrease' ? -numQuantity * item.cost_price :
+                    (numQuantity - item.stock_quantity) * item.cost_price,
         adjustment_date: new Date().toISOString(),
       };
 
       console.log('Stock adjustment data:', adjustmentData);
-      
-      const actionText = adjustmentType === 'increase' ? 'increased by' : 
-                        adjustmentType === 'decrease' ? 'decreased by' : 
+
+      const actionText = adjustmentType === 'increase' ? 'increased by' :
+                        adjustmentType === 'decrease' ? 'decreased by' :
                         'set to';
-      
-      toast.success(`Stock for ${item.name} ${actionText} ${quantity} ${item.unit_of_measure}`);
+
+      toast.success(`Stock for ${item.name} ${actionText} ${numQuantity} ${item.unit_of_measure}`);
       onSuccess();
       handleClose();
       
@@ -134,13 +137,14 @@ export function StockAdjustmentModal({ open, onOpenChange, onSuccess, item }: St
 
   const getNewQuantity = () => {
     if (!item) return 0;
+    const numQuantity = toInteger(quantity, 0);
     switch (adjustmentType) {
       case 'increase':
-        return item.stock_quantity + quantity;
+        return item.stock_quantity + numQuantity;
       case 'decrease':
-        return Math.max(0, item.stock_quantity - quantity);
+        return Math.max(0, item.stock_quantity - numQuantity);
       case 'set':
-        return quantity;
+        return numQuantity;
       default:
         return item.stock_quantity;
     }
@@ -240,8 +244,24 @@ export function StockAdjustmentModal({ open, onOpenChange, onSuccess, item }: St
               <Input
                 id="quantity"
                 type="number"
-                value={quantity}
-                onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
+                value={quantity || ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    setQuantity('');
+                  } else {
+                    const num = parseInt(value);
+                    if (!isNaN(num)) {
+                      setQuantity(num);
+                    }
+                  }
+                }}
+                onBlur={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    setQuantity(0);
+                  }
+                }}
                 placeholder={adjustmentType === 'set' ? 'Enter exact quantity' : 'Enter adjustment quantity'}
                 min="0"
               />
@@ -281,51 +301,54 @@ export function StockAdjustmentModal({ open, onOpenChange, onSuccess, item }: St
           </div>
 
           {/* Preview */}
-          {quantity > 0 && (
-            <Card className="border-primary/20 bg-primary/5">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  {getAdjustmentIcon()}
-                  Adjustment Preview
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <Label className="text-sm text-muted-foreground">Current Stock</Label>
-                    <p className="text-lg font-medium">{item.stock_quantity}</p>
+          {(() => {
+            const numQuantity = toInteger(quantity, 0);
+            return numQuantity > 0 ? (
+              <Card className="border-primary/20 bg-primary/5">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    {getAdjustmentIcon()}
+                    Adjustment Preview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <Label className="text-sm text-muted-foreground">Current Stock</Label>
+                      <p className="text-lg font-medium">{item.stock_quantity}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-muted-foreground">Adjustment</Label>
+                      <p className="text-lg font-medium">
+                        {adjustmentType === 'increase' ? '+' : adjustmentType === 'decrease' ? '-' : '→'} {numQuantity}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-muted-foreground">New Stock</Label>
+                      <p className="text-lg font-medium text-primary">{getNewQuantity()}</p>
+                    </div>
                   </div>
-                  <div>
-                    <Label className="text-sm text-muted-foreground">Adjustment</Label>
-                    <p className="text-lg font-medium">
-                      {adjustmentType === 'increase' ? '+' : adjustmentType === 'decrease' ? '-' : '→'} {quantity}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-sm text-muted-foreground">New Stock</Label>
-                    <p className="text-lg font-medium text-primary">{getNewQuantity()}</p>
-                  </div>
-                </div>
-                {adjustmentType !== 'set' && (
-                  <div className="mt-4 text-center">
-                    <Label className="text-sm text-muted-foreground">Cost Impact</Label>
-                    <p className="text-lg font-medium">
-                      {adjustmentType === 'increase' ? '+' : '-'}${(quantity * item.cost_price).toFixed(2)}
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+                  {adjustmentType !== 'set' && (
+                    <div className="mt-4 text-center">
+                      <Label className="text-sm text-muted-foreground">Cost Impact</Label>
+                      <p className="text-lg font-medium">
+                        {adjustmentType === 'increase' ? '+' : '-'}${(numQuantity * item.cost_price).toFixed(2)}
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ) : null;
+          })()}
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={isSubmitting || quantity <= 0 || !reason}
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting || toInteger(quantity, 0) <= 0 || !reason}
             className="min-w-[120px]"
           >
             {isSubmitting ? 'Processing...' : 'Apply Adjustment'}

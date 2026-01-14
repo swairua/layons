@@ -31,6 +31,7 @@ import {
 import { toast } from 'sonner';
 import { parseErrorMessageWithCodes } from '@/utils/errorHelpers';
 import { useCreatePayment } from '@/hooks/useDatabase';
+import { toNumber } from '@/utils/numericFormHelpers';
 import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { PaymentAllocationQuickFix } from './PaymentAllocationQuickFix';
@@ -43,7 +44,15 @@ interface RecordPaymentModalProps {
 }
 
 export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: RecordPaymentModalProps) {
-  const [paymentData, setPaymentData] = useState({
+  const [paymentData, setPaymentData] = useState<{
+    invoice_id: string;
+    amount: number | '';
+    payment_date: string;
+    payment_method: string;
+    reference_number: string;
+    notes: string;
+    customer_name: string;
+  }>({
     invoice_id: invoice?.id || '',
     amount: invoice?.balance_due || 0,
     payment_date: new Date().toISOString().split('T')[0],
@@ -89,13 +98,16 @@ export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: R
   };
 
   const handleSubmit = async () => {
+    // Convert amount to number
+    const amount = toNumber(paymentData.amount, 0);
+
     // Validate that an invoice is selected
     if (!paymentData.invoice_id) {
       toast.error('Please select an invoice. Payments can only be made against invoices.');
       return;
     }
 
-    if (!paymentData.amount || paymentData.amount === 0) {
+    if (!amount || amount === 0) {
       toast.error('Please enter a valid payment amount (can be negative for refunds/adjustments)');
       return;
     }
@@ -104,8 +116,8 @@ export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: R
     const currentBalance = selectedInvoice?.balance_due || (selectedInvoice?.total_amount || 0) - (selectedInvoice?.paid_amount || 0);
 
     // Allow manual adjustments: warn about overpayments but don't prevent them
-    if (paymentData.amount > currentBalance && currentBalance > 0) {
-      console.warn(`Payment amount (${paymentData.amount}) exceeds outstanding balance (${currentBalance}) - this will create an overpayment`);
+    if (amount > currentBalance && currentBalance > 0) {
+      console.warn(`Payment amount (${amount}) exceeds outstanding balance (${currentBalance}) - this will create an overpayment`);
     }
 
     if (!paymentData.payment_method) {
@@ -139,7 +151,7 @@ export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: R
         invoice_id: paymentData.invoice_id, // Required for payment allocation
         payment_number: paymentNumber,
         payment_date: paymentData.payment_date,
-        amount: paymentData.amount,
+        amount: amount,
         payment_method: mapPaymentMethod(paymentData.payment_method),
         reference_number: paymentData.reference_number || paymentNumber,
         notes: paymentData.notes
@@ -368,8 +380,24 @@ export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: R
                 <Input
                   id="amount"
                   type="number"
-                  value={paymentData.amount}
-                  onChange={(e) => handleInputChange('amount', parseFloat(e.target.value) || 0)}
+                  value={paymentData.amount || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('amount', '');
+                    } else {
+                      const num = parseFloat(value);
+                      if (!isNaN(num)) {
+                        handleInputChange('amount', num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('amount', 0);
+                    }
+                  }}
                   min="0"
                   max={undefined}
                   step="0.01"
