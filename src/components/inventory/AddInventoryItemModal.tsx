@@ -47,7 +47,18 @@ interface ProductCategory {
 }
 
 export function AddInventoryItemModal({ open, onOpenChange, onSuccess }: AddInventoryItemModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    product_code: string;
+    description: string;
+    category_id: string;
+    unit_of_measure: string;
+    cost_price: number | '';
+    selling_price: number | '';
+    stock_quantity: number | '';
+    min_stock_level: number | '';
+    max_stock_level: number | '';
+  }>({
     name: '',
     product_code: '',
     description: '',
