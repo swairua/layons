@@ -42,9 +42,9 @@ interface QuotationItem {
   product_id: string;
   product_name: string;
   description: string;
-  quantity: number;
-  unit_price: number;
-  vat_percentage: number;
+  quantity: number | '';
+  unit_price: number | '';
+  vat_percentage: number | '';
   vat_inclusive: boolean;
   line_total: number;
   unit_of_measure?: string;
