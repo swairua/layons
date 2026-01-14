@@ -567,13 +567,14 @@ export const useConvertProformaToInvoice = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (proformaId: string) => {
+    mutationFn: async ({ proformaId, companyId }: { proformaId: string; companyId: string }) => {
       // This would implement the conversion logic
       // For now, just mark the proforma as converted
       const { data, error } = await supabase
         .from('proforma_invoices')
         .update({ status: 'converted' })
         .eq('id', proformaId)
+        .eq('company_id', companyId)
         .select()
         .single();
 
