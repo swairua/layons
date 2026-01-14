@@ -151,7 +151,7 @@ export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: R
         invoice_id: paymentData.invoice_id, // Required for payment allocation
         payment_number: paymentNumber,
         payment_date: paymentData.payment_date,
-        amount: paymentData.amount,
+        amount: amount,
         payment_method: mapPaymentMethod(paymentData.payment_method),
         reference_number: paymentData.reference_number || paymentNumber,
         notes: paymentData.notes
