@@ -492,8 +492,8 @@ export const CreateProformaModal = ({
                         <TableCell>
                           <Input
                             type="number"
-                            value={item.quantity}
-                            onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+                            value={item.quantity || ''}
+                            onChange={(e) => updateItem(item.id, 'quantity', e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
                             min="0"
                             step="0.01"
                             className="w-20"
@@ -503,8 +503,8 @@ export const CreateProformaModal = ({
                         <TableCell>
                           <Input
                             type="number"
-                            value={item.unit_price}
-                            onChange={(e) => updateItem(item.id, 'unit_price', parseFloat(e.target.value) || 0)}
+                            value={item.unit_price || ''}
+                            onChange={(e) => updateItem(item.id, 'unit_price', e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
                             min="0"
                             step="0.01"
                             className="w-24"
@@ -514,8 +514,8 @@ export const CreateProformaModal = ({
                         <TableCell>
                           <Input
                             type="number"
-                            value={item.tax_percentage}
-                            onChange={(e) => updateItem(item.id, 'tax_percentage', parseFloat(e.target.value) || 0)}
+                            value={item.tax_percentage || ''}
+                            onChange={(e) => updateItem(item.id, 'tax_percentage', e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
                             min="0"
                             max="100"
                             step="0.01"
