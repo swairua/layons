@@ -359,9 +359,12 @@ export const useConvertBoqToInvoice = () => {
           if (itemsError) {
             // Try to clean up the invoice if items insertion fails
             console.error('Invoice items creation failed, attempting cleanup...');
-            await supabase.from('invoices').delete().eq('id', invoice.id).catch((cleanupErr) => {
+            try {
+              await supabase.from('invoices').delete().eq('id', invoice.id);
+              console.log('Invoice cleaned up successfully after items error');
+            } catch (cleanupErr) {
               console.error('Failed to clean up invoice after items error:', cleanupErr);
-            });
+            }
 
             const errorMsg = itemsError?.message || itemsError?.details || JSON.stringify(itemsError);
             console.error('Invoice items creation error:', {
