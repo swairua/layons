@@ -256,7 +256,7 @@ export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: E
                 <Input
                   id="credit_limit"
                   type="number"
-                  value={formData.credit_limit || ''}
+                  value={formData.credit_limit ?? ''}
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value === '') {
@@ -285,7 +285,7 @@ export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: E
                 <Input
                   id="payment_terms"
                   type="number"
-                  value={formData.payment_terms || ''}
+                  value={formData.payment_terms ?? ''}
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value === '') {

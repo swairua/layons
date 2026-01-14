@@ -380,7 +380,7 @@ export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: R
                 <Input
                   id="amount"
                   type="number"
-                  value={paymentData.amount || ''}
+                  value={paymentData.amount ?? ''}
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value === '') {

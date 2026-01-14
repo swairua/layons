@@ -334,7 +334,7 @@ export function EditInventoryItemModal({ open, onOpenChange, onSuccess, item }: 
                 <Input
                   id="cost_price"
                   type="number"
-                  value={formData.cost_price || ''}
+                  value={formData.cost_price ?? ''}
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value === '') {
@@ -363,7 +363,7 @@ export function EditInventoryItemModal({ open, onOpenChange, onSuccess, item }: 
                 <Input
                   id="selling_price"
                   type="number"
-                  value={formData.selling_price || ''}
+                  value={formData.selling_price ?? ''}
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value === '') {
@@ -393,7 +393,7 @@ export function EditInventoryItemModal({ open, onOpenChange, onSuccess, item }: 
               <Input
                 id="stock_quantity"
                 type="number"
-                value={formData.stock_quantity || ''}
+                value={formData.stock_quantity ?? ''}
                 onChange={(e) => {
                   const value = e.target.value;
                   if (value === '') {
@@ -422,7 +422,7 @@ export function EditInventoryItemModal({ open, onOpenChange, onSuccess, item }: 
                 <Input
                   id="min_stock_level"
                   type="number"
-                  value={formData.min_stock_level || ''}
+                  value={formData.min_stock_level ?? ''}
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value === '') {
@@ -450,7 +450,7 @@ export function EditInventoryItemModal({ open, onOpenChange, onSuccess, item }: 
                 <Input
                   id="max_stock_level"
                   type="number"
-                  value={formData.max_stock_level || ''}
+                  value={formData.max_stock_level ?? ''}
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value === '') {

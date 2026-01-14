@@ -751,7 +751,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                             <Label>Labor Cost</Label>
                             <Input
                               type="number"
-                              value={section.labor_cost || ''}
+                              value={section.labor_cost ?? ''}
                               onChange={(e) => {
                                 const value = e.target.value;
                                 if (value === '') {
@@ -816,7 +816,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                     <TableCell>
                                       <Input
                                         type="number"
-                                        value={item.quantity || ''}
+                                        value={item.quantity ?? ''}
                                         onChange={(e) => {
                                           const value = e.target.value;
                                           updateItemQuantity(section.id, item.id, value === '' ? '' : parseInt(value) || 0);
@@ -829,7 +829,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                     <TableCell>
                                       <Input
                                         type="number"
-                                        value={item.unit_price || ''}
+                                        value={item.unit_price ?? ''}
                                         onChange={(e) => {
                                           const value = e.target.value;
                                           updateItemPrice(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
@@ -842,7 +842,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                     <TableCell>
                                       <Input
                                         type="number"
-                                        value={item.tax_percentage || ''}
+                                        value={item.tax_percentage ?? ''}
                                         onChange={(e) => {
                                           const value = e.target.value;
                                           updateItemTax(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
