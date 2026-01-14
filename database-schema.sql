@@ -443,20 +443,26 @@ RETURNS VARCHAR AS $$
 DECLARE
     next_number INTEGER;
     year_part VARCHAR(4);
-    month_part VARCHAR(2);
 BEGIN
     year_part := EXTRACT(YEAR FROM CURRENT_DATE)::VARCHAR;
-    month_part := LPAD(EXTRACT(MONTH FROM CURRENT_DATE)::VARCHAR, 2, '0');
 
-    SELECT COALESCE(MAX(CAST(SUBSTRING(invoice_number FROM '^[0-9]{4}') AS INTEGER)), 0) + 1
+    -- Extract the numeric part from existing invoices and quotations from CURRENT YEAR ONLY
+    -- For format "INV-YYYY-XXX", extract the XXX part where YYYY matches current year
+    SELECT COALESCE(MAX(
+        CAST(SUBSTRING(invoice_number FROM 'INV-[0-9]{4}-([0-9]{3})') AS INTEGER)
+    ), 0) + 1
     INTO next_number
     FROM (
-        SELECT invoice_number FROM invoices WHERE company_id = company_uuid
+        SELECT invoice_number FROM invoices
+        WHERE company_id = company_uuid
+        AND invoice_number LIKE 'INV-' || year_part || '-%'
         UNION ALL
-        SELECT quotation_number FROM quotations WHERE company_id = company_uuid
+        SELECT quotation_number FROM quotations
+        WHERE company_id = company_uuid
+        AND quotation_number LIKE 'INV-' || year_part || '-%'
     ) AS all_docs;
 
-    RETURN LPAD(next_number::VARCHAR, 4, '0') || month_part || year_part;
+    RETURN 'INV-' || year_part || '-' || LPAD(next_number::VARCHAR, 3, '0');
 END;
 $$ LANGUAGE plpgsql;
 

@@ -394,17 +394,24 @@ export const useConvertBoqToInvoice = () => {
 
       if (updateError) {
         const errorMsg = updateError?.message || updateError?.details || JSON.stringify(updateError);
-        console.warn('Warning: Failed to mark BOQ as converted:', { updateError, errorMsg });
-        // This is not critical, invoice was created successfully
+        console.error('ERROR: Failed to mark BOQ as converted:', { updateError, errorMsg });
+        throw new Error(`Failed to update BOQ status: ${errorMsg}`);
       }
 
+      console.log('✅ BOQ status updated to converted successfully');
       return invoice;
     },
     onSuccess: () => {
       // Invalidate relevant queries to refetch data
+      console.log('🔄 Invalidating BOQ and Invoice queries');
       queryClient.invalidateQueries({ queryKey: ['boqs'] });
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
       queryClient.invalidateQueries({ queryKey: ['invoices_fixed'] });
+
+      // Also manually refetch after a short delay to ensure fresh data
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['boqs'] });
+      }, 200);
     }
   });
 };
