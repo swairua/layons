@@ -626,8 +626,8 @@ export function CreateCreditNoteModal({
                       <TableCell>
                         <Input
                           type="number"
-                          value={item.quantity}
-                          onChange={(e) => updateItemQuantity(item.id, parseInt(e.target.value) || 0)}
+                          value={item.quantity || ''}
+                          onChange={(e) => updateItemQuantity(item.id, e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
                           className="w-20"
                           min="1"
                           placeholder="1"
@@ -636,8 +636,8 @@ export function CreateCreditNoteModal({
                       <TableCell>
                         <Input
                           type="number"
-                          value={item.unit_price}
-                          onChange={(e) => updateItemPrice(item.id, parseFloat(e.target.value) || 0)}
+                          value={item.unit_price || ''}
+                          onChange={(e) => updateItemPrice(item.id, e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
                           className="w-24"
                           step="0.01"
                           placeholder="0.00"
@@ -646,8 +646,8 @@ export function CreateCreditNoteModal({
                       <TableCell>
                         <Input
                           type="number"
-                          value={item.tax_percentage}
-                          onChange={(e) => updateItemTax(item.id, parseFloat(e.target.value) || 0)}
+                          value={item.tax_percentage || ''}
+                          onChange={(e) => updateItemTax(item.id, e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
                           className="w-20"
                           min="0"
                           max="100"
