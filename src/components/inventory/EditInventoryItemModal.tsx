@@ -133,12 +133,16 @@ export function EditInventoryItemModal({ open, onOpenChange, onSuccess, item }: 
       return;
     }
 
-    if (formData.selling_price <= 0) {
+    // Convert string values to numbers
+    const sellingPrice = toNumber(formData.selling_price, 0);
+    const minStockLevel = toInteger(formData.min_stock_level, 0);
+
+    if (sellingPrice <= 0) {
       toast.error('Selling price must be greater than 0');
       return;
     }
 
-    if (formData.min_stock_level < 0) {
+    if (minStockLevel < 0) {
       toast.error('Minimum stock level cannot be negative');
       return;
     }
@@ -157,11 +161,11 @@ export function EditInventoryItemModal({ open, onOpenChange, onSuccess, item }: 
         description: formData.description,
         category_id: formData.category_id,
         unit_of_measure: formData.unit_of_measure,
-        cost_price: Number(formData.cost_price),
-        selling_price: Number(formData.selling_price),
-        stock_quantity: Number(formData.stock_quantity),
-        minimum_stock_level: Number(formData.min_stock_level),
-        maximum_stock_level: Number(formData.max_stock_level)
+        cost_price: toNumber(formData.cost_price, 0),
+        selling_price: sellingPrice,
+        stock_quantity: toInteger(formData.stock_quantity, 0),
+        minimum_stock_level: minStockLevel,
+        maximum_stock_level: toInteger(formData.max_stock_level, 0)
       };
 
       console.log('Updating product with data:', updatedData);
