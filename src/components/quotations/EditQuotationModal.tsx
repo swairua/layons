@@ -876,20 +876,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                                 value={section.labor_cost || ''}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  if (value === '') {
-                                    updateSectionLaborCost(section.id, '');
-                                  } else {
-                                    const num = parseFloat(value);
-                                    if (!isNaN(num)) {
-                                      updateSectionLaborCost(section.id, num);
-                                    }
-                                  }
-                                }}
-                                onBlur={(e) => {
-                                  const value = e.target.value;
-                                  if (value === '') {
-                                    updateSectionLaborCost(section.id, 0);
-                                  }
+                                  updateSectionLaborCost(section.id, value === '' ? '' : parseFloat(value) || 0);
                                 }}
                                 className="w-32 h-8"
                                 step="0.01"
