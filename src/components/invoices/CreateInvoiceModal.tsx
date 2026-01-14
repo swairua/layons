@@ -351,7 +351,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
   };
 
   const calculateTotalLabor = () => {
-    return sections.reduce((sum, section) => sum + section.labor_cost, 0);
+    return sections.reduce((sum, section) => sum + toNumber(section.labor_cost, 0), 0);
   };
 
   const getTotalTax = () => {
