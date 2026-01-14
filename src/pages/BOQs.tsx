@@ -121,10 +121,10 @@ export default function BOQs() {
   };
 
   const handleConvertConfirm = async () => {
-    if (!convertDialog.boqId) return;
+    if (!convertDialog.boqId || !companyId) return;
     try {
       toast.loading(`Converting BOQ ${convertDialog.boqNumber} to invoice...`);
-      const invoice = await convertToInvoice.mutateAsync(convertDialog.boqId);
+      const invoice = await convertToInvoice.mutateAsync({ boqId: convertDialog.boqId, companyId });
 
       toast.dismiss();
 
