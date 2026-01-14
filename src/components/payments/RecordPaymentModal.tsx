@@ -98,13 +98,16 @@ export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: R
   };
 
   const handleSubmit = async () => {
+    // Convert amount to number
+    const amount = toNumber(paymentData.amount, 0);
+
     // Validate that an invoice is selected
     if (!paymentData.invoice_id) {
       toast.error('Please select an invoice. Payments can only be made against invoices.');
       return;
     }
 
-    if (!paymentData.amount || paymentData.amount === 0) {
+    if (!amount || amount === 0) {
       toast.error('Please enter a valid payment amount (can be negative for refunds/adjustments)');
       return;
     }
@@ -113,8 +116,8 @@ export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: R
     const currentBalance = selectedInvoice?.balance_due || (selectedInvoice?.total_amount || 0) - (selectedInvoice?.paid_amount || 0);
 
     // Allow manual adjustments: warn about overpayments but don't prevent them
-    if (paymentData.amount > currentBalance && currentBalance > 0) {
-      console.warn(`Payment amount (${paymentData.amount}) exceeds outstanding balance (${currentBalance}) - this will create an overpayment`);
+    if (amount > currentBalance && currentBalance > 0) {
+      console.warn(`Payment amount (${amount}) exceeds outstanding balance (${currentBalance}) - this will create an overpayment`);
     }
 
     if (!paymentData.payment_method) {
