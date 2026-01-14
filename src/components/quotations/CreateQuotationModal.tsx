@@ -42,9 +42,9 @@ interface QuotationItem {
   product_id: string;
   product_name: string;
   description: string;
-  quantity: number;
-  unit_price: number;
-  vat_percentage: number;
+  quantity: number | '';
+  unit_price: number | '';
+  vat_percentage: number | '';
   vat_inclusive: boolean;
   line_total: number;
   unit_of_measure?: string;
@@ -203,8 +203,9 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
     setSearchProduct('');
   };
 
-  const updateItemQuantity = (sectionId: string, itemId: string, quantity: number) => {
-    if (quantity <= 0) {
+  const updateItemQuantity = (sectionId: string, itemId: string, quantity: number | '') => {
+    const numQuantity = quantity === '' ? 0 : Number(quantity);
+    if (numQuantity < 0) {
       removeItem(sectionId, itemId);
       return;
     }
@@ -216,7 +217,9 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(quantity, item.unit_price, item.vat_percentage, item.vat_inclusive);
+            const price = item.unit_price === '' ? 0 : Number(item.unit_price);
+            const vat = item.vat_percentage === '' ? 0 : Number(item.vat_percentage);
+            const lineTotal = calculateItemTotal(numQuantity, price, vat, item.vat_inclusive);
             return { ...item, quantity, line_total: lineTotal };
           }
           return item;
@@ -225,7 +228,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
     }));
   };
 
-  const updateItemPrice = (sectionId: string, itemId: string, unitPrice: number) => {
+  const updateItemPrice = (sectionId: string, itemId: string, unitPrice: number | '') => {
     setSections(sections.map(section => {
       if (section.id !== sectionId) return section;
 
@@ -233,7 +236,10 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(item.quantity, unitPrice, item.vat_percentage, item.vat_inclusive);
+            const qty = item.quantity === '' ? 0 : Number(item.quantity);
+            const price = unitPrice === '' ? 0 : Number(unitPrice);
+            const vat = item.vat_percentage === '' ? 0 : Number(item.vat_percentage);
+            const lineTotal = calculateItemTotal(qty, price, vat, item.vat_inclusive);
             return { ...item, unit_price: unitPrice, line_total: lineTotal };
           }
           return item;
@@ -242,7 +248,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
     }));
   };
 
-  const updateItemVAT = (sectionId: string, itemId: string, vatPercentage: number) => {
+  const updateItemVAT = (sectionId: string, itemId: string, vatPercentage: number | '') => {
     setSections(sections.map(section => {
       if (section.id !== sectionId) return section;
 
@@ -250,7 +256,10 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, vatPercentage, item.vat_inclusive);
+            const qty = item.quantity === '' ? 0 : Number(item.quantity);
+            const price = item.unit_price === '' ? 0 : Number(item.unit_price);
+            const vat = vatPercentage === '' ? 0 : Number(vatPercentage);
+            const lineTotal = calculateItemTotal(qty, price, vat, item.vat_inclusive);
             return { ...item, vat_percentage: vatPercentage, line_total: lineTotal };
           }
           return item;
@@ -786,20 +795,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                         value={item.quantity || ''}
                                         onChange={(e) => {
                                           const value = e.target.value;
-                                          if (value === '') {
-                                            // Don't update on empty, wait for blur
-                                          } else {
-                                            const num = parseInt(value);
-                                            if (!isNaN(num) && num > 0) {
-                                              updateItemQuantity(section.id, item.id, num);
-                                            }
-                                          }
-                                        }}
-                                        onBlur={(e) => {
-                                          const value = e.target.value;
-                                          if (value === '' || parseInt(value) <= 0) {
-                                            updateItemQuantity(section.id, item.id, 1);
-                                          }
+                                          updateItemQuantity(section.id, item.id, value === '' ? '' : parseInt(value) || 0);
                                         }}
                                         className="w-16 h-8"
                                         min="1"
@@ -812,20 +808,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                         value={item.unit_price || ''}
                                         onChange={(e) => {
                                           const value = e.target.value;
-                                          if (value === '') {
-                                            // Don't update on empty, wait for blur
-                                          } else {
-                                            const num = parseFloat(value);
-                                            if (!isNaN(num) && num >= 0) {
-                                              updateItemPrice(section.id, item.id, num);
-                                            }
-                                          }
-                                        }}
-                                        onBlur={(e) => {
-                                          const value = e.target.value;
-                                          if (value === '') {
-                                            updateItemPrice(section.id, item.id, 0);
-                                          }
+                                          updateItemPrice(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
                                         className="w-24 h-8"
                                         step="0.01"
@@ -838,20 +821,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                         value={item.vat_percentage || ''}
                                         onChange={(e) => {
                                           const value = e.target.value;
-                                          if (value === '') {
-                                            // Don't update on empty, wait for blur
-                                          } else {
-                                            const num = parseFloat(value);
-                                            if (!isNaN(num) && num >= 0 && num <= 100) {
-                                              updateItemVAT(section.id, item.id, num);
-                                            }
-                                          }
-                                        }}
-                                        onBlur={(e) => {
-                                          const value = e.target.value;
-                                          if (value === '') {
-                                            updateItemVAT(section.id, item.id, 0);
-                                          }
+                                          updateItemVAT(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
                                         className="w-20 h-8"
                                         min="0"
@@ -899,20 +869,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                 value={section.labor_cost || ''}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  if (value === '') {
-                                    updateSectionLaborCost(section.id, '');
-                                  } else {
-                                    const num = parseFloat(value);
-                                    if (!isNaN(num)) {
-                                      updateSectionLaborCost(section.id, num);
-                                    }
-                                  }
-                                }}
-                                onBlur={(e) => {
-                                  const value = e.target.value;
-                                  if (value === '') {
-                                    updateSectionLaborCost(section.id, 0);
-                                  }
+                                  updateSectionLaborCost(section.id, value === '' ? '' : parseFloat(value) || 0);
                                 }}
                                 className="w-32 h-8"
                                 step="0.01"

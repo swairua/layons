@@ -44,9 +44,9 @@ interface InvoiceItem {
   product_id: string;
   product_name: string;
   description: string;
-  quantity: number;
-  unit_price: number;
-  tax_percentage: number;
+  quantity: number | '';
+  unit_price: number | '';
+  tax_percentage: number | '';
   tax_amount: number;
   tax_inclusive: boolean;
   line_total: number;
@@ -219,8 +219,9 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
     setSearchProduct('');
   };
 
-  const updateItemQuantity = (sectionId: string, itemId: string, quantity: number) => {
-    if (quantity <= 0) {
+  const updateItemQuantity = (sectionId: string, itemId: string, quantity: number | '') => {
+    const numQuantity = quantity === '' ? 0 : Number(quantity);
+    if (numQuantity < 0) {
       removeItem(sectionId, itemId);
       return;
     }
@@ -232,8 +233,10 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(quantity, item.unit_price, item.tax_percentage, item.tax_inclusive);
-            const taxAmount = calculateTaxAmount({ ...item, quantity });
+            const price = item.unit_price === '' ? 0 : Number(item.unit_price);
+            const tax = item.tax_percentage === '' ? 0 : Number(item.tax_percentage);
+            const lineTotal = calculateItemTotal(numQuantity, price, tax, item.tax_inclusive);
+            const taxAmount = calculateTaxAmount({ ...item, quantity: numQuantity });
             return { ...item, quantity, line_total: lineTotal, tax_amount: taxAmount };
           }
           return item;
@@ -242,7 +245,8 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
     }));
   };
 
-  const updateItemPrice = (sectionId: string, itemId: string, unitPrice: number) => {
+  const updateItemPrice = (sectionId: string, itemId: string, unitPrice: number | '') => {
+    const numPrice = unitPrice === '' ? 0 : Number(unitPrice);
     setSections(sections.map(section => {
       if (section.id !== sectionId) return section;
 
@@ -250,8 +254,10 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(item.quantity, unitPrice, item.tax_percentage, item.tax_inclusive);
-            const taxAmount = calculateTaxAmount({ ...item, unit_price: unitPrice });
+            const qty = item.quantity === '' ? 0 : Number(item.quantity);
+            const tax = item.tax_percentage === '' ? 0 : Number(item.tax_percentage);
+            const lineTotal = calculateItemTotal(qty, numPrice, tax, item.tax_inclusive);
+            const taxAmount = calculateTaxAmount({ ...item, unit_price: numPrice });
             return { ...item, unit_price: unitPrice, line_total: lineTotal, tax_amount: taxAmount };
           }
           return item;
@@ -260,7 +266,8 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
     }));
   };
 
-  const updateItemTax = (sectionId: string, itemId: string, taxPercentage: number) => {
+  const updateItemTax = (sectionId: string, itemId: string, taxPercentage: number | '') => {
+    const numTax = taxPercentage === '' ? 0 : Number(taxPercentage);
     setSections(sections.map(section => {
       if (section.id !== sectionId) return section;
 
@@ -268,8 +275,10 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const lineTotal = calculateItemTotal(item.quantity, item.unit_price, taxPercentage, item.tax_inclusive);
-            const taxAmount = calculateTaxAmount({ ...item, tax_percentage: taxPercentage });
+            const qty = item.quantity === '' ? 0 : Number(item.quantity);
+            const price = item.unit_price === '' ? 0 : Number(item.unit_price);
+            const lineTotal = calculateItemTotal(qty, price, numTax, item.tax_inclusive);
+            const taxAmount = calculateTaxAmount({ ...item, tax_percentage: numTax });
             return { ...item, tax_percentage: taxPercentage, line_total: lineTotal, tax_amount: taxAmount };
           }
           return item;
@@ -810,20 +819,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                         value={item.quantity || ''}
                                         onChange={(e) => {
                                           const value = e.target.value;
-                                          if (value === '') {
-                                            // Don't update on empty, wait for blur
-                                          } else {
-                                            const num = parseInt(value);
-                                            if (!isNaN(num) && num > 0) {
-                                              updateItemQuantity(section.id, item.id, num);
-                                            }
-                                          }
-                                        }}
-                                        onBlur={(e) => {
-                                          const value = e.target.value;
-                                          if (value === '' || parseInt(value) <= 0) {
-                                            updateItemQuantity(section.id, item.id, 1);
-                                          }
+                                          updateItemQuantity(section.id, item.id, value === '' ? '' : parseInt(value) || 0);
                                         }}
                                         className="w-16 h-8"
                                         min="1"
@@ -836,20 +832,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                         value={item.unit_price || ''}
                                         onChange={(e) => {
                                           const value = e.target.value;
-                                          if (value === '') {
-                                            // Don't update on empty, wait for blur
-                                          } else {
-                                            const num = parseFloat(value);
-                                            if (!isNaN(num) && num >= 0) {
-                                              updateItemPrice(section.id, item.id, num);
-                                            }
-                                          }
-                                        }}
-                                        onBlur={(e) => {
-                                          const value = e.target.value;
-                                          if (value === '') {
-                                            updateItemPrice(section.id, item.id, 0);
-                                          }
+                                          updateItemPrice(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
                                         className="w-20 h-8"
                                         step="0.01"
@@ -862,20 +845,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                         value={item.tax_percentage || ''}
                                         onChange={(e) => {
                                           const value = e.target.value;
-                                          if (value === '') {
-                                            // Don't update on empty, wait for blur
-                                          } else {
-                                            const num = parseFloat(value);
-                                            if (!isNaN(num) && num >= 0 && num <= 100) {
-                                              updateItemTax(section.id, item.id, num);
-                                            }
-                                          }
-                                        }}
-                                        onBlur={(e) => {
-                                          const value = e.target.value;
-                                          if (value === '') {
-                                            updateItemTax(section.id, item.id, 0);
-                                          }
+                                          updateItemTax(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
                                         className="w-14 h-8"
                                         placeholder="0"

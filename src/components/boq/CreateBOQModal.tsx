@@ -60,9 +60,9 @@ interface BOQSectionRow {
 const defaultItem = (): BOQItemRow => ({
   id: `item-${crypto.randomUUID()}`,
   description: '',
-  quantity: 1,
+  quantity: '',
   unit: '',
-  rate: 0,
+  rate: '',
 });
 
 const defaultSubsection = (name: string, label: string): BOQSubsectionRow => ({
@@ -151,7 +151,14 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
           if (sub.id !== subsectionId) return sub;
           return {
             ...sub,
-            items: sub.items.map(i => i.id === itemId ? { ...i, [field]: field === 'description' || field === 'unit' ? String(value) : Number(value) } : i)
+            items: sub.items.map(i => {
+              if (i.id !== itemId) return i;
+              if (field === 'description' || field === 'unit') {
+                return { ...i, [field]: String(value) };
+              }
+              // For numeric fields (quantity, rate), allow empty string
+              return { ...i, [field]: value === '' ? '' : Number(value) };
+            })
           };
         })
       };
@@ -198,7 +205,11 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
   };
 
   const calculateSubsectionTotal = (subsection: BOQSubsectionRow): number => {
-    return subsection.items.reduce((sum, item) => sum + ((item.quantity || 0) * (item.rate || 0)), 0);
+    return subsection.items.reduce((sum, item) => {
+      const qty = item.quantity === '' ? 0 : Number(item.quantity);
+      const rate = item.rate === '' ? 0 : Number(item.rate);
+      return sum + (qty * rate);
+    }, 0);
   };
 
   const calculateSectionTotal = (section: BOQSectionRow): number => {
@@ -212,13 +223,13 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
   }, [sections]);
 
   const isItemEmpty = (item: BOQItemRow): boolean => {
-    return !item.description.trim() && item.quantity === 1 && item.rate === 0;
+    return !item.description.trim() && (item.quantity === '' || item.quantity === 0) && (item.rate === '' || item.rate === 0);
   };
 
   const isItemPartiallyFilled = (item: BOQItemRow): boolean => {
     const hasDescription = item.description.trim().length > 0;
-    const hasQuantity = item.quantity > 0;
-    const hasRate = item.rate >= 0;
+    const hasQuantity = item.quantity !== '' && Number(item.quantity) > 0;
+    const hasRate = item.rate !== '' && Number(item.rate) > 0;
     const filledFields = [hasDescription, hasQuantity, hasRate].filter(Boolean).length;
     return filledFields > 0 && filledFields < 3;
   };
@@ -260,7 +271,9 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
       filledSections.forEach(sec => {
         sec.subsections.forEach(sub => {
           sub.items.forEach(item => {
-            filledSubtotal += (item.quantity || 0) * (item.rate || 0);
+            const qty = item.quantity === '' ? 0 : Number(item.quantity);
+            const rate = item.rate === '' ? 0 : Number(item.rate);
+            filledSubtotal += qty * rate;
           });
         });
       });
@@ -476,7 +489,7 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
                                 <Input value={row.description} onChange={e => updateItem(section.id, subsection.id, row.id, 'description', e.target.value)} placeholder="Describe item" />
                               </TableCell>
                               <TableCell>
-                                <Input type="number" min={0} value={row.quantity} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', Number(e.target.value))} />
+                                <Input type="number" min={0} value={row.quantity || ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', e.target.value === '' ? '' : Number(e.target.value))} />
                               </TableCell>
                               <TableCell>
                                 <Select value={row.unit} onValueChange={(val) => {
@@ -506,10 +519,10 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
                                 }} />
                               </TableCell>
                               <TableCell>
-                                <Input type="number" min={0} value={row.rate} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', Number(e.target.value))} />
+                                <Input type="number" min={0} value={row.rate || ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', e.target.value === '' ? '' : Number(e.target.value))} />
                               </TableCell>
                               <TableCell className="text-right">
-                                {formatCurrency((row.quantity || 0) * (row.rate || 0))}
+                                {formatCurrency((row.quantity === '' ? 0 : Number(row.quantity)) * (row.rate === '' ? 0 : Number(row.rate)))}
                               </TableCell>
                               <TableCell className="text-right">
                                 <Button variant="ghost" size="icon" onClick={() => removeItem(section.id, subsection.id, row.id)}>

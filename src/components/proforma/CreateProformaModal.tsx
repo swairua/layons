@@ -38,9 +38,9 @@ interface ProformaItem {
   product_id: string;
   product_name: string;
   description: string;
-  quantity: number;
-  unit_price: number;
-  tax_percentage: number;
+  quantity: number | '';
+  unit_price: number | '';
+  tax_percentage: number | '';
   tax_amount: number;
   tax_inclusive: boolean;
   line_total: number;
@@ -167,9 +167,13 @@ export const CreateProformaModal = ({
   };
 
   const calculateItemTotals = (item: ProformaItem): ProformaItem => {
-    const baseAmount = item.quantity * item.unit_price;
+    const qty = item.quantity === '' ? 0 : Number(item.quantity);
+    const price = item.unit_price === '' ? 0 : Number(item.unit_price);
+    const tax = item.tax_percentage === '' ? 0 : Number(item.tax_percentage);
 
-    if (item.tax_percentage === 0 || !item.tax_inclusive) {
+    const baseAmount = qty * price;
+
+    if (tax === 0 || !item.tax_inclusive) {
       // No tax or tax checkbox unchecked
       return {
         ...item,
@@ -179,7 +183,7 @@ export const CreateProformaModal = ({
     }
 
     // Tax checkbox checked: add tax to the base amount
-    const taxAmount = baseAmount * (item.tax_percentage / 100);
+    const taxAmount = baseAmount * (tax / 100);
     const lineTotal = baseAmount + taxAmount;
 
     return {
@@ -196,7 +200,9 @@ export const CreateProformaModal = ({
   const calculateTotals = () => {
     // Unit prices are always tax-exclusive, so subtotal is always the base amount
     const subtotal = items.reduce((sum, item) => {
-      return sum + (item.quantity * item.unit_price);
+      const qty = item.quantity === '' ? 0 : Number(item.quantity);
+      const price = item.unit_price === '' ? 0 : Number(item.unit_price);
+      return sum + (qty * price);
     }, 0);
 
     const totalTax = items.reduce((sum, item) => sum + item.tax_amount, 0);
@@ -492,8 +498,8 @@ export const CreateProformaModal = ({
                         <TableCell>
                           <Input
                             type="number"
-                            value={item.quantity}
-                            onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+                            value={item.quantity || ''}
+                            onChange={(e) => updateItem(item.id, 'quantity', e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
                             min="0"
                             step="0.01"
                             className="w-20"
@@ -503,8 +509,8 @@ export const CreateProformaModal = ({
                         <TableCell>
                           <Input
                             type="number"
-                            value={item.unit_price}
-                            onChange={(e) => updateItem(item.id, 'unit_price', parseFloat(e.target.value) || 0)}
+                            value={item.unit_price || ''}
+                            onChange={(e) => updateItem(item.id, 'unit_price', e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
                             min="0"
                             step="0.01"
                             className="w-24"
@@ -514,8 +520,8 @@ export const CreateProformaModal = ({
                         <TableCell>
                           <Input
                             type="number"
-                            value={item.tax_percentage}
-                            onChange={(e) => updateItem(item.id, 'tax_percentage', parseFloat(e.target.value) || 0)}
+                            value={item.tax_percentage || ''}
+                            onChange={(e) => updateItem(item.id, 'tax_percentage', e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
                             min="0"
                             max="100"
                             step="0.01"

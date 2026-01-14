@@ -41,9 +41,9 @@ interface CreditNoteItem {
   product_id?: string; // Optional to allow custom items
   product_name: string;
   description: string;
-  quantity: number;
-  unit_price: number;
-  tax_percentage: number;
+  quantity: number | '';
+  unit_price: number | '';
+  tax_percentage: number | '';
   tax_amount: number;
   tax_inclusive: boolean;
   line_total: number;
@@ -160,10 +160,14 @@ export function CreateCreditNoteModal({
   };
 
   const calculateLineTotal = (item: CreditNoteItem, quantity?: number, unitPrice?: number, taxPercentage?: number, taxInclusive?: boolean) => {
-    const qty = quantity ?? item.quantity;
-    const price = unitPrice ?? item.unit_price;
-    const tax = taxPercentage ?? item.tax_percentage;
+    const qtyValue = quantity ?? item.quantity;
+    const priceValue = unitPrice ?? item.unit_price;
+    const taxValue = taxPercentage ?? item.tax_percentage;
     const inclusive = taxInclusive ?? item.tax_inclusive;
+
+    const qty = qtyValue === '' ? 0 : Number(qtyValue);
+    const price = priceValue === '' ? 0 : Number(priceValue);
+    const tax = taxValue === '' ? 0 : Number(taxValue);
 
     const baseAmount = qty * price;
     let taxAmount = 0;
@@ -186,35 +190,38 @@ export function CreateCreditNoteModal({
     return { lineTotal, taxAmount };
   };
 
-  const updateItemQuantity = (itemId: string, quantity: number) => {
-    if (quantity <= 0) {
+  const updateItemQuantity = (itemId: string, quantity: number | '') => {
+    const numQuantity = quantity === '' ? 0 : Number(quantity);
+    if (numQuantity < 0) {
       removeItem(itemId);
       return;
     }
 
     setItems(items.map(item => {
       if (item.id === itemId) {
-        const { lineTotal, taxAmount } = calculateLineTotal(item, quantity);
+        const { lineTotal, taxAmount } = calculateLineTotal(item, numQuantity);
         return { ...item, quantity, line_total: lineTotal, tax_amount: taxAmount };
       }
       return item;
     }));
   };
 
-  const updateItemPrice = (itemId: string, unitPrice: number) => {
+  const updateItemPrice = (itemId: string, unitPrice: number | '') => {
+    const numPrice = unitPrice === '' ? 0 : Number(unitPrice);
     setItems(items.map(item => {
       if (item.id === itemId) {
-        const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, unitPrice);
+        const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, numPrice);
         return { ...item, unit_price: unitPrice, line_total: lineTotal, tax_amount: taxAmount };
       }
       return item;
     }));
   };
 
-  const updateItemTax = (itemId: string, taxPercentage: number) => {
+  const updateItemTax = (itemId: string, taxPercentage: number | '') => {
+    const numTax = taxPercentage === '' ? 0 : Number(taxPercentage);
     setItems(items.map(item => {
       if (item.id === itemId) {
-        const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, undefined, taxPercentage);
+        const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, undefined, numTax);
         return { ...item, tax_percentage: taxPercentage, line_total: lineTotal, tax_amount: taxAmount };
       }
       return item;
@@ -252,7 +259,11 @@ export function CreateCreditNoteModal({
     }).format(amount);
   };
 
-  const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+  const subtotal = items.reduce((sum, item) => {
+    const qty = item.quantity === '' ? 0 : Number(item.quantity);
+    const price = item.unit_price === '' ? 0 : Number(item.unit_price);
+    return sum + (qty * price);
+  }, 0);
   const taxAmount = items.reduce((sum, item) => sum + (item.tax_amount || 0), 0);
   const totalAmount = items.reduce((sum, item) => sum + item.line_total, 0);
 
@@ -623,8 +634,8 @@ export function CreateCreditNoteModal({
                       <TableCell>
                         <Input
                           type="number"
-                          value={item.quantity}
-                          onChange={(e) => updateItemQuantity(item.id, parseInt(e.target.value) || 0)}
+                          value={item.quantity || ''}
+                          onChange={(e) => updateItemQuantity(item.id, e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
                           className="w-20"
                           min="1"
                           placeholder="1"
@@ -633,8 +644,8 @@ export function CreateCreditNoteModal({
                       <TableCell>
                         <Input
                           type="number"
-                          value={item.unit_price}
-                          onChange={(e) => updateItemPrice(item.id, parseFloat(e.target.value) || 0)}
+                          value={item.unit_price || ''}
+                          onChange={(e) => updateItemPrice(item.id, e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
                           className="w-24"
                           step="0.01"
                           placeholder="0.00"
@@ -643,8 +654,8 @@ export function CreateCreditNoteModal({
                       <TableCell>
                         <Input
                           type="number"
-                          value={item.tax_percentage}
-                          onChange={(e) => updateItemTax(item.id, parseFloat(e.target.value) || 0)}
+                          value={item.tax_percentage || ''}
+                          onChange={(e) => updateItemTax(item.id, e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
                           className="w-20"
                           min="0"
                           max="100"

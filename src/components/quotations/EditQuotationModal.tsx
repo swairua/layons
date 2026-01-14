@@ -43,9 +43,9 @@ interface QuotationItem {
   product_id: string;
   product_name: string;
   description: string;
-  quantity: number;
-  unit_price: number;
-  tax_percentage: number;
+  quantity: number | '';
+  unit_price: number | '';
+  tax_percentage: number | '';
   tax_amount: number;
   tax_inclusive: boolean;
   line_total: number;
@@ -163,8 +163,9 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
     return { lineTotal, taxAmount };
   };
 
-  const updateItemQuantity = (sectionId: string, itemId: string, quantity: number) => {
-    if (quantity <= 0) {
+  const updateItemQuantity = (sectionId: string, itemId: string, quantity: number | '') => {
+    const numQuantity = quantity === '' ? 0 : Number(quantity);
+    if (numQuantity < 0) {
       removeItem(sectionId, itemId);
       return;
     }
@@ -175,7 +176,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const { lineTotal, taxAmount } = calculateLineTotal(item, quantity);
+            const { lineTotal, taxAmount } = calculateLineTotal(item, numQuantity);
             return { ...item, quantity, line_total: lineTotal, tax_amount: taxAmount };
           }
           return item;
@@ -184,14 +185,15 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
     }));
   };
 
-  const updateItemPrice = (sectionId: string, itemId: string, unitPrice: number) => {
+  const updateItemPrice = (sectionId: string, itemId: string, unitPrice: number | '') => {
     setSections(sections.map(section => {
       if (section.id !== sectionId) return section;
       return {
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, unitPrice);
+            const price = unitPrice === '' ? 0 : Number(unitPrice);
+            const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, price);
             return { ...item, unit_price: unitPrice, line_total: lineTotal, tax_amount: taxAmount };
           }
           return item;
@@ -200,14 +202,15 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
     }));
   };
 
-  const updateItemVAT = (sectionId: string, itemId: string, vatPercentage: number) => {
+  const updateItemVAT = (sectionId: string, itemId: string, vatPercentage: number | '') => {
     setSections(sections.map(section => {
       if (section.id !== sectionId) return section;
       return {
         ...section,
         items: section.items.map(item => {
           if (item.id === itemId) {
-            const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, undefined, vatPercentage);
+            const vat = vatPercentage === '' ? 0 : Number(vatPercentage);
+            const { lineTotal, taxAmount } = calculateLineTotal(item, undefined, undefined, vat);
             return { ...item, tax_percentage: vatPercentage, line_total: lineTotal, tax_amount: taxAmount };
           }
           return item;
@@ -799,20 +802,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                                         value={item.quantity || ''}
                                         onChange={(e) => {
                                           const value = e.target.value;
-                                          if (value === '') {
-                                            // Don't update on empty, wait for blur
-                                          } else {
-                                            const num = parseInt(value);
-                                            if (!isNaN(num) && num > 0) {
-                                              updateItemQuantity(section.id, item.id, num);
-                                            }
-                                          }
-                                        }}
-                                        onBlur={(e) => {
-                                          const value = e.target.value;
-                                          if (value === '' || parseInt(value) <= 0) {
-                                            updateItemQuantity(section.id, item.id, 1);
-                                          }
+                                          updateItemQuantity(section.id, item.id, value === '' ? '' : parseInt(value) || 0);
                                         }}
                                         className="w-16 h-8"
                                         min="1"
@@ -825,20 +815,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                                         value={item.unit_price || ''}
                                         onChange={(e) => {
                                           const value = e.target.value;
-                                          if (value === '') {
-                                            // Don't update on empty, wait for blur
-                                          } else {
-                                            const num = parseFloat(value);
-                                            if (!isNaN(num) && num >= 0) {
-                                              updateItemPrice(section.id, item.id, num);
-                                            }
-                                          }
-                                        }}
-                                        onBlur={(e) => {
-                                          const value = e.target.value;
-                                          if (value === '') {
-                                            updateItemPrice(section.id, item.id, 0);
-                                          }
+                                          updateItemPrice(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
                                         className="w-24 h-8"
                                         step="0.01"
@@ -851,20 +828,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                                         value={item.tax_percentage || ''}
                                         onChange={(e) => {
                                           const value = e.target.value;
-                                          if (value === '') {
-                                            // Don't update on empty, wait for blur
-                                          } else {
-                                            const num = parseFloat(value);
-                                            if (!isNaN(num) && num >= 0 && num <= 100) {
-                                              updateItemVAT(section.id, item.id, num);
-                                            }
-                                          }
-                                        }}
-                                        onBlur={(e) => {
-                                          const value = e.target.value;
-                                          if (value === '') {
-                                            updateItemVAT(section.id, item.id, 0);
-                                          }
+                                          updateItemVAT(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
                                         className="w-20 h-8"
                                         min="0"
@@ -912,20 +876,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                                 value={section.labor_cost || ''}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  if (value === '') {
-                                    updateSectionLaborCost(section.id, '');
-                                  } else {
-                                    const num = parseFloat(value);
-                                    if (!isNaN(num)) {
-                                      updateSectionLaborCost(section.id, num);
-                                    }
-                                  }
-                                }}
-                                onBlur={(e) => {
-                                  const value = e.target.value;
-                                  if (value === '') {
-                                    updateSectionLaborCost(section.id, 0);
-                                  }
+                                  updateSectionLaborCost(section.id, value === '' ? '' : parseFloat(value) || 0);
                                 }}
                                 className="w-32 h-8"
                                 step="0.01"
