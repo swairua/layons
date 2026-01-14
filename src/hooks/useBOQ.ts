@@ -100,14 +100,23 @@ export const useConvertBoqToInvoice = () => {
         .eq('company_id', companyId)
         .single();
 
-      if (boqError) throw boqError;
+      if (boqError) {
+        const errorMsg = boqError?.message || boqError?.details || JSON.stringify(boqError);
+        console.error('BOQ fetch error:', { boqError, boqId, companyId });
+        throw new Error(`Failed to fetch BOQ: ${errorMsg}`);
+      }
+
       if (!boq) throw new Error('BOQ not found');
 
       const boqData = boq.data as BoqDocument;
-      if (!boqData) throw new Error('BOQ data is invalid or missing');
+      if (!boqData) {
+        console.error('BOQ data invalid:', { boq });
+        throw new Error('BOQ data is invalid or missing');
+      }
 
       // Validate BOQ has sections and items
       if (!boqData.sections || boqData.sections.length === 0) {
+        console.error('BOQ has no sections:', { boqData });
         throw new Error('BOQ has no sections. Cannot convert empty BOQ.');
       }
 
