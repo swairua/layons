@@ -446,22 +446,20 @@ DECLARE
 BEGIN
     year_part := EXTRACT(YEAR FROM CURRENT_DATE)::VARCHAR;
 
-    -- Extract the numeric part from existing invoices and quotations
-    -- For format "INV-YYYY-XXX", extract the XXX part
-    -- For old format "XXXXMMYYYY", extract the XXXX part for backwards compatibility
+    -- Extract the numeric part from existing invoices and quotations from CURRENT YEAR ONLY
+    -- For format "INV-YYYY-XXX", extract the XXX part where YYYY matches current year
     SELECT COALESCE(MAX(
-        CASE
-            WHEN invoice_number ~ 'INV-[0-9]{4}-[0-9]{3}' THEN
-                CAST(SUBSTRING(invoice_number FROM 'INV-[0-9]{4}-([0-9]{3})') AS INTEGER)
-            ELSE
-                CAST(SUBSTRING(invoice_number FROM '^[0-9]{4}') AS INTEGER)
-        END
+        CAST(SUBSTRING(invoice_number FROM 'INV-[0-9]{4}-([0-9]{3})') AS INTEGER)
     ), 0) + 1
     INTO next_number
     FROM (
-        SELECT invoice_number FROM invoices WHERE company_id = company_uuid
+        SELECT invoice_number FROM invoices
+        WHERE company_id = company_uuid
+        AND invoice_number LIKE 'INV-' || year_part || '-%'
         UNION ALL
-        SELECT quotation_number FROM quotations WHERE company_id = company_uuid
+        SELECT quotation_number FROM quotations
+        WHERE company_id = company_uuid
+        AND quotation_number LIKE 'INV-' || year_part || '-%'
     ) AS all_docs;
 
     RETURN 'INV-' || year_part || '-' || LPAD(next_number::VARCHAR, 3, '0');
