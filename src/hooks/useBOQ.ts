@@ -192,9 +192,18 @@ export const useConvertBoqToInvoice = () => {
       }
 
       // Flatten BOQ items and calculate subtotal
-      const { invoiceItems, subtotal } = flattenBoqItems(boqData);
+      let invoiceItems, subtotal;
+      try {
+        const result = flattenBoqItems(boqData);
+        invoiceItems = result.invoiceItems;
+        subtotal = result.subtotal;
+      } catch (flattenError) {
+        console.error('Error flattening BOQ items:', { flattenError, boqData });
+        throw new Error(`Failed to process BOQ items: ${flattenError instanceof Error ? flattenError.message : JSON.stringify(flattenError)}`);
+      }
 
       if (invoiceItems.length === 0) {
+        console.error('No items resulted from BOQ conversion:', { boqData });
         throw new Error('BOQ conversion resulted in no items. Please check BOQ structure.');
       }
 
