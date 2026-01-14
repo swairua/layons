@@ -43,9 +43,9 @@ interface InvoiceItem {
   product_id: string;
   product_name: string;
   description: string;
-  quantity: number;
-  unit_price: number;
-  tax_percentage: number;
+  quantity: number | '';
+  unit_price: number | '';
+  tax_percentage: number | '';
   tax_amount: number;
   tax_inclusive: boolean;
   line_total: number;
