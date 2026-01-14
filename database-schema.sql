@@ -149,9 +149,14 @@ CREATE TABLE quotation_items (
     quantity DECIMAL(10,3) NOT NULL,
     unit_price DECIMAL(15,2) NOT NULL,
     discount_percentage DECIMAL(5,2) DEFAULT 0,
+    tax_percentage DECIMAL(5,2) DEFAULT 0,
+    tax_amount DECIMAL(15,2) DEFAULT 0,
+    tax_inclusive BOOLEAN DEFAULT FALSE,
     line_total DECIMAL(15,2) NOT NULL,
     sort_order INTEGER DEFAULT 0,
-    unit_of_measure VARCHAR(50)
+    unit_of_measure VARCHAR(50),
+    section_name VARCHAR(255),
+    section_labor_cost DECIMAL(15,2) DEFAULT 0
 );
 
 -- Invoices table
