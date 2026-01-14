@@ -33,7 +33,14 @@ interface RestockItemModalProps {
 }
 
 export function RestockItemModal({ open, onOpenChange, onSuccess, item }: RestockItemModalProps) {
-  const [restockData, setRestockData] = useState({
+  const [restockData, setRestockData] = useState<{
+    quantity: number | '';
+    cost_per_unit: number | '';
+    supplier: string;
+    restock_date: string;
+    reference_number: string;
+    notes: string;
+  }>({
     quantity: item?.minStock * 2 || 50,
     cost_per_unit: 0,
     supplier: item?.supplier || '',
