@@ -361,7 +361,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
         tax_inclusive: false,
         line_total: lineTotal,
         section_name: section.name,
-        section_labor_cost: section.labor_cost,
+        section_labor_cost: toNumber(section.labor_cost, 0),
         unit_of_measure: product.unit_of_measure || 'Each',
       };
 
