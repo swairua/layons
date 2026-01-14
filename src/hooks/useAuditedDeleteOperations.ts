@@ -113,6 +113,7 @@ export function useAuditedDeleteOperations() {
           .from('invoices')
           .select('*')
           .eq('id', id)
+          .eq('company_id', companyId)
           .single();
 
         // Perform audited delete
@@ -150,6 +151,7 @@ export function useAuditedDeleteOperations() {
           .from('quotations')
           .select('*')
           .eq('id', id)
+          .eq('company_id', companyId)
           .single();
 
         // Perform audited delete
