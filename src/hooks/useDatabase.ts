@@ -2037,11 +2037,12 @@ export const useUpdateDeliveryNote = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...deliveryNote }: Partial<DeliveryNote> & { id: string }) => {
+    mutationFn: async ({ id, companyId, ...deliveryNote }: Partial<DeliveryNote> & { id: string; companyId: string }) => {
       const { data, error } = await supabase
         .from('delivery_notes')
         .update(deliveryNote)
         .eq('id', id)
+        .eq('company_id', companyId)
         .select()
         .single();
 
