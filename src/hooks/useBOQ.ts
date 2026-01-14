@@ -295,7 +295,8 @@ export const useConvertBoqToInvoice = () => {
         .eq('company_id', companyId);
 
       if (updateError) {
-        console.warn('Warning: Failed to mark BOQ as converted:', updateError);
+        const errorMsg = updateError?.message || updateError?.details || JSON.stringify(updateError);
+        console.warn('Warning: Failed to mark BOQ as converted:', { updateError, errorMsg });
         // This is not critical, invoice was created successfully
       }
 
