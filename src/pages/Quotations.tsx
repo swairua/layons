@@ -27,7 +27,6 @@ import {
 import { useQuotations, useCompanies, useDeleteQuotation } from '@/hooks/useDatabase';
 import { useConvertQuotationToInvoice } from '@/hooks/useQuotationItems';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAuditLog } from '@/hooks/useAuditLog';
 import { toast } from 'sonner';
 import { CreateQuotationModal } from '@/components/quotations/CreateQuotationModal';
 import { ViewQuotationModal } from '@/components/quotations/ViewQuotationModal';
@@ -87,7 +86,6 @@ export default function Quotations() {
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; quotation?: Quotation }>({ open: false });
   const [autoDownloadTriggered, setAutoDownloadTriggered] = useState(false);
 
-  // Get current user and company from context
   const { profile, loading: authLoading } = useAuth();
   const { data: companies } = useCompanies();
   const currentCompany = companies?.[0];
@@ -107,7 +105,6 @@ export default function Quotations() {
       setDeleteDialog({ open: false });
     } catch (err: any) {
       console.error('Delete failed', err);
-      // Prefer the original Supabase error message if available
       const supabaseMessage = err?.message || err?.original?.message || (err?.details || null) || JSON.stringify(err);
       toast.error(`Failed to delete quotation: ${supabaseMessage}`);
     }
@@ -159,7 +156,6 @@ export default function Quotations() {
 
   const handleDownloadQuotation = async (quotation: Quotation) => {
     try {
-      // Get current company details for PDF
       const companyDetails = currentCompany ? {
         name: currentCompany.name,
         address: currentCompany.address,
@@ -183,21 +179,19 @@ export default function Quotations() {
     }
   };
 
-  // Auto-trigger download when URL contains ?download_quotation=QT-2025-005 or by id
   useEffect(() => {
     try {
       if (autoDownloadTriggered) return;
       const params = new URLSearchParams(window.location.search || '');
       const downloadParam = params.get('download_quotation') || params.get('download');
       if (!downloadParam) return;
-      if (!quotations || quotations.length === 0) return; // wait until quotations loaded
+      if (!quotations || quotations.length === 0) return;
 
       const found = quotations.find((q: any) => q.quotation_number === downloadParam || q.id === downloadParam);
       if (found) {
         handleDownloadQuotation(found as Quotation);
         setAutoDownloadTriggered(true);
 
-        // Remove the query param to avoid repeated downloads
         try {
           const url = new URL(window.location.href);
           url.searchParams.delete('download_quotation');
@@ -208,7 +202,6 @@ export default function Quotations() {
         }
       }
     } catch (e) {
-      // ignore errors in auto-download flow
       console.error('Auto-download check failed', e);
     }
   }, [quotations, currentCompany, autoDownloadTriggered]);
@@ -220,7 +213,6 @@ export default function Quotations() {
     }
 
     try {
-      // Create email content
       const subject = `Quotation ${quotation.quotation_number} from Layons Construction Limited`;
       const body = `Dear ${quotation.customers.name},
 
@@ -238,16 +230,10 @@ Tel: 0741 207 690/0780 165 490
 Email: biolegend@biolegendscientific.co.ke/info@biolegendscientific.co.ke
 Website: www.biolegendscientific.co.ke`;
 
-      // Open email client with pre-filled content
       const emailUrl = `mailto:${quotation.customers.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       window.open(emailUrl, '_blank');
 
-      // TODO: In a real app, this would actually send the email via API and update the quotation status
       toast.success(`Email client opened with quotation ${quotation.quotation_number} for ${quotation.customers.email}`);
-
-      // Update quotation status to 'sent' (simulated)
-      // await updateQuotationStatus(quotation.id, 'sent');
-
     } catch (error) {
       console.error('Error sending quotation:', error);
 
@@ -263,8 +249,6 @@ Website: www.biolegendscientific.co.ke`;
           errorMessage = supabaseError.details;
         } else if (supabaseError.hint) {
           errorMessage = supabaseError.hint;
-        } else {
-          errorMessage = JSON.stringify(error);
         }
       }
 
@@ -308,8 +292,6 @@ Website: www.biolegendscientific.co.ke`;
           errorMessage = supabaseError.details;
         } else if (supabaseError.hint) {
           errorMessage = supabaseError.hint;
-        } else {
-          errorMessage = JSON.stringify(error);
         }
       }
 
@@ -350,7 +332,6 @@ Website: www.biolegendscientific.co.ke`;
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Quotations</h1>
@@ -368,7 +349,6 @@ Website: www.biolegendscientific.co.ke`;
         </Button>
       </div>
 
-      {/* Filters and Search */}
       <Card className="shadow-card">
         <CardContent className="pt-6">
           <div className="flex items-center space-x-4">
@@ -389,7 +369,6 @@ Website: www.biolegendscientific.co.ke`;
         </CardContent>
       </Card>
 
-      {/* Quotations Table */}
       <Card className="shadow-card">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
@@ -489,7 +468,6 @@ Website: www.biolegendscientific.co.ke`;
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end space-x-1">
-                        {/* Icon Actions */}
                         <div className="flex space-x-1">
                           <Button
                             variant="ghost"
@@ -526,7 +504,6 @@ Website: www.biolegendscientific.co.ke`;
                           </Button>
                         </div>
 
-                        {/* Conditional Action Buttons */}
                         <div className="flex space-x-2 ml-2">
                           {quotation.status === 'draft' && quotation.customers?.email && (
                             <Button
@@ -563,7 +540,6 @@ Website: www.biolegendscientific.co.ke`;
         </CardContent>
       </Card>
 
-      {/* Modals */}
       <CreateQuotationModal
         open={showCreateModal}
         onOpenChange={setShowCreateModal}
