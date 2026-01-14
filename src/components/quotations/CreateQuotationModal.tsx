@@ -663,12 +663,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
 
                   {searchProduct && (
                     <div className="max-h-64 overflow-y-auto border rounded-lg">
-                      {sections.length === 0 ? (
-                        <div className="p-4 text-center text-amber-600 bg-amber-50 border-t">
-                          <div className="font-medium mb-1">No sections yet</div>
-                          <div className="text-sm">Create a section below before adding products</div>
-                        </div>
-                      ) : loadingProducts ? (
+                      {loadingProducts ? (
                         <div className="p-4 text-center text-muted-foreground">Loading products...</div>
                       ) : filteredProducts.length === 0 ? (
                         <div className="p-4 text-center text-muted-foreground">No products found</div>
