@@ -342,13 +342,8 @@ export const useConvertBoqToInvoice = () => {
               unit_price: item.unit_price,
               line_total: item.line_total,
               unit_of_measure: item.unit_of_measure,
-              section_name: item.section_name || 'General',
-              sort_order: index,
-              tax_percentage: 0,
-              tax_amount: 0,
-              tax_inclusive: false,
               discount_percentage: 0,
-              discount_before_vat: false
+              sort_order: index
             };
           });
 
