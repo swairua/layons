@@ -3,7 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 /**
  * Handle invoice deletion with all related cleanup:
  * 1. Reverse BOQ status if invoice came from BOQ
+ * 1.5. Delete related delivery notes (before invoice deletion due to FK constraint)
  * 2. Reverse inventory movements
+ * 3. Delete the invoice
  */
 export async function handleInvoiceDelete(invoiceId: string) {
   console.log('🗑️ Starting invoice deletion process for invoice:', invoiceId);
@@ -40,6 +42,31 @@ export async function handleInvoiceDelete(invoiceId: string) {
     } else if (boqError && boqError.code !== 'PGRST116') {
       // PGRST116 means no rows found - which is expected if invoice wasn't from BOQ
       console.warn('⚠️ Error checking for related BOQ:', boqError);
+    }
+
+    // Step 1.5: Delete all delivery notes related to this invoice
+    const { data: deliveryNotes, error: deliveryError } = await supabase
+      .from('delivery_notes')
+      .select('id')
+      .eq('invoice_id', invoiceId);
+
+    if (deliveryNotes && deliveryNotes.length > 0) {
+      console.log('🚚 Found', deliveryNotes.length, 'delivery notes to delete');
+
+      // Delete delivery notes (delivery_note_items will cascade delete)
+      const { error: deleteDeliveryError } = await supabase
+        .from('delivery_notes')
+        .delete()
+        .eq('invoice_id', invoiceId);
+
+      if (deleteDeliveryError) {
+        console.error('⚠️ Failed to delete delivery notes:', deleteDeliveryError);
+        throw new Error(`Failed to delete delivery notes: ${deleteDeliveryError.message}`);
+      }
+
+      console.log('✅ Delivery notes deleted');
+    } else if (deliveryError && deliveryError.code !== 'PGRST116') {
+      console.warn('⚠️ Error checking for related delivery notes:', deliveryError);
     }
 
     // Step 2: Find and reverse all stock movements for this invoice
@@ -118,9 +145,11 @@ export async function handleInvoiceDelete(invoiceId: string) {
       invoiceDeleted: true,
       boqReversed: boqWasReversed,
       inventoryReversed: inventoryReversed,
+      deliveryNotesDeleted: (deliveryNotes?.length || 0) > 0,
       stockMovementsReverted: stockMovements?.length || 0,
       message: [
         'Invoice deleted successfully',
+        (deliveryNotes?.length || 0) > 0 ? `✅ ${deliveryNotes?.length || 0} delivery notes deleted` : null,
         boqWasReversed ? '✅ BOQ status reversed to draft' : null,
         inventoryReversed ? `✅ ${stockMovements?.length || 0} inventory movements reversed` : null
       ]

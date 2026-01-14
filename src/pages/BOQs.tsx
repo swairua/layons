@@ -8,6 +8,7 @@ import { CreateBOQModal } from '@/components/boq/CreateBOQModal';
 import { CreatePercentageCopyModal } from '@/components/boq/CreatePercentageCopyModal';
 import { EditBOQModal } from '@/components/boq/EditBOQModal';
 import { ChangePercentageRateModal } from '@/components/boq/ChangePercentageRateModal';
+import { BOQConversionFix } from '@/components/boq/BOQConversionFix';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
@@ -24,6 +25,7 @@ export default function BOQs() {
   const [percentageCopyOpen, setPercentageCopyOpen] = useState(false);
   const [percentageRateOpen, setPercentageRateOpen] = useState(false);
   const [percentageRateBoq, setPercentageRateBoq] = useState<any | null>(null);
+  const [schemaError, setSchemaError] = useState(false);
   const { currentCompany } = useCurrentCompany();
   const companyId = currentCompany?.id;
   const { data: boqs = [], isLoading, refetch: refetchBOQs } = useBOQs(companyId);
@@ -173,6 +175,16 @@ export default function BOQs() {
       if (err instanceof Error) {
         errorMessage = err.message;
 
+        // Check for schema cache error (missing converted_at column)
+        if (errorMessage.includes('converted_at') && errorMessage.includes('schema cache')) {
+          setSchemaError(true);
+          toast.error('Schema Error', {
+            description: 'The database schema needs to be updated. Please use the fix guide below.',
+            duration: 8000
+          });
+          return;
+        }
+
         // Provide specific guidance based on error type
         if (errorMessage.includes('BOQ has no sections')) {
           errorTitle = 'Empty BOQ';
@@ -243,6 +255,10 @@ export default function BOQs() {
           </Button>
         </div>
       </div>
+
+      {schemaError && (
+        <BOQConversionFix />
+      )}
 
       <Card className="shadow-card">
         <CardHeader>

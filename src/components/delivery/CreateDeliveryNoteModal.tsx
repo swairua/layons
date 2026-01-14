@@ -176,18 +176,38 @@ export const CreateDeliveryNoteModal = ({
       return;
     }
 
+    // Check invoice selection first with detailed error
     if (!formData.invoice_id) {
-      toast.error('Please select an invoice. Delivery notes must be linked to an invoice to auto-populate items.');
+      toast.error('Invoice Required', {
+        description: 'Please select an invoice. Delivery notes must be linked to an existing invoice.',
+        duration: 5000
+      });
+      return;
+    }
+
+    // Verify selected invoice still exists
+    const selectedInvoice = invoices?.find(inv => inv.id === formData.invoice_id);
+    if (!selectedInvoice) {
+      toast.error('Invoice Not Found', {
+        description: 'The selected invoice may have been deleted. Please select a different invoice.',
+        duration: 5000
+      });
       return;
     }
 
     if (!formData.customer_id) {
-      toast.error('Please select a customer');
+      toast.error('Customer Required', {
+        description: 'Please select a customer for this delivery',
+        duration: 4000
+      });
       return;
     }
 
     if (items.length === 0) {
-      toast.error('Please add at least one item');
+      toast.error('Items Required', {
+        description: 'Please add at least one item to deliver',
+        duration: 4000
+      });
       return;
     }
 
@@ -197,7 +217,10 @@ export const CreateDeliveryNoteModal = ({
     );
 
     if (invalidItems.length > 0) {
-      toast.error(`Please ensure all items have valid delivery quantities greater than 0`);
+      toast.error('Invalid Quantities', {
+        description: 'All items must have a delivery quantity greater than 0',
+        duration: 4000
+      });
       return;
     }
 
@@ -249,7 +272,29 @@ export const CreateDeliveryNoteModal = ({
     } catch (error: any) {
       console.error('Error creating delivery note:', error);
       const message = typeof error?.message === 'string' ? error.message : 'Failed to create delivery note';
-      toast.error(message);
+
+      // Handle specific error cases
+      if (message.includes('not found')) {
+        toast.error('Data Mismatch Error', {
+          description: message + '. The invoice or customer may have been deleted. Please refresh and try again.',
+          duration: 6000
+        });
+      } else if (message.includes('customer must match')) {
+        toast.error('Customer Mismatch', {
+          description: 'The delivery note customer does not match the invoice customer. Please select the correct customer.',
+          duration: 6000
+        });
+      } else if (message.includes('exceed')) {
+        toast.error('Quantity Error', {
+          description: message,
+          duration: 5000
+        });
+      } else {
+        toast.error('Failed to Create Delivery Note', {
+          description: message,
+          duration: 5000
+        });
+      }
     }
   };
 
@@ -318,31 +363,43 @@ export const CreateDeliveryNoteModal = ({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="invoice_id">Related Invoice *</Label>
+              <Label htmlFor="invoice_id">Related Invoice * <span className="text-destructive">(Required)</span></Label>
               <Select value={formData.invoice_id} onValueChange={(value) => {
                 setFormData(prev => ({ ...prev, invoice_id: value }));
                 if (value) {
-                  toast.info('Loading items from selected invoice...');
+                  const selectedInv = invoices?.find(inv => inv.id === value);
+                  if (selectedInv) {
+                    toast.success(`Selected invoice ${selectedInv.invoice_number} - loading items...`);
+                  }
                 }
               }}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select invoice to load items" />
+                  <SelectValue placeholder={invoices && invoices.length > 0 ? "Select invoice to load items" : "No invoices available"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {invoices?.filter(inv => !formData.customer_id || inv.customer_id === formData.customer_id)
-                    .map((invoice) => (
-                    <SelectItem key={invoice.id} value={invoice.id}>
-                      {invoice.invoice_number} - ${invoice.total_amount?.toFixed(2)}
-                      {invoice.invoice_items && invoice.invoice_items.length > 0 ?
-                        ` (${invoice.invoice_items.length} items)` :
-                        ' (no items)'
-                      }
-                    </SelectItem>
-                  ))}
+                  {(!invoices || invoices.length === 0) ? (
+                    <div className="p-2 text-sm text-muted-foreground">
+                      No invoices available. Create an invoice first.
+                    </div>
+                  ) : (
+                    invoices.filter(inv => !formData.customer_id || inv.customer_id === formData.customer_id)
+                      .map((invoice) => (
+                      <SelectItem key={invoice.id} value={invoice.id}>
+                        {invoice.invoice_number} - {new Intl.NumberFormat('en-KE', { style: 'currency', currency: invoice.currency || 'KES' }).format(invoice.total_amount?.toFixed(2) || 0)}
+                        {invoice.invoice_items && invoice.invoice_items.length > 0 ?
+                          ` (${invoice.invoice_items.length} items)` :
+                          ' (no items)'
+                        }
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
               {formData.invoice_id && (
-                <p className="text-xs text-success">✅ Invoice selected - items will be auto-populated</p>
+                <p className="text-xs text-success">✅ Invoice selected - items auto-populated from invoice</p>
+              )}
+              {!formData.invoice_id && (
+                <p className="text-xs text-muted-foreground">Select an invoice to automatically load its items</p>
               )}
             </div>
           </div>

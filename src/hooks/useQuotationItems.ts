@@ -760,18 +760,28 @@ export const useCreateDeliveryNote = () => {
       }
 
       // Verify the invoice exists
+      console.log('🔍 Verifying invoice exists with ID:', deliveryNote.invoice_id);
       const { data: invoice, error: invoiceError } = await supabase
         .from('invoices')
         .select('id, customer_id')
-        .eq('id', deliveryNote.invoice_id)
-        .single();
+        .eq('id', deliveryNote.invoice_id);
 
-      if (invoiceError || !invoice) {
-        throw new Error('Related invoice not found.');
+      if (invoiceError) {
+        console.error('❌ Error fetching invoice:', invoiceError);
+        throw new Error(`Failed to verify invoice: ${invoiceError.message}`);
       }
 
+      if (!invoice || invoice.length === 0) {
+        console.error('❌ Invoice not found with ID:', deliveryNote.invoice_id);
+        throw new Error(`Related invoice (${deliveryNote.invoice_id}) not found. It may have been deleted.`);
+      }
+
+      const invoiceData = invoice[0];
+      console.log('✅ Invoice verified:', invoiceData.id);
+
       // Verify customer matches
-      if (invoice.customer_id !== deliveryNote.customer_id) {
+      if (invoiceData.customer_id !== deliveryNote.customer_id) {
+        console.warn('⚠️ Customer mismatch - invoice customer:', invoiceData.customer_id, 'delivery note customer:', deliveryNote.customer_id);
         throw new Error('Delivery note customer must match the invoice customer.');
       }
 
