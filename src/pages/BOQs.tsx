@@ -256,6 +256,10 @@ export default function BOQs() {
         </div>
       </div>
 
+      {schemaError && (
+        <BOQConversionFix />
+      )}
+
       <Card className="shadow-card">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
