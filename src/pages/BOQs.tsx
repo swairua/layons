@@ -182,9 +182,24 @@ export default function BOQs() {
         } else if (errorMessage.includes('invoice number')) {
           errorTitle = 'Invoice Number Error';
           errorMessage = 'Failed to generate a unique invoice number. Please try again or contact support.';
+        } else if (errorMessage.includes('row level security') || errorMessage.includes('Permission denied')) {
+          errorTitle = 'Permission Denied';
+          if (errorMessage.includes('invoice items')) {
+            errorMessage = 'Your database access permissions do not allow creating invoice items. Please contact your administrator to check Row Level Security (RLS) policies.';
+          } else if (errorMessage.includes('invoice number')) {
+            errorMessage = 'Your database access permissions do not allow generating invoice numbers. Please contact your administrator to check RLS policies.';
+          } else {
+            errorMessage = 'Your database access permissions are insufficient. Please contact your administrator to check Row Level Security (RLS) policies.';
+          }
         } else if (errorMessage.includes('customer')) {
           errorTitle = 'Customer Setup Issue';
-          errorMessage = 'There was an issue with the customer data. The invoice was created without a customer. Please assign one manually.';
+          if (errorMessage.includes('Could not create unique customer code')) {
+            errorMessage = 'Could not generate a unique customer code. The invoice was created without a customer. Please assign a customer manually from the invoice view.';
+          } else if (errorMessage.includes('row level security') || errorMessage.includes('permission')) {
+            errorMessage = 'Permission denied when creating customer. The invoice was created without a customer. Please check your access permissions or assign a customer manually.';
+          } else {
+            errorMessage = 'There was an issue with the customer data. The invoice was created without a customer. Please assign one manually.';
+          }
         }
       }
 

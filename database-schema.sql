@@ -169,6 +169,7 @@ CREATE TABLE invoices (
     total_amount DECIMAL(15,2) DEFAULT 0,
     paid_amount DECIMAL(15,2) DEFAULT 0,
     balance_due DECIMAL(15,2) DEFAULT 0,
+    currency VARCHAR(3) DEFAULT 'KES', -- Currency code: KES, USD, EUR, GBP
     terms_and_conditions TEXT,
     notes TEXT,
     created_by UUID REFERENCES users(id),
