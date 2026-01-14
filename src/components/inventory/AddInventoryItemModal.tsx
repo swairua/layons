@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { CreateCategoryModalBasic } from '@/components/categories/CreateCategoryModalBasic';
+import { toNumber, toInteger } from '@/utils/numericFormHelpers';
 
 interface AddInventoryItemModalProps {
   open: boolean;
