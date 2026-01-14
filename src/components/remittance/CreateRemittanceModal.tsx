@@ -387,7 +387,7 @@ export function CreateRemittanceModal({ open, onOpenChange, onSuccess }: CreateR
                         <Input
                           type="number"
                           step="0.01"
-                          value={item.invoiceAmount || ''}
+                          value={item.invoiceAmount ?? ''}
                           onChange={(e) => updateItem(item.id, 'invoiceAmount', parseFloat(e.target.value) || 0)}
                           placeholder="0.00"
                           className="w-full"
@@ -397,7 +397,7 @@ export function CreateRemittanceModal({ open, onOpenChange, onSuccess }: CreateR
                         <Input
                           type="number"
                           step="0.01"
-                          value={item.creditAmount || ''}
+                          value={item.creditAmount ?? ''}
                           onChange={(e) => updateItem(item.id, 'creditAmount', parseFloat(e.target.value) || 0)}
                           placeholder="0.00"
                           className="w-full"
@@ -407,7 +407,7 @@ export function CreateRemittanceModal({ open, onOpenChange, onSuccess }: CreateR
                         <Input
                           type="number"
                           step="0.01"
-                          value={item.payment || ''}
+                          value={item.payment ?? ''}
                           onChange={(e) => updateItem(item.id, 'payment', parseFloat(e.target.value) || 0)}
                           placeholder="0.00"
                           className="w-full"
