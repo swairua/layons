@@ -12,6 +12,7 @@ import { verifyInvoiceCompanyIdColumn } from "@/utils/fixMissingInvoiceCompanyId
 import { verifyInvoiceRLSFix } from "@/utils/fixInvoiceRLSPolicy";
 import { verifyRLSDisabled } from "@/utils/disableInvoiceRLS";
 import { fixRLSWithProperOrder, verifyRLSColumnFix } from "@/utils/fixRLSProperOrder";
+import { fixQuotationsRLS, verifyQuotationsRLS } from "@/utils/fixQuotationsRLS";
 
 // Lazy load the page components to reduce initial bundle size and startup time
 import { lazy, Suspense } from "react";
