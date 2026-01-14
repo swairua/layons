@@ -314,7 +314,7 @@ export function RestockItemModal({ open, onOpenChange, onSuccess, item }: Restoc
               </div>
               <div className="text-center p-4 bg-muted/50 rounded-lg">
                 <div className="text-sm text-muted-foreground">Restock Quantity</div>
-                <div className="text-2xl font-bold text-primary">+{restockData.quantity}</div>
+                <div className="text-2xl font-bold text-primary">+{quantity}</div>
               </div>
               <div className="text-center p-4 bg-muted/50 rounded-lg">
                 <div className="text-sm text-muted-foreground">New Stock Level</div>
