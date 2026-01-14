@@ -380,8 +380,24 @@ export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: R
                 <Input
                   id="amount"
                   type="number"
-                  value={paymentData.amount}
-                  onChange={(e) => handleInputChange('amount', parseFloat(e.target.value) || 0)}
+                  value={paymentData.amount || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('amount', '');
+                    } else {
+                      const num = parseFloat(value);
+                      if (!isNaN(num)) {
+                        handleInputChange('amount', num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('amount', 0);
+                    }
+                  }}
                   min="0"
                   max={undefined}
                   step="0.01"
