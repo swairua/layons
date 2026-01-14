@@ -392,24 +392,28 @@ export function AddInventoryItemModal({ open, onOpenChange, onSuccess }: AddInve
                 </div>
               </div>
 
-              {formData.cost_price > 0 && formData.selling_price > 0 && (
-                <div className="p-3 bg-muted/50 rounded-lg">
-                  <div className="text-sm">
-                    <div className="flex justify-between">
-                      <span>Margin:</span>
-                      <span className="font-medium">
-                        KES {(formData.selling_price - formData.cost_price).toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Markup:</span>
-                      <span className="font-medium">
-                        {formData.cost_price > 0 ? (((formData.selling_price - formData.cost_price) / formData.cost_price) * 100).toFixed(1) : 0}%
-                      </span>
+              {(() => {
+                const cost = toNumber(formData.cost_price, 0);
+                const selling = toNumber(formData.selling_price, 0);
+                return cost > 0 && selling > 0 ? (
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <div className="text-sm">
+                      <div className="flex justify-between">
+                        <span>Margin:</span>
+                        <span className="font-medium">
+                          KES {(selling - cost).toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Markup:</span>
+                        <span className="font-medium">
+                          {cost > 0 ? (((selling - cost) / cost) * 100).toFixed(1) : 0}%
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                ) : null;
+              })()}
 
               <div className="space-y-2">
                 <Label htmlFor="stock_quantity">Initial Stock Quantity</Label>
