@@ -21,6 +21,7 @@ import {
 import { toast } from 'sonner';
 import { TrendingUp, TrendingDown, RotateCcw, Calculator } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toInteger } from '@/utils/numericFormHelpers';
 
 interface InventoryItem {
   id?: string;
