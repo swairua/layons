@@ -103,13 +103,13 @@ export const useProformas = (companyId?: string) => {
 /**
  * Hook to fetch a single proforma invoice
  */
-export const useProforma = (proformaId?: string) => {
+export const useProforma = (proformaId?: string, companyId?: string) => {
   return useQuery({
-    queryKey: ['proforma_invoice', proformaId],
+    queryKey: ['proforma_invoice', proformaId, companyId],
     queryFn: async () => {
       if (!proformaId) return null;
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('proforma_invoices')
         .select(`
           *,
@@ -127,8 +127,13 @@ export const useProforma = (proformaId?: string) => {
             )
           )
         `)
-        .eq('id', proformaId)
-        .single();
+        .eq('id', proformaId);
+
+      if (companyId) {
+        query = query.eq('company_id', companyId);
+      }
+
+      const { data, error } = await query.single();
 
       if (error) {
         console.error('Error fetching proforma:', error);
