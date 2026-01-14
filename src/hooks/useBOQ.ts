@@ -280,17 +280,11 @@ export const useConvertBoqToInvoice = () => {
 
       return invoice;
     },
-    onSuccess: (invoice) => {
+    onSuccess: () => {
       // Invalidate relevant queries to refetch data
       queryClient.invalidateQueries({ queryKey: ['boqs'] });
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
       queryClient.invalidateQueries({ queryKey: ['invoices_fixed'] });
-      toast.success(`Invoice ${invoice.invoice_number} created successfully!`);
-    },
-    onError: (error) => {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      console.error('Error converting BOQ to invoice:', errorMessage);
-      toast.error(`Error converting BOQ: ${errorMessage}`);
     }
   });
 };
