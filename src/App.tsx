@@ -103,6 +103,24 @@ const App = () => {
 
         // Verify invoice RLS policy doesn't have infinite recursion
         await verifyInvoiceRLSFix();
+
+        // Fix quotations RLS policy issue
+        try {
+          const quotationsRLSFixed = await verifyQuotationsRLS();
+          if (!quotationsRLSFixed) {
+            console.log('🔧 Quotations RLS issue detected. Attempting to fix...');
+            const fixResult = await fixQuotationsRLS();
+            if (fixResult.success) {
+              console.log('✅ Quotations RLS fix applied successfully');
+            } else if (fixResult.requiresManualFix) {
+              console.warn('⚠️ Manual quotations RLS fix required. Please run the SQL in Supabase.');
+            }
+          } else {
+            console.log('✅ Quotations RLS verification passed');
+          }
+        } catch (err) {
+          console.warn('⚠️ Could not automatically fix quotations RLS issue', err);
+        }
       } catch (error) {
         console.warn('Database schema verification completed with issues (non-critical)', error);
       }
