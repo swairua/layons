@@ -89,8 +89,8 @@ export function RestockItemModal({ open, onOpenChange, onSuccess, item }: Restoc
       // Create restock record with stock movement and product update
       await restockProduct.mutateAsync({
         productId: item.id,
-        quantity: restockData.quantity,
-        costPerUnit: restockData.cost_per_unit,
+        quantity: quantity,
+        costPerUnit: costPerUnit,
         companyId: currentCompany.id,
         supplier: restockData.supplier,
         notes: restockData.notes ?
@@ -98,7 +98,7 @@ export function RestockItemModal({ open, onOpenChange, onSuccess, item }: Restoc
           `Restock from ${restockData.supplier}${restockData.reference_number ? ` (Ref: ${restockData.reference_number})` : ''}`
       });
 
-      toast.success(`${item?.name} restocked with ${restockData.quantity} units successfully!`);
+      toast.success(`${item?.name} restocked with ${quantity} units successfully!`);
       onSuccess();
       onOpenChange(false);
       resetForm();
