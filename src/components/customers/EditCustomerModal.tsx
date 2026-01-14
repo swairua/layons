@@ -55,15 +55,25 @@ interface EditCustomerModalProps {
 }
 
 export function EditCustomerModal({ open, onOpenChange, onSuccess, customer }: EditCustomerModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    city: string;
+    country: string;
+    credit_limit: number | '';
+    payment_terms: number | '';
+    is_active: boolean;
+  }>({
     name: '',
     email: '',
     phone: '',
     address: '',
     city: '',
     country: 'Kenya',
-    credit_limit: 0,
-    payment_terms: 0,
+    credit_limit: '',
+    payment_terms: '',
     is_active: true,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
