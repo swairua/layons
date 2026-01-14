@@ -2131,19 +2131,24 @@ export const useLPOs = (companyId?: string) => {
   });
 };
 
-export const useLPO = (lpoId?: string) => {
+export const useLPO = (lpoId?: string, companyId?: string) => {
   return useQuery({
-    queryKey: ['lpo', lpoId],
+    queryKey: ['lpo', lpoId, companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('lpos')
         .select(`
           *,
           suppliers:customers!supplier_id(name, email, phone, address, city, country),
           lpo_items(*, products(name, product_code, unit_of_measure))
         `)
-        .eq('id', lpoId)
-        .single();
+        .eq('id', lpoId);
+
+      if (companyId) {
+        query = query.eq('company_id', companyId);
+      }
+
+      const { data, error } = await query.single();
 
       if (error) throw error;
       return data;
