@@ -132,6 +132,7 @@ CREATE TABLE quotations (
     tax_amount DECIMAL(15,2) DEFAULT 0,
     discount_amount DECIMAL(15,2) DEFAULT 0,
     total_amount DECIMAL(15,2) DEFAULT 0,
+    currency VARCHAR(3) DEFAULT 'KES',
     terms_and_conditions TEXT,
     notes TEXT,
     created_by UUID REFERENCES users(id),
