@@ -808,20 +808,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                         value={item.unit_price || ''}
                                         onChange={(e) => {
                                           const value = e.target.value;
-                                          if (value === '') {
-                                            // Don't update on empty, wait for blur
-                                          } else {
-                                            const num = parseFloat(value);
-                                            if (!isNaN(num) && num >= 0) {
-                                              updateItemPrice(section.id, item.id, num);
-                                            }
-                                          }
-                                        }}
-                                        onBlur={(e) => {
-                                          const value = e.target.value;
-                                          if (value === '') {
-                                            updateItemPrice(section.id, item.id, 0);
-                                          }
+                                          updateItemPrice(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
                                         className="w-24 h-8"
                                         step="0.01"
