@@ -119,7 +119,10 @@ export function AddInventoryItemModal({ open, onOpenChange, onSuccess }: AddInve
       handleInputChange('product_code', generateProductCode());
     }
 
-    if (formData.selling_price <= 0) {
+    // Convert string values to numbers
+    const sellingPrice = toNumber(formData.selling_price, 0);
+
+    if (sellingPrice <= 0) {
       toast.error('Selling price must be greater than 0');
       return;
     }
@@ -133,11 +136,11 @@ export function AddInventoryItemModal({ open, onOpenChange, onSuccess }: AddInve
         description: formData.description,
         category_id: formData.category_id,
         unit_of_measure: formData.unit_of_measure,
-        cost_price: formData.cost_price,
-        selling_price: formData.selling_price,
-        stock_quantity: formData.stock_quantity,
-        minimum_stock_level: formData.min_stock_level,
-        maximum_stock_level: formData.max_stock_level,
+        cost_price: toNumber(formData.cost_price, 0),
+        selling_price: sellingPrice,
+        stock_quantity: toInteger(formData.stock_quantity, 0),
+        minimum_stock_level: toInteger(formData.min_stock_level, 0),
+        maximum_stock_level: toInteger(formData.max_stock_level, 0),
         is_active: true,
         track_inventory: true
       };
