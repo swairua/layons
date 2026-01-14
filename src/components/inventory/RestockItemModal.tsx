@@ -199,8 +199,24 @@ export function RestockItemModal({ open, onOpenChange, onSuccess, item }: Restoc
                 <Input
                   id="quantity"
                   type="number"
-                  value={restockData.quantity}
-                  onChange={(e) => handleInputChange('quantity', parseInt(e.target.value) || 0)}
+                  value={restockData.quantity || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('quantity', '');
+                    } else {
+                      const num = parseInt(value);
+                      if (!isNaN(num)) {
+                        handleInputChange('quantity', num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('quantity', item?.minStock * 2 || 50);
+                    }
+                  }}
                   min="1"
                   placeholder="Enter quantity to add"
                 />
@@ -214,8 +230,24 @@ export function RestockItemModal({ open, onOpenChange, onSuccess, item }: Restoc
                 <Input
                   id="cost_per_unit"
                   type="number"
-                  value={restockData.cost_per_unit}
-                  onChange={(e) => handleInputChange('cost_per_unit', parseFloat(e.target.value) || 0)}
+                  value={restockData.cost_per_unit || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('cost_per_unit', '');
+                    } else {
+                      const num = parseFloat(value);
+                      if (!isNaN(num)) {
+                        handleInputChange('cost_per_unit', num);
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      handleInputChange('cost_per_unit', 0);
+                    }
+                  }}
                   min="0"
                   step="0.01"
                   placeholder="0.00"
