@@ -160,10 +160,14 @@ export function CreateCreditNoteModal({
   };
 
   const calculateLineTotal = (item: CreditNoteItem, quantity?: number, unitPrice?: number, taxPercentage?: number, taxInclusive?: boolean) => {
-    const qty = quantity ?? item.quantity;
-    const price = unitPrice ?? item.unit_price;
-    const tax = taxPercentage ?? item.tax_percentage;
+    const qtyValue = quantity ?? item.quantity;
+    const priceValue = unitPrice ?? item.unit_price;
+    const taxValue = taxPercentage ?? item.tax_percentage;
     const inclusive = taxInclusive ?? item.tax_inclusive;
+
+    const qty = qtyValue === '' ? 0 : Number(qtyValue);
+    const price = priceValue === '' ? 0 : Number(priceValue);
+    const tax = taxValue === '' ? 0 : Number(taxValue);
 
     const baseAmount = qty * price;
     let taxAmount = 0;
