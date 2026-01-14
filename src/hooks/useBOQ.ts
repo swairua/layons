@@ -118,20 +118,18 @@ export const useConvertBoqToInvoice = () => {
       let customerId: string | null = null;
 
       if (customerData?.name) {
-        // Try to find existing customer by name and company
-        const { data: existingCustomer, error: searchError } = await supabase
+        // Try to find existing customer by name and company - use limit without .single() to handle no results
+        const { data: existingCustomers, error: searchError } = await supabase
           .from('customers')
           .select('id')
           .eq('company_id', boq.company_id)
           .eq('name', customerData.name)
-          .limit(1)
-          .single();
+          .limit(1);
 
-        if (existingCustomer) {
-          customerId = existingCustomer.id;
-        } else if (!searchError || searchError.code === 'PGRST116') {
-          // PGRST116 = no rows returned (expected)
-          // Create new customer from BOQ client data with proper validation
+        if (existingCustomers && existingCustomers.length > 0) {
+          customerId = existingCustomers[0].id;
+        } else if (!searchError) {
+          // No customer found, create a new one
           const customerPayload = {
             company_id: boq.company_id,
             name: customerData.name,
@@ -157,7 +155,7 @@ export const useConvertBoqToInvoice = () => {
             customerId = newCustomer.id;
           }
         } else {
-          // Unexpected error
+          // Unexpected error searching for customer
           console.warn('Error searching for existing customer:', searchError);
         }
       }
