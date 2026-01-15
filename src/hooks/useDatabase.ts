@@ -2071,7 +2071,7 @@ export const useDashboardStats = (companyId?: string) => {
         { data: invoices },
         { data: customers },
         { data: products },
-        { data: payments }
+        { data: cashReceipts }
       ] = await Promise.all([
         supabase
           .from('invoices')
@@ -2086,13 +2086,13 @@ export const useDashboardStats = (companyId?: string) => {
           .select('stock_quantity, minimum_stock_level')
           .eq('company_id', companyId || '550e8400-e29b-41d4-a716-446655440000'),
         supabase
-          .from('payments')
-          .select('amount')
+          .from('cash_receipts')
+          .select('total_amount')
           .eq('company_id', companyId || '550e8400-e29b-41d4-a716-446655440000')
       ]);
 
       const totalRevenue = invoices?.reduce((sum, inv) => sum + Number(inv.total_amount || 0), 0) || 0;
-      const totalPayments = payments?.reduce((sum, pay) => sum + Number(pay.amount || 0), 0) || 0;
+      const totalPayments = cashReceipts?.reduce((sum, receipt) => sum + Number(receipt.total_amount || 0), 0) || 0;
       const lowStockProducts = products?.filter(p => p.stock_quantity <= p.minimum_stock_level).length || 0;
       const pendingInvoices = invoices?.filter(inv => inv.status === 'sent').length || 0;
 

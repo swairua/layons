@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
+import {
   DollarSign,
   CreditCard,
   Calendar,
@@ -34,7 +34,9 @@ import { useCreatePayment } from '@/hooks/useDatabase';
 import { toNumber } from '@/utils/numericFormHelpers';
 import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { PaymentAllocationQuickFix } from './PaymentAllocationQuickFix';
+import { autoCreateCashReceipt } from '@/utils/autoCreateCashReceipt';
 
 interface RecordPaymentModalProps {
   open: boolean;
@@ -73,6 +75,7 @@ export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: R
 
   // Fetch all available invoices for selection
   const { currentCompany } = useCurrentCompany();
+  const { profile } = useAuth();
   const { data: invoices = [] } = useInvoices(currentCompany?.id);
   const createPaymentMutation = useCreatePayment();
   
@@ -158,6 +161,24 @@ export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: R
       };
 
       const result = await createPaymentMutation.mutateAsync(paymentRecord);
+
+      // Auto-create a cash receipt for audit trail
+      if (result.success && selectedInvoice) {
+        const receiptResult = await autoCreateCashReceipt({
+          company_id: selectedInvoice.company_id || currentCompany!.id,
+          customer_id: selectedInvoice.customer_id,
+          payment_date: paymentData.payment_date,
+          amount: amount,
+          payment_method: paymentData.payment_method,
+          reference_number: paymentData.reference_number || result.payment_id,
+          notes: paymentData.notes || undefined,
+          created_by: profile?.id
+        });
+
+        if (receiptResult) {
+          console.log('✅ Cash receipt auto-created:', receiptResult.receipt_number);
+        }
+      }
 
       // Check if payment was recorded but allocation might have failed
       if (result.fallback_used) {
