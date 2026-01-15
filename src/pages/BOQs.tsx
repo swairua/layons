@@ -42,6 +42,10 @@ export default function BOQs() {
   const [convertDialog, setConvertDialog] = useState<{ open: boolean; boqId?: string; boqNumber?: string }>({ open: false });
   const convertToInvoice = useConvertBoqToInvoice();
 
+  // Pagination hook
+  const pagination = usePagination(boqs, { initialPageSize: 10 });
+  const paginatedBOQs = pagination.paginatedItems;
+
   const handleDownloadPDF = async (boq: any, options?: { customTitle?: string; amountMultiplier?: number; forceCurrency?: string; customClient?: any; stampImageUrl?: string; specialPaymentPercentage?: number; invoiceNumber?: string; useCurrentDate?: boolean }) => {
     try {
       if (!boq || !boq.data) {
