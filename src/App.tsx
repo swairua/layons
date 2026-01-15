@@ -65,12 +65,25 @@ class AppErrorBoundary extends Component<
     console.error('App Error:', error, errorInfo);
 
     // Check if this is a module loading error
-    if (
+    const isModuleError =
       error.message.includes('dynamically imported module') ||
       error.message.includes('Failed to fetch') ||
-      error.message.includes('network')
-    ) {
-      console.warn('⚠️ Module loading error detected - this may be a network issue');
+      error.message.includes('network');
+
+    if (isModuleError) {
+      console.warn('⚠️ Module loading error detected - attempting recovery');
+      console.warn('Error details:', error.message);
+      console.warn('This may be due to:');
+      console.warn('1. Network connectivity issues');
+      console.warn('2. Browser cache issues');
+      console.warn('3. Dev server configuration issues');
+
+      // Clear service worker cache if available
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          registrations.forEach(reg => reg.unregister());
+        }).catch(err => console.warn('Could not clear service workers:', err));
+      }
     }
   }
 
@@ -86,10 +99,31 @@ class AppErrorBoundary extends Component<
 // Error recovery component for module loading failures
 const ModuleErrorFallback = () => {
   const [retryCount, setRetryCount] = useState(0);
+  const [isClearing, setIsClearing] = useState(false);
 
   const handleRetry = () => {
     setRetryCount(prev => prev + 1);
     window.location.reload();
+  };
+
+  const handleHardRefresh = async () => {
+    setIsClearing(true);
+    try {
+      // Clear all caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+      }
+
+      // Force hard refresh (Ctrl+Shift+R equivalent)
+      window.location.reload(true);
+    } catch (err) {
+      console.error('Error clearing cache:', err);
+      // Fallback to normal reload
+      window.location.reload();
+    } finally {
+      setIsClearing(false);
+    }
   };
 
   return (
@@ -98,28 +132,39 @@ const ModuleErrorFallback = () => {
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-foreground">Module Loading Error</h1>
           <p className="text-muted-foreground">
-            There was an issue loading the page content. This can happen if the connection was interrupted.
+            There was an issue loading the page content. This can happen if the connection was interrupted or your browser cache is outdated.
           </p>
         </div>
 
         <div className="bg-destructive/10 border border-destructive/20 rounded p-4">
-          <p className="text-sm text-destructive/80">
-            Try refreshing the page or clearing your browser cache if this persists.
-          </p>
+          <p className="text-sm text-destructive/80 font-medium mb-2">Troubleshooting steps:</p>
+          <ul className="text-xs text-destructive/70 space-y-1">
+            <li>• Check your internet connection</li>
+            <li>• Try a hard refresh (Ctrl+Shift+R)</li>
+            <li>• Clear your browser cache</li>
+            <li>• Try a different browser</li>
+          </ul>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={handleHardRefresh}
+            disabled={isClearing}
+            className="w-full px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors font-medium disabled:opacity-50"
+          >
+            {isClearing ? 'Clearing cache...' : 'Hard Refresh (Clear Cache)'}
+          </button>
           <button
             onClick={handleRetry}
-            className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors font-medium"
+            className="w-full px-4 py-2 bg-secondary text-secondary-foreground rounded hover:bg-secondary/90 transition-colors font-medium"
           >
-            Refresh Page
+            Soft Refresh
           </button>
           <button
             onClick={() => window.location.href = '/'}
-            className="flex-1 px-4 py-2 bg-muted text-foreground rounded hover:bg-muted/80 transition-colors font-medium"
+            className="w-full px-4 py-2 bg-muted text-foreground rounded hover:bg-muted/80 transition-colors font-medium"
           >
-            Go Home
+            Go to Home Page
           </button>
         </div>
 

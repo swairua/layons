@@ -1360,11 +1360,13 @@ export const useDeletePayment = () => {
           .eq('payment_id', paymentId);
 
         if (allocError) {
-          console.warn('Could not fetch allocations:', allocError.message);
+          console.warn('Could not fetch allocations:', allocError);
+          console.warn('Allocation fetch error message:', allocError?.message);
+          console.warn('Allocation fetch error code:', allocError?.code);
         }
 
         const allocationsList = allocations || [];
-        console.log('Found allocations:', allocationsList.length);
+        console.log(`Found ${allocationsList.length} allocation(s) for payment ${paymentId}`);
 
         // Step 2: Reverse invoice adjustments for each allocation
         if (allocationsList.length > 0) {
@@ -1402,7 +1404,11 @@ export const useDeletePayment = () => {
 
                 if (updateError) {
                   console.warn(`Could not update invoice ${allocation.invoice_id}:`, updateError.message);
+                  console.warn(`Details - Invoice was: paid=${invoice.paid_amount}, balance=${invoice.balance_due}, status=${invoice.status}`);
+                  console.warn(`Details - Attempted to reverse: paid=${reversedPaidAmount}, balance=${reversedBalanceDue}, status=${newStatus}`);
                   // Continue anyway - don't fail the entire delete
+                } else {
+                  console.log(`✅ Successfully reversed payment for invoice ${allocation.invoice_id}: ${reversedPaidAmount} → ${reversedBalanceDue} balance`);
                 }
               }
             } catch (err) {
@@ -1410,6 +1416,8 @@ export const useDeletePayment = () => {
               // Continue to next allocation
             }
           }
+
+          console.log(`Payment deletion: Processed ${allocationsList.length} invoice allocation(s)`);
 
           // Step 3: Delete payment allocations
           console.log('Deleting payment allocations for payment:', paymentId);
@@ -1419,8 +1427,24 @@ export const useDeletePayment = () => {
             .eq('payment_id', paymentId);
 
           if (deleteAllocError) {
-            console.error('Failed to delete payment allocations:', deleteAllocError);
-            const errorMsg = deleteAllocError?.message || 'Unknown error';
+            console.error('Failed to delete payment allocations - Full error:', deleteAllocError);
+
+            // Extract error message properly
+            let errorMsg = 'Unknown error';
+            if (deleteAllocError?.message) {
+              errorMsg = deleteAllocError.message;
+            } else if (deleteAllocError?.code) {
+              errorMsg = `Error code: ${deleteAllocError.code}`;
+            } else if (typeof deleteAllocError === 'string') {
+              errorMsg = deleteAllocError;
+            } else {
+              try {
+                errorMsg = JSON.stringify(deleteAllocError);
+              } catch {
+                errorMsg = String(deleteAllocError);
+              }
+            }
+
             if (errorMsg.includes('row-level security') || errorMsg.includes('permission denied')) {
               throw new Error(`You don't have permission to delete payment allocations. Please check your access settings.`);
             }
@@ -1436,8 +1460,27 @@ export const useDeletePayment = () => {
           .eq('id', paymentId);
 
         if (deletePaymentError) {
-          console.error('Failed to delete payment:', deletePaymentError);
-          const errorMsg = deletePaymentError?.message || 'Unknown error';
+          console.error('Failed to delete payment - Full error object:', deletePaymentError);
+
+          // Extract error message from Supabase error object
+          let errorMsg = 'Unknown error';
+
+          if (deletePaymentError?.message) {
+            errorMsg = deletePaymentError.message;
+          } else if (deletePaymentError?.code) {
+            errorMsg = `Error code: ${deletePaymentError.code}`;
+          } else if (typeof deletePaymentError === 'string') {
+            errorMsg = deletePaymentError;
+          } else {
+            // Try to stringify and inspect the error
+            try {
+              errorMsg = JSON.stringify(deletePaymentError);
+            } catch {
+              errorMsg = String(deletePaymentError);
+            }
+          }
+
+          console.error('Extracted error message:', errorMsg);
 
           // Handle specific error types
           if (errorMsg.includes('row-level security') || errorMsg.includes('permission denied')) {
@@ -1446,8 +1489,8 @@ export const useDeletePayment = () => {
           if (errorMsg.includes('FOREIGN KEY') || errorMsg.includes('constraint')) {
             throw new Error(`Cannot delete this payment. It may be referenced by other records. Please try again or contact support.`);
           }
-          if (errorMsg.includes('Failed to fetch') || errorMsg.includes('network')) {
-            throw new Error(`Network error while deleting payment. Please check your connection and try again.`);
+          if (errorMsg.includes('Failed to fetch')) {
+            throw new Error(`Network error: Could not reach the server. Please check your connection and try again.`);
           }
 
           throw new Error(`Failed to delete payment: ${errorMsg}`);
@@ -1461,6 +1504,8 @@ export const useDeletePayment = () => {
         };
       } catch (error) {
         console.error('Error in useDeletePayment:', error);
+        console.error('Error type:', typeof error);
+        console.error('Error constructor:', error?.constructor?.name);
 
         // Handle different types of errors
         let errorMessage = 'Failed to delete payment';
@@ -1470,16 +1515,31 @@ export const useDeletePayment = () => {
           if (error.message.includes('Failed to fetch')) {
             errorMessage = 'Network error: Could not connect to the server. Please check your internet connection and try again.';
           } else {
-            errorMessage = `Network error: ${error.message}`;
+            errorMessage = `Connection error: ${error.message}`;
           }
         } else if (error instanceof Error) {
           errorMessage = error.message;
         } else if (typeof error === 'string') {
           errorMessage = error;
         } else if (error && typeof error === 'object') {
-          errorMessage = (error as any).message || 'Unknown error occurred';
+          // Try to extract message from various error object formats
+          const errObj = error as any;
+          if (errObj.message) {
+            errorMessage = errObj.message;
+          } else if (errObj.error?.message) {
+            errorMessage = errObj.error.message;
+          } else if (errObj.status) {
+            errorMessage = `Error (${errObj.status}): ${errObj.statusText || 'Unknown'}`;
+          } else {
+            try {
+              errorMessage = JSON.stringify(errObj);
+            } catch {
+              errorMessage = String(errObj);
+            }
+          }
         }
 
+        console.error('Final error message:', errorMessage);
         throw new Error(errorMessage);
       }
     },
@@ -1489,6 +1549,7 @@ export const useDeletePayment = () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
       queryClient.invalidateQueries({ queryKey: ['customer_invoices'] });
       queryClient.invalidateQueries({ queryKey: ['customer_payments'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard_stats'] });
     }
   });
 };

@@ -9,7 +9,11 @@ export default defineConfig(({ mode }) => {
       host: "::",
       port: 8080,
       middlewareMode: false,
-      hmr: false,
+      // HMR configuration: let the browser determine the host/port automatically
+      // This fixes module loading issues in proxied environments like builder.io
+      hmr: {
+        protocol: "ws",
+      },
     },
     plugins: [
       react(),
@@ -17,6 +21,16 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
+      },
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          // Ensure chunks are properly named for reliable loading
+          chunkFileNames: 'assets/[name]-[hash].js',
+          entryFileNames: 'assets/[name]-[hash].js',
+          assetFileNames: 'assets/[name]-[hash][extname]',
+        },
       },
     },
   };

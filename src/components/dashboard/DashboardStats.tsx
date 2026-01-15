@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, TrendingDown, DollarSign, FileText, AlertTriangle, CheckCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, AlertTriangle, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDashboardStats, useCompanies } from '@/hooks/useDatabase';
 
@@ -78,19 +78,6 @@ export function DashboardStats() {
             </Card>
           ))}
         </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[...Array(1)].map((_, i) => (
-            <Card key={i} className="shadow-card">
-              <CardHeader className="space-y-0 pb-2">
-                <div className="h-4 bg-muted rounded animate-pulse"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-8 bg-muted rounded animate-pulse mb-2"></div>
-                <div className="h-3 bg-muted rounded animate-pulse w-2/3"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
       </div>
     );
   }
@@ -104,7 +91,7 @@ export function DashboardStats() {
     }).format(amount);
   };
 
-  const dashboardStats = [
+  const allStats = [
     {
       title: 'Total Revenue',
       value: formatCurrency(stats?.totalRevenue || 0),
@@ -113,22 +100,11 @@ export function DashboardStats() {
       icon: DollarSign
     },
     {
-      title: 'Total Invoices',
-      value: (stats?.totalInvoices || 0).toString(),
-      change: '+8.1%',
-      changeType: 'increase' as const,
-      icon: FileText
-    },
-    {
       title: 'Outstanding Amount',
       value: formatCurrency((stats?.totalRevenue || 0) - (stats?.totalPayments || 0)),
       alert: ((stats?.totalRevenue || 0) - (stats?.totalPayments || 0)) > 0,
       icon: AlertTriangle
-    }
-  ];
-
-  // Additional stats row
-  const secondaryStats = [
+    },
     {
       title: 'Total Payments Received',
       value: formatCurrency(stats?.totalPayments || 0),
@@ -138,21 +114,12 @@ export function DashboardStats() {
 
   return (
     <div className="space-y-4">
-      {/* Primary Stats */}
+      {/* All Stats in One Row */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {dashboardStats.map((stat) => (
+        {allStats.map((stat) => (
           <StatCard key={stat.title} {...stat} />
         ))}
       </div>
-
-      {/* Secondary Stats */}
-      {secondaryStats.length > 0 && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {secondaryStats.map((stat) => (
-            <StatCard key={stat.title} {...stat} />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
