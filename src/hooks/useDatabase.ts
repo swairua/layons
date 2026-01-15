@@ -1489,6 +1489,7 @@ export const useDeletePayment = () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
       queryClient.invalidateQueries({ queryKey: ['customer_invoices'] });
       queryClient.invalidateQueries({ queryKey: ['customer_payments'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard_stats'] });
     }
   });
 };
