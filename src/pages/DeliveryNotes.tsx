@@ -58,6 +58,10 @@ export default function DeliveryNotes() {
     note.tracking_number?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Pagination hook
+  const pagination = usePagination(filteredDeliveryNotes, { initialPageSize: 10 });
+  const paginatedDeliveryNotes = pagination.paginatedItems;
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'draft':
