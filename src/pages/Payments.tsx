@@ -231,6 +231,10 @@ export default function Payments() {
     (payment.payment_allocations?.some(alloc => alloc.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase())) ?? false)
   );
 
+  // Pagination hook
+  const pagination = usePagination(filteredPayments, { initialPageSize: 10 });
+  const paginatedPayments = pagination.paginatedItems;
+
   if (isLoading) {
     return (
       <div className="space-y-6">
