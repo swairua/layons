@@ -105,13 +105,6 @@ export function DashboardStats() {
       icon: FileText
     },
     {
-      title: 'Active Customers',
-      value: (stats?.customerCount || 0).toString(),
-      change: '+5.2%',
-      changeType: 'increase' as const,
-      icon: Users
-    },
-    {
       title: 'Outstanding Amount',
       value: formatCurrency((stats?.totalRevenue || 0) - (stats?.totalPayments || 0)),
       alert: ((stats?.totalRevenue || 0) - (stats?.totalPayments || 0)) > 0,
