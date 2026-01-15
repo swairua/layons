@@ -414,6 +414,8 @@ Website:`;
     setStatusFilter('all');
     setDateFromFilter('');
     setDateToFilter('');
+    setDueDateFromFilter('');
+    setDueDateToFilter('');
     setCustomerFilter('all');
     setAmountFromFilter('');
     setAmountToFilter('');
