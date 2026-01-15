@@ -440,7 +440,7 @@ Website: www.biolegendscientific.co.ke`;
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredQuotations.map((quotation: Quotation) => (
+                {paginatedQuotations.map((quotation: Quotation) => (
                   <TableRow key={quotation.id} className="hover:bg-muted/50 transition-smooth">
                     <TableCell className="font-medium">
                       <div className="flex items-center space-x-2">
