@@ -107,6 +107,10 @@ const RemittanceAdvice = () => {
     return matchesSearch && matchesStatus;
   });
 
+  // Pagination hook
+  const pagination = usePagination(filteredRemittances, { initialPageSize: 10 });
+  const paginatedRemittances = pagination.paginatedItems;
+
   if (isLoading) {
     return (
       <div className="space-y-6">
