@@ -10,9 +10,8 @@ import {
   Package,
   TrendingUp
 } from 'lucide-react';
-import { useQuotations, useBOQs, usePayments } from '@/hooks/useDatabase';
+import { useQuotations, useBOQs } from '@/hooks/useDatabase';
 import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
-import { useProformas } from '@/hooks/useProforma';
 import { useCompanies } from '@/hooks/useDatabase';
 import { cn } from '@/lib/utils';
 
