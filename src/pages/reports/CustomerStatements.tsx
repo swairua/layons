@@ -97,9 +97,10 @@ export default function CustomerStatements() {
 
       // Get last payment info
       const customerPayments = payments.filter(pay => pay.customer_id === customer.id);
-      const lastPayment = customerPayments.sort((a, b) => 
+      const sortedPayments = customerPayments.sort((a, b) =>
         new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime()
-      )[0];
+      );
+      const lastPayment = sortedPayments.length > 0 ? sortedPayments[0] : undefined;
 
       return {
         customer_id: customer.id,
