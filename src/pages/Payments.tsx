@@ -381,7 +381,7 @@ export default function Payments() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="shadow-card">
           <CardContent className="pt-6">
             <div className="flex items-center space-x-2">
@@ -405,6 +405,43 @@ export default function Payments() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Payment Method Filter Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {['all', 'cash', 'mpesa', 'bank_transfer'].map((method) => {
+          let count = 0;
+          let label = method;
+          if (method === 'all') {
+            count = payments.length;
+            label = 'All Payments';
+          } else if (method === 'mpesa') {
+            count = payments.filter(p => p.payment_method === 'mpesa').length;
+            label = 'M-Pesa';
+          } else if (method === 'bank_transfer') {
+            count = payments.filter(p => p.payment_method === 'bank_transfer').length;
+            label = 'Bank Transfer';
+          } else {
+            count = payments.filter(p => p.payment_method === method).length;
+            label = method.charAt(0).toUpperCase() + method.slice(1);
+          }
+          const isActive = methodFilter === method;
+          return (
+            <Card
+              key={method}
+              className={`shadow-card cursor-pointer hover:shadow-lg transition-shadow ${isActive ? 'ring-2 ring-primary' : ''}`}
+              onClick={() => setMethodFilter(isActive ? 'all' : method)}
+            >
+              <CardContent className="pt-6">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">{label}</p>
+                  <p className="text-2xl font-bold">{count}</p>
+                  <p className="text-xs text-muted-foreground">{isActive ? 'Filtering...' : 'Click to filter'}</p>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Filters and Search */}
