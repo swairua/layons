@@ -65,21 +65,8 @@ export function DashboardStats() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-          {[...Array(2)].map((_, i) => (
-            <Card key={i} className="shadow-card">
-              <CardHeader className="space-y-0 pb-2">
-                <div className="h-4 bg-muted rounded animate-pulse"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-8 bg-muted rounded animate-pulse mb-2"></div>
-                <div className="h-3 bg-muted rounded animate-pulse w-2/3"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[...Array(1)].map((_, i) => (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(3)].map((_, i) => (
             <Card key={i} className="shadow-card">
               <CardHeader className="space-y-0 pb-2">
                 <div className="h-4 bg-muted rounded animate-pulse"></div>
