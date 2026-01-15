@@ -34,6 +34,7 @@ export default function BOQs() {
   const [searchTerm, setSearchTerm] = useState('');
   const [dueDateFromFilter, setDueDateFromFilter] = useState('');
   const [dueDateToFilter, setDueDateToFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'overdue' | 'aging' | 'current'>('all');
   const { currentCompany } = useCurrentCompany();
   const companyId = currentCompany?.id;
   const { data: boqs = [], isLoading, refetch: refetchBOQs } = useBOQs(companyId);
