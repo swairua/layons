@@ -1502,6 +1502,8 @@ export const useDeletePayment = () => {
         };
       } catch (error) {
         console.error('Error in useDeletePayment:', error);
+        console.error('Error type:', typeof error);
+        console.error('Error constructor:', error?.constructor?.name);
 
         // Handle different types of errors
         let errorMessage = 'Failed to delete payment';
@@ -1511,16 +1513,31 @@ export const useDeletePayment = () => {
           if (error.message.includes('Failed to fetch')) {
             errorMessage = 'Network error: Could not connect to the server. Please check your internet connection and try again.';
           } else {
-            errorMessage = `Network error: ${error.message}`;
+            errorMessage = `Connection error: ${error.message}`;
           }
         } else if (error instanceof Error) {
           errorMessage = error.message;
         } else if (typeof error === 'string') {
           errorMessage = error;
         } else if (error && typeof error === 'object') {
-          errorMessage = (error as any).message || 'Unknown error occurred';
+          // Try to extract message from various error object formats
+          const errObj = error as any;
+          if (errObj.message) {
+            errorMessage = errObj.message;
+          } else if (errObj.error?.message) {
+            errorMessage = errObj.error.message;
+          } else if (errObj.status) {
+            errorMessage = `Error (${errObj.status}): ${errObj.statusText || 'Unknown'}`;
+          } else {
+            try {
+              errorMessage = JSON.stringify(errObj);
+            } catch {
+              errorMessage = String(errObj);
+            }
+          }
         }
 
+        console.error('Final error message:', errorMessage);
         throw new Error(errorMessage);
       }
     },
