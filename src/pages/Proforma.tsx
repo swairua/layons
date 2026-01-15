@@ -40,11 +40,21 @@ import { formatCurrency } from '@/utils/taxCalculation';
 import { ensureProformaSchema } from '@/utils/proformaDatabaseSetup';
 
 export default function Proforma() {
+  const [searchParams] = useSearchParams();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedProforma, setSelectedProforma] = useState<ProformaWithItems | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+
+  // Set status filter from URL params
+  useEffect(() => {
+    const status = searchParams.get('status');
+    if (status && ['draft', 'sent', 'accepted', 'converted'].includes(status)) {
+      setStatusFilter(status);
+    }
+  }, [searchParams]);
 
   // Get company data
   const { data: companies } = useCompanies();
