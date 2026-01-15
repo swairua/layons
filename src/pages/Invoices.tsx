@@ -110,6 +110,7 @@ export default function Invoices() {
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState('all');
+  const [dueDateStatusFilter, setDueDateStatusFilter] = useState<'all' | 'overdue' | 'aging' | 'current'>('all');
   const [dateFromFilter, setDateFromFilter] = useState('');
   const [dateToFilter, setDateToFilter] = useState('');
   const [dueDateFromFilter, setDueDateFromFilter] = useState('');
