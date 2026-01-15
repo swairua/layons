@@ -31,6 +31,9 @@ export default function BOQs() {
   const [percentageRateOpen, setPercentageRateOpen] = useState(false);
   const [percentageRateBoq, setPercentageRateBoq] = useState<any | null>(null);
   const [schemaError, setSchemaError] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [dueDateFromFilter, setDueDateFromFilter] = useState('');
+  const [dueDateToFilter, setDueDateToFilter] = useState('');
   const { currentCompany } = useCurrentCompany();
   const companyId = currentCompany?.id;
   const { data: boqs = [], isLoading, refetch: refetchBOQs } = useBOQs(companyId);
@@ -45,8 +48,30 @@ export default function BOQs() {
   const [convertDialog, setConvertDialog] = useState<{ open: boolean; boqId?: string; boqNumber?: string }>({ open: false });
   const convertToInvoice = useConvertBoqToInvoice();
 
+  // Filter and search logic
+  const filteredBOQs = boqs.filter(boq => {
+    // Search filter
+    const matchesSearch =
+      boq.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      boq.client_name.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Due date filter
+    const dueDate = boq.due_date ? new Date(boq.due_date) : null;
+    const matchesDueDateFrom = !dueDateFromFilter || (dueDate && dueDate >= new Date(dueDateFromFilter));
+    const matchesDueDateTo = !dueDateToFilter || (dueDate && dueDate <= new Date(dueDateToFilter));
+
+    return matchesSearch && matchesDueDateFrom && matchesDueDateTo;
+  });
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setDueDateFromFilter('');
+    setDueDateToFilter('');
+    toast.success('Filters cleared');
+  };
+
   // Pagination hook
-  const pagination = usePagination(boqs, { initialPageSize: 10 });
+  const pagination = usePagination(filteredBOQs, { initialPageSize: 10 });
   const paginatedBOQs = pagination.paginatedItems;
 
   const handleDownloadPDF = async (boq: any, options?: { customTitle?: string; amountMultiplier?: number; forceCurrency?: string; customClient?: any; stampImageUrl?: string; specialPaymentPercentage?: number; invoiceNumber?: string; useCurrentDate?: boolean }) => {
