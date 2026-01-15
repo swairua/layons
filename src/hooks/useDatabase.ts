@@ -1442,8 +1442,27 @@ export const useDeletePayment = () => {
           .eq('id', paymentId);
 
         if (deletePaymentError) {
-          console.error('Failed to delete payment:', deletePaymentError);
-          const errorMsg = deletePaymentError?.message || 'Unknown error';
+          console.error('Failed to delete payment - Full error object:', deletePaymentError);
+
+          // Extract error message from Supabase error object
+          let errorMsg = 'Unknown error';
+
+          if (deletePaymentError?.message) {
+            errorMsg = deletePaymentError.message;
+          } else if (deletePaymentError?.code) {
+            errorMsg = `Error code: ${deletePaymentError.code}`;
+          } else if (typeof deletePaymentError === 'string') {
+            errorMsg = deletePaymentError;
+          } else {
+            // Try to stringify and inspect the error
+            try {
+              errorMsg = JSON.stringify(deletePaymentError);
+            } catch {
+              errorMsg = String(deletePaymentError);
+            }
+          }
+
+          console.error('Extracted error message:', errorMsg);
 
           // Handle specific error types
           if (errorMsg.includes('row-level security') || errorMsg.includes('permission denied')) {
@@ -1452,8 +1471,8 @@ export const useDeletePayment = () => {
           if (errorMsg.includes('FOREIGN KEY') || errorMsg.includes('constraint')) {
             throw new Error(`Cannot delete this payment. It may be referenced by other records. Please try again or contact support.`);
           }
-          if (errorMsg.includes('Failed to fetch') || errorMsg.includes('network')) {
-            throw new Error(`Network error while deleting payment. Please check your connection and try again.`);
+          if (errorMsg.includes('Failed to fetch')) {
+            throw new Error(`Network error: Could not reach the server. Please check your connection and try again.`);
           }
 
           throw new Error(`Failed to delete payment: ${errorMsg}`);
