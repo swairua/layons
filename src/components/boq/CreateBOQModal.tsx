@@ -112,8 +112,9 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
   useEffect(() => {
     if (open) {
       setBoqNumber(defaultNumber);
+      setDueDate(todayISO);
     }
-  }, [open, defaultNumber]);
+  }, [open, defaultNumber, todayISO]);
 
   const selectedClient = useMemo(() => customers.find(c => c.id === clientId), [customers, clientId]);
 
