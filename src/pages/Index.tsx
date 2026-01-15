@@ -1,10 +1,36 @@
+import { useNavigate } from 'react-router-dom';
 import { DashboardStats } from '@/components/dashboard/DashboardStats';
+import { DashboardSummaryCards } from '@/components/dashboard/DashboardSummaryCards';
 import { RecentActivity } from '@/components/dashboard/RecentActivity';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { useCompanies } from '@/hooks/useDatabase';
 
 const Index = () => {
+  const navigate = useNavigate();
   const { data: companies } = useCompanies();
+
+  const handleDrillDown = (module: string, filterType: string) => {
+    // Navigate to the appropriate module with filter state
+    switch (module) {
+      case 'quotations':
+        navigate(`/quotations?status=${filterType}`);
+        break;
+      case 'boqs':
+        navigate(`/boqs?dueStatus=${filterType}`);
+        break;
+      case 'invoices':
+        navigate(`/invoices?dueStatus=${filterType}`);
+        break;
+      case 'proforma':
+        navigate(`/proforma?status=${filterType}`);
+        break;
+      case 'payments':
+        navigate(`/payments?filter=${filterType}`);
+        break;
+      default:
+        break;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -18,6 +44,9 @@ const Index = () => {
 
       {/* Dashboard Stats */}
       <DashboardStats />
+
+      {/* Dashboard Summary Cards with Drill-down */}
+      <DashboardSummaryCards onDrill={handleDrillDown} />
 
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
