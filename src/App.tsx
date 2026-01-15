@@ -47,6 +47,56 @@ const CustomerPerformanceOptimizerPage = lazy(() => import("./pages/CustomerPerf
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const DatabaseFix = lazy(() => import("./pages/DatabaseFix"));
 
+// Error recovery component for module loading failures
+const ModuleErrorFallback = () => {
+  const [retryCount, setRetryCount] = useState(0);
+
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
+    window.location.reload();
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="max-w-md w-full p-6 space-y-4">
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-bold text-foreground">Module Loading Error</h1>
+          <p className="text-muted-foreground">
+            There was an issue loading the page content. This can happen if the connection was interrupted.
+          </p>
+        </div>
+
+        <div className="bg-destructive/10 border border-destructive/20 rounded p-4">
+          <p className="text-sm text-destructive/80">
+            Try refreshing the page or clearing your browser cache if this persists.
+          </p>
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={handleRetry}
+            className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors font-medium"
+          >
+            Refresh Page
+          </button>
+          <button
+            onClick={() => window.location.href = '/'}
+            className="flex-1 px-4 py-2 bg-muted text-foreground rounded hover:bg-muted/80 transition-colors font-medium"
+          >
+            Go Home
+          </button>
+        </div>
+
+        {retryCount > 0 && (
+          <p className="text-xs text-muted-foreground text-center">
+            Refresh attempts: {retryCount}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const App = () => {
   const { currentCompany } = useCurrentCompany();
 
