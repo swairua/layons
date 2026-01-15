@@ -29,8 +29,6 @@ export function DashboardSummaryCards({ onDrill }: DashboardSummaryCardsProps) {
   const { data: quotations = [] } = useQuotations(companyId);
   const { data: boqs = [] } = useBOQs(companyId);
   const { data: invoices = [] } = useInvoices(companyId);
-  const { data: payments = [] } = usePayments(companyId);
-  const { data: proformas = [] } = useProformas(companyId);
 
   // Categorize invoices by due date status
   const categorizeInvoice = (invoice: any) => {
