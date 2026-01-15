@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { parseErrorMessage } from '@/utils/errorHelpers';
 import { RecordPaymentModal } from '@/components/payments/RecordPaymentModal';
@@ -89,12 +90,22 @@ function formatCurrency(amount: number, currency: string = 'KES') {
 }
 
 export default function Payments() {
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
+  const [methodFilter, setMethodFilter] = useState<string>('all');
   const [showRecordModal, setShowRecordModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<any>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [paymentToDelete, setPaymentToDelete] = useState<any>(null);
+
+  // Set method filter from URL params
+  useEffect(() => {
+    const filter = searchParams.get('filter');
+    if (filter && ['all', 'thisMonth', 'cash', 'mpesa', 'bank_transfer', 'cheque'].includes(filter)) {
+      setMethodFilter(filter);
+    }
+  }, [searchParams]);
 
   // Fetch live payments data and company details
   const { data: companies = [] } = useCompanies();
@@ -225,11 +236,25 @@ export default function Payments() {
 
   // Removed inline PDF generation function - now using utility function
 
-  const filteredPayments = payments.filter(payment =>
-    (payment.customers?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
-    (payment.payment_number?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
-    (payment.payment_allocations?.some(alloc => alloc.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase())) ?? false)
-  );
+  const filteredPayments = payments.filter(payment => {
+    const matchesSearch =
+      (payment.customers?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+      (payment.payment_number?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+      (payment.payment_allocations?.some(alloc => alloc.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase())) ?? false);
+
+    let matchesFilter = true;
+    if (methodFilter === 'all') {
+      matchesFilter = true;
+    } else if (methodFilter === 'thisMonth') {
+      const paymentDate = new Date(payment.payment_date);
+      const now = new Date();
+      matchesFilter = paymentDate.getMonth() === now.getMonth() && paymentDate.getFullYear() === now.getFullYear();
+    } else {
+      matchesFilter = payment.payment_method === methodFilter;
+    }
+
+    return matchesSearch && matchesFilter;
+  });
 
   // Pagination hook
   const pagination = usePagination(filteredPayments, { initialPageSize: 10 });
@@ -356,7 +381,7 @@ export default function Payments() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="shadow-card">
           <CardContent className="pt-6">
             <div className="flex items-center space-x-2">
@@ -380,6 +405,43 @@ export default function Payments() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Payment Method Filter Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {['all', 'cash', 'mpesa', 'bank_transfer'].map((method) => {
+          let count = 0;
+          let label = method;
+          if (method === 'all') {
+            count = payments.length;
+            label = 'All Payments';
+          } else if (method === 'mpesa') {
+            count = payments.filter(p => p.payment_method === 'mpesa').length;
+            label = 'M-Pesa';
+          } else if (method === 'bank_transfer') {
+            count = payments.filter(p => p.payment_method === 'bank_transfer').length;
+            label = 'Bank Transfer';
+          } else {
+            count = payments.filter(p => p.payment_method === method).length;
+            label = method.charAt(0).toUpperCase() + method.slice(1);
+          }
+          const isActive = methodFilter === method;
+          return (
+            <Card
+              key={method}
+              className={`shadow-card cursor-pointer hover:shadow-lg transition-shadow ${isActive ? 'ring-2 ring-primary' : ''}`}
+              onClick={() => setMethodFilter(isActive ? 'all' : method)}
+            >
+              <CardContent className="pt-6">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">{label}</p>
+                  <p className="text-2xl font-bold">{count}</p>
+                  <p className="text-xs text-muted-foreground">{isActive ? 'Filtering...' : 'Click to filter'}</p>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Filters and Search */}

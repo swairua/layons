@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Routes, Route } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState, Component, ReactNode, ErrorInfo } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useCurrentCompany } from "@/contexts/CompanyContext";
@@ -46,6 +46,92 @@ const OptimizedCustomers = lazy(() => import("./pages/OptimizedCustomers"));
 const CustomerPerformanceOptimizerPage = lazy(() => import("./pages/CustomerPerformanceOptimizerPage"));
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const DatabaseFix = lazy(() => import("./pages/DatabaseFix"));
+
+// Error boundary class component to catch module loading errors
+class AppErrorBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('App Error:', error, errorInfo);
+
+    // Check if this is a module loading error
+    if (
+      error.message.includes('dynamically imported module') ||
+      error.message.includes('Failed to fetch') ||
+      error.message.includes('network')
+    ) {
+      console.warn('⚠️ Module loading error detected - this may be a network issue');
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <ModuleErrorFallback />;
+    }
+
+    return this.props.children;
+  }
+}
+
+// Error recovery component for module loading failures
+const ModuleErrorFallback = () => {
+  const [retryCount, setRetryCount] = useState(0);
+
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
+    window.location.reload();
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="max-w-md w-full p-6 space-y-4">
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-bold text-foreground">Module Loading Error</h1>
+          <p className="text-muted-foreground">
+            There was an issue loading the page content. This can happen if the connection was interrupted.
+          </p>
+        </div>
+
+        <div className="bg-destructive/10 border border-destructive/20 rounded p-4">
+          <p className="text-sm text-destructive/80">
+            Try refreshing the page or clearing your browser cache if this persists.
+          </p>
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={handleRetry}
+            className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors font-medium"
+          >
+            Refresh Page
+          </button>
+          <button
+            onClick={() => window.location.href = '/'}
+            className="flex-1 px-4 py-2 bg-muted text-foreground rounded hover:bg-muted/80 transition-colors font-medium"
+          >
+            Go Home
+          </button>
+        </div>
+
+        {retryCount > 0 && (
+          <p className="text-xs text-muted-foreground text-center">
+            Refresh attempts: {retryCount}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const App = () => {
   const { currentCompany } = useCurrentCompany();

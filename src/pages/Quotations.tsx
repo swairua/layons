@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -79,7 +80,9 @@ function getStatusColor(status: string) {
 }
 
 export default function Quotations() {
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -93,6 +96,14 @@ export default function Quotations() {
   const currentCompany = companies?.[0];
   const { data: quotations, isLoading, error, refetch } = useQuotations(currentCompany?.id);
   const deleteQuotation = useDeleteQuotation();
+
+  // Set status filter from URL params
+  useEffect(() => {
+    const status = searchParams.get('status');
+    if (status && ['draft', 'sent', 'accepted', 'rejected', 'expired', 'processed'].includes(status)) {
+      setStatusFilter(status);
+    }
+  }, [searchParams]);
 
   const handleDeleteClick = (quotation: Quotation) => {
     setDeleteDialog({ open: true, quotation });
@@ -133,10 +144,15 @@ export default function Quotations() {
     }).format(amount);
   };
 
-  const filteredQuotations = quotations?.filter(quotation =>
-    quotation.customers?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    quotation.quotation_number.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredQuotations = quotations?.filter(quotation => {
+    const matchesSearch =
+      quotation.customers?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      quotation.quotation_number.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus = statusFilter === 'all' || quotation.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  }) || [];
 
   // Pagination hook
   const pagination = usePagination(filteredQuotations, { initialPageSize: 10 });
@@ -378,6 +394,29 @@ Website: www.biolegendscientific.co.ke`;
           </div>
         </CardContent>
       </Card>
+
+      {/* Status Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {['draft', 'sent', 'accepted', 'expired'].map((status) => {
+          const count = quotations?.filter(q => q.status === status).length || 0;
+          const isActive = statusFilter === status;
+          return (
+            <Card
+              key={status}
+              className={`shadow-card cursor-pointer hover:shadow-lg transition-shadow ${isActive ? 'ring-2 ring-primary' : ''}`}
+              onClick={() => setStatusFilter(isActive ? 'all' : status)}
+            >
+              <CardContent className="pt-6">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground capitalize">{status}</p>
+                  <p className="text-2xl font-bold">{count}</p>
+                  <p className="text-xs text-muted-foreground">{isActive ? 'Filtering...' : 'Click to filter'}</p>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
 
       <Card className="shadow-card">
         <CardHeader>

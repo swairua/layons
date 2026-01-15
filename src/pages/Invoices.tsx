@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -97,6 +98,7 @@ function getStatusColor(status: string) {
 }
 
 export default function Invoices() {
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -126,6 +128,14 @@ export default function Invoices() {
   // Use the fixed invoices hook
   const { data: invoices, isLoading, error, refetch } = useInvoices(currentCompany?.id);
   const deleteInvoice = useDeleteInvoice();
+
+  // Set dueStatus filter from URL params
+  useEffect(() => {
+    const dueStatus = searchParams.get('dueStatus');
+    if (dueStatus && ['overdue', 'aging', 'current'].includes(dueStatus)) {
+      setDueDateStatusFilter(dueStatus as 'all' | 'overdue' | 'aging' | 'current');
+    }
+  }, [searchParams]);
 
   // Fix invoice data on page load
   useEffect(() => {

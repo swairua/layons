@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, TrendingDown, DollarSign, FileText, Package, Users, AlertTriangle, CheckCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, FileText, AlertTriangle, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDashboardStats, useCompanies } from '@/hooks/useDatabase';
 
@@ -64,18 +64,33 @@ export function DashboardStats() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i} className="shadow-card">
-            <CardHeader className="space-y-0 pb-2">
-              <div className="h-4 bg-muted rounded animate-pulse"></div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-8 bg-muted rounded animate-pulse mb-2"></div>
-              <div className="h-3 bg-muted rounded animate-pulse w-2/3"></div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="space-y-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="shadow-card">
+              <CardHeader className="space-y-0 pb-2">
+                <div className="h-4 bg-muted rounded animate-pulse"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-8 bg-muted rounded animate-pulse mb-2"></div>
+                <div className="h-3 bg-muted rounded animate-pulse w-2/3"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[...Array(1)].map((_, i) => (
+            <Card key={i} className="shadow-card">
+              <CardHeader className="space-y-0 pb-2">
+                <div className="h-4 bg-muted rounded animate-pulse"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-8 bg-muted rounded animate-pulse mb-2"></div>
+                <div className="h-3 bg-muted rounded animate-pulse w-2/3"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
@@ -105,18 +120,10 @@ export function DashboardStats() {
       icon: FileText
     },
     {
-      title: 'Active Customers',
-      value: (stats?.customerCount || 0).toString(),
-      change: '+5.2%',
-      changeType: 'increase' as const,
-      icon: Users
-    },
-    {
-      title: 'Products in Stock',
-      value: (stats?.productCount || 0).toString(),
-      change: (stats?.lowStockProducts || 0) > 0 ? `${stats?.lowStockProducts} low stock` : 'All stocked well',
-      alert: (stats?.lowStockProducts || 0) > 0,
-      icon: Package
+      title: 'Outstanding Amount',
+      value: formatCurrency((stats?.totalRevenue || 0) - (stats?.totalPayments || 0)),
+      alert: ((stats?.totalRevenue || 0) - (stats?.totalPayments || 0)) > 0,
+      icon: AlertTriangle
     }
   ];
 
@@ -126,42 +133,26 @@ export function DashboardStats() {
       title: 'Total Payments Received',
       value: formatCurrency(stats?.totalPayments || 0),
       icon: CheckCircle
-    },
-    {
-      title: 'Outstanding Invoices',
-      value: (stats?.pendingInvoices || 0).toString(),
-      alert: (stats?.pendingInvoices || 0) > 0,
-      icon: AlertTriangle
-    },
-    {
-      title: 'Outstanding Amount',
-      value: formatCurrency((stats?.totalRevenue || 0) - (stats?.totalPayments || 0)),
-      alert: ((stats?.totalRevenue || 0) - (stats?.totalPayments || 0)) > 0,
-      icon: DollarSign
-    },
-    {
-      title: 'Low Stock Alerts',
-      value: (stats?.lowStockProducts || 0).toString(),
-      alert: (stats?.lowStockProducts || 0) > 0,
-      icon: Package
     }
   ];
 
   return (
     <div className="space-y-4">
       {/* Primary Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {dashboardStats.map((stat) => (
           <StatCard key={stat.title} {...stat} />
         ))}
       </div>
-      
+
       {/* Secondary Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {secondaryStats.map((stat) => (
-          <StatCard key={stat.title} {...stat} />
-        ))}
-      </div>
+      {secondaryStats.length > 0 && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {secondaryStats.map((stat) => (
+            <StatCard key={stat.title} {...stat} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
