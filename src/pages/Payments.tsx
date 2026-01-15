@@ -90,12 +90,22 @@ function formatCurrency(amount: number, currency: string = 'KES') {
 }
 
 export default function Payments() {
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
+  const [methodFilter, setMethodFilter] = useState<string>('all');
   const [showRecordModal, setShowRecordModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<any>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [paymentToDelete, setPaymentToDelete] = useState<any>(null);
+
+  // Set method filter from URL params
+  useEffect(() => {
+    const filter = searchParams.get('filter');
+    if (filter && ['all', 'thisMonth', 'cash', 'mpesa', 'bank_transfer', 'cheque'].includes(filter)) {
+      setMethodFilter(filter);
+    }
+  }, [searchParams]);
 
   // Fetch live payments data and company details
   const { data: companies = [] } = useCompanies();
