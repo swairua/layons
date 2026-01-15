@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
+import {
   DollarSign,
   CreditCard,
   Calendar,
@@ -34,7 +34,9 @@ import { useCreatePayment } from '@/hooks/useDatabase';
 import { toNumber } from '@/utils/numericFormHelpers';
 import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { PaymentAllocationQuickFix } from './PaymentAllocationQuickFix';
+import { autoCreateCashReceipt } from '@/utils/autoCreateCashReceipt';
 
 interface RecordPaymentModalProps {
   open: boolean;
