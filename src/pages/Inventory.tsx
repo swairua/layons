@@ -148,6 +148,10 @@ export default function Inventory() {
     (item.product_categories?.name && item.product_categories.name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  // Pagination hook
+  const pagination = usePagination(filteredInventory, { initialPageSize: 10 });
+  const paginatedInventory = pagination.paginatedItems;
+
   const totalValue = inventory.reduce((sum, item) => {
     return sum + ((item.stock_quantity || 0) * (item.selling_price || 0));
   }, 0);
