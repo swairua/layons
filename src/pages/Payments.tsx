@@ -236,11 +236,25 @@ export default function Payments() {
 
   // Removed inline PDF generation function - now using utility function
 
-  const filteredPayments = payments.filter(payment =>
-    (payment.customers?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
-    (payment.payment_number?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
-    (payment.payment_allocations?.some(alloc => alloc.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase())) ?? false)
-  );
+  const filteredPayments = payments.filter(payment => {
+    const matchesSearch =
+      (payment.customers?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+      (payment.payment_number?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+      (payment.payment_allocations?.some(alloc => alloc.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase())) ?? false);
+
+    let matchesFilter = true;
+    if (methodFilter === 'all') {
+      matchesFilter = true;
+    } else if (methodFilter === 'thisMonth') {
+      const paymentDate = new Date(payment.payment_date);
+      const now = new Date();
+      matchesFilter = paymentDate.getMonth() === now.getMonth() && paymentDate.getFullYear() === now.getFullYear();
+    } else {
+      matchesFilter = payment.payment_method === methodFilter;
+    }
+
+    return matchesSearch && matchesFilter;
+  });
 
   // Pagination hook
   const pagination = usePagination(filteredPayments, { initialPageSize: 10 });
