@@ -75,6 +75,7 @@ export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: R
 
   // Fetch all available invoices for selection
   const { currentCompany } = useCurrentCompany();
+  const { profile } = useAuth();
   const { data: invoices = [] } = useInvoices(currentCompany?.id);
   const createPaymentMutation = useCreatePayment();
   
