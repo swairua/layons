@@ -608,138 +608,149 @@ Website:`;
               )}
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Invoice Number</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Due Date</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Paid</TableHead>
-                  <TableHead>Balance</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredInvoices.map((invoice: Invoice) => (
-                  <TableRow key={invoice.id} className="hover:bg-muted/50 transition-smooth">
-                    <TableCell className="font-medium">
-                      <div className="flex items-center space-x-2">
-                        <Receipt className="h-4 w-4 text-primary" />
-                        <span>{invoice.invoice_number}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{invoice.customers?.name || 'Unknown Customer'}</div>
-                        {invoice.customers?.email && (
-                          <div className="text-sm text-muted-foreground">{invoice.customers.email}</div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>{new Date(invoice.invoice_date).toLocaleDateString()}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(invoice.due_date).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="font-semibold">
-                      {formatCurrency(invoice.total_amount || 0, invoice.currency || 'KES')}
-                    </TableCell>
-                    <TableCell className="text-success">
-                      {formatCurrency(invoice.paid_amount ?? 0, invoice.currency || 'KES')}
-                    </TableCell>
-                    <TableCell className={`font-medium ${((invoice.balance_due ?? (invoice.total_amount || 0) - (invoice.paid_amount ?? 0)) || 0) > 0 ? 'text-destructive' : 'text-success'}`}>
-                      {formatCurrency(invoice.balance_due ?? (invoice.total_amount || 0) - (invoice.paid_amount ?? 0), invoice.currency || 'KES')}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStatusColor(calculateInvoiceStatus(invoice))}>
-                        {calculateInvoiceStatus(invoice).charAt(0).toUpperCase() + calculateInvoiceStatus(invoice).slice(1)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleViewInvoice(invoice)}
-                          title="View invoice"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        {invoice.status === 'draft' && (
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Invoice Number</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Due Date</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Paid</TableHead>
+                    <TableHead>Balance</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedInvoices.map((invoice: Invoice) => (
+                    <TableRow key={invoice.id} className="hover:bg-muted/50 transition-smooth">
+                      <TableCell className="font-medium">
+                        <div className="flex items-center space-x-2">
+                          <Receipt className="h-4 w-4 text-primary" />
+                          <span>{invoice.invoice_number}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{invoice.customers?.name || 'Unknown Customer'}</div>
+                          {invoice.customers?.email && (
+                            <div className="text-sm text-muted-foreground">{invoice.customers.email}</div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span>{new Date(invoice.invoice_date).toLocaleDateString()}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(invoice.due_date).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="font-semibold">
+                        {formatCurrency(invoice.total_amount || 0, invoice.currency || 'KES')}
+                      </TableCell>
+                      <TableCell className="text-success">
+                        {formatCurrency(invoice.paid_amount ?? 0, invoice.currency || 'KES')}
+                      </TableCell>
+                      <TableCell className={`font-medium ${((invoice.balance_due ?? (invoice.total_amount || 0) - (invoice.paid_amount ?? 0)) || 0) > 0 ? 'text-destructive' : 'text-success'}`}>
+                        {formatCurrency(invoice.balance_due ?? (invoice.total_amount || 0) - (invoice.paid_amount ?? 0), invoice.currency || 'KES')}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getStatusColor(calculateInvoiceStatus(invoice))}>
+                          {calculateInvoiceStatus(invoice).charAt(0).toUpperCase() + calculateInvoiceStatus(invoice).slice(1)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end space-x-2">
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleEditInvoice(invoice)}
-                            title="Edit invoice"
+                            onClick={() => handleViewInvoice(invoice)}
+                            title="View invoice"
                           >
-                            <Edit className="h-4 w-4" />
+                            <Eye className="h-4 w-4" />
                           </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDownloadInvoice(invoice)}
-                          title="Download PDF"
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                        {/* Create Delivery Note - Available for sent/paid invoices */}
-                        {(invoice.status === 'sent' || invoice.status === 'paid' || invoice.status === 'partial') && (
+                          {invoice.status === 'draft' && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditInvoice(invoice)}
+                              title="Edit invoice"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleCreateDeliveryNote(invoice)}
-                            title="Create delivery note"
+                            onClick={() => handleDownloadInvoice(invoice)}
+                            title="Download PDF"
                           >
-                            <Truck className="h-4 w-4" />
+                            <Download className="h-4 w-4" />
                           </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteClick(invoice)}
-                          title="Delete invoice"
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                        {invoice.status !== 'paid' && (
-                          <>
-                            {invoice.status === 'draft' && (
+                          {/* Create Delivery Note - Available for sent/paid invoices */}
+                          {(invoice.status === 'sent' || invoice.status === 'paid' || invoice.status === 'partial') && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleCreateDeliveryNote(invoice)}
+                              title="Create delivery note"
+                            >
+                              <Truck className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteClick(invoice)}
+                            title="Delete invoice"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                          {invoice.status !== 'paid' && (
+                            <>
+                              {invoice.status === 'draft' && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleSendInvoice(invoice.id)}
+                                  className="bg-primary-light text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground"
+                                >
+                                  <Send className="h-4 w-4 mr-1" />
+                                  Send
+                                </Button>
+                              )}
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleSendInvoice(invoice.id)}
-                                className="bg-primary-light text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground"
+                                onClick={() => handleRecordPayment(invoice)}
+                                className="bg-success-light text-success border-success/20 hover:bg-success hover:text-success-foreground"
                               >
-                                <Send className="h-4 w-4 mr-1" />
-                                Send
+                                <DollarSign className="h-4 w-4 mr-1" />
+                                {(invoice.balance_due || 0) > 0 ? 'Record Payment' : 'Payment Adjustment'}
                               </Button>
-                            )}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleRecordPayment(invoice)}
-                              className="bg-success-light text-success border-success/20 hover:bg-success hover:text-success-foreground"
-                            >
-                              <DollarSign className="h-4 w-4 mr-1" />
-                              {(invoice.balance_due || 0) > 0 ? 'Record Payment' : 'Payment Adjustment'}
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <PaginationControls
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                pageSize={pagination.pageSize}
+                totalItems={pagination.totalItems}
+                onPageChange={pagination.setCurrentPage}
+                onPageSizeChange={pagination.setPageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+              />
+            </div>
           )}
         </CardContent>
       </Card>
