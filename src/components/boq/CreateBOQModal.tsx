@@ -99,6 +99,7 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
 
   const [boqNumber, setBoqNumber] = useState(defaultNumber);
   const [boqDate, setBoqDate] = useState(todayISO);
+  const [dueDate, setDueDate] = useState(todayISO);
   const [clientId, setClientId] = useState('');
   const [projectTitle, setProjectTitle] = useState('');
   const [contractor, setContractor] = useState('');
