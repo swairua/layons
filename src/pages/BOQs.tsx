@@ -378,8 +378,8 @@ export default function BOQs() {
         const currencyLocale = getLocaleForCurrency(viewing.currency || 'KES');
         const formatViewingCurrency = (amount: number) => new Intl.NumberFormat(currencyLocale.locale, { style: 'currency', currency: currencyLocale.code, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
         return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-lg max-w-3xl w-full p-6">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-white rounded-lg max-w-3xl w-full p-6">
             <div className="flex items-start justify-between">
               <h2 className="text-xl font-semibold">BOQ {viewing.number}</h2>
               <div className="flex items-center gap-2">

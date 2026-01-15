@@ -2,7 +2,7 @@
 
 /**
  * Update user password in Supabase
- * Usage: node scripts/update-user-password.js
+ * Usage: node scripts/update-user-password.cjs
  * 
  * Requires environment variables:
  * - VITE_SUPABASE_URL
