@@ -1425,8 +1425,24 @@ export const useDeletePayment = () => {
             .eq('payment_id', paymentId);
 
           if (deleteAllocError) {
-            console.error('Failed to delete payment allocations:', deleteAllocError);
-            const errorMsg = deleteAllocError?.message || 'Unknown error';
+            console.error('Failed to delete payment allocations - Full error:', deleteAllocError);
+
+            // Extract error message properly
+            let errorMsg = 'Unknown error';
+            if (deleteAllocError?.message) {
+              errorMsg = deleteAllocError.message;
+            } else if (deleteAllocError?.code) {
+              errorMsg = `Error code: ${deleteAllocError.code}`;
+            } else if (typeof deleteAllocError === 'string') {
+              errorMsg = deleteAllocError;
+            } else {
+              try {
+                errorMsg = JSON.stringify(deleteAllocError);
+              } catch {
+                errorMsg = String(deleteAllocError);
+              }
+            }
+
             if (errorMsg.includes('row-level security') || errorMsg.includes('permission denied')) {
               throw new Error(`You don't have permission to delete payment allocations. Please check your access settings.`);
             }
