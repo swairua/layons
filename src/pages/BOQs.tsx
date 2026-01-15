@@ -27,6 +27,7 @@ import { generateUniqueInvoiceNumber } from '@/utils/invoiceNumberGenerator';
 import { toast } from 'sonner';
 
 export default function BOQs() {
+  const [searchParams] = useSearchParams();
   const [open, setOpen] = useState(false);
   const [percentageCopyOpen, setPercentageCopyOpen] = useState(false);
   const [percentageRateOpen, setPercentageRateOpen] = useState(false);
@@ -36,6 +37,14 @@ export default function BOQs() {
   const [dueDateFromFilter, setDueDateFromFilter] = useState('');
   const [dueDateToFilter, setDueDateToFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'overdue' | 'aging' | 'current'>('all');
+
+  // Set status filter from URL params
+  useEffect(() => {
+    const dueStatus = searchParams.get('dueStatus');
+    if (dueStatus && ['overdue', 'aging', 'current'].includes(dueStatus)) {
+      setStatusFilter(dueStatus as 'overdue' | 'aging' | 'current');
+    }
+  }, [searchParams]);
   const { currentCompany } = useCurrentCompany();
   const companyId = currentCompany?.id;
   const { data: boqs = [], isLoading, refetch: refetchBOQs } = useBOQs(companyId);
