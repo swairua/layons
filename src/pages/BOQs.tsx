@@ -381,6 +381,66 @@ export default function BOQs() {
         </CardContent>
       </Card>
 
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card
+          className="shadow-card cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => setStatusFilter(statusFilter === 'overdue' ? 'all' : 'overdue')}
+        >
+          <CardContent className="pt-6">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-destructive">Overdue</p>
+                <Badge variant="destructive" className="text-lg font-bold">
+                  {boqSummary.overdue}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {statusFilter === 'overdue' ? 'Showing overdue BOQs' : 'Click to filter'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card
+          className="shadow-card cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => setStatusFilter(statusFilter === 'aging' ? 'all' : 'aging')}
+        >
+          <CardContent className="pt-6">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-warning">Due Within 7 Days</p>
+                <Badge variant="secondary" className="text-lg font-bold">
+                  {boqSummary.aging}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {statusFilter === 'aging' ? 'Showing aging BOQs' : 'Click to filter'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card
+          className="shadow-card cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => setStatusFilter(statusFilter === 'current' ? 'all' : 'current')}
+        >
+          <CardContent className="pt-6">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-success">Valid/Current</p>
+                <Badge variant="default" className="text-lg font-bold bg-success">
+                  {boqSummary.current}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {statusFilter === 'current' ? 'Showing valid BOQs' : 'Click to filter'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card className="shadow-card">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
