@@ -1415,6 +1415,8 @@ export const useDeletePayment = () => {
             }
           }
 
+          console.log(`Payment deletion: Processed ${allocationsList.length} invoice allocation(s)`);
+
           // Step 3: Delete payment allocations
           console.log('Deleting payment allocations for payment:', paymentId);
           const { error: deleteAllocError } = await supabase
