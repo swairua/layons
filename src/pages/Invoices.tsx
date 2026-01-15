@@ -442,6 +442,7 @@ Website:`;
 
   const handleClearFilters = () => {
     setStatusFilter('all');
+    setDueDateStatusFilter('all');
     setDateFromFilter('');
     setDateToFilter('');
     setDueDateFromFilter('');
