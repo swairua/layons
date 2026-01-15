@@ -403,18 +403,19 @@ export default function Customers() {
               )}
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Customer</TableHead>
-                  <TableHead className="hidden md:table-cell">Contact</TableHead>
-                  <TableHead className="hidden lg:table-cell">Location</TableHead>
-                  <TableHead className="hidden lg:table-cell">Credit Limit</TableHead>
-                  <TableHead className="hidden md:table-cell">Terms</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right min-w-[200px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Customer</TableHead>
+                    <TableHead className="hidden md:table-cell">Contact</TableHead>
+                    <TableHead className="hidden lg:table-cell">Location</TableHead>
+                    <TableHead className="hidden lg:table-cell">Credit Limit</TableHead>
+                    <TableHead className="hidden md:table-cell">Terms</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right min-w-[200px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
               <TableBody>
                 {paginatedCustomers.map((customer: Customer) => (
                   <TableRow key={customer.id} className="hover:bg-muted/50 transition-smooth">
@@ -533,6 +534,16 @@ export default function Customers() {
                 ))}
               </TableBody>
             </Table>
+              <PaginationControls
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                pageSize={pagination.pageSize}
+                totalItems={pagination.totalItems}
+                onPageChange={pagination.setCurrentPage}
+                onPageSizeChange={pagination.setPageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+              />
+            </div>
           )}
         </CardContent>
       </Card>
