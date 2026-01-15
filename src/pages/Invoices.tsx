@@ -200,16 +200,21 @@ export default function Invoices() {
     const calculatedStatus = calculateInvoiceStatus(invoice);
     const matchesStatus = statusFilter === 'all' || calculatedStatus === statusFilter;
 
-    // Date filter
+    // Invoice Date filter
     const invoiceDate = new Date(invoice.invoice_date);
     const matchesDateFrom = !dateFromFilter || invoiceDate >= new Date(dateFromFilter);
     const matchesDateTo = !dateToFilter || invoiceDate <= new Date(dateToFilter);
+
+    // Due Date filter
+    const dueDate = new Date(invoice.due_date);
+    const matchesDueDateFrom = !dueDateFromFilter || dueDate >= new Date(dueDateFromFilter);
+    const matchesDueDateTo = !dueDateToFilter || dueDate <= new Date(dueDateToFilter);
 
     // Amount filter
     const matchesAmountFrom = !amountFromFilter || (invoice.total_amount || 0) >= parseFloat(amountFromFilter);
     const matchesAmountTo = !amountToFilter || (invoice.total_amount || 0) <= parseFloat(amountToFilter);
 
-    return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo && matchesAmountFrom && matchesAmountTo;
+    return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo && matchesDueDateFrom && matchesDueDateTo && matchesAmountFrom && matchesAmountTo;
   }) || [];
 
   // Pagination hook
