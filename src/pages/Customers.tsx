@@ -114,6 +114,10 @@ export default function Customers() {
     return matchesSearch && matchesStatus && matchesCity && matchesCreditLimit;
   }) || [];
 
+  // Pagination hook
+  const pagination = usePagination(filteredCustomers, { initialPageSize: 10 });
+  const paginatedCustomers = pagination.paginatedItems;
+
   const displayCurrency = (amount: number) => {
     return formatCurrency(amount, currentCompany?.currency || 'KES');
   };
