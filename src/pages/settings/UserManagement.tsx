@@ -121,6 +121,13 @@ export default function UserManagement() {
     user.department?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Pagination hooks for users and invitations
+  const usersPagination = usePagination(filteredUsers, { initialPageSize: 10 });
+  const paginatedUsers = usersPagination.paginatedItems;
+
+  const invitationsPagination = usePagination(invitations, { initialPageSize: 10 });
+  const paginatedInvitations = invitationsPagination.paginatedItems;
+
   const handleCreateUser = async (userData: any) => {
     return await createUser(userData);
   };
