@@ -112,6 +112,10 @@ export default function CreditNotes() {
     return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo && matchesAmountFrom && matchesAmountTo;
   }) || [];
 
+  // Pagination hook
+  const pagination = usePagination(filteredCreditNotes, { initialPageSize: 10 });
+  const paginatedCreditNotes = pagination.paginatedItems;
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
       style: 'currency',
