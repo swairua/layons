@@ -129,6 +129,14 @@ export default function Invoices() {
   const { data: invoices, isLoading, error, refetch } = useInvoices(currentCompany?.id);
   const deleteInvoice = useDeleteInvoice();
 
+  // Set dueStatus filter from URL params
+  useEffect(() => {
+    const dueStatus = searchParams.get('dueStatus');
+    if (dueStatus && ['overdue', 'aging', 'current'].includes(dueStatus)) {
+      setDueDateStatusFilter(dueStatus as 'all' | 'overdue' | 'aging' | 'current');
+    }
+  }, [searchParams]);
+
   // Fix invoice data on page load
   useEffect(() => {
     if (currentCompany?.id && !isFixingData) {
