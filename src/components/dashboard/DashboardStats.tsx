@@ -131,18 +131,6 @@ export function DashboardStats() {
       value: (stats?.pendingInvoices || 0).toString(),
       alert: (stats?.pendingInvoices || 0) > 0,
       icon: AlertTriangle
-    },
-    {
-      title: 'Outstanding Amount',
-      value: formatCurrency((stats?.totalRevenue || 0) - (stats?.totalPayments || 0)),
-      alert: ((stats?.totalRevenue || 0) - (stats?.totalPayments || 0)) > 0,
-      icon: DollarSign
-    },
-    {
-      title: 'Low Stock Alerts',
-      value: (stats?.lowStockProducts || 0).toString(),
-      alert: (stats?.lowStockProducts || 0) > 0,
-      icon: Package
     }
   ];
 
