@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { PaginationControls } from '@/components/pagination/PaginationControls';
+import { usePagination } from '@/hooks/usePagination';
 import { 
   Select,
   SelectContent,
@@ -105,6 +107,10 @@ const RemittanceAdvice = () => {
     return matchesSearch && matchesStatus;
   });
 
+  // Pagination hook
+  const pagination = usePagination(filteredRemittances, { initialPageSize: 10 });
+  const paginatedRemittances = pagination.paginatedItems;
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -205,96 +211,12 @@ const RemittanceAdvice = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Advice Number</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Items</TableHead>
-                <TableHead>Total Payment</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredRemittances.map((remittance) => (
-                <TableRow key={remittance.id} className="hover:bg-muted/50 transition-smooth">
-                  <TableCell className="font-medium">
-                    <div className="flex items-center space-x-2">
-                      <FileText className="h-4 w-4 text-primary" />
-                      <span>{remittance.adviceNumber || remittance.advice_number || 'N/A'}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{remittance.customerName || remittance.customers?.name || 'N/A'}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {remittance.customerAddress || remittance.customers?.address || 'N/A'}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span>{new Date(remittance.date || remittance.advice_date || new Date()).toLocaleDateString()}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                      <span>{(remittance.remittance_advice_items?.length || remittance.items?.length || 0)} items</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="font-medium">
-                      ${(remittance.total_payment || remittance.totalPayment || 0).toFixed(2)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(remittance.status || 'draft')}>
-                      {(remittance.status || 'draft').charAt(0).toUpperCase() + (remittance.status || 'draft').slice(1)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewRemittance(remittance)}
-                      >
-                        <FileText className="mr-1 h-3 w-3" />
-                        View
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEditRemittance(remittance)}
-                      >
-                        <Edit className="mr-1 h-3 w-3" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDownloadRemittance(remittance)}
-                      >
-                        <Download className="mr-1 h-3 w-3" />
-                        PDF
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          {filteredRemittances.length === 0 && (
+          {filteredRemittances.length === 0 ? (
             <div className="text-center py-8">
               <CreditCard className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium text-foreground mb-2">No remittance advice found</h3>
               <p className="text-muted-foreground mb-4">
-                {searchTerm || statusFilter !== 'all' 
+                {searchTerm || statusFilter !== 'all'
                   ? 'Try adjusting your search criteria'
                   : 'Create your first remittance advice document'
                 }
@@ -306,17 +228,112 @@ const RemittanceAdvice = () => {
                 </Button>
               )}
             </div>
+          ) : (
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Advice Number</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Items</TableHead>
+                    <TableHead>Total Payment</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedRemittances.map((remittance) => (
+                    <TableRow key={remittance.id} className="hover:bg-muted/50 transition-smooth">
+                      <TableCell className="font-medium">
+                        <div className="flex items-center space-x-2">
+                          <FileText className="h-4 w-4 text-primary" />
+                          <span>{remittance.adviceNumber || remittance.advice_number || 'N/A'}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{remittance.customerName || remittance.customers?.name || 'N/A'}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {remittance.customerAddress || remittance.customers?.address || 'N/A'}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span>{new Date(remittance.date || remittance.advice_date || new Date()).toLocaleDateString()}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <FileText className="h-4 w-4 text-muted-foreground" />
+                          <span>{(remittance.remittance_advice_items?.length || remittance.items?.length || 0)} items</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium">
+                          ${(remittance.total_payment || remittance.totalPayment || 0).toFixed(2)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(remittance.status || 'draft')}>
+                          {(remittance.status || 'draft').charAt(0).toUpperCase() + (remittance.status || 'draft').slice(1)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewRemittance(remittance)}
+                          >
+                            <FileText className="mr-1 h-3 w-3" />
+                            View
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditRemittance(remittance)}
+                          >
+                            <Edit className="mr-1 h-3 w-3" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDownloadRemittance(remittance)}
+                          >
+                            <Download className="mr-1 h-3 w-3" />
+                            PDF
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <PaginationControls
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                pageSize={pagination.pageSize}
+                totalItems={pagination.totalItems}
+                onPageChange={pagination.setCurrentPage}
+                onPageSizeChange={pagination.setPageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+              />
+            </div>
           )}
         </CardContent>
       </Card>
 
       {/* Latest Remittance Advice Preview */}
-      {filteredRemittances.length > 0 && filteredRemittances[0] && (
+      {paginatedRemittances.length > 0 && paginatedRemittances[0] && (
         <Card className="shadow-card">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Building2 className="h-5 w-5 text-primary" />
-              <span>Remittance Advice Preview - {filteredRemittances[0].adviceNumber || filteredRemittances[0].advice_number || 'N/A'}</span>
+              <span>Remittance Advice Preview - {paginatedRemittances[0].adviceNumber || paginatedRemittances[0].advice_number || 'N/A'}</span>
             </CardTitle>
             <CardDescription>
               Latest remittance advice document layout
@@ -347,7 +364,7 @@ const RemittanceAdvice = () => {
                 <div>
                   <div className="font-semibold text-sm mb-2">TO:</div>
                   <div className="space-y-1">
-                    <div className="font-medium">{filteredRemittances[0].customerName || filteredRemittances[0].customers?.name || 'N/A'}</div>
+                    <div className="font-medium">{paginatedRemittances[0].customerName || paginatedRemittances[0].customers?.name || 'N/A'}</div>
                     <div className="text-sm text-muted-foreground">
                       {filteredRemittances[0].customerAddress || filteredRemittances[0].customers?.address || 'N/A'}
                     </div>

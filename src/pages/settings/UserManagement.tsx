@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { PaginationControls } from '@/components/pagination/PaginationControls';
+import { usePagination } from '@/hooks/usePagination';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
   Table, 
@@ -118,6 +120,13 @@ export default function UserManagement() {
     user.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.department?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Pagination hooks for users and invitations
+  const usersPagination = usePagination(filteredUsers, { initialPageSize: 10 });
+  const paginatedUsers = usersPagination.paginatedItems;
+
+  const invitationsPagination = usePagination(invitations, { initialPageSize: 10 });
+  const paginatedInvitations = invitationsPagination.paginatedItems;
 
   const handleCreateUser = async (userData: any) => {
     return await createUser(userData);
@@ -274,98 +283,106 @@ export default function UserManagement() {
                 <p className="text-muted-foreground">Loading users...</p>
               </div>
             </div>
+          ) : filteredUsers.length === 0 ? (
+            <div className="text-center py-8">
+              <UserX className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+              <p className="text-muted-foreground">No users found</p>
+            </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Last Login</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id} className="hover:bg-muted/50">
-                    <TableCell>
-                      <div className="flex items-center space-x-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarFallback className="bg-primary text-primary-foreground font-medium">
-                            {user.full_name ? getInitials(user.full_name) : 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">{user.full_name || 'No name'}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {user.position || 'No position'}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getRoleColor(user.role)}>
-                        {user.role.replace('_', ' ')}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStatusColor(user.status)}>
-                        {user.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-muted-foreground">
-                        {user.department || '-'}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {user.last_login ? (
-                        new Date(user.last_login).toLocaleDateString()
-                      ) : (
-                        <span className="text-muted-foreground">Never</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => setModalState({ type: 'edit', user })}
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit User
-                          </DropdownMenuItem>
-                          {user.id !== currentUser?.id && (
-                            <DropdownMenuItem
-                              onClick={() => setDeleteDialog({ open: true, user })}
-                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete User
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {filteredUsers.length === 0 && (
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
-                      <UserX className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-muted-foreground">No users found</p>
-                    </TableCell>
+                    <TableHead>User</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Department</TableHead>
+                    <TableHead>Last Login</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedUsers.map((user) => (
+                    <TableRow key={user.id} className="hover:bg-muted/50">
+                      <TableCell>
+                        <div className="flex items-center space-x-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarFallback className="bg-primary text-primary-foreground font-medium">
+                              {user.full_name ? getInitials(user.full_name) : 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{user.full_name || 'No name'}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {user.position || 'No position'}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getRoleColor(user.role)}>
+                          {user.role.replace('_', ' ')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getStatusColor(user.status)}>
+                          {user.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-muted-foreground">
+                          {user.department || '-'}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {user.last_login ? (
+                          new Date(user.last_login).toLocaleDateString()
+                        ) : (
+                          <span className="text-muted-foreground">Never</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => setModalState({ type: 'edit', user })}
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit User
+                            </DropdownMenuItem>
+                            {user.id !== currentUser?.id && (
+                              <DropdownMenuItem
+                                onClick={() => setDeleteDialog({ open: true, user })}
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete User
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <PaginationControls
+                currentPage={usersPagination.currentPage}
+                totalPages={usersPagination.totalPages}
+                pageSize={usersPagination.pageSize}
+                totalItems={usersPagination.totalItems}
+                onPageChange={usersPagination.setCurrentPage}
+                onPageSizeChange={usersPagination.setPageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+              />
+            </div>
           )}
         </CardContent>
       </Card>
@@ -377,54 +394,65 @@ export default function UserManagement() {
             <CardTitle>Pending Invitations</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Invited</TableHead>
-                  <TableHead>Expires</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {invitations.map((invitation) => (
-                  <TableRow key={invitation.id}>
-                    <TableCell>{invitation.email}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getRoleColor(invitation.role)}>
-                        {invitation.role.replace('_', ' ')}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(invitation.invited_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(invitation.expires_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStatusColor(invitation.status)}>
-                        {invitation.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {invitation.status === 'pending' && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRevokeInvitation(invitation.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <UserX className="h-4 w-4 mr-2" />
-                          Revoke
-                        </Button>
-                      )}
-                    </TableCell>
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Invited</TableHead>
+                    <TableHead>Expires</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedInvitations.map((invitation) => (
+                    <TableRow key={invitation.id}>
+                      <TableCell>{invitation.email}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getRoleColor(invitation.role)}>
+                          {invitation.role.replace('_', ' ')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(invitation.invited_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(invitation.expires_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getStatusColor(invitation.status)}>
+                          {invitation.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {invitation.status === 'pending' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRevokeInvitation(invitation.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <UserX className="h-4 w-4 mr-2" />
+                            Revoke
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <PaginationControls
+                currentPage={invitationsPagination.currentPage}
+                totalPages={invitationsPagination.totalPages}
+                pageSize={invitationsPagination.pageSize}
+                totalItems={invitationsPagination.totalItems}
+                onPageChange={invitationsPagination.setCurrentPage}
+                onPageSizeChange={invitationsPagination.setPageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+              />
+            </div>
           </CardContent>
         </Card>
       )}

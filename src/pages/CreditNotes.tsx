@@ -384,115 +384,126 @@ export default function CreditNotes() {
               )}
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Credit Note Number</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Reason</TableHead>
-                  <TableHead>Total Amount</TableHead>
-                  <TableHead>Applied</TableHead>
-                  <TableHead>Balance</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedCreditNotes.map((creditNote: CreditNote) => (
-                  <TableRow key={creditNote.id} className="hover:bg-muted/50 transition-smooth">
-                    <TableCell className="font-medium">
-                      <div className="flex items-center space-x-2">
-                        <FileText className="h-4 w-4 text-primary" />
-                        <span>{creditNote.credit_note_number}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{creditNote.customers?.name || 'Unknown Customer'}</div>
-                        {creditNote.customers?.email && (
-                          <div className="text-sm text-muted-foreground">{creditNote.customers.email}</div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>{new Date(creditNote.credit_note_date).toLocaleDateString()}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm">{creditNote.reason || 'Not specified'}</span>
-                    </TableCell>
-                    <TableCell className="font-semibold text-success">
-                      {formatCurrency(creditNote.total_amount || 0)}
-                    </TableCell>
-                    <TableCell className="text-warning">
-                      {formatCurrency(creditNote.applied_amount || 0)}
-                    </TableCell>
-                    <TableCell className={`font-medium ${(creditNote.balance || 0) > 0 ? 'text-success' : 'text-muted-foreground'}`}>
-                      {formatCurrency(creditNote.balance || 0)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStatusColor(creditNote.status)}>
-                        {creditNote.status.charAt(0).toUpperCase() + creditNote.status.slice(1)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setSelectedCreditNote(creditNote);
-                            setShowViewModal(true);
-                          }}
-                          title="View credit note"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        {creditNote.status === 'draft' && (
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Credit Note Number</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Reason</TableHead>
+                    <TableHead>Total Amount</TableHead>
+                    <TableHead>Applied</TableHead>
+                    <TableHead>Balance</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedCreditNotes.map((creditNote: CreditNote) => (
+                    <TableRow key={creditNote.id} className="hover:bg-muted/50 transition-smooth">
+                      <TableCell className="font-medium">
+                        <div className="flex items-center space-x-2">
+                          <FileText className="h-4 w-4 text-primary" />
+                          <span>{creditNote.credit_note_number}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{creditNote.customers?.name || 'Unknown Customer'}</div>
+                          {creditNote.customers?.email && (
+                            <div className="text-sm text-muted-foreground">{creditNote.customers.email}</div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span>{new Date(creditNote.credit_note_date).toLocaleDateString()}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm">{creditNote.reason || 'Not specified'}</span>
+                      </TableCell>
+                      <TableCell className="font-semibold text-success">
+                        {formatCurrency(creditNote.total_amount || 0)}
+                      </TableCell>
+                      <TableCell className="text-warning">
+                        {formatCurrency(creditNote.applied_amount || 0)}
+                      </TableCell>
+                      <TableCell className={`font-medium ${(creditNote.balance || 0) > 0 ? 'text-success' : 'text-muted-foreground'}`}>
+                        {formatCurrency(creditNote.balance || 0)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getStatusColor(creditNote.status)}>
+                          {creditNote.status.charAt(0).toUpperCase() + creditNote.status.slice(1)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end space-x-2">
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => {
                               setSelectedCreditNote(creditNote);
-                              setShowEditModal(true);
+                              setShowViewModal(true);
                             }}
-                            title="Edit credit note"
+                            title="View credit note"
                           >
-                            <Edit className="h-4 w-4" />
+                            <Eye className="h-4 w-4" />
                           </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => downloadPDF.mutate(creditNote)}
-                          disabled={downloadPDF.isPending}
-                          title="Download PDF"
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                        {creditNote.status !== 'applied' && creditNote.balance > 0 && (
+                          {creditNote.status === 'draft' && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setSelectedCreditNote(creditNote);
+                                setShowEditModal(true);
+                              }}
+                              title="Edit credit note"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          )}
                           <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedCreditNote(creditNote);
-                              setShowApplyModal(true);
-                            }}
-                            className="bg-primary-light text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => downloadPDF.mutate(creditNote)}
+                            disabled={downloadPDF.isPending}
+                            title="Download PDF"
                           >
-                            <DollarSign className="h-4 w-4 mr-1" />
-                            Apply
+                            <Download className="h-4 w-4" />
                           </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                          {creditNote.status !== 'applied' && creditNote.balance > 0 && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedCreditNote(creditNote);
+                                setShowApplyModal(true);
+                              }}
+                              className="bg-primary-light text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground"
+                            >
+                              <DollarSign className="h-4 w-4 mr-1" />
+                              Apply
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <PaginationControls
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                pageSize={pagination.pageSize}
+                totalItems={pagination.totalItems}
+                onPageChange={pagination.setCurrentPage}
+                onPageSizeChange={pagination.setPageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+              />
+            </div>
           )}
         </CardContent>
       </Card>

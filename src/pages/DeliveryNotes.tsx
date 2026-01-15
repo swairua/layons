@@ -4,13 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import { PaginationControls } from '@/components/pagination/PaginationControls';
+import { usePagination } from '@/hooks/usePagination';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from '@/components/ui/table';
 import { 
   Plus, 
@@ -55,6 +57,10 @@ export default function DeliveryNotes() {
     note.customers?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     note.tracking_number?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Pagination hook
+  const pagination = usePagination(filteredDeliveryNotes, { initialPageSize: 10 });
+  const paginatedDeliveryNotes = pagination.paginatedItems;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -310,104 +316,115 @@ export default function DeliveryNotes() {
               )}
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Delivery Note #</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Delivery Date</TableHead>
-                  <TableHead>Method</TableHead>
-                  <TableHead>Tracking #</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredDeliveryNotes.map((note) => (
-                  <TableRow key={note.id}>
-                    <TableCell className="font-medium">
-                      {note.delivery_note_number || note.delivery_number}
-                      {note.invoice_number ? (
-                        <div className="text-xs text-success">
-                          Invoice: {note.invoice_number}
-                        </div>
-                      ) : (
-                        <div className="text-xs text-destructive">
-                          ⚠️ No invoice linked
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{note.customers?.name}</div>
-                        {note.customers?.email && (
-                          <div className="text-sm text-muted-foreground">
-                            {note.customers.email}
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Delivery Note #</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Delivery Date</TableHead>
+                    <TableHead>Method</TableHead>
+                    <TableHead>Tracking #</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedDeliveryNotes.map((note) => (
+                    <TableRow key={note.id}>
+                      <TableCell className="font-medium">
+                        {note.delivery_note_number || note.delivery_number}
+                        {note.invoice_number ? (
+                          <div className="text-xs text-success">
+                            Invoice: {note.invoice_number}
+                          </div>
+                        ) : (
+                          <div className="text-xs text-destructive">
+                            ⚠️ No invoice linked
                           </div>
                         )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                        {formatDate(note.delivery_date)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                        {getDeliveryMethodDisplay(note.delivery_method)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {note.tracking_number ? (
-                        <span className="font-mono text-sm">{note.tracking_number}</span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(note.status)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleView(note)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDownloadPDF(note)}
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleSendEmail(note)}
-                          disabled={!note.customers?.email}
-                        >
-                          <Send className="h-4 w-4" />
-                        </Button>
-                        {note.status !== 'approved' && (
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{note.customers?.name}</div>
+                          {note.customers?.email && (
+                            <div className="text-sm text-muted-foreground">
+                              {note.customers.email}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                          {formatDate(note.delivery_date)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
+                          {getDeliveryMethodDisplay(note.delivery_method)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {note.tracking_number ? (
+                          <span className="font-mono text-sm">{note.tracking_number}</span>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(note.status)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-1">
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleMarkDelivered(note)}
+                            onClick={() => handleView(note)}
                           >
-                            <CheckCircle className="h-4 w-4" />
+                            <Eye className="h-4 w-4" />
                           </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDownloadPDF(note)}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleSendEmail(note)}
+                            disabled={!note.customers?.email}
+                          >
+                            <Send className="h-4 w-4" />
+                          </Button>
+                          {note.status !== 'approved' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleMarkDelivered(note)}
+                            >
+                              <CheckCircle className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <PaginationControls
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                pageSize={pagination.pageSize}
+                totalItems={pagination.totalItems}
+                onPageChange={pagination.setCurrentPage}
+                onPageSizeChange={pagination.setPageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+              />
+            </div>
           )}
         </CardContent>
       </Card>
