@@ -399,7 +399,7 @@ export default function CreditNotes() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredCreditNotes.map((creditNote: CreditNote) => (
+                {paginatedCreditNotes.map((creditNote: CreditNote) => (
                   <TableRow key={creditNote.id} className="hover:bg-muted/50 transition-smooth">
                     <TableCell className="font-medium">
                       <div className="flex items-center space-x-2">
