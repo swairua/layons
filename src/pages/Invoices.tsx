@@ -39,7 +39,10 @@ import {
   Calendar,
   Receipt,
   Truck,
-  Trash2
+  Trash2,
+  AlertCircle,
+  Clock,
+  CheckCircle
 } from 'lucide-react';
 import { useCompanies, useDeleteInvoice } from '@/hooks/useDatabase';
 import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
@@ -107,8 +110,11 @@ export default function Invoices() {
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState('all');
+  const [dueDateStatusFilter, setDueDateStatusFilter] = useState<'all' | 'overdue' | 'aging' | 'current'>('all');
   const [dateFromFilter, setDateFromFilter] = useState('');
   const [dateToFilter, setDateToFilter] = useState('');
+  const [dueDateFromFilter, setDueDateFromFilter] = useState('');
+  const [dueDateToFilter, setDueDateToFilter] = useState('');
   const [customerFilter, setCustomerFilter] = useState('all');
   const [amountFromFilter, setAmountFromFilter] = useState('');
   const [amountToFilter, setAmountToFilter] = useState('');
@@ -186,6 +192,28 @@ export default function Invoices() {
     }
   };
 
+  // Categorize invoices by due date status
+  const categorizeInvoice = (invoice: Invoice) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dueDate = new Date(invoice.due_date);
+    dueDate.setHours(0, 0, 0, 0);
+
+    const daysUntilDue = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysUntilDue < 0) return 'overdue';
+    if (daysUntilDue <= 7) return 'aging';
+    return 'current';
+  };
+
+  // Calculate summary stats
+  const invoiceSummary = {
+    overdue: invoices?.filter(inv => categorizeInvoice(inv) === 'overdue').length || 0,
+    aging: invoices?.filter(inv => categorizeInvoice(inv) === 'aging').length || 0,
+    current: invoices?.filter(inv => categorizeInvoice(inv) === 'current').length || 0,
+  };
+
   // Filter and search logic
   const filteredInvoices = invoices?.filter(invoice => {
     // Search filter
@@ -198,16 +226,25 @@ export default function Invoices() {
     const calculatedStatus = calculateInvoiceStatus(invoice);
     const matchesStatus = statusFilter === 'all' || calculatedStatus === statusFilter;
 
-    // Date filter
+    // Invoice Date filter
     const invoiceDate = new Date(invoice.invoice_date);
     const matchesDateFrom = !dateFromFilter || invoiceDate >= new Date(dateFromFilter);
     const matchesDateTo = !dateToFilter || invoiceDate <= new Date(dateToFilter);
+
+    // Due Date filter
+    const dueDate = new Date(invoice.due_date);
+    const matchesDueDateFrom = !dueDateFromFilter || dueDate >= new Date(dueDateFromFilter);
+    const matchesDueDateTo = !dueDateToFilter || dueDate <= new Date(dueDateToFilter);
+
+    // Due Date Status filter (Overdue, Aging, Current)
+    const invoiceDueDateStatus = categorizeInvoice(invoice);
+    const matchesDueDateStatus = dueDateStatusFilter === 'all' || invoiceDueDateStatus === dueDateStatusFilter;
 
     // Amount filter
     const matchesAmountFrom = !amountFromFilter || (invoice.total_amount || 0) >= parseFloat(amountFromFilter);
     const matchesAmountTo = !amountToFilter || (invoice.total_amount || 0) <= parseFloat(amountToFilter);
 
-    return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo && matchesAmountFrom && matchesAmountTo;
+    return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo && matchesDueDateFrom && matchesDueDateTo && matchesDueDateStatus && matchesAmountFrom && matchesAmountTo;
   }) || [];
 
   // Pagination hook
@@ -405,8 +442,11 @@ Website:`;
 
   const handleClearFilters = () => {
     setStatusFilter('all');
+    setDueDateStatusFilter('all');
     setDateFromFilter('');
     setDateToFilter('');
+    setDueDateFromFilter('');
+    setDueDateToFilter('');
     setCustomerFilter('all');
     setAmountFromFilter('');
     setAmountToFilter('');
@@ -502,7 +542,7 @@ Website:`;
 
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-2">
-                      <Label htmlFor="date-from">Date From</Label>
+                      <Label htmlFor="date-from">Invoice Date From</Label>
                       <Input
                         id="date-from"
                         type="date"
@@ -511,12 +551,33 @@ Website:`;
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="date-to">Date To</Label>
+                      <Label htmlFor="date-to">Invoice Date To</Label>
                       <Input
                         id="date-to"
                         type="date"
                         value={dateToFilter}
                         onChange={(e) => setDateToFilter(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="due-date-from">Due Date From</Label>
+                      <Input
+                        id="due-date-from"
+                        type="date"
+                        value={dueDateFromFilter}
+                        onChange={(e) => setDueDateFromFilter(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="due-date-to">Due Date To</Label>
+                      <Input
+                        id="due-date-to"
+                        type="date"
+                        value={dueDateToFilter}
+                        onChange={(e) => setDueDateToFilter(e.target.value)}
                       />
                     </div>
                   </div>
@@ -557,6 +618,75 @@ Website:`;
           </div>
         </CardContent>
       </Card>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card
+          className="shadow-card cursor-pointer hover:shadow-lg transition-shadow border-destructive/20 hover:border-destructive/40"
+          onClick={() => setDueDateStatusFilter(dueDateStatusFilter === 'overdue' ? 'all' : 'overdue')}
+        >
+          <CardContent className="pt-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <AlertCircle className="h-5 w-5 text-destructive" />
+                  <p className="text-sm font-medium text-destructive">Overdue</p>
+                </div>
+                <Badge variant="destructive" className="text-lg font-bold px-3 py-1">
+                  {invoiceSummary.overdue}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {dueDateStatusFilter === 'overdue' ? 'Showing overdue invoices' : 'Click to filter'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card
+          className="shadow-card cursor-pointer hover:shadow-lg transition-shadow border-warning/20 hover:border-warning/40"
+          onClick={() => setDueDateStatusFilter(dueDateStatusFilter === 'aging' ? 'all' : 'aging')}
+        >
+          <CardContent className="pt-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Clock className="h-5 w-5 text-warning" />
+                  <p className="text-sm font-medium text-warning">Due Soon</p>
+                </div>
+                <Badge variant="secondary" className="text-lg font-bold px-3 py-1">
+                  {invoiceSummary.aging}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {dueDateStatusFilter === 'aging' ? 'Showing invoices due within 7 days' : 'Click to filter'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card
+          className="shadow-card cursor-pointer hover:shadow-lg transition-shadow border-success/20 hover:border-success/40"
+          onClick={() => setDueDateStatusFilter(dueDateStatusFilter === 'current' ? 'all' : 'current')}
+        >
+          <CardContent className="pt-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-5 w-5 text-success" />
+                  <p className="text-sm font-medium text-success">Valid</p>
+                </div>
+                <Badge className="text-lg font-bold px-3 py-1 bg-success text-success-foreground">
+                  {invoiceSummary.current}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {dueDateStatusFilter === 'current' ? 'Showing valid invoices' : 'Click to filter'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Invoices Table */}
       <Card className="shadow-card">

@@ -3,9 +3,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { PaginationControls } from '@/components/pagination/PaginationControls';
 import { usePagination } from '@/hooks/usePagination';
-import { Layers, Plus, Eye, Download, Trash2, Copy, Pencil, FileText } from 'lucide-react';
+import { Layers, Plus, Eye, Download, Trash2, Copy, Pencil, FileText, Filter, Search, AlertCircle, Clock, CheckCircle } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CreateBOQModal } from '@/components/boq/CreateBOQModal';
 import { CreatePercentageCopyModal } from '@/components/boq/CreatePercentageCopyModal';
 import { EditBOQModal } from '@/components/boq/EditBOQModal';
@@ -28,6 +31,10 @@ export default function BOQs() {
   const [percentageRateOpen, setPercentageRateOpen] = useState(false);
   const [percentageRateBoq, setPercentageRateBoq] = useState<any | null>(null);
   const [schemaError, setSchemaError] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [dueDateFromFilter, setDueDateFromFilter] = useState('');
+  const [dueDateToFilter, setDueDateToFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'overdue' | 'aging' | 'current'>('all');
   const { currentCompany } = useCurrentCompany();
   const companyId = currentCompany?.id;
   const { data: boqs = [], isLoading, refetch: refetchBOQs } = useBOQs(companyId);
@@ -42,8 +49,59 @@ export default function BOQs() {
   const [convertDialog, setConvertDialog] = useState<{ open: boolean; boqId?: string; boqNumber?: string }>({ open: false });
   const convertToInvoice = useConvertBoqToInvoice();
 
+  // Categorize BOQs by due date status
+  const categorizeBOQ = (boq: any) => {
+    if (!boq.due_date) return 'current';
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dueDate = new Date(boq.due_date);
+    dueDate.setHours(0, 0, 0, 0);
+
+    const daysUntilDue = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysUntilDue < 0) return 'overdue';
+    if (daysUntilDue <= 7) return 'aging';
+    return 'current';
+  };
+
+  // Calculate summary stats
+  const boqSummary = {
+    overdue: boqs.filter(b => categorizeBOQ(b) === 'overdue').length,
+    aging: boqs.filter(b => categorizeBOQ(b) === 'aging').length,
+    current: boqs.filter(b => categorizeBOQ(b) === 'current').length,
+  };
+
+  // Filter and search logic
+  const filteredBOQs = boqs.filter(boq => {
+    // Search filter
+    const matchesSearch =
+      boq.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      boq.client_name.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Due date filter
+    const dueDate = boq.due_date ? new Date(boq.due_date) : null;
+    const matchesDueDateFrom = !dueDateFromFilter || (dueDate && dueDate >= new Date(dueDateFromFilter));
+    const matchesDueDateTo = !dueDateToFilter || (dueDate && dueDate <= new Date(dueDateToFilter));
+
+    // Status filter
+    const boqStatus = categorizeBOQ(boq);
+    const matchesStatus = statusFilter === 'all' || boqStatus === statusFilter;
+
+    return matchesSearch && matchesDueDateFrom && matchesDueDateTo && matchesStatus;
+  });
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setDueDateFromFilter('');
+    setDueDateToFilter('');
+    setStatusFilter('all');
+    toast.success('Filters cleared');
+  };
+
   // Pagination hook
-  const pagination = usePagination(boqs, { initialPageSize: 10 });
+  const pagination = usePagination(filteredBOQs, { initialPageSize: 10 });
   const paginatedBOQs = pagination.paginatedItems;
 
   const handleDownloadPDF = async (boq: any, options?: { customTitle?: string; amountMultiplier?: number; forceCurrency?: string; customClient?: any; stampImageUrl?: string; specialPaymentPercentage?: number; invoiceNumber?: string; useCurrentDate?: boolean }) => {
@@ -266,6 +324,132 @@ export default function BOQs() {
         <BOQConversionFix />
       )}
 
+      {/* Filters and Search */}
+      <Card className="shadow-card">
+        <CardContent className="pt-6">
+          <div className="flex items-center space-x-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search BOQs by number or client..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filter
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="due-date-from">Due Date From</Label>
+                      <Input
+                        id="due-date-from"
+                        type="date"
+                        value={dueDateFromFilter}
+                        onChange={(e) => setDueDateFromFilter(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="due-date-to">Due Date To</Label>
+                      <Input
+                        id="due-date-to"
+                        type="date"
+                        value={dueDateToFilter}
+                        onChange={(e) => setDueDateToFilter(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    onClick={handleClearFilters}
+                    className="w-full"
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card
+          className="shadow-card cursor-pointer hover:shadow-lg transition-shadow border-destructive/20 hover:border-destructive/40"
+          onClick={() => setStatusFilter(statusFilter === 'overdue' ? 'all' : 'overdue')}
+        >
+          <CardContent className="pt-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <AlertCircle className="h-5 w-5 text-destructive" />
+                  <p className="text-sm font-medium text-destructive">Overdue</p>
+                </div>
+                <Badge variant="destructive" className="text-lg font-bold px-3 py-1">
+                  {boqSummary.overdue}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {statusFilter === 'overdue' ? 'Showing overdue BOQs' : 'Click to filter'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card
+          className="shadow-card cursor-pointer hover:shadow-lg transition-shadow border-warning/20 hover:border-warning/40"
+          onClick={() => setStatusFilter(statusFilter === 'aging' ? 'all' : 'aging')}
+        >
+          <CardContent className="pt-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Clock className="h-5 w-5 text-warning" />
+                  <p className="text-sm font-medium text-warning">Due Soon</p>
+                </div>
+                <Badge variant="secondary" className="text-lg font-bold px-3 py-1">
+                  {boqSummary.aging}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {statusFilter === 'aging' ? 'Showing BOQs due within 7 days' : 'Click to filter'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card
+          className="shadow-card cursor-pointer hover:shadow-lg transition-shadow border-success/20 hover:border-success/40"
+          onClick={() => setStatusFilter(statusFilter === 'current' ? 'all' : 'current')}
+        >
+          <CardContent className="pt-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-5 w-5 text-success" />
+                  <p className="text-sm font-medium text-success">Valid</p>
+                </div>
+                <Badge className="text-lg font-bold px-3 py-1 bg-success text-success-foreground">
+                  {boqSummary.current}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {statusFilter === 'current' ? 'Showing valid BOQs' : 'Click to filter'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card className="shadow-card">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
@@ -273,7 +457,7 @@ export default function BOQs() {
             <span>BOQs List</span>
             {!isLoading && (
               <Badge variant="outline" className="ml-auto">
-                {boqs.length} boqs
+                {filteredBOQs.length} boqs
               </Badge>
             )}
           </CardTitle>
@@ -290,6 +474,7 @@ export default function BOQs() {
                   <TableRow>
                     <TableHead>Number</TableHead>
                     <TableHead>Date</TableHead>
+                    <TableHead>Due Date</TableHead>
                     <TableHead>Client</TableHead>
                     <TableHead>Project</TableHead>
                     <TableHead>Currency</TableHead>
@@ -303,6 +488,7 @@ export default function BOQs() {
                     <TableRow key={b.id}>
                       <TableCell>{b.number}</TableCell>
                       <TableCell>{new Date(b.boq_date).toLocaleDateString()}</TableCell>
+                      <TableCell>{b.due_date ? new Date(b.due_date).toLocaleDateString() : '-'}</TableCell>
                       <TableCell>{b.client_name}</TableCell>
                       <TableCell>{b.project_title || '-'}</TableCell>
                       <TableCell><Badge variant="outline">{b.currency || 'KES'}</Badge></TableCell>

@@ -92,6 +92,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
 
   const [boqNumber, setBoqNumber] = useState('');
   const [boqDate, setBoqDate] = useState('');
+  const [dueDate, setDueDate] = useState('');
   const [clientId, setClientId] = useState('');
   const [projectTitle, setProjectTitle] = useState('');
   const [contractor, setContractor] = useState('');
@@ -107,6 +108,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
       const boqData = boq.data;
       setBoqNumber(boq.number || '');
       setBoqDate(boq.boq_date || '');
+      setDueDate(boq.due_date || '');
       setProjectTitle(boqData.project_title || '');
       setContractor(boqData.contractor || '');
       setNotes(boqData.notes || '');
@@ -328,6 +330,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
       const payload = {
         number: boqNumber,
         boq_date: boqDate,
+        due_date: dueDate,
         client_name: selectedClient.name,
         client_email: selectedClient.email || null,
         client_phone: selectedClient.phone || null,
@@ -385,6 +388,10 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
               <Input type="date" value={boqDate} onChange={e => setBoqDate(e.target.value)} />
             </div>
             <div>
+              <Label>Due Date</Label>
+              <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+            </div>
+            <div>
               <Label>Currency</Label>
               <Select value={currency} onValueChange={setCurrency}>
                 <SelectTrigger>
@@ -398,19 +405,20 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label>Client</Label>
-              <Select value={clientId} onValueChange={setClientId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select client" />
-                </SelectTrigger>
-                <SelectContent>
-                  {customers.map(c => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          </div>
+
+          <div>
+            <Label>Client</Label>
+            <Select value={clientId} onValueChange={setClientId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select client" />
+              </SelectTrigger>
+              <SelectContent>
+                {customers.map(c => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -99,6 +99,7 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
 
   const [boqNumber, setBoqNumber] = useState(defaultNumber);
   const [boqDate, setBoqDate] = useState(todayISO);
+  const [dueDate, setDueDate] = useState(todayISO);
   const [clientId, setClientId] = useState('');
   const [projectTitle, setProjectTitle] = useState('');
   const [contractor, setContractor] = useState('');
@@ -111,8 +112,9 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
   useEffect(() => {
     if (open) {
       setBoqNumber(defaultNumber);
+      setDueDate(todayISO);
     }
-  }, [open, defaultNumber]);
+  }, [open, defaultNumber, todayISO]);
 
   const selectedClient = useMemo(() => customers.find(c => c.id === clientId), [customers, clientId]);
 
@@ -318,6 +320,7 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
         company_id: currentCompany?.id || null,
         number: boqNumber,
         boq_date: boqDate,
+        due_date: dueDate,
         client_name: selectedClient.name,
         client_email: selectedClient.email || null,
         client_phone: selectedClient.phone || null,
@@ -388,6 +391,10 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
               <Input type="date" value={boqDate} onChange={e => setBoqDate(e.target.value)} />
             </div>
             <div>
+              <Label>Due Date</Label>
+              <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+            </div>
+            <div>
               <Label>Currency</Label>
               <Select value={currency} onValueChange={setCurrency}>
                 <SelectTrigger>
@@ -401,19 +408,20 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label>Client</Label>
-              <Select value={clientId} onValueChange={setClientId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select client" />
-                </SelectTrigger>
-                <SelectContent>
-                  {customers.map(c => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          </div>
+
+          <div>
+            <Label>Client</Label>
+            <Select value={clientId} onValueChange={setClientId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select client" />
+              </SelectTrigger>
+              <SelectContent>
+                {customers.map(c => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
