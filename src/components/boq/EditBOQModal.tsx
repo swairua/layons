@@ -92,6 +92,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
 
   const [boqNumber, setBoqNumber] = useState('');
   const [boqDate, setBoqDate] = useState('');
+  const [dueDate, setDueDate] = useState('');
   const [clientId, setClientId] = useState('');
   const [projectTitle, setProjectTitle] = useState('');
   const [contractor, setContractor] = useState('');
