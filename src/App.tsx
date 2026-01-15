@@ -47,6 +47,42 @@ const CustomerPerformanceOptimizerPage = lazy(() => import("./pages/CustomerPerf
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const DatabaseFix = lazy(() => import("./pages/DatabaseFix"));
 
+// Error boundary class component to catch module loading errors
+class AppErrorBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('App Error:', error, errorInfo);
+
+    // Check if this is a module loading error
+    if (
+      error.message.includes('dynamically imported module') ||
+      error.message.includes('Failed to fetch') ||
+      error.message.includes('network')
+    ) {
+      console.warn('⚠️ Module loading error detected - this may be a network issue');
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <ModuleErrorFallback />;
+    }
+
+    return this.props.children;
+  }
+}
+
 // Error recovery component for module loading failures
 const ModuleErrorFallback = () => {
   const [retryCount, setRetryCount] = useState(0);
