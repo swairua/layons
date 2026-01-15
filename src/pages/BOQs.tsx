@@ -279,86 +279,99 @@ export default function BOQs() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Number</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>Project</TableHead>
-                <TableHead>Currency</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Total</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={8}>Loading...</TableCell></TableRow>
-              ) : boqs.length === 0 ? (
-                <TableRow><TableCell colSpan={8}>No BOQs found</TableCell></TableRow>
-              ) : boqs.map((b: any) => (
-                <TableRow key={b.id}>
-                  <TableCell>{b.number}</TableCell>
-                  <TableCell>{new Date(b.boq_date).toLocaleDateString()}</TableCell>
-                  <TableCell>{b.client_name}</TableCell>
-                  <TableCell>{b.project_title || '-'}</TableCell>
-                  <TableCell><Badge variant="outline">{b.currency || 'KES'}</Badge></TableCell>
-                  <TableCell>
-                    <Badge variant={b.status === 'converted' ? 'default' : b.status === 'cancelled' ? 'destructive' : 'secondary'}>
-                      {b.status === 'draft' ? 'Draft' : b.status === 'converted' ? 'Converted' : 'Cancelled'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">{new Intl.NumberFormat('en-KE', { style: 'currency', currency: b.currency || 'KES' }).format(Number(b.total_amount || b.subtotal || 0))}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button size="icon" variant="ghost" onClick={() => setViewing(b)} title="View">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button size="icon" variant="ghost" onClick={() => setEditing(b)} title="Edit">
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button size="icon" variant="ghost" onClick={() => handleDownloadPDF(b)} title="Download PDF">
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      {b.number === 'BOQ-20251124-1441' && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-xs"
-                          onClick={() => {
-                            setPercentageRateBoq(b);
-                            setPercentageRateOpen(true);
-                          }}
-                          title="Download Special Invoice PDF"
-                        >
-                          Invoice PDF
-                        </Button>
-                      )}
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => handleConvertClick(b.id, b.number)}
-                        title="Convert to Invoice"
-                        disabled={b.converted_to_invoice_id !== null && b.converted_to_invoice_id !== undefined}
-                      >
-                        <FileText className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="destructive"
-                        onClick={() => handleDeleteClick(b.id, b.number)}
-                        title={b.converted_to_invoice_id ? "Cannot delete converted BOQ" : "Delete"}
-                        disabled={!!b.converted_to_invoice_id}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          {isLoading ? (
+            <div>Loading...</div>
+          ) : boqs.length === 0 ? (
+            <div>No BOQs found</div>
+          ) : (
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Number</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Client</TableHead>
+                    <TableHead>Project</TableHead>
+                    <TableHead>Currency</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Total</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedBOQs.map((b: any) => (
+                    <TableRow key={b.id}>
+                      <TableCell>{b.number}</TableCell>
+                      <TableCell>{new Date(b.boq_date).toLocaleDateString()}</TableCell>
+                      <TableCell>{b.client_name}</TableCell>
+                      <TableCell>{b.project_title || '-'}</TableCell>
+                      <TableCell><Badge variant="outline">{b.currency || 'KES'}</Badge></TableCell>
+                      <TableCell>
+                        <Badge variant={b.status === 'converted' ? 'default' : b.status === 'cancelled' ? 'destructive' : 'secondary'}>
+                          {b.status === 'draft' ? 'Draft' : b.status === 'converted' ? 'Converted' : 'Cancelled'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">{new Intl.NumberFormat('en-KE', { style: 'currency', currency: b.currency || 'KES' }).format(Number(b.total_amount || b.subtotal || 0))}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button size="icon" variant="ghost" onClick={() => setViewing(b)} title="View">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => setEditing(b)} title="Edit">
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => handleDownloadPDF(b)} title="Download PDF">
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          {b.number === 'BOQ-20251124-1441' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs"
+                              onClick={() => {
+                                setPercentageRateBoq(b);
+                                setPercentageRateOpen(true);
+                              }}
+                              title="Download Special Invoice PDF"
+                            >
+                              Invoice PDF
+                            </Button>
+                          )}
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => handleConvertClick(b.id, b.number)}
+                            title="Convert to Invoice"
+                            disabled={b.converted_to_invoice_id !== null && b.converted_to_invoice_id !== undefined}
+                          >
+                            <FileText className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="destructive"
+                            onClick={() => handleDeleteClick(b.id, b.number)}
+                            title={b.converted_to_invoice_id ? "Cannot delete converted BOQ" : "Delete"}
+                            disabled={!!b.converted_to_invoice_id}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <PaginationControls
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                pageSize={pagination.pageSize}
+                totalItems={pagination.totalItems}
+                onPageChange={pagination.setCurrentPage}
+                onPageSizeChange={pagination.setPageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 
