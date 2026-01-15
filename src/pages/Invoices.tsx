@@ -511,7 +511,7 @@ Website:`;
 
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-2">
-                      <Label htmlFor="date-from">Date From</Label>
+                      <Label htmlFor="date-from">Invoice Date From</Label>
                       <Input
                         id="date-from"
                         type="date"
@@ -520,12 +520,33 @@ Website:`;
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="date-to">Date To</Label>
+                      <Label htmlFor="date-to">Invoice Date To</Label>
                       <Input
                         id="date-to"
                         type="date"
                         value={dateToFilter}
                         onChange={(e) => setDateToFilter(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="due-date-from">Due Date From</Label>
+                      <Input
+                        id="due-date-from"
+                        type="date"
+                        value={dueDateFromFilter}
+                        onChange={(e) => setDueDateFromFilter(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="due-date-to">Due Date To</Label>
+                      <Input
+                        id="due-date-to"
+                        type="date"
+                        value={dueDateToFilter}
+                        onChange={(e) => setDueDateToFilter(e.target.value)}
                       />
                     </div>
                   </div>
