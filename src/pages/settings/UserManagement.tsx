@@ -394,54 +394,65 @@ export default function UserManagement() {
             <CardTitle>Pending Invitations</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Invited</TableHead>
-                  <TableHead>Expires</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {invitations.map((invitation) => (
-                  <TableRow key={invitation.id}>
-                    <TableCell>{invitation.email}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getRoleColor(invitation.role)}>
-                        {invitation.role.replace('_', ' ')}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(invitation.invited_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(invitation.expires_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStatusColor(invitation.status)}>
-                        {invitation.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {invitation.status === 'pending' && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRevokeInvitation(invitation.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <UserX className="h-4 w-4 mr-2" />
-                          Revoke
-                        </Button>
-                      )}
-                    </TableCell>
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Invited</TableHead>
+                    <TableHead>Expires</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedInvitations.map((invitation) => (
+                    <TableRow key={invitation.id}>
+                      <TableCell>{invitation.email}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getRoleColor(invitation.role)}>
+                          {invitation.role.replace('_', ' ')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(invitation.invited_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(invitation.expires_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getStatusColor(invitation.status)}>
+                          {invitation.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {invitation.status === 'pending' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRevokeInvitation(invitation.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <UserX className="h-4 w-4 mr-2" />
+                            Revoke
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <PaginationControls
+                currentPage={invitationsPagination.currentPage}
+                totalPages={invitationsPagination.totalPages}
+                pageSize={invitationsPagination.pageSize}
+                totalItems={invitationsPagination.totalItems}
+                onPageChange={invitationsPagination.setCurrentPage}
+                onPageSizeChange={invitationsPagination.setPageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+              />
+            </div>
           </CardContent>
         </Card>
       )}
