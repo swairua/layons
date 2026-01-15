@@ -118,12 +118,6 @@ export function DashboardStats() {
       title: 'Total Payments Received',
       value: formatCurrency(stats?.totalPayments || 0),
       icon: CheckCircle
-    },
-    {
-      title: 'Outstanding Invoices',
-      value: (stats?.pendingInvoices || 0).toString(),
-      alert: (stats?.pendingInvoices || 0) > 0,
-      icon: AlertTriangle
     }
   ];
 
