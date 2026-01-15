@@ -138,6 +138,10 @@ export default function Quotations() {
     quotation.quotation_number.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
+  // Pagination hook
+  const pagination = usePagination(filteredQuotations, { initialPageSize: 10 });
+  const paginatedQuotations = pagination.paginatedItems;
+
   const handleCreateSuccess = () => {
     refetch();
     toast.success('Quotation created successfully!');
