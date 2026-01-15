@@ -427,125 +427,136 @@ Website: www.biolegendscientific.co.ke`;
               )}
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Quote Number</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Valid Until</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right min-w-[180px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedQuotations.map((quotation: Quotation) => (
-                  <TableRow key={quotation.id} className="hover:bg-muted/50 transition-smooth">
-                    <TableCell className="font-medium">
-                      <div className="flex items-center space-x-2">
-                        <FileText className="h-4 w-4 text-primary" />
-                        <span>{quotation.quotation_number}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{quotation.customers?.name || 'Unknown Customer'}</div>
-                        {quotation.customers?.email && (
-                          <div className="text-sm text-muted-foreground">{quotation.customers.email}</div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>{new Date(quotation.quotation_date).toLocaleDateString()}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-semibold">
-                      {formatCurrency(quotation.total_amount || 0, quotation.currency || 'KES')}
-                    </TableCell>
-                    <TableCell>
-                      {quotation.valid_until 
-                        ? new Date(quotation.valid_until).toLocaleDateString()
-                        : 'No expiry'
-                      }
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStatusColor(quotation.status)}>
-                        {quotation.status.charAt(0).toUpperCase() + quotation.status.slice(1)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end space-x-1">
-                        <div className="flex space-x-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleViewQuotation(quotation)}
-                            title="View quotation"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEditQuotation(quotation)}
-                            title="Edit quotation"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDownloadQuotation(quotation)}
-                            title="Download PDF"
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteClick(quotation)}
-                            title="Delete quotation"
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-
-                        <div className="flex space-x-2 ml-2">
-                          {quotation.status === 'draft' && quotation.customers?.email && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleSendQuotation(quotation)}
-                              className="bg-primary-light text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground"
-                            >
-                              <Send className="h-4 w-4 mr-1" />
-                              <span className="hidden sm:inline">Send</span>
-                            </Button>
-                          )}
-                          {quotation.status !== 'processed' && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleConvertToInvoice(quotation)}
-                              disabled={convertingQuotationId === quotation.id || !quotation.quotation_items?.length}
-                              title={!quotation.quotation_items?.length ? 'Quotation must have items to convert' : 'Convert to invoice'}
-                              className="bg-success-light text-success border-success/20 hover:bg-success hover:text-success-foreground"
-                            >
-                              <FileText className="h-4 w-4 mr-1" />
-                              <span className="hidden sm:inline">{convertingQuotationId === quotation.id ? 'Converting...' : 'Convert'}</span>
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Quote Number</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Valid Until</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right min-w-[180px]">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedQuotations.map((quotation: Quotation) => (
+                    <TableRow key={quotation.id} className="hover:bg-muted/50 transition-smooth">
+                      <TableCell className="font-medium">
+                        <div className="flex items-center space-x-2">
+                          <FileText className="h-4 w-4 text-primary" />
+                          <span>{quotation.quotation_number}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{quotation.customers?.name || 'Unknown Customer'}</div>
+                          {quotation.customers?.email && (
+                            <div className="text-sm text-muted-foreground">{quotation.customers.email}</div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span>{new Date(quotation.quotation_date).toLocaleDateString()}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-semibold">
+                        {formatCurrency(quotation.total_amount || 0, quotation.currency || 'KES')}
+                      </TableCell>
+                      <TableCell>
+                        {quotation.valid_until
+                          ? new Date(quotation.valid_until).toLocaleDateString()
+                          : 'No expiry'
+                        }
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getStatusColor(quotation.status)}>
+                          {quotation.status.charAt(0).toUpperCase() + quotation.status.slice(1)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end space-x-1">
+                          <div className="flex space-x-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleViewQuotation(quotation)}
+                              title="View quotation"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditQuotation(quotation)}
+                              title="Edit quotation"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDownloadQuotation(quotation)}
+                              title="Download PDF"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteClick(quotation)}
+                              title="Delete quotation"
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+
+                          <div className="flex space-x-2 ml-2">
+                            {quotation.status === 'draft' && quotation.customers?.email && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleSendQuotation(quotation)}
+                                className="bg-primary-light text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground"
+                              >
+                                <Send className="h-4 w-4 mr-1" />
+                                <span className="hidden sm:inline">Send</span>
+                              </Button>
+                            )}
+                            {quotation.status !== 'processed' && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleConvertToInvoice(quotation)}
+                                disabled={convertingQuotationId === quotation.id || !quotation.quotation_items?.length}
+                                title={!quotation.quotation_items?.length ? 'Quotation must have items to convert' : 'Convert to invoice'}
+                                className="bg-success-light text-success border-success/20 hover:bg-success hover:text-success-foreground"
+                              >
+                                <FileText className="h-4 w-4 mr-1" />
+                                <span className="hidden sm:inline">{convertingQuotationId === quotation.id ? 'Converting...' : 'Convert'}</span>
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <PaginationControls
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                pageSize={pagination.pageSize}
+                totalItems={pagination.totalItems}
+                onPageChange={pagination.setCurrentPage}
+                onPageSizeChange={pagination.setPageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+              />
+            </div>
           )}
         </CardContent>
       </Card>
