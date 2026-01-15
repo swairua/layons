@@ -9,9 +9,9 @@ export default defineConfig(({ mode }) => {
       host: "::",
       port: 8080,
       middlewareMode: false,
+      // HMR configuration: let the browser determine the host/port automatically
+      // This fixes module loading issues in proxied environments like builder.io
       hmr: {
-        host: "localhost",
-        port: 5173,
         protocol: "ws",
       },
     },
