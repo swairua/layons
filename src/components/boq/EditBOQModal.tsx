@@ -108,6 +108,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
       const boqData = boq.data;
       setBoqNumber(boq.number || '');
       setBoqDate(boq.boq_date || '');
+      setDueDate(boq.due_date || '');
       setProjectTitle(boqData.project_title || '');
       setContractor(boqData.contractor || '');
       setNotes(boqData.notes || '');
