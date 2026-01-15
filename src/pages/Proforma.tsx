@@ -64,10 +64,15 @@ export default function Proforma() {
   const { data: proformas = [], isLoading, refetch } = useProformas(currentCompany?.id);
   const convertToInvoice = useConvertProformaToInvoice();
 
-  const filteredProformas = proformas.filter(proforma =>
-    proforma.proforma_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    proforma.customers?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProformas = proformas.filter(proforma => {
+    const matchesSearch =
+      proforma.proforma_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      proforma.customers?.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus = statusFilter === 'all' || proforma.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
 
   // Pagination hook
   const pagination = usePagination(filteredProformas, { initialPageSize: 10 });
