@@ -98,6 +98,7 @@ function getStatusColor(status: string) {
 }
 
 export default function Invoices() {
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
