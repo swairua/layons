@@ -112,11 +112,10 @@ export function DashboardStats() {
       icon: Users
     },
     {
-      title: 'Products in Stock',
-      value: (stats?.productCount || 0).toString(),
-      change: (stats?.lowStockProducts || 0) > 0 ? `${stats?.lowStockProducts} low stock` : 'All stocked well',
-      alert: (stats?.lowStockProducts || 0) > 0,
-      icon: Package
+      title: 'Outstanding Amount',
+      value: formatCurrency((stats?.totalRevenue || 0) - (stats?.totalPayments || 0)),
+      alert: ((stats?.totalRevenue || 0) - (stats?.totalPayments || 0)) > 0,
+      icon: AlertTriangle
     }
   ];
 
