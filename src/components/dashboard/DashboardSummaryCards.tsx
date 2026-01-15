@@ -102,33 +102,46 @@ export function DashboardSummaryCards({ onDrill }: DashboardSummaryCardsProps) {
     converted: proformas.filter(p => p.status === 'converted').length,
   };
 
-  const SummaryCard = ({ title, count, icon: Icon, color, onClick, description }: any) => (
-    <Card
-      className={cn(
-        "shadow-card cursor-pointer hover:shadow-lg transition-all border-2",
-        `hover:border-${color}/40`,
-        `border-${color}/20`
-      )}
-      onClick={onClick}
-    >
-      <CardContent className="pt-6">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Icon className={cn("h-5 w-5", `text-${color}`)} />
-              <p className={cn("text-sm font-medium", `text-${color}`)}>{title}</p>
+  const getColorClasses = (color: string) => {
+    const colorMap: { [key: string]: { icon: string; text: string; badge: string; border: string } } = {
+      destructive: { icon: 'text-destructive', text: 'text-destructive', badge: 'bg-destructive text-destructive-foreground', border: 'border-destructive/20 hover:border-destructive/40' },
+      warning: { icon: 'text-warning', text: 'text-warning', badge: 'bg-warning text-warning-foreground', border: 'border-warning/20 hover:border-warning/40' },
+      success: { icon: 'text-success', text: 'text-success', badge: 'bg-success text-success-foreground', border: 'border-success/20 hover:border-success/40' },
+      primary: { icon: 'text-primary', text: 'text-primary', badge: 'bg-primary text-primary-foreground', border: 'border-primary/20 hover:border-primary/40' },
+      muted: { icon: 'text-muted-foreground', text: 'text-muted-foreground', badge: 'bg-muted text-muted-foreground', border: 'border-muted/20 hover:border-muted/40' },
+    };
+    return colorMap[color] || colorMap.primary;
+  };
+
+  const SummaryCard = ({ title, count, icon: Icon, color, onClick, description }: any) => {
+    const classes = getColorClasses(color);
+    return (
+      <Card
+        className={cn(
+          "shadow-card cursor-pointer hover:shadow-lg transition-all border-2",
+          classes.border
+        )}
+        onClick={onClick}
+      >
+        <CardContent className="pt-6">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Icon className={cn("h-5 w-5", classes.icon)} />
+                <p className={cn("text-sm font-medium", classes.text)}>{title}</p>
+              </div>
+              <Badge className={cn("text-lg font-bold px-3 py-1", classes.badge)}>
+                {count}
+              </Badge>
             </div>
-            <Badge className={cn("text-lg font-bold px-3 py-1", `bg-${color} text-${color}-foreground`)}>
-              {count}
-            </Badge>
+            <p className="text-xs text-muted-foreground">
+              {description || 'Click to filter'}
+            </p>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {description || 'Click to filter'}
-          </p>
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <div className="space-y-6">
