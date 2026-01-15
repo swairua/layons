@@ -619,6 +619,75 @@ Website:`;
         </CardContent>
       </Card>
 
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card
+          className="shadow-card cursor-pointer hover:shadow-lg transition-shadow border-destructive/20 hover:border-destructive/40"
+          onClick={() => setDueDateStatusFilter(dueDateStatusFilter === 'overdue' ? 'all' : 'overdue')}
+        >
+          <CardContent className="pt-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <AlertCircle className="h-5 w-5 text-destructive" />
+                  <p className="text-sm font-medium text-destructive">Overdue</p>
+                </div>
+                <Badge variant="destructive" className="text-lg font-bold px-3 py-1">
+                  {invoiceSummary.overdue}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {dueDateStatusFilter === 'overdue' ? 'Showing overdue invoices' : 'Click to filter'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card
+          className="shadow-card cursor-pointer hover:shadow-lg transition-shadow border-warning/20 hover:border-warning/40"
+          onClick={() => setDueDateStatusFilter(dueDateStatusFilter === 'aging' ? 'all' : 'aging')}
+        >
+          <CardContent className="pt-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Clock className="h-5 w-5 text-warning" />
+                  <p className="text-sm font-medium text-warning">Due Soon</p>
+                </div>
+                <Badge variant="secondary" className="text-lg font-bold px-3 py-1">
+                  {invoiceSummary.aging}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {dueDateStatusFilter === 'aging' ? 'Showing invoices due within 7 days' : 'Click to filter'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card
+          className="shadow-card cursor-pointer hover:shadow-lg transition-shadow border-success/20 hover:border-success/40"
+          onClick={() => setDueDateStatusFilter(dueDateStatusFilter === 'current' ? 'all' : 'current')}
+        >
+          <CardContent className="pt-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-5 w-5 text-success" />
+                  <p className="text-sm font-medium text-success">Valid</p>
+                </div>
+                <Badge className="text-lg font-bold px-3 py-1 bg-success text-success-foreground">
+                  {invoiceSummary.current}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {dueDateStatusFilter === 'current' ? 'Showing valid invoices' : 'Click to filter'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Invoices Table */}
       <Card className="shadow-card">
         <CardHeader>
