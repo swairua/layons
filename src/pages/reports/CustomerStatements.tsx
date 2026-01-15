@@ -485,96 +485,107 @@ export default function CustomerStatements() {
               </p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Select</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Total Outstanding</TableHead>
-                  <TableHead>Current Due</TableHead>
-                  <TableHead>Overdue Amount</TableHead>
-                  <TableHead>Days Overdue</TableHead>
-                  <TableHead>Last Payment</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedStatements.map((statement) => (
-                  <TableRow key={statement.customer_id}>
-                    <TableCell>
-                      <Checkbox
-                        checked={selectedCustomers.includes(statement.customer_id)}
-                        onCheckedChange={() => handleSelectCustomer(statement.customer_id)}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{statement.customer_name}</div>
-                        {statement.customer_email && (
-                          <div className="text-sm text-muted-foreground">
-                            {statement.customer_email}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-medium">
-                        ${statement.total_outstanding.toFixed(2)}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {statement.invoice_count} invoices
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className={statement.current_due > 0 ? 'text-warning' : 'text-muted-foreground'}>
-                        ${statement.current_due.toFixed(2)}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span className={statement.overdue_amount > 0 ? 'text-destructive font-medium' : 'text-muted-foreground'}>
-                        ${statement.overdue_amount.toFixed(2)}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {statement.days_overdue > 0 ? (
-                        <span className="text-destructive font-medium">
-                          {statement.days_overdue} days
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {statement.last_payment_date ? (
-                        <div>
-                          <div className="text-sm">
-                            {new Date(statement.last_payment_date).toLocaleDateString()}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            ${statement.last_payment_amount?.toFixed(2)}
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">No payments</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(statement)}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handlePreviewStatement(statement)}
-                      >
-                        <FileText className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Select</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Total Outstanding</TableHead>
+                    <TableHead>Current Due</TableHead>
+                    <TableHead>Overdue Amount</TableHead>
+                    <TableHead>Days Overdue</TableHead>
+                    <TableHead>Last Payment</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedStatements.map((statement) => (
+                    <TableRow key={statement.customer_id}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedCustomers.includes(statement.customer_id)}
+                          onCheckedChange={() => handleSelectCustomer(statement.customer_id)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{statement.customer_name}</div>
+                          {statement.customer_email && (
+                            <div className="text-sm text-muted-foreground">
+                              {statement.customer_email}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium">
+                          ${statement.total_outstanding.toFixed(2)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {statement.invoice_count} invoices
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className={statement.current_due > 0 ? 'text-warning' : 'text-muted-foreground'}>
+                          ${statement.current_due.toFixed(2)}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className={statement.overdue_amount > 0 ? 'text-destructive font-medium' : 'text-muted-foreground'}>
+                          ${statement.overdue_amount.toFixed(2)}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {statement.days_overdue > 0 ? (
+                          <span className="text-destructive font-medium">
+                            {statement.days_overdue} days
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {statement.last_payment_date ? (
+                          <div>
+                            <div className="text-sm">
+                              {new Date(statement.last_payment_date).toLocaleDateString()}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              ${statement.last_payment_amount?.toFixed(2)}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">No payments</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(statement)}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handlePreviewStatement(statement)}
+                        >
+                          <FileText className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <PaginationControls
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                pageSize={pagination.pageSize}
+                totalItems={pagination.totalItems}
+                onPageChange={pagination.setCurrentPage}
+                onPageSizeChange={pagination.setPageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+              />
+            </div>
           )}
         </CardContent>
       </Card>
