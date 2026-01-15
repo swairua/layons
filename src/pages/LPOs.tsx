@@ -395,102 +395,113 @@ export default function LPOs() {
               )}
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>LPO #</TableHead>
-                  <TableHead>Supplier</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Delivery Date</TableHead>
-                  <TableHead>Total Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredLPOs.map((lpo) => (
-                  <TableRow key={lpo.id}>
-                    <TableCell className="font-medium">
-                      {lpo.lpo_number}
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{lpo.suppliers?.name}</div>
-                        {lpo.suppliers?.email && (
-                          <div className="text-sm text-muted-foreground">
-                            {lpo.suppliers.email}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                        {formatDate(lpo.lpo_date)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {lpo.delivery_date ? (
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>LPO #</TableHead>
+                    <TableHead>Supplier</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Delivery Date</TableHead>
+                    <TableHead>Total Amount</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedLPOs.map((lpo) => (
+                    <TableRow key={lpo.id}>
+                      <TableCell className="font-medium">
+                        {lpo.lpo_number}
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{lpo.suppliers?.name}</div>
+                          {lpo.suppliers?.email && (
+                            <div className="text-sm text-muted-foreground">
+                              {lpo.suppliers.email}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                          {formatDate(lpo.delivery_date)}
+                          {formatDate(lpo.lpo_date)}
                         </div>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {formatCurrency(lpo.total_amount)}
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(lpo.status)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleView(lpo)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(lpo)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDownloadPDF(lpo)}
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleSendEmail(lpo)}
-                          disabled={!lpo.suppliers?.email}
-                        >
-                          <Send className="h-4 w-4" />
-                        </Button>
-                        {lpo.status === 'approved' && (
+                      </TableCell>
+                      <TableCell>
+                        {lpo.delivery_date ? (
+                          <div className="flex items-center">
+                            <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                            {formatDate(lpo.delivery_date)}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {formatCurrency(lpo.total_amount)}
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(lpo.status)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-1">
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleUpdateStatus(lpo, 'received')}
+                            onClick={() => handleView(lpo)}
                           >
-                            <Package className="h-4 w-4" />
+                            <Eye className="h-4 w-4" />
                           </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(lpo)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDownloadPDF(lpo)}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleSendEmail(lpo)}
+                            disabled={!lpo.suppliers?.email}
+                          >
+                            <Send className="h-4 w-4" />
+                          </Button>
+                          {lpo.status === 'approved' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleUpdateStatus(lpo, 'received')}
+                            >
+                              <Package className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <PaginationControls
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                pageSize={pagination.pageSize}
+                totalItems={pagination.totalItems}
+                onPageChange={pagination.setCurrentPage}
+                onPageSizeChange={pagination.setPageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+              />
+            </div>
           )}
         </CardContent>
       </Card>
