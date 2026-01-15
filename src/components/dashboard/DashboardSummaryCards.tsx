@@ -145,45 +145,6 @@ export function DashboardSummaryCards({ onDrill }: DashboardSummaryCardsProps) {
 
   return (
     <div className="space-y-6">
-      {/* Quotations Summary */}
-      <div>
-        <h3 className="text-lg font-semibold mb-3 text-foreground">Quotations</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <SummaryCard
-            title="Draft"
-            count={quotationSummary.draft}
-            icon={FileText}
-            color="muted"
-            description={`${quotationSummary.draft} quotations`}
-            onClick={() => onDrill?.('quotations', 'draft')}
-          />
-          <SummaryCard
-            title="Sent"
-            count={quotationSummary.sent}
-            icon={TrendingUp}
-            color="warning"
-            description={`${quotationSummary.sent} awaiting response`}
-            onClick={() => onDrill?.('quotations', 'sent')}
-          />
-          <SummaryCard
-            title="Accepted"
-            count={quotationSummary.accepted}
-            icon={CheckCircle}
-            color="success"
-            description={`${quotationSummary.accepted} accepted`}
-            onClick={() => onDrill?.('quotations', 'accepted')}
-          />
-          <SummaryCard
-            title="Expired"
-            count={quotationSummary.expired}
-            icon={AlertCircle}
-            color="destructive"
-            description={`${quotationSummary.expired} expired`}
-            onClick={() => onDrill?.('quotations', 'expired')}
-          />
-        </div>
-      </div>
-
       {/* BOQs Summary */}
       <div>
         <h3 className="text-lg font-semibold mb-3 text-foreground">Bill of Quantities (BOQs)</h3>
@@ -246,80 +207,41 @@ export function DashboardSummaryCards({ onDrill }: DashboardSummaryCardsProps) {
         </div>
       </div>
 
-      {/* Proforma/Sales Summary */}
+      {/* Quotations Summary */}
       <div>
-        <h3 className="text-lg font-semibold mb-3 text-foreground">Proforma Invoices</h3>
+        <h3 className="text-lg font-semibold mb-3 text-foreground">Quotations</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <SummaryCard
             title="Draft"
-            count={proformaSummary.draft}
+            count={quotationSummary.draft}
             icon={FileText}
             color="muted"
-            description={`${proformaSummary.draft} proformas`}
-            onClick={() => onDrill?.('proforma', 'draft')}
+            description={`${quotationSummary.draft} quotations`}
+            onClick={() => onDrill?.('quotations', 'draft')}
           />
           <SummaryCard
             title="Sent"
-            count={proformaSummary.sent}
+            count={quotationSummary.sent}
             icon={TrendingUp}
             color="warning"
-            description={`${proformaSummary.sent} awaiting response`}
-            onClick={() => onDrill?.('proforma', 'sent')}
+            description={`${quotationSummary.sent} awaiting response`}
+            onClick={() => onDrill?.('quotations', 'sent')}
           />
           <SummaryCard
             title="Accepted"
-            count={proformaSummary.accepted}
+            count={quotationSummary.accepted}
             icon={CheckCircle}
             color="success"
-            description={`${proformaSummary.accepted} accepted`}
-            onClick={() => onDrill?.('proforma', 'accepted')}
+            description={`${quotationSummary.accepted} accepted`}
+            onClick={() => onDrill?.('quotations', 'accepted')}
           />
           <SummaryCard
-            title="Converted"
-            count={proformaSummary.converted}
-            icon={DollarSign}
-            color="primary"
-            description={`${proformaSummary.converted} to invoice`}
-            onClick={() => onDrill?.('proforma', 'converted')}
-          />
-        </div>
-      </div>
-
-      {/* Payments Summary */}
-      <div>
-        <h3 className="text-lg font-semibold mb-3 text-foreground">Payments</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <SummaryCard
-            title="Total Payments"
-            count={paymentSummary.total}
-            icon={DollarSign}
-            color="primary"
-            description="All recorded"
-            onClick={() => onDrill?.('payments', 'all')}
-          />
-          <SummaryCard
-            title="This Month"
-            count={paymentSummary.thisMonth}
-            icon={TrendingUp}
-            color="success"
-            description="Current month"
-            onClick={() => onDrill?.('payments', 'thisMonth')}
-          />
-          <SummaryCard
-            title="Cash"
-            count={paymentSummary.cash}
-            icon={DollarSign}
-            color="warning"
-            description="Cash payments"
-            onClick={() => onDrill?.('payments', 'cash')}
-          />
-          <SummaryCard
-            title="M-Pesa"
-            count={paymentSummary.mpesa}
-            icon={Package}
-            color="primary"
-            description="Mobile money"
-            onClick={() => onDrill?.('payments', 'mpesa')}
+            title="Expired"
+            count={quotationSummary.expired}
+            icon={AlertCircle}
+            color="destructive"
+            description={`${quotationSummary.expired} expired`}
+            onClick={() => onDrill?.('quotations', 'expired')}
           />
         </div>
       </div>
