@@ -294,6 +294,63 @@ export default function BOQs() {
         <BOQConversionFix />
       )}
 
+      {/* Filters and Search */}
+      <Card className="shadow-card">
+        <CardContent className="pt-6">
+          <div className="flex items-center space-x-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search BOQs by number or client..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filter
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="due-date-from">Due Date From</Label>
+                      <Input
+                        id="due-date-from"
+                        type="date"
+                        value={dueDateFromFilter}
+                        onChange={(e) => setDueDateFromFilter(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="due-date-to">Due Date To</Label>
+                      <Input
+                        id="due-date-to"
+                        type="date"
+                        value={dueDateToFilter}
+                        onChange={(e) => setDueDateToFilter(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    onClick={handleClearFilters}
+                    className="w-full"
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card className="shadow-card">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
@@ -301,7 +358,7 @@ export default function BOQs() {
             <span>BOQs List</span>
             {!isLoading && (
               <Badge variant="outline" className="ml-auto">
-                {boqs.length} boqs
+                {filteredBOQs.length} boqs
               </Badge>
             )}
           </CardTitle>
