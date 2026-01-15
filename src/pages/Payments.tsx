@@ -96,7 +96,7 @@ export default function Payments() {
 
   // Fetch live payments data and company details
   const { data: companies = [] } = useCompanies();
-  const currentCompany = companies[0];
+  const currentCompany = companies.length > 0 ? companies[0] : undefined;
   const { data: payments = [], isLoading, error } = usePayments(currentCompany?.id);
   const { data: invoices = [] } = useInvoices(currentCompany?.id);
   const deletePayment = useDeletePayment();
