@@ -144,10 +144,15 @@ export default function Quotations() {
     }).format(amount);
   };
 
-  const filteredQuotations = quotations?.filter(quotation =>
-    quotation.customers?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    quotation.quotation_number.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredQuotations = quotations?.filter(quotation => {
+    const matchesSearch =
+      quotation.customers?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      quotation.quotation_number.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus = statusFilter === 'all' || quotation.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  }) || [];
 
   // Pagination hook
   const pagination = usePagination(filteredQuotations, { initialPageSize: 10 });
