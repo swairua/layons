@@ -49,6 +49,30 @@ export default function BOQs() {
   const [convertDialog, setConvertDialog] = useState<{ open: boolean; boqId?: string; boqNumber?: string }>({ open: false });
   const convertToInvoice = useConvertBoqToInvoice();
 
+  // Categorize BOQs by due date status
+  const categorizeBOQ = (boq: any) => {
+    if (!boq.due_date) return 'current';
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dueDate = new Date(boq.due_date);
+    dueDate.setHours(0, 0, 0, 0);
+
+    const daysUntilDue = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysUntilDue < 0) return 'overdue';
+    if (daysUntilDue <= 7) return 'aging';
+    return 'current';
+  };
+
+  // Calculate summary stats
+  const boqSummary = {
+    overdue: boqs.filter(b => categorizeBOQ(b) === 'overdue').length,
+    aging: boqs.filter(b => categorizeBOQ(b) === 'aging').length,
+    current: boqs.filter(b => categorizeBOQ(b) === 'current').length,
+  };
+
   // Filter and search logic
   const filteredBOQs = boqs.filter(boq => {
     // Search filter
@@ -61,13 +85,18 @@ export default function BOQs() {
     const matchesDueDateFrom = !dueDateFromFilter || (dueDate && dueDate >= new Date(dueDateFromFilter));
     const matchesDueDateTo = !dueDateToFilter || (dueDate && dueDate <= new Date(dueDateToFilter));
 
-    return matchesSearch && matchesDueDateFrom && matchesDueDateTo;
+    // Status filter
+    const boqStatus = categorizeBOQ(boq);
+    const matchesStatus = statusFilter === 'all' || boqStatus === statusFilter;
+
+    return matchesSearch && matchesDueDateFrom && matchesDueDateTo && matchesStatus;
   });
 
   const handleClearFilters = () => {
     setSearchTerm('');
     setDueDateFromFilter('');
     setDueDateToFilter('');
+    setStatusFilter('all');
     toast.success('Filters cleared');
   };
 
