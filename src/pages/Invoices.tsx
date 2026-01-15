@@ -236,11 +236,15 @@ export default function Invoices() {
     const matchesDueDateFrom = !dueDateFromFilter || dueDate >= new Date(dueDateFromFilter);
     const matchesDueDateTo = !dueDateToFilter || dueDate <= new Date(dueDateToFilter);
 
+    // Due Date Status filter (Overdue, Aging, Current)
+    const invoiceDueDateStatus = categorizeInvoice(invoice);
+    const matchesDueDateStatus = dueDateStatusFilter === 'all' || invoiceDueDateStatus === dueDateStatusFilter;
+
     // Amount filter
     const matchesAmountFrom = !amountFromFilter || (invoice.total_amount || 0) >= parseFloat(amountFromFilter);
     const matchesAmountTo = !amountToFilter || (invoice.total_amount || 0) <= parseFloat(amountToFilter);
 
-    return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo && matchesDueDateFrom && matchesDueDateTo && matchesAmountFrom && matchesAmountTo;
+    return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo && matchesDueDateFrom && matchesDueDateTo && matchesDueDateStatus && matchesAmountFrom && matchesAmountTo;
   }) || [];
 
   // Pagination hook
