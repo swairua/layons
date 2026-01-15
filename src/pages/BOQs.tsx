@@ -389,6 +389,7 @@ export default function BOQs() {
                     <TableRow key={b.id}>
                       <TableCell>{b.number}</TableCell>
                       <TableCell>{new Date(b.boq_date).toLocaleDateString()}</TableCell>
+                      <TableCell>{b.due_date ? new Date(b.due_date).toLocaleDateString() : '-'}</TableCell>
                       <TableCell>{b.client_name}</TableCell>
                       <TableCell>{b.project_title || '-'}</TableCell>
                       <TableCell><Badge variant="outline">{b.currency || 'KES'}</Badge></TableCell>
