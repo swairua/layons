@@ -211,61 +211,27 @@ export default function Proforma() {
         </Button>
       </div>
 
-      {/* Stats Cards */}
+      {/* Status Filter Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="flex items-center p-6">
-            <div className="flex items-center space-x-2">
-              <FileText className="h-8 w-8 text-primary" />
-              <div>
-                <p className="text-2xl font-bold">{proformas.length}</p>
-                <p className="text-xs text-muted-foreground">Total Proformas</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="flex items-center p-6">
-            <div className="flex items-center space-x-2">
-              <Send className="h-8 w-8 text-blue-500" />
-              <div>
-                <p className="text-2xl font-bold">
-                  {proformas.filter(p => p.status === 'sent').length}
-                </p>
-                <p className="text-xs text-muted-foreground">Sent</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="flex items-center p-6">
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-8 w-8 text-success" />
-              <div>
-                <p className="text-2xl font-bold">
-                  {proformas.filter(p => p.status === 'accepted').length}
-                </p>
-                <p className="text-xs text-muted-foreground">Accepted</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="flex items-center p-6">
-            <div className="flex items-center space-x-2">
-              <DollarSign className="h-8 w-8 text-success" />
-              <div>
-                <p className="text-2xl font-bold">
-                  {formatCurrency(proformas.reduce((sum, p) => sum + (p.total_amount || 0), 0))}
-                </p>
-                <p className="text-xs text-muted-foreground">Total Value</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {['draft', 'sent', 'accepted', 'converted'].map((status) => {
+          const count = proformas.filter(p => p.status === status).length;
+          const isActive = statusFilter === status;
+          return (
+            <Card
+              key={status}
+              className={`shadow-card cursor-pointer hover:shadow-lg transition-shadow ${isActive ? 'ring-2 ring-primary' : ''}`}
+              onClick={() => setStatusFilter(isActive ? 'all' : status)}
+            >
+              <CardContent className="pt-6">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground capitalize">{status}</p>
+                  <p className="text-2xl font-bold">{count}</p>
+                  <p className="text-xs text-muted-foreground">{isActive ? 'Filtering...' : 'Click to filter'}</p>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Search and Filter */}
