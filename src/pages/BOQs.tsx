@@ -375,6 +375,7 @@ export default function BOQs() {
                   <TableRow>
                     <TableHead>Number</TableHead>
                     <TableHead>Date</TableHead>
+                    <TableHead>Due Date</TableHead>
                     <TableHead>Client</TableHead>
                     <TableHead>Project</TableHead>
                     <TableHead>Currency</TableHead>
