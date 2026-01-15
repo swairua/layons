@@ -1360,11 +1360,13 @@ export const useDeletePayment = () => {
           .eq('payment_id', paymentId);
 
         if (allocError) {
-          console.warn('Could not fetch allocations:', allocError.message);
+          console.warn('Could not fetch allocations:', allocError);
+          console.warn('Allocation fetch error message:', allocError?.message);
+          console.warn('Allocation fetch error code:', allocError?.code);
         }
 
         const allocationsList = allocations || [];
-        console.log('Found allocations:', allocationsList.length);
+        console.log(`Found ${allocationsList.length} allocation(s) for payment ${paymentId}`);
 
         // Step 2: Reverse invoice adjustments for each allocation
         if (allocationsList.length > 0) {
