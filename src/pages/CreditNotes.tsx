@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PaginationControls } from '@/components/pagination/PaginationControls';
+import { usePagination } from '@/hooks/usePagination';
 import {
   Select,
   SelectContent,
@@ -109,6 +111,10 @@ export default function CreditNotes() {
 
     return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo && matchesAmountFrom && matchesAmountTo;
   }) || [];
+
+  // Pagination hook
+  const pagination = usePagination(filteredCreditNotes, { initialPageSize: 10 });
+  const paginatedCreditNotes = pagination.paginatedItems;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
@@ -393,7 +399,7 @@ export default function CreditNotes() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredCreditNotes.map((creditNote: CreditNote) => (
+                {paginatedCreditNotes.map((creditNote: CreditNote) => (
                   <TableRow key={creditNote.id} className="hover:bg-muted/50 transition-smooth">
                     <TableCell className="font-medium">
                       <div className="flex items-center space-x-2">

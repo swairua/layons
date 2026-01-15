@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PaginationControls } from '@/components/pagination/PaginationControls';
+import { usePagination } from '@/hooks/usePagination';
 import {
   Table,
   TableBody,
@@ -55,6 +57,10 @@ export default function Proforma() {
     proforma.proforma_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
     proforma.customers?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Pagination hook
+  const pagination = usePagination(filteredProformas, { initialPageSize: 10 });
+  const paginatedProformas = pagination.paginatedItems;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -310,111 +316,122 @@ export default function Proforma() {
               )}
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Proforma #</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Valid Until</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredProformas.map((proforma) => (
-                  <TableRow key={proforma.id}>
-                    <TableCell className="font-medium">
-                      {proforma.proforma_number}
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{proforma.customers?.name}</div>
-                        {proforma.customers?.email && (
-                          <div className="text-sm text-muted-foreground">
-                            {proforma.customers.email}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                        {formatDate(proforma.proforma_date)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                        {formatDate(proforma.valid_until)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center font-medium">
-                        <DollarSign className="h-4 w-4 mr-1" />
-                        {formatCurrency(proforma.total_amount)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(proforma.status)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleView(proforma)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(proforma)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDownloadPDF(proforma)}
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleSendEmail(proforma)}
-                          disabled={!proforma.customers?.email}
-                        >
-                          <Send className="h-4 w-4" />
-                        </Button>
-                        {proforma.status === 'sent' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleAcceptProforma(proforma)}
-                          >
-                            <CheckCircle className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {proforma.status !== 'converted' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleCreateInvoice(proforma)}
-                            title="Convert to Invoice"
-                          >
-                            <Receipt className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Proforma #</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Valid Until</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedProformas.map((proforma) => (
+                    <TableRow key={proforma.id}>
+                      <TableCell className="font-medium">
+                        {proforma.proforma_number}
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{proforma.customers?.name}</div>
+                          {proforma.customers?.email && (
+                            <div className="text-sm text-muted-foreground">
+                              {proforma.customers.email}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                          {formatDate(proforma.proforma_date)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                          {formatDate(proforma.valid_until)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center font-medium">
+                          <DollarSign className="h-4 w-4 mr-1" />
+                          {formatCurrency(proforma.total_amount)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(proforma.status)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleView(proforma)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(proforma)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDownloadPDF(proforma)}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleSendEmail(proforma)}
+                            disabled={!proforma.customers?.email}
+                          >
+                            <Send className="h-4 w-4" />
+                          </Button>
+                          {proforma.status === 'sent' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleAcceptProforma(proforma)}
+                            >
+                              <CheckCircle className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {proforma.status !== 'converted' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCreateInvoice(proforma)}
+                              title="Convert to Invoice"
+                            >
+                              <Receipt className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <PaginationControls
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                pageSize={pagination.pageSize}
+                totalItems={pagination.totalItems}
+                onPageChange={pagination.setCurrentPage}
+                onPageSizeChange={pagination.setPageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+              />
+            </div>
           )}
         </CardContent>
       </Card>

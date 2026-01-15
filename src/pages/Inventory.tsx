@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { PaginationControls } from '@/components/pagination/PaginationControls';
+import { usePagination } from '@/hooks/usePagination';
 import { 
   Table, 
   TableBody, 
@@ -145,6 +147,10 @@ export default function Inventory() {
     item.product_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (item.product_categories?.name && item.product_categories.name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  // Pagination hook
+  const pagination = usePagination(filteredInventory, { initialPageSize: 10 });
+  const paginatedInventory = pagination.paginatedItems;
 
   const totalValue = inventory.reduce((sum, item) => {
     return sum + ((item.stock_quantity || 0) * (item.selling_price || 0));
@@ -292,7 +298,7 @@ export default function Inventory() {
         <CardHeader>
           <CardTitle>Inventory Items</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <Table>
             <TableHeader>
               <TableRow>
@@ -326,7 +332,7 @@ export default function Inventory() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredInventory.map((item) => (
+                paginatedInventory.map((item) => (
                   <TableRow key={item.id} className="hover:bg-muted/50">
                     <TableCell className="font-medium">{item.product_code}</TableCell>
                     <TableCell className="font-medium">{item.name}</TableCell>
@@ -378,6 +384,17 @@ export default function Inventory() {
               )}
             </TableBody>
           </Table>
+          {filteredInventory.length > 0 && (
+            <PaginationControls
+              currentPage={pagination.currentPage}
+              totalPages={pagination.totalPages}
+              pageSize={pagination.pageSize}
+              totalItems={pagination.totalItems}
+              onPageChange={pagination.setCurrentPage}
+              onPageSizeChange={pagination.setPageSize}
+              pageSizeOptions={[10, 25, 50, 100]}
+            />
+          )}
         </CardContent>
       </Card>
 

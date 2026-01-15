@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PaginationControls } from '@/components/pagination/PaginationControls';
+import { usePagination } from '@/hooks/usePagination';
 import {
   Select,
   SelectContent,
@@ -111,6 +113,10 @@ export default function Customers() {
 
     return matchesSearch && matchesStatus && matchesCity && matchesCreditLimit;
   }) || [];
+
+  // Pagination hook
+  const pagination = usePagination(filteredCustomers, { initialPageSize: 10 });
+  const paginatedCustomers = pagination.paginatedItems;
 
   const displayCurrency = (amount: number) => {
     return formatCurrency(amount, currentCompany?.currency || 'KES');
@@ -397,20 +403,21 @@ export default function Customers() {
               )}
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Customer</TableHead>
-                  <TableHead className="hidden md:table-cell">Contact</TableHead>
-                  <TableHead className="hidden lg:table-cell">Location</TableHead>
-                  <TableHead className="hidden lg:table-cell">Credit Limit</TableHead>
-                  <TableHead className="hidden md:table-cell">Terms</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right min-w-[200px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Customer</TableHead>
+                    <TableHead className="hidden md:table-cell">Contact</TableHead>
+                    <TableHead className="hidden lg:table-cell">Location</TableHead>
+                    <TableHead className="hidden lg:table-cell">Credit Limit</TableHead>
+                    <TableHead className="hidden md:table-cell">Terms</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right min-w-[200px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
               <TableBody>
-                {filteredCustomers.map((customer: Customer) => (
+                {paginatedCustomers.map((customer: Customer) => (
                   <TableRow key={customer.id} className="hover:bg-muted/50 transition-smooth">
                     <TableCell>
                       <div className="flex items-center space-x-3">
@@ -527,6 +534,16 @@ export default function Customers() {
                 ))}
               </TableBody>
             </Table>
+              <PaginationControls
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                pageSize={pagination.pageSize}
+                totalItems={pagination.totalItems}
+                onPageChange={pagination.setCurrentPage}
+                onPageSizeChange={pagination.setPageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+              />
+            </div>
           )}
         </CardContent>
       </Card>
