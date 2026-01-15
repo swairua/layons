@@ -1,0 +1,315 @@
+import { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  AlertCircle,
+  Clock,
+  CheckCircle,
+  FileText,
+  DollarSign,
+  Package,
+  TrendingUp
+} from 'lucide-react';
+import { useQuotations, useBOQs, usePayments } from '@/hooks/useDatabase';
+import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
+import { useProformas } from '@/hooks/useProforma';
+import { useCompanies } from '@/hooks/useDatabase';
+import { cn } from '@/lib/utils';
+
+interface DashboardSummaryCardsProps {
+  onDrill?: (module: string, filterType: string) => void;
+}
+
+export function DashboardSummaryCards({ onDrill }: DashboardSummaryCardsProps) {
+  const { data: companies } = useCompanies();
+  const currentCompany = companies?.[0];
+  const companyId = currentCompany?.id;
+
+  // Fetch data for all modules
+  const { data: quotations = [] } = useQuotations(companyId);
+  const { data: boqs = [] } = useBOQs(companyId);
+  const { data: invoices = [] } = useInvoices(companyId);
+  const { data: payments = [] } = usePayments(companyId);
+  const { data: proformas = [] } = useProformas(companyId);
+
+  // Categorize invoices by due date status
+  const categorizeInvoice = (invoice: any) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dueDate = new Date(invoice.due_date);
+    dueDate.setHours(0, 0, 0, 0);
+
+    const daysUntilDue = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysUntilDue < 0) return 'overdue';
+    if (daysUntilDue <= 7) return 'aging';
+    return 'current';
+  };
+
+  // Categorize BOQs by due date status
+  const categorizeBOQ = (boq: any) => {
+    if (!boq.due_date) return 'current';
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dueDate = new Date(boq.due_date);
+    dueDate.setHours(0, 0, 0, 0);
+
+    const daysUntilDue = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysUntilDue < 0) return 'overdue';
+    if (daysUntilDue <= 7) return 'aging';
+    return 'current';
+  };
+
+  // Calculate summaries
+  const quotationSummary = {
+    draft: quotations.filter(q => q.status === 'draft').length,
+    sent: quotations.filter(q => q.status === 'sent').length,
+    accepted: quotations.filter(q => q.status === 'accepted').length,
+    expired: quotations.filter(q => q.status === 'expired').length,
+  };
+
+  const boqSummary = {
+    overdue: boqs.filter(b => categorizeBOQ(b) === 'overdue').length,
+    aging: boqs.filter(b => categorizeBOQ(b) === 'aging').length,
+    current: boqs.filter(b => categorizeBOQ(b) === 'current').length,
+  };
+
+  const invoiceSummary = {
+    overdue: invoices.filter(inv => categorizeInvoice(inv) === 'overdue').length,
+    aging: invoices.filter(inv => categorizeInvoice(inv) === 'aging').length,
+    current: invoices.filter(inv => categorizeInvoice(inv) === 'current').length,
+  };
+
+  const paymentSummary = {
+    total: payments.length,
+    thisMonth: payments.filter(p => {
+      const paymentDate = new Date(p.payment_date);
+      const now = new Date();
+      return paymentDate.getMonth() === now.getMonth() && paymentDate.getFullYear() === now.getFullYear();
+    }).length,
+    cash: payments.filter(p => p.payment_method === 'cash').length,
+    mpesa: payments.filter(p => p.payment_method === 'mpesa').length,
+  };
+
+  const proformaSummary = {
+    draft: proformas.filter(p => p.status === 'draft').length,
+    sent: proformas.filter(p => p.status === 'sent').length,
+    accepted: proformas.filter(p => p.status === 'accepted').length,
+    converted: proformas.filter(p => p.status === 'converted').length,
+  };
+
+  const SummaryCard = ({ title, count, icon: Icon, color, onClick, description }: any) => (
+    <Card
+      className={cn(
+        "shadow-card cursor-pointer hover:shadow-lg transition-all border-2",
+        `hover:border-${color}/40`,
+        `border-${color}/20`
+      )}
+      onClick={onClick}
+    >
+      <CardContent className="pt-6">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Icon className={cn("h-5 w-5", `text-${color}`)} />
+              <p className={cn("text-sm font-medium", `text-${color}`)}>{title}</p>
+            </div>
+            <Badge className={cn("text-lg font-bold px-3 py-1", `bg-${color} text-${color}-foreground`)}>
+              {count}
+            </Badge>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {description || 'Click to filter'}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  return (
+    <div className="space-y-6">
+      {/* Quotations Summary */}
+      <div>
+        <h3 className="text-lg font-semibold mb-3 text-foreground">Quotations</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <SummaryCard
+            title="Draft"
+            count={quotationSummary.draft}
+            icon={FileText}
+            color="muted"
+            description={`${quotationSummary.draft} quotations`}
+            onClick={() => onDrill?.('quotations', 'draft')}
+          />
+          <SummaryCard
+            title="Sent"
+            count={quotationSummary.sent}
+            icon={TrendingUp}
+            color="warning"
+            description={`${quotationSummary.sent} awaiting response`}
+            onClick={() => onDrill?.('quotations', 'sent')}
+          />
+          <SummaryCard
+            title="Accepted"
+            count={quotationSummary.accepted}
+            icon={CheckCircle}
+            color="success"
+            description={`${quotationSummary.accepted} accepted`}
+            onClick={() => onDrill?.('quotations', 'accepted')}
+          />
+          <SummaryCard
+            title="Expired"
+            count={quotationSummary.expired}
+            icon={AlertCircle}
+            color="destructive"
+            description={`${quotationSummary.expired} expired`}
+            onClick={() => onDrill?.('quotations', 'expired')}
+          />
+        </div>
+      </div>
+
+      {/* BOQs Summary */}
+      <div>
+        <h3 className="text-lg font-semibold mb-3 text-foreground">Bill of Quantities (BOQs)</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <SummaryCard
+            title="Overdue"
+            count={boqSummary.overdue}
+            icon={AlertCircle}
+            color="destructive"
+            description={boqSummary.overdue > 0 ? 'Click to filter' : 'None'}
+            onClick={() => onDrill?.('boqs', 'overdue')}
+          />
+          <SummaryCard
+            title="Due Soon"
+            count={boqSummary.aging}
+            icon={Clock}
+            color="warning"
+            description={boqSummary.aging > 0 ? 'Within 7 days' : 'None'}
+            onClick={() => onDrill?.('boqs', 'aging')}
+          />
+          <SummaryCard
+            title="Valid"
+            count={boqSummary.current}
+            icon={CheckCircle}
+            color="success"
+            description={`${boqSummary.current} active`}
+            onClick={() => onDrill?.('boqs', 'current')}
+          />
+        </div>
+      </div>
+
+      {/* Invoices Summary */}
+      <div>
+        <h3 className="text-lg font-semibold mb-3 text-foreground">Invoices</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <SummaryCard
+            title="Overdue"
+            count={invoiceSummary.overdue}
+            icon={AlertCircle}
+            color="destructive"
+            description={invoiceSummary.overdue > 0 ? 'Click to filter' : 'None'}
+            onClick={() => onDrill?.('invoices', 'overdue')}
+          />
+          <SummaryCard
+            title="Due Soon"
+            count={invoiceSummary.aging}
+            icon={Clock}
+            color="warning"
+            description={invoiceSummary.aging > 0 ? 'Within 7 days' : 'None'}
+            onClick={() => onDrill?.('invoices', 'aging')}
+          />
+          <SummaryCard
+            title="Valid"
+            count={invoiceSummary.current}
+            icon={CheckCircle}
+            color="success"
+            description={`${invoiceSummary.current} active`}
+            onClick={() => onDrill?.('invoices', 'current')}
+          />
+        </div>
+      </div>
+
+      {/* Proforma/Sales Summary */}
+      <div>
+        <h3 className="text-lg font-semibold mb-3 text-foreground">Proforma Invoices</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <SummaryCard
+            title="Draft"
+            count={proformaSummary.draft}
+            icon={FileText}
+            color="muted"
+            description={`${proformaSummary.draft} proformas`}
+            onClick={() => onDrill?.('proforma', 'draft')}
+          />
+          <SummaryCard
+            title="Sent"
+            count={proformaSummary.sent}
+            icon={TrendingUp}
+            color="warning"
+            description={`${proformaSummary.sent} awaiting response`}
+            onClick={() => onDrill?.('proforma', 'sent')}
+          />
+          <SummaryCard
+            title="Accepted"
+            count={proformaSummary.accepted}
+            icon={CheckCircle}
+            color="success"
+            description={`${proformaSummary.accepted} accepted`}
+            onClick={() => onDrill?.('proforma', 'accepted')}
+          />
+          <SummaryCard
+            title="Converted"
+            count={proformaSummary.converted}
+            icon={DollarSign}
+            color="primary"
+            description={`${proformaSummary.converted} to invoice`}
+            onClick={() => onDrill?.('proforma', 'converted')}
+          />
+        </div>
+      </div>
+
+      {/* Payments Summary */}
+      <div>
+        <h3 className="text-lg font-semibold mb-3 text-foreground">Payments</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <SummaryCard
+            title="Total Payments"
+            count={paymentSummary.total}
+            icon={DollarSign}
+            color="primary"
+            description="All recorded"
+            onClick={() => onDrill?.('payments', 'all')}
+          />
+          <SummaryCard
+            title="This Month"
+            count={paymentSummary.thisMonth}
+            icon={TrendingUp}
+            color="success"
+            description="Current month"
+            onClick={() => onDrill?.('payments', 'thisMonth')}
+          />
+          <SummaryCard
+            title="Cash"
+            count={paymentSummary.cash}
+            icon={DollarSign}
+            color="warning"
+            description="Cash payments"
+            onClick={() => onDrill?.('payments', 'cash')}
+          />
+          <SummaryCard
+            title="M-Pesa"
+            count={paymentSummary.mpesa}
+            icon={Package}
+            color="primary"
+            description="Mobile money"
+            onClick={() => onDrill?.('payments', 'mpesa')}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
