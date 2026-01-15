@@ -162,6 +162,24 @@ export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: R
 
       const result = await createPaymentMutation.mutateAsync(paymentRecord);
 
+      // Auto-create a cash receipt for audit trail
+      if (result.success && selectedInvoice) {
+        const receiptResult = await autoCreateCashReceipt({
+          company_id: selectedInvoice.company_id || currentCompany!.id,
+          customer_id: selectedInvoice.customer_id,
+          payment_date: paymentData.payment_date,
+          amount: amount,
+          payment_method: paymentData.payment_method,
+          reference_number: paymentData.reference_number || result.payment_id,
+          notes: paymentData.notes || undefined,
+          created_by: profile?.id
+        });
+
+        if (receiptResult) {
+          console.log('✅ Cash receipt auto-created:', receiptResult.receipt_number);
+        }
+      }
+
       // Check if payment was recorded but allocation might have failed
       if (result.fallback_used) {
         if (result.allocation_failed) {
