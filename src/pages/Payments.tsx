@@ -427,73 +427,84 @@ export default function Payments() {
               )}
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Payment Number</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Invoice</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Amount (KES)</TableHead>
-                  <TableHead>Method</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredPayments.map((payment) => (
-                  <TableRow key={payment.id} className="hover:bg-muted/50">
-                    <TableCell className="font-medium">{payment.payment_number}</TableCell>
-                    <TableCell>{payment.customers?.name || 'N/A'}</TableCell>
-                    <TableCell className="font-medium text-primary">
-                      {payment.payment_allocations?.[0]?.invoice_number || 'N/A'}
-                    </TableCell>
-                    <TableCell>{new Date(payment.payment_date).toLocaleDateString()}</TableCell>
-                    <TableCell className="font-semibold text-success">{formatCurrency(payment.amount)}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getMethodColor(payment.payment_method)}>
-                        {payment.payment_method.replace('_', ' ')}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStatusColor()}>
-                        Completed
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end space-x-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleViewPayment(payment)}
-                          title="View payment details"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDownloadReceipt(payment)}
-                          title="Download receipt"
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteClick(payment)}
-                          title="Delete payment"
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          disabled={deletePayment.isPending}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Payment Number</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Invoice</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Amount (KES)</TableHead>
+                    <TableHead>Method</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedPayments.map((payment) => (
+                    <TableRow key={payment.id} className="hover:bg-muted/50">
+                      <TableCell className="font-medium">{payment.payment_number}</TableCell>
+                      <TableCell>{payment.customers?.name || 'N/A'}</TableCell>
+                      <TableCell className="font-medium text-primary">
+                        {payment.payment_allocations?.[0]?.invoice_number || 'N/A'}
+                      </TableCell>
+                      <TableCell>{new Date(payment.payment_date).toLocaleDateString()}</TableCell>
+                      <TableCell className="font-semibold text-success">{formatCurrency(payment.amount)}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getMethodColor(payment.payment_method)}>
+                          {payment.payment_method.replace('_', ' ')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getStatusColor()}>
+                          Completed
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end space-x-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleViewPayment(payment)}
+                            title="View payment details"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDownloadReceipt(payment)}
+                            title="Download receipt"
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteClick(payment)}
+                            title="Delete payment"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            disabled={deletePayment.isPending}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <PaginationControls
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                pageSize={pagination.pageSize}
+                totalItems={pagination.totalItems}
+                onPageChange={pagination.setCurrentPage}
+                onPageSizeChange={pagination.setPageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+              />
+            </div>
           )}
         </CardContent>
       </Card>
