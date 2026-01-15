@@ -148,6 +148,10 @@ export default function CustomerStatements() {
     return matchesSearch && matchesStatus;
   });
 
+  // Pagination hook
+  const pagination = usePagination(filteredStatements, { initialPageSize: 10 });
+  const paginatedStatements = pagination.paginatedItems;
+
   // Calculate totals
   const totalOutstanding = filteredStatements.reduce((sum, s) => sum + s.total_outstanding, 0);
   const totalOverdue = filteredStatements.reduce((sum, s) => sum + s.overdue_amount, 0);
