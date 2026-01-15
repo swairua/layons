@@ -113,13 +113,6 @@ export function DashboardStats() {
       icon: DollarSign
     },
     {
-      title: 'Total Invoices',
-      value: (stats?.totalInvoices || 0).toString(),
-      change: '+8.1%',
-      changeType: 'increase' as const,
-      icon: FileText
-    },
-    {
       title: 'Outstanding Amount',
       value: formatCurrency((stats?.totalRevenue || 0) - (stats?.totalPayments || 0)),
       alert: ((stats?.totalRevenue || 0) - (stats?.totalPayments || 0)) > 0,
