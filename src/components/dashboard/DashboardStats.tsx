@@ -104,7 +104,7 @@ export function DashboardStats() {
     }).format(amount);
   };
 
-  const dashboardStats = [
+  const allStats = [
     {
       title: 'Total Revenue',
       value: formatCurrency(stats?.totalRevenue || 0),
@@ -117,11 +117,7 @@ export function DashboardStats() {
       value: formatCurrency((stats?.totalRevenue || 0) - (stats?.totalPayments || 0)),
       alert: ((stats?.totalRevenue || 0) - (stats?.totalPayments || 0)) > 0,
       icon: AlertTriangle
-    }
-  ];
-
-  // Additional stats row
-  const secondaryStats = [
+    },
     {
       title: 'Total Payments Received',
       value: formatCurrency(stats?.totalPayments || 0),
@@ -131,21 +127,12 @@ export function DashboardStats() {
 
   return (
     <div className="space-y-4">
-      {/* Primary Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-        {dashboardStats.map((stat) => (
+      {/* All Stats in One Row */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {allStats.map((stat) => (
           <StatCard key={stat.title} {...stat} />
         ))}
       </div>
-
-      {/* Secondary Stats */}
-      {secondaryStats.length > 0 && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {secondaryStats.map((stat) => (
-            <StatCard key={stat.title} {...stat} />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
