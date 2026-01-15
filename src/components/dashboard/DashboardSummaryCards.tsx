@@ -82,23 +82,6 @@ export function DashboardSummaryCards({ onDrill }: DashboardSummaryCardsProps) {
     current: invoices.filter(inv => categorizeInvoice(inv) === 'current').length,
   };
 
-  const paymentSummary = {
-    total: payments.length,
-    thisMonth: payments.filter(p => {
-      const paymentDate = new Date(p.payment_date);
-      const now = new Date();
-      return paymentDate.getMonth() === now.getMonth() && paymentDate.getFullYear() === now.getFullYear();
-    }).length,
-    cash: payments.filter(p => p.payment_method === 'cash').length,
-    mpesa: payments.filter(p => p.payment_method === 'mpesa').length,
-  };
-
-  const proformaSummary = {
-    draft: proformas.filter(p => p.status === 'draft').length,
-    sent: proformas.filter(p => p.status === 'sent').length,
-    accepted: proformas.filter(p => p.status === 'accepted').length,
-    converted: proformas.filter(p => p.status === 'converted').length,
-  };
 
   const getColorClasses = (color: string) => {
     const colorMap: { [key: string]: { icon: string; text: string; badge: string; border: string } } = {
