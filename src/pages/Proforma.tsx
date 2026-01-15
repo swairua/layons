@@ -58,6 +58,10 @@ export default function Proforma() {
     proforma.customers?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Pagination hook
+  const pagination = usePagination(filteredProformas, { initialPageSize: 10 });
+  const paginatedProformas = pagination.paginatedItems;
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'draft':
