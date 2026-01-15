@@ -283,98 +283,106 @@ export default function UserManagement() {
                 <p className="text-muted-foreground">Loading users...</p>
               </div>
             </div>
+          ) : filteredUsers.length === 0 ? (
+            <div className="text-center py-8">
+              <UserX className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+              <p className="text-muted-foreground">No users found</p>
+            </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Last Login</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id} className="hover:bg-muted/50">
-                    <TableCell>
-                      <div className="flex items-center space-x-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarFallback className="bg-primary text-primary-foreground font-medium">
-                            {user.full_name ? getInitials(user.full_name) : 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">{user.full_name || 'No name'}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {user.position || 'No position'}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getRoleColor(user.role)}>
-                        {user.role.replace('_', ' ')}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStatusColor(user.status)}>
-                        {user.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-muted-foreground">
-                        {user.department || '-'}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {user.last_login ? (
-                        new Date(user.last_login).toLocaleDateString()
-                      ) : (
-                        <span className="text-muted-foreground">Never</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => setModalState({ type: 'edit', user })}
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit User
-                          </DropdownMenuItem>
-                          {user.id !== currentUser?.id && (
-                            <DropdownMenuItem
-                              onClick={() => setDeleteDialog({ open: true, user })}
-                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete User
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {filteredUsers.length === 0 && (
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
-                      <UserX className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-muted-foreground">No users found</p>
-                    </TableCell>
+                    <TableHead>User</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Department</TableHead>
+                    <TableHead>Last Login</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedUsers.map((user) => (
+                    <TableRow key={user.id} className="hover:bg-muted/50">
+                      <TableCell>
+                        <div className="flex items-center space-x-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarFallback className="bg-primary text-primary-foreground font-medium">
+                              {user.full_name ? getInitials(user.full_name) : 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{user.full_name || 'No name'}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {user.position || 'No position'}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getRoleColor(user.role)}>
+                          {user.role.replace('_', ' ')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getStatusColor(user.status)}>
+                          {user.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-muted-foreground">
+                          {user.department || '-'}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {user.last_login ? (
+                          new Date(user.last_login).toLocaleDateString()
+                        ) : (
+                          <span className="text-muted-foreground">Never</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => setModalState({ type: 'edit', user })}
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit User
+                            </DropdownMenuItem>
+                            {user.id !== currentUser?.id && (
+                              <DropdownMenuItem
+                                onClick={() => setDeleteDialog({ open: true, user })}
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete User
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <PaginationControls
+                currentPage={usersPagination.currentPage}
+                totalPages={usersPagination.totalPages}
+                pageSize={usersPagination.pageSize}
+                totalItems={usersPagination.totalItems}
+                onPageChange={usersPagination.setCurrentPage}
+                onPageSizeChange={usersPagination.setPageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+              />
+            </div>
           )}
         </CardContent>
       </Card>
