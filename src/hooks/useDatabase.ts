@@ -1402,7 +1402,11 @@ export const useDeletePayment = () => {
 
                 if (updateError) {
                   console.warn(`Could not update invoice ${allocation.invoice_id}:`, updateError.message);
+                  console.warn(`Details - Invoice was: paid=${invoice.paid_amount}, balance=${invoice.balance_due}, status=${invoice.status}`);
+                  console.warn(`Details - Attempted to reverse: paid=${reversedPaidAmount}, balance=${reversedBalanceDue}, status=${newStatus}`);
                   // Continue anyway - don't fail the entire delete
+                } else {
+                  console.log(`✅ Successfully reversed payment for invoice ${allocation.invoice_id}: ${reversedPaidAmount} → ${reversedBalanceDue} balance`);
                 }
               }
             } catch (err) {
