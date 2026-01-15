@@ -210,6 +210,10 @@ export default function Invoices() {
     return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo && matchesAmountFrom && matchesAmountTo;
   }) || [];
 
+  // Pagination hook
+  const pagination = usePagination(filteredInvoices, { initialPageSize: 10 });
+  const paginatedInvoices = pagination.paginatedItems;
+
   const formatCurrency = (amount: number, currency: string = 'KES') => {
     const localeMap: { [key: string]: string } = {
       'KES': 'en-KE',
