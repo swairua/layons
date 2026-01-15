@@ -298,7 +298,7 @@ export default function Inventory() {
         <CardHeader>
           <CardTitle>Inventory Items</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <Table>
             <TableHeader>
               <TableRow>
@@ -332,7 +332,7 @@ export default function Inventory() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredInventory.map((item) => (
+                paginatedInventory.map((item) => (
                   <TableRow key={item.id} className="hover:bg-muted/50">
                     <TableCell className="font-medium">{item.product_code}</TableCell>
                     <TableCell className="font-medium">{item.name}</TableCell>
@@ -384,6 +384,17 @@ export default function Inventory() {
               )}
             </TableBody>
           </Table>
+          {filteredInventory.length > 0 && (
+            <PaginationControls
+              currentPage={pagination.currentPage}
+              totalPages={pagination.totalPages}
+              pageSize={pagination.pageSize}
+              totalItems={pagination.totalItems}
+              onPageChange={pagination.setCurrentPage}
+              onPageSizeChange={pagination.setPageSize}
+              pageSizeOptions={[10, 25, 50, 100]}
+            />
+          )}
         </CardContent>
       </Card>
 
