@@ -15,7 +15,7 @@ export function updateMetaTags(companyData?: {
   const companyServices =
     companyData?.company_services ||
     'Professional Management System with Quotations, Invoices, Payments, Inventory, and Multi-Company Support';
-  const logoUrl = companyData?.logo_url || 'https://cdn.builder.io/api/v1/image/assets%2Fe2eb9e788fdb405b8eda593a40e178b5%2F23073e29015745f6bebad21080caefe4?format=webp&width=1200';
+  const logoUrl = companyData?.logo_url || 'https://cdn.builder.io/api/v1/image/assets%2F7a328cb3421e406ca54186a5902e41b7%2F1f63456b33f04af1ba43104b637519aa?format=webp&width=1200';
   const companyLocation = [companyData?.address, companyData?.city, companyData?.country]
     .filter(Boolean)
     .join(', ');
