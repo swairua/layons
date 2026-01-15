@@ -23,6 +23,10 @@ export default function UnitsSettings() {
   const [editing, setEditing] = useState<any | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; unitId?: string; unitName?: string }>({ open: false });
 
+  // Pagination hook
+  const pagination = usePagination(units, { initialPageSize: 10 });
+  const paginatedUnits = pagination.paginatedItems;
+
   const handleEdit = (u: any) => setEditing(u);
 
   const handleDeleteClick = (id: string, name: string) => {
