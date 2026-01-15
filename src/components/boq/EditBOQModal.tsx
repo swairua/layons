@@ -330,6 +330,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
       const payload = {
         number: boqNumber,
         boq_date: boqDate,
+        due_date: dueDate,
         client_name: selectedClient.name,
         client_email: selectedClient.email || null,
         client_phone: selectedClient.phone || null,
