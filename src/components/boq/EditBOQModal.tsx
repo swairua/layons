@@ -387,6 +387,10 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
               <Input type="date" value={boqDate} onChange={e => setBoqDate(e.target.value)} />
             </div>
             <div>
+              <Label>Due Date</Label>
+              <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+            </div>
+            <div>
               <Label>Currency</Label>
               <Select value={currency} onValueChange={setCurrency}>
                 <SelectTrigger>
@@ -400,19 +404,20 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label>Client</Label>
-              <Select value={clientId} onValueChange={setClientId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select client" />
-                </SelectTrigger>
-                <SelectContent>
-                  {customers.map(c => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          </div>
+
+          <div>
+            <Label>Client</Label>
+            <Select value={clientId} onValueChange={setClientId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select client" />
+              </SelectTrigger>
+              <SelectContent>
+                {customers.map(c => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
