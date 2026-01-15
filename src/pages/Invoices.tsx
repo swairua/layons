@@ -109,6 +109,8 @@ export default function Invoices() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateFromFilter, setDateFromFilter] = useState('');
   const [dateToFilter, setDateToFilter] = useState('');
+  const [dueDateFromFilter, setDueDateFromFilter] = useState('');
+  const [dueDateToFilter, setDueDateToFilter] = useState('');
   const [customerFilter, setCustomerFilter] = useState('all');
   const [amountFromFilter, setAmountFromFilter] = useState('');
   const [amountToFilter, setAmountToFilter] = useState('');
