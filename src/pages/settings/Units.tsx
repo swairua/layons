@@ -65,33 +65,46 @@ export default function UnitsSettings() {
           <CardTitle>Units</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Abbreviation</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={3}>Loading...</TableCell></TableRow>
-              ) : units.length === 0 ? (
-                <TableRow><TableCell colSpan={3}>No units found</TableCell></TableRow>
-              ) : units.map((u: any) => (
-                <TableRow key={u.id}>
-                  <TableCell>{u.name}</TableCell>
-                  <TableCell>{u.abbreviation || '-'}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button size="icon" variant="ghost" onClick={() => handleEdit(u)} title="Edit"><Edit className="h-4 w-4" /></Button>
-                      <Button size="icon" variant="destructive" onClick={() => handleDeleteClick(u.id, u.name)} title="Delete"><Trash2 className="h-4 w-4" /></Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          {isLoading ? (
+            <div>Loading...</div>
+          ) : units.length === 0 ? (
+            <div>No units found</div>
+          ) : (
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Abbreviation</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedUnits.map((u: any) => (
+                    <TableRow key={u.id}>
+                      <TableCell>{u.name}</TableCell>
+                      <TableCell>{u.abbreviation || '-'}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button size="icon" variant="ghost" onClick={() => handleEdit(u)} title="Edit"><Edit className="h-4 w-4" /></Button>
+                          <Button size="icon" variant="destructive" onClick={() => handleDeleteClick(u.id, u.name)} title="Delete"><Trash2 className="h-4 w-4" /></Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <PaginationControls
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                pageSize={pagination.pageSize}
+                totalItems={pagination.totalItems}
+                onPageChange={pagination.setCurrentPage}
+                onPageSizeChange={pagination.setPageSize}
+                pageSizeOptions={[10, 25, 50, 100]}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 
