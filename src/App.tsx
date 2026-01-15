@@ -65,12 +65,25 @@ class AppErrorBoundary extends Component<
     console.error('App Error:', error, errorInfo);
 
     // Check if this is a module loading error
-    if (
+    const isModuleError =
       error.message.includes('dynamically imported module') ||
       error.message.includes('Failed to fetch') ||
-      error.message.includes('network')
-    ) {
-      console.warn('⚠️ Module loading error detected - this may be a network issue');
+      error.message.includes('network');
+
+    if (isModuleError) {
+      console.warn('⚠️ Module loading error detected - attempting recovery');
+      console.warn('Error details:', error.message);
+      console.warn('This may be due to:');
+      console.warn('1. Network connectivity issues');
+      console.warn('2. Browser cache issues');
+      console.warn('3. Dev server configuration issues');
+
+      // Clear service worker cache if available
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          registrations.forEach(reg => reg.unregister());
+        }).catch(err => console.warn('Could not clear service workers:', err));
+      }
     }
   }
 
