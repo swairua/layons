@@ -328,12 +328,12 @@ const RemittanceAdvice = () => {
       </Card>
 
       {/* Latest Remittance Advice Preview */}
-      {filteredRemittances.length > 0 && filteredRemittances[0] && (
+      {paginatedRemittances.length > 0 && paginatedRemittances[0] && (
         <Card className="shadow-card">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Building2 className="h-5 w-5 text-primary" />
-              <span>Remittance Advice Preview - {filteredRemittances[0].adviceNumber || filteredRemittances[0].advice_number || 'N/A'}</span>
+              <span>Remittance Advice Preview - {paginatedRemittances[0].adviceNumber || paginatedRemittances[0].advice_number || 'N/A'}</span>
             </CardTitle>
             <CardDescription>
               Latest remittance advice document layout
@@ -364,7 +364,7 @@ const RemittanceAdvice = () => {
                 <div>
                   <div className="font-semibold text-sm mb-2">TO:</div>
                   <div className="space-y-1">
-                    <div className="font-medium">{filteredRemittances[0].customerName || filteredRemittances[0].customers?.name || 'N/A'}</div>
+                    <div className="font-medium">{paginatedRemittances[0].customerName || paginatedRemittances[0].customers?.name || 'N/A'}</div>
                     <div className="text-sm text-muted-foreground">
                       {filteredRemittances[0].customerAddress || filteredRemittances[0].customers?.address || 'N/A'}
                     </div>
