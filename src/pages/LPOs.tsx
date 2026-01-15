@@ -64,6 +64,10 @@ export default function LPOs() {
     lpo.notes?.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
+  // Pagination hook
+  const pagination = usePagination(filteredLPOs, { initialPageSize: 10 });
+  const paginatedLPOs = pagination.paginatedItems;
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'draft':
