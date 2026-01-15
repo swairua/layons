@@ -21,7 +21,7 @@ export function setFavicon(logoUrl?: string | null) {
     }
   } else {
     // Fall back to Layons Construction Limited logo
-    faviconElement.href = 'https://cdn.builder.io/api/v1/image/assets%2Fe2eb9e788fdb405b8eda593a40e178b5%2F23073e29015745f6bebad21080caefe4?format=webp&width=256';
-    faviconElement.type = 'image/webp';
+    faviconElement.href = 'https://cdn.builder.io/api/v1/image/assets%2F7a328cb3421e406ca54186a5902e41b7%2F1f63456b33f04af1ba43104b637519aa?format=webp&width=256';
+    faviconElement.type = 'image/png';
   }
 }
