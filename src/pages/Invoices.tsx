@@ -192,6 +192,28 @@ export default function Invoices() {
     }
   };
 
+  // Categorize invoices by due date status
+  const categorizeInvoice = (invoice: Invoice) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dueDate = new Date(invoice.due_date);
+    dueDate.setHours(0, 0, 0, 0);
+
+    const daysUntilDue = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysUntilDue < 0) return 'overdue';
+    if (daysUntilDue <= 7) return 'aging';
+    return 'current';
+  };
+
+  // Calculate summary stats
+  const invoiceSummary = {
+    overdue: invoices?.filter(inv => categorizeInvoice(inv) === 'overdue').length || 0,
+    aging: invoices?.filter(inv => categorizeInvoice(inv) === 'aging').length || 0,
+    current: invoices?.filter(inv => categorizeInvoice(inv) === 'current').length || 0,
+  };
+
   // Filter and search logic
   const filteredInvoices = invoices?.filter(invoice => {
     // Search filter
