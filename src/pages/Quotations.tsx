@@ -80,7 +80,9 @@ function getStatusColor(status: string) {
 }
 
 export default function Quotations() {
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -94,6 +96,14 @@ export default function Quotations() {
   const currentCompany = companies?.[0];
   const { data: quotations, isLoading, error, refetch } = useQuotations(currentCompany?.id);
   const deleteQuotation = useDeleteQuotation();
+
+  // Set status filter from URL params
+  useEffect(() => {
+    const status = searchParams.get('status');
+    if (status && ['draft', 'sent', 'accepted', 'rejected', 'expired', 'processed'].includes(status)) {
+      setStatusFilter(status);
+    }
+  }, [searchParams]);
 
   const handleDeleteClick = (quotation: Quotation) => {
     setDeleteDialog({ open: true, quotation });
