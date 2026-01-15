@@ -395,6 +395,29 @@ Website: www.biolegendscientific.co.ke`;
         </CardContent>
       </Card>
 
+      {/* Status Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {['draft', 'sent', 'accepted', 'expired'].map((status) => {
+          const count = quotations?.filter(q => q.status === status).length || 0;
+          const isActive = statusFilter === status;
+          return (
+            <Card
+              key={status}
+              className={`shadow-card cursor-pointer hover:shadow-lg transition-shadow ${isActive ? 'ring-2 ring-primary' : ''}`}
+              onClick={() => setStatusFilter(isActive ? 'all' : status)}
+            >
+              <CardContent className="pt-6">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground capitalize">{status}</p>
+                  <p className="text-2xl font-bold">{count}</p>
+                  <p className="text-xs text-muted-foreground">{isActive ? 'Filtering...' : 'Click to filter'}</p>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
       <Card className="shadow-card">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
