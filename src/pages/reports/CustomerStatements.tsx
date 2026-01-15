@@ -500,7 +500,7 @@ export default function CustomerStatements() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredStatements.map((statement) => (
+                {paginatedStatements.map((statement) => (
                   <TableRow key={statement.customer_id}>
                     <TableCell>
                       <Checkbox
