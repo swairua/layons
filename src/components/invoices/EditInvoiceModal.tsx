@@ -465,7 +465,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-7xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Receipt className="h-5 w-5 text-primary" />
@@ -765,7 +765,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                                           const value = e.target.value;
                                           updateItemQuantity(section.id, item.id, value === '' ? '' : parseInt(value) || 0);
                                         }}
-                                        className="w-16 h-8"
+                                        className="w-36 h-12 text-base"
                                         min="1"
                                         placeholder="1"
                                       />
@@ -778,7 +778,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                                           const value = e.target.value;
                                           updateItemPrice(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
-                                        className="w-20 h-8"
+                                        className="w-44 h-12 text-base"
                                         step="0.01"
                                         placeholder="0.00"
                                       />
@@ -791,7 +791,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                                           const value = e.target.value;
                                           updateItemTax(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
-                                        className="w-14 h-8"
+                                        className="w-28 h-12 text-base"
                                         min="0"
                                         max="100"
                                         step="0.1"
