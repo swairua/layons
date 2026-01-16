@@ -484,11 +484,11 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="w-1/3">Item Description</TableHead>
-                            <TableHead className="w-32">Qty</TableHead>
-                            <TableHead className="w-40">Unit</TableHead>
-                            <TableHead className="w-40">Rate</TableHead>
-                            <TableHead className="w-40 text-right">Amount</TableHead>
+                            <TableHead className="w-2/5">Item Description</TableHead>
+                            <TableHead className="w-20">Qty</TableHead>
+                            <TableHead className="w-32">Unit</TableHead>
+                            <TableHead className="w-28">Rate</TableHead>
+                            <TableHead className="w-28 text-right">Amount</TableHead>
                             <TableHead className="w-12"></TableHead>
                           </TableRow>
                         </TableHeader>
