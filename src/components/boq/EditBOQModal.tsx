@@ -496,7 +496,12 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
                                 <Input value={row.description} onChange={e => updateItem(section.id, subsection.id, row.id, 'description', e.target.value)} placeholder="Describe item" className="h-10 text-sm px-2" />
                               </TableCell>
                               <TableCell className="py-2">
-                                <Input type="number" min={0} value={row.quantity} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', Number(e.target.value))} className="h-10 text-sm text-center px-2" />
+                                <div className="relative">
+                                  <Input type="number" min={0} value={row.quantity} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', Number(e.target.value))} onFocus={() => setPreviewItem({ sectionId: section.id, subsectionId: subsection.id, itemId: row.id })} onBlur={() => setPreviewItem(null)} className="h-10 text-sm text-center px-2 w-32" />
+                                  {previewItem?.itemId === row.id && (
+                                    <FloatingItemPreview quantity={row.quantity} rate={row.rate} formatCurrency={formatCurrency} />
+                                  )}
+                                </div>
                               </TableCell>
                               <TableCell className="py-2">
                                 <Select value={row.unit} onValueChange={(val) => {
