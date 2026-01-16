@@ -447,7 +447,7 @@ export const EditProformaModal = ({
                             onChange={(e) => updateItem(item.id, 'quantity', e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
                             min="0"
                             step="0.01"
-                            className="w-20"
+                            className="w-28 h-10 text-sm"
                             placeholder="1"
                           />
                         </TableCell>
@@ -458,7 +458,7 @@ export const EditProformaModal = ({
                             onChange={(e) => updateItem(item.id, 'unit_price', e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
                             min="0"
                             step="0.01"
-                            className="w-24"
+                            className="w-36 h-10 text-sm"
                             placeholder="0.00"
                           />
                         </TableCell>
@@ -470,7 +470,7 @@ export const EditProformaModal = ({
                             min="0"
                             max="100"
                             step="0.01"
-                            className="w-20"
+                            className="w-28 h-10 text-sm"
                             disabled={item.tax_inclusive}
                             placeholder="0"
                           />
