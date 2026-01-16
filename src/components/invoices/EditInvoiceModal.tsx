@@ -743,12 +743,12 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                               <TableHeader>
                                 <TableRow>
                                   <TableHead>Product</TableHead>
-                                  <TableHead className="w-20">Qty</TableHead>
-                                  <TableHead className="w-24">Unit Price</TableHead>
-                                  <TableHead className="w-16">Tax %</TableHead>
-                                  <TableHead className="w-16">Inc. Tax</TableHead>
+                                  <TableHead className="w-32">Qty</TableHead>
+                                  <TableHead className="w-40">Unit Price</TableHead>
+                                  <TableHead className="w-32">Tax %</TableHead>
+                                  <TableHead className="w-24">Inc. Tax</TableHead>
                                   <TableHead className="text-right">Total</TableHead>
-                                  <TableHead className="w-8"></TableHead>
+                                  <TableHead className="w-12"></TableHead>
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
@@ -765,7 +765,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                                           const value = e.target.value;
                                           updateItemQuantity(section.id, item.id, value === '' ? '' : parseInt(value) || 0);
                                         }}
-                                        className="w-36 h-12 text-base"
+                                        className="w-28 h-10 text-sm"
                                         min="1"
                                         placeholder="1"
                                       />
@@ -778,7 +778,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                                           const value = e.target.value;
                                           updateItemPrice(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
-                                        className="w-44 h-12 text-base"
+                                        className="w-36 h-10 text-sm"
                                         step="0.01"
                                         placeholder="0.00"
                                       />
@@ -791,7 +791,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                                           const value = e.target.value;
                                           updateItemTax(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
-                                        className="w-28 h-12 text-base"
+                                        className="w-28 h-10 text-sm"
                                         min="0"
                                         max="100"
                                         step="0.1"
@@ -811,11 +811,11 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                                     <TableCell>
                                       <Button
                                         variant="ghost"
-                                        size="icon"
+                                        size="sm"
                                         onClick={() => removeItem(section.id, item.id)}
-                                        className="text-destructive hover:text-destructive h-8 w-8"
+                                        className="text-destructive hover:text-destructive"
                                       >
-                                        <Trash2 className="h-3 w-3" />
+                                        <Trash2 className="h-4 w-4" />
                                       </Button>
                                     </TableCell>
                                   </TableRow>
