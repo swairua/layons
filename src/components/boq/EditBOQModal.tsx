@@ -491,10 +491,10 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
                           {subsection.items.map(row => (
                             <TableRow key={row.id} className="h-16">
                               <TableCell className="py-2">
-                                <Input value={row.description} onChange={e => updateItem(section.id, subsection.id, row.id, 'description', e.target.value)} placeholder="Describe item" className="h-12 text-sm px-3" />
+                                <Input value={row.description} onChange={e => updateItem(section.id, subsection.id, row.id, 'description', e.target.value)} placeholder="Describe item" className="h-10 text-sm px-2" />
                               </TableCell>
                               <TableCell className="py-2">
-                                <Input type="number" min={0} value={row.quantity} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', Number(e.target.value))} className="h-12 text-sm text-center px-3" />
+                                <Input type="number" min={0} value={row.quantity} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', Number(e.target.value))} className="h-10 text-sm text-center px-2" />
                               </TableCell>
                               <TableCell className="py-2">
                                 <Select value={row.unit} onValueChange={(val) => {
@@ -505,7 +505,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
                                     updateItem(section.id, subsection.id, row.id, 'unit', val);
                                   }
                                 }}>
-                                  <SelectTrigger className="h-12 text-sm">
+                                  <SelectTrigger className="h-10 text-sm">
                                     <SelectValue placeholder="Unit" />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -524,7 +524,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
                                 }} />
                               </TableCell>
                               <TableCell className="py-2">
-                                <Input type="number" min={0} value={row.rate} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', Number(e.target.value))} className="h-12 text-sm text-center px-3" />
+                                <Input type="number" min={0} value={row.rate} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', Number(e.target.value))} className="h-10 text-sm text-center px-2" />
                               </TableCell>
                               <TableCell className="text-right py-2">
                                 <div className="text-sm font-medium">
