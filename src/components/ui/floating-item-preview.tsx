@@ -7,6 +7,7 @@ interface FloatingItemPreviewProps {
   formatCurrency: (value: number) => string;
   showTax?: boolean;
   taxPercentage?: number;
+  description?: string;
 }
 
 export function FloatingItemPreview({
