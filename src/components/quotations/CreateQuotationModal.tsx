@@ -79,6 +79,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
   const [searchProduct, setSearchProduct] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newSectionName, setNewSectionName] = useState('');
+  const [previewItem, setPreviewItem] = useState<{ sectionId: string; itemId: string } | null>(null);
 
   // Get current user and company from context
   const { profile, loading: authLoading } = useAuth();
