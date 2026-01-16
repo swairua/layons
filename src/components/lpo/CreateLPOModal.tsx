@@ -402,7 +402,7 @@ export const CreateLPOModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-7xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
@@ -841,11 +841,11 @@ export const CreateLPOModal = ({
                       <TableRow>
                         <TableHead>Product</TableHead>
                         <TableHead>Description</TableHead>
-                        <TableHead>Qty</TableHead>
-                        <TableHead>Unit Price</TableHead>
-                        <TableHead>Tax %</TableHead>
-                        <TableHead>Total</TableHead>
-                        <TableHead></TableHead>
+                        <TableHead className="w-40">Qty</TableHead>
+                        <TableHead className="w-48">Unit Price</TableHead>
+                        <TableHead className="w-32">Tax %</TableHead>
+                        <TableHead className="w-40">Total</TableHead>
+                        <TableHead className="w-12"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -870,7 +870,7 @@ export const CreateLPOModal = ({
                               onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
                               min="0"
                               step="0.01"
-                              className="w-20"
+                              className="w-36 h-12 text-base"
                               placeholder="1"
                             />
                           </TableCell>
@@ -881,7 +881,7 @@ export const CreateLPOModal = ({
                               onChange={(e) => updateItem(item.id, 'unit_price', parseFloat(e.target.value) || 0)}
                               min="0"
                               step="0.01"
-                              className="w-24"
+                              className="w-44 h-12 text-base"
                               placeholder="0.00"
                             />
                           </TableCell>
@@ -893,7 +893,7 @@ export const CreateLPOModal = ({
                               min="0"
                               max="100"
                               step="0.01"
-                              className="w-16"
+                              className="w-28 h-12 text-base"
                               placeholder="0"
                             />
                           </TableCell>

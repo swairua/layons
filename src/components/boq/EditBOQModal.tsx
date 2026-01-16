@@ -366,7 +366,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-7xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Layers className="h-5 w-5 text-primary" />
@@ -479,24 +479,24 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="w-1/2">Item Description</TableHead>
-                            <TableHead className="w-24">Qty</TableHead>
-                            <TableHead className="w-28">Unit</TableHead>
-                            <TableHead className="w-32">Rate</TableHead>
-                            <TableHead className="w-32 text-right">Amount</TableHead>
-                            <TableHead className="w-12"></TableHead>
+                            <TableHead className="w-1/3">Item Description</TableHead>
+                            <TableHead className="w-40">Qty</TableHead>
+                            <TableHead className="w-40">Unit</TableHead>
+                            <TableHead className="w-48">Rate</TableHead>
+                            <TableHead className="w-40 text-right">Amount</TableHead>
+                            <TableHead className="w-14"></TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {subsection.items.map(row => (
-                            <TableRow key={row.id}>
-                              <TableCell>
-                                <Input value={row.description} onChange={e => updateItem(section.id, subsection.id, row.id, 'description', e.target.value)} placeholder="Describe item" />
+                            <TableRow key={row.id} className="h-20">
+                              <TableCell className="py-2">
+                                <Input value={row.description} onChange={e => updateItem(section.id, subsection.id, row.id, 'description', e.target.value)} placeholder="Describe item" className="h-14 text-lg px-4" />
                               </TableCell>
-                              <TableCell>
-                                <Input type="number" min={0} value={row.quantity} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', Number(e.target.value))} />
+                              <TableCell className="py-2">
+                                <Input type="number" min={0} value={row.quantity} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', Number(e.target.value))} className="h-14 text-lg text-center px-4" />
                               </TableCell>
-                              <TableCell>
+                              <TableCell className="py-2">
                                 <Select value={row.unit} onValueChange={(val) => {
                                   if (val === '__add_unit') {
                                     setPendingUnitTarget({ sectionId: section.id, itemId: row.id });
@@ -505,7 +505,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
                                     updateItem(section.id, subsection.id, row.id, 'unit', val);
                                   }
                                 }}>
-                                  <SelectTrigger>
+                                  <SelectTrigger className="h-14 text-lg">
                                     <SelectValue placeholder="Unit" />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -523,15 +523,17 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
                                   }
                                 }} />
                               </TableCell>
-                              <TableCell>
-                                <Input type="number" min={0} value={row.rate} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', Number(e.target.value))} />
+                              <TableCell className="py-2">
+                                <Input type="number" min={0} value={row.rate} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', Number(e.target.value))} className="h-14 text-lg text-center px-4" />
                               </TableCell>
-                              <TableCell className="text-right">
-                                {formatCurrency((row.quantity || 0) * (row.rate || 0))}
+                              <TableCell className="text-right py-2">
+                                <div className="text-lg font-medium">
+                                  {formatCurrency((row.quantity || 0) * (row.rate || 0))}
+                                </div>
                               </TableCell>
-                              <TableCell className="text-right">
-                                <Button variant="ghost" size="icon" onClick={() => removeItem(section.id, subsection.id, row.id)}>
-                                  <Trash2 className="h-4 w-4" />
+                              <TableCell className="text-right py-2">
+                                <Button variant="ghost" size="lg" onClick={() => removeItem(section.id, subsection.id, row.id)}>
+                                  <Trash2 className="h-5 w-5" />
                                 </Button>
                               </TableCell>
                             </TableRow>
