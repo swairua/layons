@@ -479,12 +479,12 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="w-1/2">Item Description</TableHead>
-                            <TableHead className="w-24">Qty</TableHead>
-                            <TableHead className="w-28">Unit</TableHead>
-                            <TableHead className="w-32">Rate</TableHead>
-                            <TableHead className="w-32 text-right">Amount</TableHead>
-                            <TableHead className="w-12"></TableHead>
+                            <TableHead className="w-1/3">Item Description</TableHead>
+                            <TableHead className="w-40">Qty</TableHead>
+                            <TableHead className="w-40">Unit</TableHead>
+                            <TableHead className="w-48">Rate</TableHead>
+                            <TableHead className="w-40 text-right">Amount</TableHead>
+                            <TableHead className="w-14"></TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
