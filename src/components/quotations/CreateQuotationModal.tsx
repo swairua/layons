@@ -834,7 +834,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                           placeholder="1"
                                         />
                                         {previewItem?.itemId === item.id && (
-                                          <FloatingItemPreview quantity={item.quantity} rate={item.unit_price} formatCurrency={formatCurrency} showTax={true} taxPercentage={item.vat_percentage} />
+                                          <FloatingItemPreview quantity={item.quantity} rate={item.unit_price} formatCurrency={formatCurrency} showTax={true} taxPercentage={item.vat_percentage} description={item.product_name} />
                                         )}
                                       </div>
                                     </TableCell>
@@ -854,7 +854,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                           placeholder="0.00"
                                         />
                                         {previewItem?.itemId === item.id && (
-                                          <FloatingItemPreview quantity={item.quantity} rate={item.unit_price} formatCurrency={formatCurrency} showTax={true} taxPercentage={item.vat_percentage} />
+                                          <FloatingItemPreview quantity={item.quantity} rate={item.unit_price} formatCurrency={formatCurrency} showTax={true} taxPercentage={item.vat_percentage} description={item.product_name} />
                                         )}
                                       </div>
                                     </TableCell>
