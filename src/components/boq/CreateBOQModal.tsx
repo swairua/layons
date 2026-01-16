@@ -483,21 +483,21 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
                         <TableHeader>
                           <TableRow>
                             <TableHead className="w-1/3">Item Description</TableHead>
-                            <TableHead className="w-40">Qty</TableHead>
+                            <TableHead className="w-32">Qty</TableHead>
                             <TableHead className="w-40">Unit</TableHead>
-                            <TableHead className="w-48">Rate</TableHead>
+                            <TableHead className="w-40">Rate</TableHead>
                             <TableHead className="w-40 text-right">Amount</TableHead>
-                            <TableHead className="w-14"></TableHead>
+                            <TableHead className="w-12"></TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {subsection.items.map(row => (
-                            <TableRow key={row.id} className="h-20">
+                            <TableRow key={row.id} className="h-16">
                               <TableCell className="py-2">
-                                <Input value={row.description} onChange={e => updateItem(section.id, subsection.id, row.id, 'description', e.target.value)} placeholder="Describe item" className="h-14 text-lg px-4" />
+                                <Input value={row.description} onChange={e => updateItem(section.id, subsection.id, row.id, 'description', e.target.value)} placeholder="Describe item" className="h-12 text-sm px-3" />
                               </TableCell>
                               <TableCell className="py-2">
-                                <Input type="number" min={0} value={row.quantity ?? ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', e.target.value === '' ? '' : Number(e.target.value))} className="h-14 text-lg text-center px-4" />
+                                <Input type="number" min={0} value={row.quantity ?? ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', e.target.value === '' ? '' : Number(e.target.value))} className="h-12 text-sm text-center px-3" />
                               </TableCell>
                               <TableCell className="py-2">
                                 <Select value={row.unit} onValueChange={(val) => {
@@ -508,7 +508,7 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
                                     updateItem(section.id, subsection.id, row.id, 'unit', val);
                                   }
                                 }}>
-                                  <SelectTrigger className="h-14 text-lg">
+                                  <SelectTrigger className="h-12 text-sm">
                                     <SelectValue placeholder="Unit" />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -527,16 +527,16 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
                                 }} />
                               </TableCell>
                               <TableCell className="py-2">
-                                <Input type="number" min={0} value={row.rate ?? ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', e.target.value === '' ? '' : Number(e.target.value))} className="h-14 text-lg text-center px-4" />
+                                <Input type="number" min={0} value={row.rate ?? ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', e.target.value === '' ? '' : Number(e.target.value))} className="h-12 text-sm text-center px-3" />
                               </TableCell>
                               <TableCell className="text-right py-2">
-                                <div className="text-lg font-medium">
+                                <div className="text-sm font-medium">
                                   {formatCurrency((row.quantity === '' ? 0 : Number(row.quantity)) * (row.rate === '' ? 0 : Number(row.rate)))}
                                 </div>
                               </TableCell>
                               <TableCell className="text-right py-2">
-                                <Button variant="ghost" size="lg" onClick={() => removeItem(section.id, subsection.id, row.id)}>
-                                  <Trash2 className="h-5 w-5" />
+                                <Button variant="ghost" size="sm" onClick={() => removeItem(section.id, subsection.id, row.id)}>
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
                               </TableCell>
                             </TableRow>
