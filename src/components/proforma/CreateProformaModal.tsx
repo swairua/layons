@@ -72,6 +72,7 @@ export const CreateProformaModal = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [showProductSearch, setShowProductSearch] = useState(false);
   const [proformaNumber, setProformaNumber] = useState('');
+  const [previewItem, setPreviewItem] = useState<string | null>(null);
 
   const { data: customers } = useCustomers(companyId);
   const { data: products } = useProducts(companyId);
