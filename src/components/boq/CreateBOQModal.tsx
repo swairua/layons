@@ -484,37 +484,34 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="w-1/3">Item Description</TableHead>
-                            <TableHead className="w-32">Qty</TableHead>
-                            <TableHead className="w-40">Unit</TableHead>
-                            <TableHead className="w-40">Rate</TableHead>
-                            <TableHead className="w-40 text-right">Amount</TableHead>
+                            <TableHead className="w-2/5">Item Description</TableHead>
+                            <TableHead className="w-20">Qty</TableHead>
+                            <TableHead className="w-32">Unit</TableHead>
+                            <TableHead className="w-28">Rate</TableHead>
+                            <TableHead className="w-28 text-right">Amount</TableHead>
                             <TableHead className="w-12"></TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {subsection.items.map(row => (
-                            <TableRow key={row.id} className="h-16">
-                              <TableCell className="py-2">
+                            <TableRow key={row.id} className="h-auto">
+                              <TableCell className="py-3 pr-3">
                                 <div className="relative">
-                                  <Input value={row.description} onChange={e => updateItem(section.id, subsection.id, row.id, 'description', e.target.value)} onFocus={() => setPreviewItem({ sectionId: section.id, subsectionId: subsection.id, itemId: row.id })} onBlur={() => setPreviewItem(null)} placeholder="Describe item" className="h-10 text-sm px-2" />
+                                  <Textarea value={row.description} onChange={e => updateItem(section.id, subsection.id, row.id, 'description', e.target.value)} onFocus={() => setPreviewItem({ sectionId: section.id, subsectionId: subsection.id, itemId: row.id })} onBlur={() => setPreviewItem(null)} placeholder="Describe item in detail..." className="text-sm px-3 py-2 min-h-16 resize-none" />
                                   {previewItem?.itemId === row.id && row.description && (
-                                    <div className="fixed z-50 bg-slate-900 text-white px-3 py-2 rounded-md text-xs font-medium shadow-lg border border-slate-700 pointer-events-none" style={{ left: '10px', top: '-50px' }}>
-                                      <div className="font-semibold mb-1">Item Description</div>
-                                      <div className="text-slate-300 break-words max-w-xs">{row.description}</div>
+                                    <div className="fixed z-50 bg-gradient-to-b from-primary to-primary/90 text-primary-foreground px-4 py-3 rounded-lg text-sm font-medium shadow-xl border border-primary/30 pointer-events-none backdrop-blur-sm max-w-xs" style={{ left: '20px', top: '-120px' }}>
+                                      <div className="font-semibold mb-2 text-primary-foreground/90">Preview</div>
+                                      <div className="text-primary-foreground/95 break-words whitespace-pre-wrap">{row.description}</div>
                                     </div>
                                   )}
                                 </div>
                               </TableCell>
-                              <TableCell className="py-2">
+                              <TableCell className="py-3 px-1">
                                 <div className="relative">
-                                  <Input type="number" min={0} value={row.quantity ?? ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', e.target.value === '' ? '' : Number(e.target.value))} onFocus={() => setPreviewItem({ sectionId: section.id, subsectionId: subsection.id, itemId: row.id })} onBlur={() => setPreviewItem(null)} className="h-10 text-sm text-center px-2 w-32" />
-                                  {previewItem?.itemId === row.id && (
-                                    <FloatingItemPreview quantity={row.quantity} rate={row.rate} formatCurrency={formatCurrency} description={row.description} />
-                                  )}
+                                  <Input type="number" min={0} value={row.quantity ?? ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', e.target.value === '' ? '' : Number(e.target.value))} placeholder="0" className="h-10 text-sm text-center px-2 w-20" />
                                 </div>
                               </TableCell>
-                              <TableCell className="py-2">
+                              <TableCell className="py-3 px-2">
                                 <Select value={row.unit} onValueChange={(val) => {
                                   if (val === '__add_unit') {
                                     setPendingUnitTarget({ sectionId: section.id, itemId: row.id });
@@ -541,20 +538,17 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
                                   }
                                 }} />
                               </TableCell>
-                              <TableCell className="py-2">
+                              <TableCell className="py-3 px-1">
                                 <div className="relative">
-                                  <Input type="number" min={0} value={row.rate ?? ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', e.target.value === '' ? '' : Number(e.target.value))} onFocus={() => setPreviewItem({ sectionId: section.id, subsectionId: subsection.id, itemId: row.id })} onBlur={() => setPreviewItem(null)} className="h-10 text-sm text-center px-2 w-40" />
-                                  {previewItem?.itemId === row.id && (
-                                    <FloatingItemPreview quantity={row.quantity} rate={row.rate} formatCurrency={formatCurrency} description={row.description} />
-                                  )}
+                                  <Input type="number" min={0} value={row.rate ?? ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', e.target.value === '' ? '' : Number(e.target.value))} placeholder="0" className="h-10 text-sm text-center px-2 w-28" />
                                 </div>
                               </TableCell>
-                              <TableCell className="text-right py-2">
+                              <TableCell className="text-right py-3 px-2">
                                 <div className="text-sm font-medium">
                                   {formatCurrency((row.quantity === '' ? 0 : Number(row.quantity)) * (row.rate === '' ? 0 : Number(row.rate)))}
                                 </div>
                               </TableCell>
-                              <TableCell className="text-right py-2">
+                              <TableCell className="text-right py-3 px-1">
                                 <Button variant="ghost" size="sm" onClick={() => removeItem(section.id, subsection.id, row.id)}>
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
