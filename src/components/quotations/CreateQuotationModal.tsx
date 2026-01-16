@@ -819,17 +819,24 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                                       </div>
                                     </TableCell>
                                     <TableCell>
-                                      <Input
-                                        type="number"
-                                        value={item.quantity ?? ''}
-                                        onChange={(e) => {
-                                          const value = e.target.value;
-                                          updateItemQuantity(section.id, item.id, value === '' ? '' : parseInt(value) || 0);
-                                        }}
-                                        className="w-28 h-10 text-sm px-2"
-                                        min="1"
-                                        placeholder="1"
-                                      />
+                                      <div className="relative">
+                                        <Input
+                                          type="number"
+                                          value={item.quantity ?? ''}
+                                          onChange={(e) => {
+                                            const value = e.target.value;
+                                            updateItemQuantity(section.id, item.id, value === '' ? '' : parseInt(value) || 0);
+                                          }}
+                                          onFocus={() => setPreviewItem({ sectionId: section.id, itemId: item.id })}
+                                          onBlur={() => setPreviewItem(null)}
+                                          className="w-40 h-10 text-sm px-2"
+                                          min="1"
+                                          placeholder="1"
+                                        />
+                                        {previewItem?.itemId === item.id && (
+                                          <FloatingItemPreview quantity={item.quantity} rate={item.unit_price} formatCurrency={formatCurrency} showTax={true} taxPercentage={item.vat_percentage} />
+                                        )}
+                                      </div>
                                     </TableCell>
                                     <TableCell>
                                       <Input
