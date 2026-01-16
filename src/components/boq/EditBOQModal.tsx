@@ -366,7 +366,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-7xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Layers className="h-5 w-5 text-primary" />
