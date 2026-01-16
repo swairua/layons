@@ -493,7 +493,15 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
                           {subsection.items.map(row => (
                             <TableRow key={row.id} className="h-16">
                               <TableCell className="py-2">
-                                <Input value={row.description} onChange={e => updateItem(section.id, subsection.id, row.id, 'description', e.target.value)} placeholder="Describe item" className="h-10 text-sm px-2" />
+                                <div className="relative">
+                                  <Input value={row.description} onChange={e => updateItem(section.id, subsection.id, row.id, 'description', e.target.value)} onFocus={() => setPreviewItem({ sectionId: section.id, subsectionId: subsection.id, itemId: row.id })} onBlur={() => setPreviewItem(null)} placeholder="Describe item" className="h-10 text-sm px-2" />
+                                  {previewItem?.itemId === row.id && row.description && (
+                                    <div className="fixed z-50 bg-slate-900 text-white px-3 py-2 rounded-md text-xs font-medium shadow-lg border border-slate-700 pointer-events-none" style={{ left: '10px', top: '-50px' }}>
+                                      <div className="font-semibold mb-1">Item Description</div>
+                                      <div className="text-slate-300 break-words max-w-xs">{row.description}</div>
+                                    </div>
+                                  )}
+                                </div>
                               </TableCell>
                               <TableCell className="py-2">
                                 <div className="relative">
