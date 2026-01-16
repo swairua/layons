@@ -799,12 +799,12 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                               <TableHeader>
                                 <TableRow>
                                   <TableHead>Product</TableHead>
-                                  <TableHead className="w-20">Qty</TableHead>
-                                  <TableHead className="w-24">Unit Price</TableHead>
-                                  <TableHead className="w-16">Tax %</TableHead>
-                                  <TableHead className="w-16">Inc. Tax</TableHead>
-                                  <TableHead className="text-right">Total</TableHead>
-                                  <TableHead className="w-8"></TableHead>
+                                  <TableHead className="w-40">Qty</TableHead>
+                                  <TableHead className="w-48">Unit Price</TableHead>
+                                  <TableHead className="w-32">Tax %</TableHead>
+                                  <TableHead className="w-32">Inc. Tax</TableHead>
+                                  <TableHead className="w-40 text-right">Total</TableHead>
+                                  <TableHead className="w-12"></TableHead>
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
