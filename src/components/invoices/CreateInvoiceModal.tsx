@@ -847,7 +847,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                           const value = e.target.value;
                                           updateItemTax(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
-                                        className="w-14 h-8"
+                                        className="w-28 h-12 text-base"
                                         placeholder="0"
                                         min="0"
                                         max="100"
