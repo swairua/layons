@@ -545,7 +545,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
                                   {formatCurrency((row.quantity || 0) * (row.rate || 0))}
                                 </div>
                               </TableCell>
-                              <TableCell className="text-right py-2">
+                              <TableCell className="text-right py-3 px-1">
                                 <Button variant="ghost" size="sm" onClick={() => removeItem(section.id, subsection.id, row.id)}>
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
