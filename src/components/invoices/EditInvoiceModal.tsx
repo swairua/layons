@@ -81,6 +81,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
   const [searchProduct, setSearchProduct] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newSectionName, setNewSectionName] = useState('');
+  const [previewItem, setPreviewItem] = useState<{ sectionId: string; itemId: string } | null>(null);
 
   const { currentCompany } = useCurrentCompany();
   const { data: customers, isLoading: loadingCustomers } = useCustomers(currentCompany?.id);
