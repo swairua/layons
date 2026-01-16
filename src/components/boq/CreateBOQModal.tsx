@@ -529,12 +529,14 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
                               <TableCell className="py-2">
                                 <Input type="number" min={0} value={row.rate ?? ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', e.target.value === '' ? '' : Number(e.target.value))} className="h-14 text-lg text-center px-4" />
                               </TableCell>
-                              <TableCell className="text-right py-3">
-                                {formatCurrency((row.quantity === '' ? 0 : Number(row.quantity)) * (row.rate === '' ? 0 : Number(row.rate)))}
+                              <TableCell className="text-right py-2">
+                                <div className="text-lg font-medium">
+                                  {formatCurrency((row.quantity === '' ? 0 : Number(row.quantity)) * (row.rate === '' ? 0 : Number(row.rate)))}
+                                </div>
                               </TableCell>
-                              <TableCell className="text-right py-3">
-                                <Button variant="ghost" size="icon" onClick={() => removeItem(section.id, subsection.id, row.id)}>
-                                  <Trash2 className="h-4 w-4" />
+                              <TableCell className="text-right py-2">
+                                <Button variant="ghost" size="lg" onClick={() => removeItem(section.id, subsection.id, row.id)}>
+                                  <Trash2 className="h-5 w-5" />
                                 </Button>
                               </TableCell>
                             </TableRow>
