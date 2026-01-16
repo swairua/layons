@@ -765,7 +765,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                                           const value = e.target.value;
                                           updateItemQuantity(section.id, item.id, value === '' ? '' : parseInt(value) || 0);
                                         }}
-                                        className="w-28 h-10 text-sm"
+                                        className="w-28 h-10 text-sm px-2"
                                         min="1"
                                         placeholder="1"
                                       />
@@ -778,7 +778,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                                           const value = e.target.value;
                                           updateItemPrice(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
-                                        className="w-36 h-10 text-sm"
+                                        className="w-36 h-10 text-sm px-2"
                                         step="0.01"
                                         placeholder="0.00"
                                       />
@@ -791,7 +791,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                                           const value = e.target.value;
                                           updateItemTax(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
-                                        className="w-28 h-10 text-sm"
+                                        className="w-28 h-10 text-sm px-2"
                                         min="0"
                                         max="100"
                                         step="0.1"
