@@ -459,10 +459,10 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
                   <TableHeader>
                     <TableRow>
                       <TableHead>Item Description</TableHead>
-                      <TableHead className="w-24">Qty</TableHead>
-                      <TableHead className="w-28">Unit Price</TableHead>
-                      <TableHead className="w-20">Tax %</TableHead>
-                      <TableHead className="w-28">Total</TableHead>
+                      <TableHead className="w-32">Qty</TableHead>
+                      <TableHead className="w-40">Unit Price</TableHead>
+                      <TableHead className="w-32">Tax %</TableHead>
+                      <TableHead className="w-40">Total</TableHead>
                       <TableHead className="w-12"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -477,7 +477,7 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
                             onChange={(e) => updateItemQuantity(item.id, parseFloat(e.target.value) || 0)}
                             min="0.01"
                             step="0.01"
-                            className="w-20"
+                            className="w-28 h-10 text-sm"
                           />
                         </TableCell>
                         <TableCell>
@@ -487,7 +487,7 @@ export function CreateCashReceiptModal({ open, onOpenChange, onSuccess }: Create
                             onChange={(e) => updateItemPrice(item.id, parseFloat(e.target.value) || 0)}
                             min="0"
                             step="0.01"
-                            className="w-24"
+                            className="w-36 h-10 text-sm"
                           />
                         </TableCell>
                         <TableCell className="text-right">{item.tax_percentage.toFixed(1)}%</TableCell>
