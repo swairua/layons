@@ -870,7 +870,7 @@ export const CreateLPOModal = ({
                               onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
                               min="0"
                               step="0.01"
-                              className="w-36 h-12 text-base"
+                              className="w-28 h-10 text-sm px-2"
                               placeholder="1"
                             />
                           </TableCell>
@@ -881,7 +881,7 @@ export const CreateLPOModal = ({
                               onChange={(e) => updateItem(item.id, 'unit_price', parseFloat(e.target.value) || 0)}
                               min="0"
                               step="0.01"
-                              className="w-44 h-12 text-base"
+                              className="w-36 h-10 text-sm px-2"
                               placeholder="0.00"
                             />
                           </TableCell>
@@ -893,7 +893,7 @@ export const CreateLPOModal = ({
                               min="0"
                               max="100"
                               step="0.01"
-                              className="w-28 h-12 text-base"
+                              className="w-28 h-10 text-sm px-2"
                               placeholder="0"
                             />
                           </TableCell>

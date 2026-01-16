@@ -776,10 +776,10 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                               <TableHeader>
                                 <TableRow>
                                   <TableHead>Product</TableHead>
-                                  <TableHead className="w-40">Qty</TableHead>
-                                  <TableHead className="w-48">Unit Price</TableHead>
+                                  <TableHead className="w-32">Qty</TableHead>
+                                  <TableHead className="w-40">Unit Price</TableHead>
                                   <TableHead className="w-32">VAT %</TableHead>
-                                  <TableHead className="w-32">VAT Incl.</TableHead>
+                                  <TableHead className="w-24">VAT Incl.</TableHead>
                                   <TableHead className="w-40">Line Total</TableHead>
                                   <TableHead className="w-12"></TableHead>
                                 </TableRow>
@@ -804,7 +804,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                                           const value = e.target.value;
                                           updateItemQuantity(section.id, item.id, value === '' ? '' : parseInt(value) || 0);
                                         }}
-                                        className="w-36 h-12 text-base"
+                                        className="w-28 h-10 text-sm px-2"
                                         min="1"
                                         placeholder="1"
                                       />
@@ -817,7 +817,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                                           const value = e.target.value;
                                           updateItemPrice(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
-                                        className="w-44 h-12 text-base"
+                                        className="w-36 h-10 text-sm px-2"
                                         step="0.01"
                                         placeholder="0.00"
                                       />
@@ -830,7 +830,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                                           const value = e.target.value;
                                           updateItemVAT(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
-                                        className="w-28 h-12 text-base"
+                                        className="w-28 h-10 text-sm px-2"
                                         min="0"
                                         max="100"
                                         step="0.1"
@@ -844,17 +844,17 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                                         onCheckedChange={(checked) => updateItemVATInclusive(section.id, item.id, !!checked)}
                                       />
                                     </TableCell>
-                                    <TableCell className="font-semibold text-right">
+                                    <TableCell className="font-semibold text-right text-sm">
                                       {formatCurrency(item.line_total)}
                                     </TableCell>
                                     <TableCell>
                                       <Button
                                         variant="ghost"
-                                        size="icon"
+                                        size="sm"
                                         onClick={() => removeItem(section.id, item.id)}
-                                        className="h-6 w-6 text-destructive hover:text-destructive"
+                                        className="text-destructive hover:text-destructive"
                                       >
-                                        <Trash2 className="h-3 w-3" />
+                                        <Trash2 className="h-4 w-4" />
                                       </Button>
                                     </TableCell>
                                   </TableRow>

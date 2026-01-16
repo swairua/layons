@@ -799,10 +799,10 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                               <TableHeader>
                                 <TableRow>
                                   <TableHead>Product</TableHead>
-                                  <TableHead className="w-40">Qty</TableHead>
-                                  <TableHead className="w-48">Unit Price</TableHead>
+                                  <TableHead className="w-32">Qty</TableHead>
+                                  <TableHead className="w-40">Unit Price</TableHead>
                                   <TableHead className="w-32">Tax %</TableHead>
-                                  <TableHead className="w-32">Inc. Tax</TableHead>
+                                  <TableHead className="w-24">Inc. Tax</TableHead>
                                   <TableHead className="w-40 text-right">Total</TableHead>
                                   <TableHead className="w-12"></TableHead>
                                 </TableRow>
@@ -821,7 +821,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                           const value = e.target.value;
                                           updateItemQuantity(section.id, item.id, value === '' ? '' : parseInt(value) || 0);
                                         }}
-                                        className="w-36 h-12 text-base"
+                                        className="w-28 h-10 text-sm px-2"
                                         min="1"
                                         placeholder="1"
                                       />
@@ -834,7 +834,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                           const value = e.target.value;
                                           updateItemPrice(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
-                                        className="w-44 h-12 text-base"
+                                        className="w-36 h-10 text-sm px-2"
                                         step="0.01"
                                         placeholder="0.00"
                                       />
@@ -847,7 +847,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                           const value = e.target.value;
                                           updateItemTax(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
-                                        className="w-28 h-12 text-base"
+                                        className="w-28 h-10 text-sm px-2"
                                         placeholder="0"
                                         min="0"
                                         max="100"
@@ -867,11 +867,11 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                     <TableCell>
                                       <Button
                                         variant="ghost"
-                                        size="icon"
+                                        size="sm"
                                         onClick={() => removeItem(section.id, item.id)}
-                                        className="text-destructive hover:text-destructive h-8 w-8"
+                                        className="text-destructive hover:text-destructive"
                                       >
-                                        <Trash2 className="h-3 w-3" />
+                                        <Trash2 className="h-4 w-4" />
                                       </Button>
                                     </TableCell>
                                   </TableRow>
