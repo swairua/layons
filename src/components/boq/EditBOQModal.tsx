@@ -499,7 +499,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
                                 <div className="relative">
                                   <Input type="number" min={0} value={row.quantity} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', Number(e.target.value))} onFocus={() => setPreviewItem({ sectionId: section.id, subsectionId: subsection.id, itemId: row.id })} onBlur={() => setPreviewItem(null)} className="h-10 text-sm text-center px-2 w-32" />
                                   {previewItem?.itemId === row.id && (
-                                    <FloatingItemPreview quantity={row.quantity} rate={row.rate} formatCurrency={formatCurrency} />
+                                    <FloatingItemPreview quantity={row.quantity} rate={row.rate} formatCurrency={formatCurrency} description={row.description} />
                                   )}
                                 </div>
                               </TableCell>
@@ -534,7 +534,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
                                 <div className="relative">
                                   <Input type="number" min={0} value={row.rate} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', Number(e.target.value))} onFocus={() => setPreviewItem({ sectionId: section.id, subsectionId: subsection.id, itemId: row.id })} onBlur={() => setPreviewItem(null)} className="h-10 text-sm text-center px-2 w-40" />
                                   {previewItem?.itemId === row.id && (
-                                    <FloatingItemPreview quantity={row.quantity} rate={row.rate} formatCurrency={formatCurrency} />
+                                    <FloatingItemPreview quantity={row.quantity} rate={row.rate} formatCurrency={formatCurrency} description={row.description} />
                                   )}
                                 </div>
                               </TableCell>
