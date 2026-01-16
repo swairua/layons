@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { FloatingItemPreview } from '@/components/ui/floating-item-preview';
 import {
   Dialog,
   DialogContent,
@@ -92,6 +93,7 @@ export const EditProformaModal = ({
   const [items, setItems] = useState<ProformaItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showProductSearch, setShowProductSearch] = useState(false);
+  const [previewItem, setPreviewItem] = useState<string | null>(null);
 
   const { data: customers } = useCustomers(companyId);
   const { data: products } = useProducts(companyId);
@@ -441,26 +443,40 @@ export const EditProformaModal = ({
                           />
                         </TableCell>
                         <TableCell>
-                          <Input
-                            type="number"
-                            value={item.quantity ?? ''}
-                            onChange={(e) => updateItem(item.id, 'quantity', e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
-                            min="0"
-                            step="0.01"
-                            className="w-28 h-10 text-sm px-2"
-                            placeholder="1"
-                          />
+                          <div className="relative">
+                            <Input
+                              type="number"
+                              value={item.quantity ?? ''}
+                              onChange={(e) => updateItem(item.id, 'quantity', e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
+                              onFocus={() => setPreviewItem(item.id)}
+                              onBlur={() => setPreviewItem(null)}
+                              min="0"
+                              step="0.01"
+                              className="w-32 h-10 text-sm px-2"
+                              placeholder="1"
+                            />
+                            {previewItem === item.id && (
+                              <FloatingItemPreview quantity={item.quantity} rate={item.unit_price} formatCurrency={formatCurrency} showTax={true} taxPercentage={item.tax_percentage} description={item.product_name} />
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell>
-                          <Input
-                            type="number"
-                            value={item.unit_price ?? ''}
-                            onChange={(e) => updateItem(item.id, 'unit_price', e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
-                            min="0"
-                            step="0.01"
-                            className="w-36 h-10 text-sm px-2"
-                            placeholder="0.00"
-                          />
+                          <div className="relative">
+                            <Input
+                              type="number"
+                              value={item.unit_price ?? ''}
+                              onChange={(e) => updateItem(item.id, 'unit_price', e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
+                              onFocus={() => setPreviewItem(item.id)}
+                              onBlur={() => setPreviewItem(null)}
+                              min="0"
+                              step="0.01"
+                              className="w-48 h-10 text-sm px-2"
+                              placeholder="0.00"
+                            />
+                            {previewItem === item.id && (
+                              <FloatingItemPreview quantity={item.quantity} rate={item.unit_price} formatCurrency={formatCurrency} showTax={true} taxPercentage={item.tax_percentage} description={item.product_name} />
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell>
                           <Input

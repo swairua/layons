@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { FloatingItemPreview } from '@/components/ui/floating-item-preview';
 import {
   Dialog,
   DialogContent,
@@ -89,6 +90,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
 
   const [unitModalOpen, setUnitModalOpen] = useState(false);
   const [pendingUnitTarget, setPendingUnitTarget] = useState<{ sectionId: string; itemId: string } | null>(null);
+  const [previewItem, setPreviewItem] = useState<{ sectionId: string; subsectionId: string; itemId: string } | null>(null);
 
   const [boqNumber, setBoqNumber] = useState('');
   const [boqDate, setBoqDate] = useState('');
@@ -491,10 +493,23 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
                           {subsection.items.map(row => (
                             <TableRow key={row.id} className="h-16">
                               <TableCell className="py-2">
-                                <Input value={row.description} onChange={e => updateItem(section.id, subsection.id, row.id, 'description', e.target.value)} placeholder="Describe item" className="h-10 text-sm px-2" />
+                                <div className="relative">
+                                  <Input value={row.description} onChange={e => updateItem(section.id, subsection.id, row.id, 'description', e.target.value)} onFocus={() => setPreviewItem({ sectionId: section.id, subsectionId: subsection.id, itemId: row.id })} onBlur={() => setPreviewItem(null)} placeholder="Describe item" className="h-10 text-sm px-2" />
+                                  {previewItem?.itemId === row.id && row.description && (
+                                    <div className="fixed z-50 bg-slate-900 text-white px-3 py-2 rounded-md text-xs font-medium shadow-lg border border-slate-700 pointer-events-none" style={{ left: '10px', top: '-50px' }}>
+                                      <div className="font-semibold mb-1">Item Description</div>
+                                      <div className="text-slate-300 break-words max-w-xs">{row.description}</div>
+                                    </div>
+                                  )}
+                                </div>
                               </TableCell>
                               <TableCell className="py-2">
-                                <Input type="number" min={0} value={row.quantity} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', Number(e.target.value))} className="h-10 text-sm text-center px-2" />
+                                <div className="relative">
+                                  <Input type="number" min={0} value={row.quantity} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', Number(e.target.value))} onFocus={() => setPreviewItem({ sectionId: section.id, subsectionId: subsection.id, itemId: row.id })} onBlur={() => setPreviewItem(null)} className="h-10 text-sm text-center px-2 w-32" />
+                                  {previewItem?.itemId === row.id && (
+                                    <FloatingItemPreview quantity={row.quantity} rate={row.rate} formatCurrency={formatCurrency} description={row.description} />
+                                  )}
+                                </div>
                               </TableCell>
                               <TableCell className="py-2">
                                 <Select value={row.unit} onValueChange={(val) => {
@@ -524,7 +539,12 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
                                 }} />
                               </TableCell>
                               <TableCell className="py-2">
-                                <Input type="number" min={0} value={row.rate} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', Number(e.target.value))} className="h-10 text-sm text-center px-2" />
+                                <div className="relative">
+                                  <Input type="number" min={0} value={row.rate} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', Number(e.target.value))} onFocus={() => setPreviewItem({ sectionId: section.id, subsectionId: subsection.id, itemId: row.id })} onBlur={() => setPreviewItem(null)} className="h-10 text-sm text-center px-2 w-40" />
+                                  {previewItem?.itemId === row.id && (
+                                    <FloatingItemPreview quantity={row.quantity} rate={row.rate} formatCurrency={formatCurrency} description={row.description} />
+                                  )}
+                                </div>
                               </TableCell>
                               <TableCell className="text-right py-2">
                                 <div className="text-sm font-medium">
