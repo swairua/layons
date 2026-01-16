@@ -60,13 +60,19 @@ export function FloatingItemPreview({
   return (
     <div ref={containerRef} className="relative inline-block">
       <div
-        className="fixed z-50 bg-slate-900 text-white px-3 py-2 rounded-md text-xs font-medium shadow-lg whitespace-nowrap border border-slate-700 pointer-events-none"
+        className="fixed z-50 bg-slate-900 text-white px-3 py-2 rounded-md text-xs font-medium shadow-lg border border-slate-700 pointer-events-none"
         style={{
           left: `${position.x}px`,
           top: `${position.y}px`,
+          maxWidth: '300px',
         }}
       >
         <div className="font-semibold mb-1">{label}</div>
+        {description && (
+          <div className="mb-1 pb-1 border-b border-slate-600 text-slate-300 text-xs">
+            {description}
+          </div>
+        )}
         <div className="space-y-0.5">
           <div className="flex gap-2">
             <span className="text-slate-400">Qty:</span>
