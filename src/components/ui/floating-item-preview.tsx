@@ -17,6 +17,7 @@ export function FloatingItemPreview({
   formatCurrency,
   showTax = false,
   taxPercentage = 0,
+  description = '',
 }: FloatingItemPreviewProps) {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
