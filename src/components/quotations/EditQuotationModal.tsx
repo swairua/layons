@@ -538,7 +538,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-7xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <FileText className="h-5 w-5 text-primary" />
@@ -776,12 +776,12 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                               <TableHeader>
                                 <TableRow>
                                   <TableHead>Product</TableHead>
-                                  <TableHead className="w-16">Qty</TableHead>
-                                  <TableHead className="w-24">Unit Price</TableHead>
-                                  <TableHead className="w-20">VAT %</TableHead>
-                                  <TableHead className="w-20">VAT Incl.</TableHead>
-                                  <TableHead className="w-24">Line Total</TableHead>
-                                  <TableHead className="w-10"></TableHead>
+                                  <TableHead className="w-40">Qty</TableHead>
+                                  <TableHead className="w-48">Unit Price</TableHead>
+                                  <TableHead className="w-32">VAT %</TableHead>
+                                  <TableHead className="w-32">VAT Incl.</TableHead>
+                                  <TableHead className="w-40">Line Total</TableHead>
+                                  <TableHead className="w-12"></TableHead>
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
@@ -804,7 +804,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                                           const value = e.target.value;
                                           updateItemQuantity(section.id, item.id, value === '' ? '' : parseInt(value) || 0);
                                         }}
-                                        className="w-16 h-8"
+                                        className="w-36 h-12 text-base"
                                         min="1"
                                         placeholder="1"
                                       />
@@ -817,7 +817,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                                           const value = e.target.value;
                                           updateItemPrice(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
-                                        className="w-24 h-8"
+                                        className="w-44 h-12 text-base"
                                         step="0.01"
                                         placeholder="0.00"
                                       />
@@ -830,7 +830,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                                           const value = e.target.value;
                                           updateItemVAT(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
                                         }}
-                                        className="w-20 h-8"
+                                        className="w-28 h-12 text-base"
                                         min="0"
                                         max="100"
                                         step="0.1"
