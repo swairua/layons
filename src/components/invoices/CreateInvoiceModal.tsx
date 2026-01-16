@@ -836,17 +836,24 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
                                       </div>
                                     </TableCell>
                                     <TableCell>
-                                      <Input
-                                        type="number"
-                                        value={item.unit_price ?? ''}
-                                        onChange={(e) => {
-                                          const value = e.target.value;
-                                          updateItemPrice(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
-                                        }}
-                                        className="w-36 h-10 text-sm px-2"
-                                        step="0.01"
-                                        placeholder="0.00"
-                                      />
+                                      <div className="relative">
+                                        <Input
+                                          type="number"
+                                          value={item.unit_price ?? ''}
+                                          onChange={(e) => {
+                                            const value = e.target.value;
+                                            updateItemPrice(section.id, item.id, value === '' ? '' : parseFloat(value) || 0);
+                                          }}
+                                          onFocus={() => setPreviewItem({ sectionId: section.id, itemId: item.id })}
+                                          onBlur={() => setPreviewItem(null)}
+                                          className="w-48 h-10 text-sm px-2"
+                                          step="0.01"
+                                          placeholder="0.00"
+                                        />
+                                        {previewItem?.itemId === item.id && (
+                                          <FloatingItemPreview quantity={item.quantity} rate={item.unit_price} formatCurrency={formatCurrency} showTax={true} taxPercentage={item.tax_percentage} />
+                                        )}
+                                      </div>
                                     </TableCell>
                                     <TableCell>
                                       <Input
