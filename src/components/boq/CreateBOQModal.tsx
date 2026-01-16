@@ -492,14 +492,14 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
                         </TableHeader>
                         <TableBody>
                           {subsection.items.map(row => (
-                            <TableRow key={row.id}>
-                              <TableCell>
-                                <Input value={row.description} onChange={e => updateItem(section.id, subsection.id, row.id, 'description', e.target.value)} placeholder="Describe item" />
+                            <TableRow key={row.id} className="h-16">
+                              <TableCell className="py-3">
+                                <Input value={row.description} onChange={e => updateItem(section.id, subsection.id, row.id, 'description', e.target.value)} placeholder="Describe item" className="h-10 text-base" />
                               </TableCell>
-                              <TableCell>
-                                <Input type="number" min={0} value={row.quantity ?? ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', e.target.value === '' ? '' : Number(e.target.value))} />
+                              <TableCell className="py-3">
+                                <Input type="number" min={0} value={row.quantity ?? ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'quantity', e.target.value === '' ? '' : Number(e.target.value))} className="h-10 text-base text-center" />
                               </TableCell>
-                              <TableCell>
+                              <TableCell className="py-3">
                                 <Select value={row.unit} onValueChange={(val) => {
                                   if (val === '__add_unit') {
                                     setPendingUnitTarget({ sectionId: section.id, itemId: row.id });
@@ -508,7 +508,7 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
                                     updateItem(section.id, subsection.id, row.id, 'unit', val);
                                   }
                                 }}>
-                                  <SelectTrigger>
+                                  <SelectTrigger className="h-10 text-base">
                                     <SelectValue placeholder="Unit" />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -526,13 +526,13 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
                                   }
                                 }} />
                               </TableCell>
-                              <TableCell>
-                                <Input type="number" min={0} value={row.rate ?? ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', e.target.value === '' ? '' : Number(e.target.value))} />
+                              <TableCell className="py-3">
+                                <Input type="number" min={0} value={row.rate ?? ''} onChange={e => updateItem(section.id, subsection.id, row.id, 'rate', e.target.value === '' ? '' : Number(e.target.value))} className="h-10 text-base text-center" />
                               </TableCell>
-                              <TableCell className="text-right">
+                              <TableCell className="text-right py-3">
                                 {formatCurrency((row.quantity === '' ? 0 : Number(row.quantity)) * (row.rate === '' ? 0 : Number(row.rate)))}
                               </TableCell>
-                              <TableCell className="text-right">
+                              <TableCell className="text-right py-3">
                                 <Button variant="ghost" size="icon" onClick={() => removeItem(section.id, subsection.id, row.id)}>
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
