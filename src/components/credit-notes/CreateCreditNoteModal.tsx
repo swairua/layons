@@ -636,7 +636,7 @@ export function CreateCreditNoteModal({
                           type="number"
                           value={item.quantity ?? ''}
                           onChange={(e) => updateItemQuantity(item.id, e.target.value === '' ? '' : parseInt(e.target.value) || 0)}
-                          className="w-28 h-10 text-sm"
+                          className="w-28 h-10 text-sm px-2"
                           min="1"
                           placeholder="1"
                         />
@@ -646,7 +646,7 @@ export function CreateCreditNoteModal({
                           type="number"
                           value={item.unit_price ?? ''}
                           onChange={(e) => updateItemPrice(item.id, e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
-                          className="w-36 h-10 text-sm"
+                          className="w-36 h-10 text-sm px-2"
                           step="0.01"
                           placeholder="0.00"
                         />
@@ -656,7 +656,7 @@ export function CreateCreditNoteModal({
                           type="number"
                           value={item.tax_percentage ?? ''}
                           onChange={(e) => updateItemTax(item.id, e.target.value === '' ? '' : parseFloat(e.target.value) || 0)}
-                          className="w-28 h-10 text-sm"
+                          className="w-28 h-10 text-sm px-2"
                           min="0"
                           max="100"
                           step="0.1"
