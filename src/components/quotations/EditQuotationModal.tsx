@@ -814,7 +814,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                                           placeholder="1"
                                         />
                                         {previewItem?.itemId === item.id && (
-                                          <FloatingItemPreview quantity={item.quantity} rate={item.unit_price} formatCurrency={formatCurrency} showTax={true} taxPercentage={item.tax_percentage} />
+                                          <FloatingItemPreview quantity={item.quantity} rate={item.unit_price} formatCurrency={formatCurrency} showTax={true} taxPercentage={item.tax_percentage} description={item.product_name} />
                                         )}
                                       </div>
                                     </TableCell>
@@ -834,7 +834,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                                           placeholder="0.00"
                                         />
                                         {previewItem?.itemId === item.id && (
-                                          <FloatingItemPreview quantity={item.quantity} rate={item.unit_price} formatCurrency={formatCurrency} showTax={true} taxPercentage={item.tax_percentage} />
+                                          <FloatingItemPreview quantity={item.quantity} rate={item.unit_price} formatCurrency={formatCurrency} showTax={true} taxPercentage={item.tax_percentage} description={item.product_name} />
                                         )}
                                       </div>
                                     </TableCell>
