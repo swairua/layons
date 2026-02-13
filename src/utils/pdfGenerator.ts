@@ -1204,7 +1204,6 @@ export const generatePDF = async (data: DocumentData) => {
       </div>
 
       <!-- Page 2: Terms and Conditions -->
-      ${data.customTitle === 'INVOICE' ? '' : `
       <div class="terms-page">
         <!-- Terms Section -->
         <div style="margin-bottom: 15px; page-break-inside: avoid;">
@@ -1350,7 +1349,6 @@ export const generatePDF = async (data: DocumentData) => {
           </div>
         </div>
       </div>
-      `}
     </body>
     </html>
     `;
