@@ -1120,20 +1120,45 @@ export const generatePDF = async (data: DocumentData) => {
         <!-- Terms Section -->
         <div style="margin-bottom: 15px; page-break-inside: avoid;">
           <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
-          <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #000;">
-            <li style="margin-bottom: 6px; page-break-inside: avoid;">The Payment terms for each stage are as follows;
-              <ul style="display: block; width: 100%; clear: both; font-size: 11px; line-height: 1.6; margin: 12px 0 6px 0; padding-left: 40px; color: #000; list-style-type: lower-alpha;">
-                <li style="margin-bottom: 4px;">50% Upon Order (${formatCurrency(grandTotalForBOQ * 0.5)})</li>
-                <li style="margin-bottom: 4px;">40% As Progressive (${formatCurrency(grandTotalForBOQ * 0.4)})</li>
-                <li style="margin-bottom: 4px;">10% Upon Completion (${formatCurrency(grandTotalForBOQ * 0.1)})</li>
-              </ul>
-            </li>
-            <li style="margin-bottom: 6px; page-break-inside: avoid;">All work will be executed based on the drawings and samples approved by the client</li>
-            <li style="margin-bottom: 6px; page-break-inside: avoid;">Any Changes/alterations to the scope of work outlined will affect the final quantity will be measured, and charges will be applied on a pro-rata basis at the agreed rate</li>
-            <li style="margin-bottom: 6px; page-break-inside: avoid;">We are not responsible for any damages caused by negligence from other Sub Contractors Hired by the Client.</li>
-            <li style="margin-bottom: 6px; page-break-inside: avoid;">The quotation does not include statutory fees.</li>
-            <li style="margin-bottom: 6px; page-break-inside: avoid;">The work shall be completed within weeks from the day of Order.</li>
-          </ol>
+          ${data.terms_and_conditions ? `
+            <div style="font-size: 11px; line-height: 1.6; margin: 0; color: #000; white-space: pre-wrap;">
+              ${data.terms_and_conditions}
+            </div>
+          ` : `
+            <div style="font-size: 11px; line-height: 1.6; margin: 0; padding: 0; color: #000;">
+              <div style="display: flex; margin-bottom: 8px; align-items: flex-start;">
+                <span style="margin-right: 8px; flex-shrink: 0;">1.</span>
+                <div style="flex: 1;">
+                  <div style="margin-bottom: 4px;">Payment terms for each stage are as follows:</div>
+                  <div style="margin: 4px 0 4px 20px;">
+                    <div style="margin-bottom: 3px;">• 50% Upon Order (${formatCurrency(grandTotalForBOQ * 0.5)})</div>
+                    <div style="margin-bottom: 3px;">• 40% As Progressive (${formatCurrency(grandTotalForBOQ * 0.4)})</div>
+                    <div style="margin-bottom: 3px;">• 10% Upon Completion (${formatCurrency(grandTotalForBOQ * 0.1)})</div>
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; margin-bottom: 8px;">
+                <span style="margin-right: 8px; flex-shrink: 0;">2.</span>
+                <div style="flex: 1;">All work will be executed based on the drawings and samples approved by the client</div>
+              </div>
+              <div style="display: flex; margin-bottom: 8px;">
+                <span style="margin-right: 8px; flex-shrink: 0;">3.</span>
+                <div style="flex: 1;">Any Changes/alterations to the scope of work outlined will affect the final quantity will be measured, and charges will be applied on a pro-rata basis at the agreed rate</div>
+              </div>
+              <div style="display: flex; margin-bottom: 8px;">
+                <span style="margin-right: 8px; flex-shrink: 0;">4.</span>
+                <div style="flex: 1;">We are not responsible for any damages caused by negligence from other Sub Contractors Hired by the Client.</div>
+              </div>
+              <div style="display: flex; margin-bottom: 8px;">
+                <span style="margin-right: 8px; flex-shrink: 0;">5.</span>
+                <div style="flex: 1;">The quotation does not include statutory fees.</div>
+              </div>
+              <div style="display: flex;">
+                <span style="margin-right: 8px; flex-shrink: 0;">6.</span>
+                <div style="flex: 1;">The work shall be completed within weeks from the day of Order.</div>
+              </div>
+            </div>
+          `}
         </div>
 
         <!-- Acceptance of Quote Section -->
