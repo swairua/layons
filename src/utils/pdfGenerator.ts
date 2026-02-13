@@ -663,8 +663,9 @@ const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalcul
     // Detect if line is indented (starts with spaces)
     const isLineIndented = line.match(/^\s+/) !== null;
 
-    // Match lines that start with a number followed by a period and space
-    const match = trimmedLine.match(/^(\d+)\.\s+(.*)$/);
+    // Match lines that start with a number or letter followed by a period and space
+    // Supports: 1., 2., 3., a., b., c., A., B., C., etc.
+    const match = trimmedLine.match(/^([a-zA-Z\d]+)\.\s+(.*)$/);
 
     if (match && !isLineIndented) {
       // This is a new numbered item

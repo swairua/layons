@@ -283,6 +283,7 @@ export const useConvertBoqToInvoice = () => {
         currency: boq.currency || 'KES', // Preserve BOQ currency
         notes: boqData.notes ? `Converted from BOQ ${boq.number}\n\n${boqData.notes}` : `Converted from BOQ ${boq.number}`,
         terms_and_conditions: boq.terms_and_conditions || null,
+        showCalculatedValuesInTerms: boqData.showCalculatedValuesInTerms !== false, // Transfer from BOQ or default to true
         created_by: createdBy,
         balance_due: totalAmount,
         paid_amount: 0
