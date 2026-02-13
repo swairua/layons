@@ -36,6 +36,18 @@ interface EditBOQModalProps {
   onSuccess?: () => void;
 }
 
+const DEFAULT_TERMS_AND_CONDITIONS = `1. Payment terms - 50% Advance, 40% Upon commencement, 10% Upon completion
+
+2. Validity: This quotation is valid for 7 days from the date of issue
+
+3. Warranty: As per contract terms and conditions
+
+4. Scope of Work: As detailed in the specifications and drawings
+
+5. General: Excludes site supervision, public liability insurance, and other items not mentioned
+
+6. Acceptance of Quote: Acceptance is confirmed when the client signs both copies of this document and returns one copy to us`;
+
 interface BOQItemRow {
   id: string;
   description: string;
@@ -115,7 +127,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
       setProjectTitle(boqData.project_title || '');
       setContractor(boqData.contractor || '');
       setNotes(boqData.notes || '');
-      setTermsAndConditions(boq.terms_and_conditions || boqData.terms_and_conditions || '');
+      setTermsAndConditions(boq.terms_and_conditions || boqData.terms_and_conditions || DEFAULT_TERMS_AND_CONDITIONS);
       setCurrency(boqData.currency || 'KES');
 
       const clientIdFromBoq = customers.find(c => c.name === boq.client_name)?.id;
@@ -600,12 +612,6 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
               value={termsAndConditions}
               onChange={e => setTermsAndConditions(e.target.value)}
               rows={6}
-              placeholder={`1. Payment terms - 50% Advance, 40% Upon commencement, 10% Upon completion
-2. Validity: This quotation is valid for 7 days from the date of issue
-3. Warranty: As per contract terms and conditions
-4. Scope of Work: As detailed in the specifications and drawings
-5. General: Excludes site supervision, public liability insurance, and other items not mentioned
-6. Acceptance: Confirmed when client signs both copies and returns one copy`}
             />
           </div>
         </div>
