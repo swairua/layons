@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { FloatingItemPreview } from '@/components/ui/floating-item-preview';
 import {
   Dialog,
@@ -36,16 +37,14 @@ interface EditBOQModalProps {
   onSuccess?: () => void;
 }
 
-const DEFAULT_TERMS_AND_CONDITIONS = `1. Payment terms - 50% Advance, 40% Upon commencement, 10% Upon completion
-
+const DEFAULT_TERMS_AND_CONDITIONS = `1. Payment terms:
+   50% Advance,
+   40% Upon commencement,
+   10% Upon completion
 2. Validity: This quotation is valid for 7 days from the date of issue
-
 3. Warranty: As per contract terms and conditions
-
 4. Scope of Work: As detailed in the specifications and drawings
-
 5. General: Excludes site supervision, public liability insurance, and other items not mentioned
-
 6. Acceptance of Quote: Acceptance is confirmed when the client signs both copies of this document and returns one copy to us`;
 
 interface BOQItemRow {
@@ -112,6 +111,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
   const [contractor, setContractor] = useState('');
   const [notes, setNotes] = useState('');
   const [termsAndConditions, setTermsAndConditions] = useState('');
+  const [showCalculatedValuesInTerms, setShowCalculatedValuesInTerms] = useState(true);
   const [currency, setCurrency] = useState('KES');
   const [sections, setSections] = useState<BOQSectionRow[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -342,6 +342,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
         })),
         notes: notes || undefined,
         terms_and_conditions: termsAndConditions || undefined,
+        showCalculatedValuesInTerms: showCalculatedValuesInTerms,
       };
 
       const payload = {
@@ -613,6 +614,16 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
               onChange={e => setTermsAndConditions(e.target.value)}
               rows={6}
             />
+            <div className="flex items-center space-x-2 mt-3">
+              <Checkbox
+                id="showCalculatedValues"
+                checked={showCalculatedValuesInTerms}
+                onCheckedChange={(checked) => setShowCalculatedValuesInTerms(checked === true)}
+              />
+              <Label htmlFor="showCalculatedValues" className="font-normal cursor-pointer">
+                Show calculated values (e.g., 50% (KES 50,000))
+              </Label>
+            </div>
           </div>
         </div>
 

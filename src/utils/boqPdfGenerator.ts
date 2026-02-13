@@ -32,6 +32,7 @@ export interface BoqDocument {
   sections: BoqSection[];
   notes?: string;
   terms_and_conditions?: string;
+  showCalculatedValuesInTerms?: boolean; // Whether to show calculated values in terms (e.g., "50% (KES 50,000)")
   currency?: string; // Currency code: 'KES', 'USD', 'EUR'
 }
 
@@ -188,6 +189,7 @@ export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string;
     contractor: doc.contractor,
     notes: doc.notes || '',
     terms_and_conditions: doc.terms_and_conditions,
+    showCalculatedValuesInTerms: doc.showCalculatedValuesInTerms,
     currency: currency,
     customTitle: options?.customTitle,
     stampImageUrl: options?.stampImageUrl
