@@ -1128,7 +1128,14 @@ export const generatePDF = async (data: DocumentData) => {
             <div style="font-size: 11px; line-height: 1.6; margin: 0; padding: 0; color: #000;">
               <div style="display: flex; margin-bottom: 8px;">
                 <span style="margin-right: 8px; flex-shrink: 0;">1.</span>
-                <div style="flex: 1;">Payment terms - 50% Advance (${formatCurrency(grandTotalForBOQ * 0.5)}), 40% Upon commencement (${formatCurrency(grandTotalForBOQ * 0.4)}), 10% Upon completion (${formatCurrency(grandTotalForBOQ * 0.1)})</div>
+                <div style="flex: 1;">
+                  <div style="margin-bottom: 4px;">Payment terms for each stage are as follows:</div>
+                  <div style="margin: 4px 0 4px 20px;">
+                    <div style="margin-bottom: 3px;">• 50% Upon Order (${formatCurrency(grandTotalForBOQ * 0.5)})</div>
+                    <div style="margin-bottom: 3px;">• 40% As Progressive (${formatCurrency(grandTotalForBOQ * 0.4)})</div>
+                    <div style="margin-bottom: 3px;">• 10% Upon Completion (${formatCurrency(grandTotalForBOQ * 0.1)})</div>
+                  </div>
+                </div>
               </div>
               <div style="display: flex; margin-bottom: 8px;">
                 <span style="margin-right: 8px; flex-shrink: 0;">2.</span>
