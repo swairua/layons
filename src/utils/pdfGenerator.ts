@@ -672,7 +672,7 @@ const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalcul
   interface TermItem {
     number: string;
     text: string;
-    subItems: Array<{ letter: string; text: string }>;
+    subItems: string[];
   }
 
   const items: TermItem[] = [];
@@ -701,18 +701,18 @@ const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalcul
     // Try to match lettered sub-items (a., b., c., etc.)
     const subMatch = trimmedLine.match(/^([a-z])\.\s+(.+)$/i);
     if (subMatch && currentMainItem) {
-      currentMainItem.subItems.push({
-        letter: subMatch[1],
-        text: subMatch[2]
-      });
+      currentMainItem.subItems.push(subMatch[2]);
       continue;
     }
 
-    // If we have a current main item and this is additional text, append to it
-    if (currentMainItem && trimmedLine) {
-      currentMainItem.text += ' ' + trimmedLine;
+    // If we have a current main item and this is additional text (not starting with a number),
+    // treat it as a sub-item (for bullet formatting)
+    if (currentMainItem && trimmedLine && !trimmedLine.match(/^\d+\./)) {
+      // Remove trailing comma if present for cleaner display
+      const cleanedLine = trimmedLine.replace(/,\s*$/, '');
+      currentMainItem.subItems.push(cleanedLine);
     } else if (!currentMainItem && trimmedLine) {
-      // Standalone text (shouldn't happen with well-formed terms)
+      // Standalone text - treat as part of main text if no current item
       console.warn('Unparsed term line:', trimmedLine);
     }
   }
@@ -725,32 +725,32 @@ const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalcul
   // Render as HTML with proper numbered list and bullet points for sub-items
   let html = '<ol style="margin: 0; padding-left: 20px; font-size: 11px; line-height: 1.6;">';
 
-  items.forEach((item, index) => {
+  items.forEach((item) => {
     const mainText = calculateValue(escapeHtml(item.text));
     const itemNumber = parseInt(item.number, 10);
 
     if (item.subItems.length > 0 && itemNumber === 1) {
-      // Item 1 with sub-items: use bullet points instead of lettered list
+      // Item 1 with sub-items: use bullet points
       html += `<li style="margin-bottom: 8px;">
         <span>${mainText}</span>
         <div style="margin-left: 20px; margin-top: 6px;">`;
 
       item.subItems.forEach(subItem => {
-        const subText = calculateValue(escapeHtml(subItem.text));
+        const subText = calculateValue(escapeHtml(subItem));
         html += `<div style="margin-bottom: 4px;">• ${subText}</div>`;
       });
 
       html += `</div>
       </li>`;
     } else {
-      // Main item without sub-items (or sub-items for items other than 1)
+      // Main item without sub-items, or sub-items for items other than 1
       html += `<li style="margin-bottom: 8px;">${mainText}</li>`;
 
       // In case other items have sub-items, render them as bullets too
       if (item.subItems.length > 0) {
         html += `<div style="margin-left: 40px; margin-top: -4px; margin-bottom: 8px;">`;
         item.subItems.forEach(subItem => {
-          const subText = calculateValue(escapeHtml(subItem.text));
+          const subText = calculateValue(escapeHtml(subItem));
           html += `<div style="margin-bottom: 4px;">• ${subText}</div>`;
         });
         html += `</div>`;
