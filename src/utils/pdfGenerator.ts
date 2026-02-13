@@ -651,42 +651,6 @@ const escapeHtml = (text: string): string => {
 const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalculatedValues: boolean = true): string => {
   if (!termsText) return '';
 
-  // Split by lines but preserve original spacing for indentation detection
-  const allLines = termsText.split('\n');
-  const items: Array<{ number: string; content: Array<{ text: string; isIndented: boolean }> }> = [];
-  let currentItem: { number: string; content: Array<{ text: string; isIndented: boolean }> } | null = null;
-
-  for (const line of allLines) {
-    const trimmedLine = line.trim();
-    if (!trimmedLine) continue;
-
-    // Detect if line is indented (starts with spaces)
-    const isLineIndented = line.match(/^\s+/) !== null;
-
-    // Match lines that start with a number or letter followed by a period and space
-    // Supports: 1., 2., 3., a., b., c., A., B., C., etc.
-    const match = trimmedLine.match(/^([a-zA-Z\d]+)\.\s+(.*)$/);
-
-    if (match && !isLineIndented) {
-      // This is a new numbered item
-      if (currentItem) {
-        items.push(currentItem);
-      }
-      currentItem = {
-        number: match[1] + '.',
-        content: [{ text: match[2], isIndented: false }]
-      };
-    } else if (currentItem && trimmedLine) {
-      // This is a continuation of the previous item (could be indented)
-      currentItem.content.push({ text: trimmedLine, isIndented: isLineIndented });
-    }
-  }
-
-  // Don't forget the last item
-  if (currentItem) {
-    items.push(currentItem);
-  }
-
   // Helper function to calculate percentage values
   const calculateValue = (text: string): string => {
     if (!totalAmount || !showCalculatedValues) return text;
@@ -702,30 +666,88 @@ const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalcul
     return text;
   };
 
-  // Render items with flexbox for proper alignment
-  return items.map(item => {
-    const mainContent = item.content.filter(c => !c.isIndented);
-    const indentedContent = item.content.filter(c => c.isIndented);
+  // Split by lines
+  const allLines = termsText.split('\n');
 
-    let contentHtml = mainContent.map(c => {
-      const processedText = calculateValue(escapeHtml(c.text));
-      return processedText;
-    }).join('<br />');
+  // Parse structure into main items (numeric) and sub-items (lettered)
+  interface TermItem {
+    number: string;
+    text: string;
+    subItems: Array<{ letter: string; text: string }>;
+  }
 
-    // If there are indented items, wrap them in a div with left margin
-    if (indentedContent.length > 0) {
-      const indentedHtml = indentedContent.map(c => {
-        const processedText = calculateValue(escapeHtml(c.text));
-        return `<div style="margin-bottom: 3px;">• ${processedText}</div>`;
-      }).join('');
-      contentHtml += `<div style="margin: 4px 0 4px 20px;">${indentedHtml}</div>`;
+  const items: TermItem[] = [];
+  let currentMainItem: TermItem | null = null;
+
+  for (const line of allLines) {
+    const trimmedLine = line.trim();
+    if (!trimmedLine) continue;
+
+    // Try to match main numbered items (1., 2., 3., etc.)
+    const mainMatch = trimmedLine.match(/^(\d+)\.\s+(.*)$/);
+    if (mainMatch) {
+      // Save previous item if exists
+      if (currentMainItem) {
+        items.push(currentMainItem);
+      }
+      // Create new main item
+      currentMainItem = {
+        number: mainMatch[1],
+        text: mainMatch[2],
+        subItems: []
+      };
+      continue;
     }
 
-    return `<div style="display: flex; margin-bottom: 8px; align-items: flex-start;">
-      <span style="margin-right: 8px; flex-shrink: 0; min-width: 20px;">${escapeHtml(item.number)}</span>
-      <div style="flex: 1;">${contentHtml}</div>
-    </div>`;
-  }).join('');
+    // Try to match lettered sub-items (a., b., c., etc.)
+    const subMatch = trimmedLine.match(/^([a-z])\.\s+(.*)$/);
+    if (subMatch && currentMainItem) {
+      currentMainItem.subItems.push({
+        letter: subMatch[1],
+        text: subMatch[2]
+      });
+      continue;
+    }
+
+    // If neither main nor sub-match, treat as continuation of current main item
+    if (currentMainItem && trimmedLine) {
+      currentMainItem.text += ' ' + trimmedLine;
+    }
+  }
+
+  // Don't forget the last item
+  if (currentMainItem) {
+    items.push(currentMainItem);
+  }
+
+  // Render as HTML with proper nested lists
+  let html = '<ol style="margin: 0; padding-left: 20px; font-size: 11px; line-height: 1.6;">';
+
+  items.forEach(item => {
+    const mainText = calculateValue(escapeHtml(item.text));
+
+    if (item.subItems.length > 0) {
+      // Main item with sub-items
+      html += `<li style="margin-bottom: 8px;">
+        <span>${mainText}</span>
+        <ol style="margin: 6px 0 0 0; padding-left: 20px; list-style-type: lower-alpha;">`;
+
+      item.subItems.forEach(subItem => {
+        const subText = calculateValue(escapeHtml(subItem.text));
+        html += `<li style="margin-bottom: 4px;">${subText}</li>`;
+      });
+
+      html += `</ol>
+      </li>`;
+    } else {
+      // Main item without sub-items
+      html += `<li style="margin-bottom: 8px;">${mainText}</li>`;
+    }
+  });
+
+  html += '</ol>';
+
+  return html;
 };
 
 export const generatePDF = async (data: DocumentData) => {
