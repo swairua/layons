@@ -298,14 +298,25 @@ export default function Invoices() {
 
   const handleEditInvoice = async (invoice: Invoice) => {
     try {
-      console.log('🔍 handleEditInvoice called for:', invoice.invoice_number, 'ID:', invoice.id);
+      console.log('🔍 handleEditInvoice called for:', invoice.invoice_number);
+      console.log('📋 Invoice ID:', invoice.id, 'Type:', typeof invoice.id, 'Length:', invoice.id?.length);
       console.log('📋 Current invoice_items count:', invoice.invoice_items?.length || 0);
+
+      // Validate that invoice.id is a valid UUID (should be 36 characters with dashes)
+      const isValidUUID = invoice.id && typeof invoice.id === 'string' && invoice.id.length === 36 && invoice.id.includes('-');
+      console.log('✔️ Is valid UUID?', isValidUUID);
+
+      if (!isValidUUID) {
+        console.error('❌ Invalid invoice ID format:', invoice.id);
+        toast.error('Invalid invoice ID format. Cannot load items for editing.');
+        return;
+      }
 
       // Ensure invoice has items; if not, fetch them
       let enrichedInvoice: any = invoice;
 
       if (!invoice.invoice_items || invoice.invoice_items.length === 0) {
-        console.log('⚠️ No invoice items found, fetching from database...');
+        console.log('⚠️ No invoice items found, fetching from database for ID:', invoice.id);
         const { data: items, error } = await supabase
           .from('invoice_items')
           .select(`
@@ -336,7 +347,7 @@ export default function Invoices() {
           return;
         }
 
-        console.log('✅ Invoice items fetched from DB:', items?.length || 0, items);
+        console.log('✅ Invoice items fetched from DB:', items?.length || 0);
         enrichedInvoice = { ...invoice, invoice_items: items || [] };
       } else {
         console.log('✅ Invoice already has items:', invoice.invoice_items.length);
