@@ -97,9 +97,6 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
   // Load invoice data when modal opens
   useEffect(() => {
     if (invoice && open) {
-      console.log('Loading invoice for edit:', invoice.invoice_number);
-      console.log('Invoice items count:', invoice.invoice_items?.length || 0);
-
       setSelectedCustomerId(invoice.customer_id || '');
       setInvoiceDate(invoice.invoice_date || '');
       setDueDate(invoice.due_date || '');
@@ -143,8 +140,6 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
         };
       });
 
-      console.log('Loaded sections:', loadedSections.length);
-      console.log('Section details:', loadedSections.map(s => ({ name: s.name, items: s.items.length, expanded: s.expanded })));
       setSections(loadedSections);
     }
   }, [invoice, open]);

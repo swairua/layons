@@ -296,9 +296,53 @@ export default function Invoices() {
     setShowViewModal(true);
   };
 
-  const handleEditInvoice = (invoice: Invoice) => {
-    setSelectedInvoice(invoice);
-    setShowEditModal(true);
+  const handleEditInvoice = async (invoice: Invoice) => {
+    try {
+      // Ensure invoice has items; if not, fetch them
+      let enrichedInvoice: any = invoice;
+
+      if (!invoice.invoice_items || invoice.invoice_items.length === 0) {
+        console.log('⚠️ No invoice items found, fetching from database...');
+        const { data: items, error } = await supabase
+          .from('invoice_items')
+          .select(`
+            id,
+            invoice_id,
+            product_id,
+            description,
+            quantity,
+            unit_price,
+            discount_percentage,
+            discount_before_vat,
+            tax_percentage,
+            tax_amount,
+            tax_inclusive,
+            line_total,
+            sort_order,
+            unit_of_measure,
+            section_name,
+            section_labor_cost,
+            products(id, name, product_code, unit_of_measure)
+          `)
+          .eq('invoice_id', invoice.id)
+          .order('sort_order', { ascending: true });
+
+        if (error) {
+          console.error('❌ Failed to fetch invoice items:', error);
+          toast.error('Failed to load invoice items');
+          return;
+        }
+
+        console.log('✅ Invoice items fetched:', items?.length || 0);
+        enrichedInvoice = { ...invoice, invoice_items: items || [] };
+      }
+
+      setSelectedInvoice(enrichedInvoice);
+      setShowEditModal(true);
+    } catch (error) {
+      console.error('Error in handleEditInvoice:', error);
+      toast.error('Failed to load invoice for editing');
+    }
   };
 
   const handleDownloadInvoice = async (invoice: Invoice) => {
