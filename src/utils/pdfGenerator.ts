@@ -723,7 +723,7 @@ const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalcul
   }
 
   // Render as HTML with proper numbered list and bullet points for sub-items
-  let html = '<ol style="margin: 0; padding-left: 20px; font-size: 11px; line-height: 1.6;">';
+  let html = '<div style="margin: 0; padding-left: 0; font-size: 11px; line-height: 1.6;">';
 
   items.forEach((item) => {
     const mainText = calculateValue(escapeHtml(item.text));
@@ -731,8 +731,8 @@ const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalcul
 
     if (item.subItems.length > 0 && itemNumber === 1) {
       // Item 1 with sub-items: use bullet points
-      html += `<li style="margin-bottom: 8px;">
-        <span>${mainText}</span>
+      html += `<div style="margin-bottom: 8px;">
+        <span style="font-weight: normal;">${itemNumber}. ${mainText}</span>
         <div style="margin-left: 20px; margin-top: 6px;">`;
 
       item.subItems.forEach(subItem => {
@@ -741,14 +741,14 @@ const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalcul
       });
 
       html += `</div>
-      </li>`;
+      </div>`;
     } else {
       // Main item without sub-items, or sub-items for items other than 1
-      html += `<li style="margin-bottom: 8px;">${mainText}</li>`;
+      html += `<div style="margin-bottom: 8px;"><span>${itemNumber}. ${mainText}</span></div>`;
 
       // In case other items have sub-items, render them as bullets too
       if (item.subItems.length > 0) {
-        html += `<div style="margin-left: 40px; margin-top: -4px; margin-bottom: 8px;">`;
+        html += `<div style="margin-left: 20px; margin-top: -4px; margin-bottom: 8px;">`;
         item.subItems.forEach(subItem => {
           const subText = calculateValue(escapeHtml(subItem));
           html += `<div style="margin-bottom: 4px;">• ${subText}</div>`;
@@ -758,7 +758,7 @@ const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalcul
     }
   });
 
-  html += '</ol>';
+  html += '</div>';
 
   return html;
 };
