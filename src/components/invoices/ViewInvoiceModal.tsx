@@ -337,7 +337,7 @@ export function ViewInvoiceModal({
                                 <TableCell>
                                   <div>
                                     <div className="font-medium">
-                                      {item.products?.name || item.description || 'Unknown Product'}
+                                      {item.products?.name || item.product_name || item.description || 'Unknown Product'}
                                     </div>
                                     {item.description && item.description !== item.products?.name && (
                                       <div className="text-sm text-muted-foreground">{item.description}</div>
@@ -419,7 +419,7 @@ export function ViewInvoiceModal({
                       <TableCell>
                         <div>
                           <div className="font-medium">
-                            {item.products?.name || item.description || 'Unknown Product'}
+                            {item.products?.name || item.product_name || item.description || 'Unknown Product'}
                           </div>
                           {item.description && item.description !== item.products?.name && (
                             <div className="text-sm text-muted-foreground">{item.description}</div>

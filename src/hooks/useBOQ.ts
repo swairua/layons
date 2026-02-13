@@ -337,6 +337,7 @@ export const useConvertBoqToInvoice = () => {
             return {
               invoice_id: invoice.id,
               product_id: null, // BOQ items don't map to products
+              product_name: item.description, // Use description as product name for BOQ conversions
               description: item.description,
               quantity: item.quantity,
               unit_price: item.unit_price,

@@ -132,7 +132,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
           items: items.map((item: any, index: number) => ({
             id: item.id || `existing-${index}`,
             product_id: item.product_id || '',
-            product_name: item.products?.name || 'Unknown Product',
+            product_name: item.products?.name || item.product_name || 'Unknown Product',
             description: item.description || '',
             quantity: item.quantity || 0,
             unit_price: item.unit_price || 0,
