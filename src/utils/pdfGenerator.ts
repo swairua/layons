@@ -666,10 +666,9 @@ const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalcul
     return text;
   };
 
-  // Split by lines
-  const allLines = termsText.split('\n');
+  // Split by lines and clean up
+  const allLines = termsText.split('\n').filter(line => line.trim());
 
-  // Parse structure into main items (numeric) and sub-items (lettered)
   interface TermItem {
     number: string;
     text: string;
@@ -684,7 +683,7 @@ const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalcul
     if (!trimmedLine) continue;
 
     // Try to match main numbered items (1., 2., 3., etc.)
-    const mainMatch = trimmedLine.match(/^(\d+)\.\s+(.*)$/);
+    const mainMatch = trimmedLine.match(/^(\d+)\.\s+(.+)$/);
     if (mainMatch) {
       // Save previous item if exists
       if (currentMainItem) {
@@ -700,7 +699,7 @@ const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalcul
     }
 
     // Try to match lettered sub-items (a., b., c., etc.)
-    const subMatch = trimmedLine.match(/^([a-z])\.\s+(.*)$/);
+    const subMatch = trimmedLine.match(/^([a-z])\.\s+(.+)$/i);
     if (subMatch && currentMainItem) {
       currentMainItem.subItems.push({
         letter: subMatch[1],
@@ -709,9 +708,12 @@ const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalcul
       continue;
     }
 
-    // If neither main nor sub-match, treat as continuation of current main item
+    // If we have a current main item and this is additional text, append to it
     if (currentMainItem && trimmedLine) {
       currentMainItem.text += ' ' + trimmedLine;
+    } else if (!currentMainItem && trimmedLine) {
+      // Standalone text (shouldn't happen with well-formed terms)
+      console.warn('Unparsed term line:', trimmedLine);
     }
   }
 
@@ -3583,7 +3585,7 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
       balance_due: invoice.balance_due || (invoice.total_amount - (invoice.paid_amount || 0)),
       notes: invoice.notes,
       terms_and_conditions: invoice.terms_and_conditions,
-      showCalculatedValuesInTerms: invoice.showCalculatedValuesInTerms !== false,
+      showCalculatedValuesInTerms: false, // Never show calculated values in invoice terms
       customTitle: 'INVOICE',
     };
   } else {
@@ -3611,7 +3613,7 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
       balance_due: invoice.balance_due || (invoice.total_amount - (invoice.paid_amount || 0)),
       notes: invoice.notes,
       terms_and_conditions: invoice.terms_and_conditions,
-      showCalculatedValuesInTerms: invoice.showCalculatedValuesInTerms !== false,
+      showCalculatedValuesInTerms: false, // Never show calculated values in invoice terms
       customTitle: 'INVOICE',
     };
   }
