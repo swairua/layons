@@ -76,7 +76,8 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
   const [lpoNumber, setLpoNumber] = useState('');
   const [notes, setNotes] = useState('');
   const [termsAndConditions, setTermsAndConditions] = useState('');
-  
+  const [showCalculatedValuesInTerms, setShowCalculatedValuesInTerms] = useState(true);
+
   const [sections, setSections] = useState<InvoiceSection[]>([]);
   const [searchProduct, setSearchProduct] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -103,6 +104,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
       setLpoNumber(invoice.lpo_number || '');
       setNotes(invoice.notes || '');
       setTermsAndConditions(invoice.terms_and_conditions || '');
+      setShowCalculatedValuesInTerms(invoice.showCalculatedValuesInTerms !== false);
 
       // Group invoice items by section
       const sectionMap = new Map<string, any[]>();
@@ -429,6 +431,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
         balance_due: balanceDue,
         terms_and_conditions: termsAndConditions,
         notes: notes,
+        showCalculatedValuesInTerms: showCalculatedValuesInTerms,
       };
 
       const invoiceItems = sections.flatMap((section, sectionIndex) =>
@@ -572,6 +575,16 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                     onChange={(e) => setTermsAndConditions(e.target.value)}
                     rows={3}
                   />
+                  <div className="flex items-center space-x-2 mt-3">
+                    <Checkbox
+                      id="showCalculatedValues"
+                      checked={showCalculatedValuesInTerms}
+                      onCheckedChange={(checked) => setShowCalculatedValuesInTerms(checked === true)}
+                    />
+                    <Label htmlFor="showCalculatedValues" className="font-normal cursor-pointer">
+                      Show calculated values (e.g., 50% (KES 50,000))
+                    </Label>
+                  </div>
                 </div>
               </CardContent>
             </Card>

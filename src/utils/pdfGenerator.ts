@@ -1219,9 +1219,9 @@ export const generatePDF = async (data: DocumentData) => {
                 <div style="flex: 1;">
                   <div style="margin-bottom: 4px;">Payment terms for each stage are as follows:</div>
                   <div style="margin: 4px 0 4px 20px;">
-                    <div style="margin-bottom: 3px;">• 50% Upon Order (${formatCurrency(grandTotalForBOQ * 0.5)})</div>
-                    <div style="margin-bottom: 3px;">• 40% As Progressive (${formatCurrency(grandTotalForBOQ * 0.4)})</div>
-                    <div style="margin-bottom: 3px;">• 10% Upon Completion (${formatCurrency(grandTotalForBOQ * 0.1)})</div>
+                    <div style="margin-bottom: 3px;">i. 50% Upon Order${data.showCalculatedValuesInTerms !== false ? ` (${formatCurrency(grandTotalForBOQ * 0.5)})` : ''}</div>
+                    <div style="margin-bottom: 3px;">ii. 40% As Progressive${data.showCalculatedValuesInTerms !== false ? ` (${formatCurrency(grandTotalForBOQ * 0.4)})` : ''}</div>
+                    <div style="margin-bottom: 3px;">iii. 10% Upon Completion${data.showCalculatedValuesInTerms !== false ? ` (${formatCurrency(grandTotalForBOQ * 0.1)})` : ''}</div>
                   </div>
                 </div>
               </div>
@@ -3560,6 +3560,8 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
       balance_due: invoice.balance_due || (invoice.total_amount - (invoice.paid_amount || 0)),
       notes: invoice.notes,
       terms_and_conditions: invoice.terms_and_conditions,
+      showCalculatedValuesInTerms: invoice.showCalculatedValuesInTerms !== false,
+      customTitle: 'INVOICE',
     };
   } else {
     documentData = {
@@ -3586,6 +3588,8 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
       balance_due: invoice.balance_due || (invoice.total_amount - (invoice.paid_amount || 0)),
       notes: invoice.notes,
       terms_and_conditions: invoice.terms_and_conditions,
+      showCalculatedValuesInTerms: invoice.showCalculatedValuesInTerms !== false,
+      customTitle: 'INVOICE',
     };
   }
 
