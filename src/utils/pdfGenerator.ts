@@ -459,6 +459,7 @@ export interface DocumentData {
   balance_due?: number;
   notes?: string;
   terms_and_conditions?: string;
+  showCalculatedValuesInTerms?: boolean; // Whether to show calculated values (e.g., "50% (KES 50,000)") in terms
   valid_until?: string; // For proforma invoices
   due_date?: string; // For invoices
   // Receipt specific fields
@@ -647,7 +648,7 @@ const escapeHtml = (text: string): string => {
 };
 
 // Helper function to parse custom terms and render with flexbox alignment
-const parseAndRenderTerms = (termsText: string, totalAmount?: number): string => {
+const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalculatedValues: boolean = true): string => {
   if (!termsText) return '';
 
   // Split by lines but preserve original spacing for indentation detection
@@ -687,7 +688,7 @@ const parseAndRenderTerms = (termsText: string, totalAmount?: number): string =>
 
   // Helper function to calculate percentage values
   const calculateValue = (text: string): string => {
-    if (!totalAmount) return text;
+    if (!totalAmount || !showCalculatedValues) return text;
 
     // Match percentage patterns like "50%" or "40%"
     const percentMatch = text.match(/(\d+)%/);
@@ -1210,7 +1211,7 @@ export const generatePDF = async (data: DocumentData) => {
           <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
           ${data.terms_and_conditions ? `
             <div style="font-size: 11px; line-height: 1.6; margin: 0; padding: 0; color: #000;">
-              ${parseAndRenderTerms(data.terms_and_conditions, grandTotalForBOQ)}
+              ${parseAndRenderTerms(data.terms_and_conditions, grandTotalForBOQ, data.showCalculatedValuesInTerms !== false)}
             </div>
           ` : `
             <div style="font-size: 11px; line-height: 1.6; margin: 0; padding: 0; color: #000;">
