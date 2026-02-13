@@ -1120,20 +1120,26 @@ export const generatePDF = async (data: DocumentData) => {
         <!-- Terms Section -->
         <div style="margin-bottom: 15px; page-break-inside: avoid;">
           <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
-          <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #000;">
-            <li style="margin-bottom: 6px; page-break-inside: avoid;">The Payment terms for each stage are as follows;
-              <ul style="display: block; width: 100%; clear: both; font-size: 11px; line-height: 1.6; margin: 12px 0 6px 0; padding-left: 40px; color: #000; list-style-type: lower-alpha;">
-                <li style="margin-bottom: 4px;">50% Upon Order (${formatCurrency(grandTotalForBOQ * 0.5)})</li>
-                <li style="margin-bottom: 4px;">40% As Progressive (${formatCurrency(grandTotalForBOQ * 0.4)})</li>
-                <li style="margin-bottom: 4px;">10% Upon Completion (${formatCurrency(grandTotalForBOQ * 0.1)})</li>
-              </ul>
-            </li>
-            <li style="margin-bottom: 6px; page-break-inside: avoid;">All work will be executed based on the drawings and samples approved by the client</li>
-            <li style="margin-bottom: 6px; page-break-inside: avoid;">Any Changes/alterations to the scope of work outlined will affect the final quantity will be measured, and charges will be applied on a pro-rata basis at the agreed rate</li>
-            <li style="margin-bottom: 6px; page-break-inside: avoid;">We are not responsible for any damages caused by negligence from other Sub Contractors Hired by the Client.</li>
-            <li style="margin-bottom: 6px; page-break-inside: avoid;">The quotation does not include statutory fees.</li>
-            <li style="margin-bottom: 6px; page-break-inside: avoid;">The work shall be completed within weeks from the day of Order.</li>
-          </ol>
+          <div style="font-size: 11px; line-height: 1.6; margin: 0; color: #000; white-space: pre-wrap;">
+            ${data.terms_and_conditions ? `
+              ${data.terms_and_conditions}
+            ` : `
+            1. The Payment terms for each stage are as follows:
+               - 50% Upon Order (${formatCurrency(grandTotalForBOQ * 0.5)})
+               - 40% As Progressive (${formatCurrency(grandTotalForBOQ * 0.4)})
+               - 10% Upon Completion (${formatCurrency(grandTotalForBOQ * 0.1)})
+
+            2. All work will be executed based on the drawings and samples approved by the client
+
+            3. Any Changes/alterations to the scope of work outlined will affect the final quantity will be measured, and charges will be applied on a pro-rata basis at the agreed rate
+
+            4. We are not responsible for any damages caused by negligence from other Sub Contractors Hired by the Client.
+
+            5. The quotation does not include statutory fees.
+
+            6. The work shall be completed within weeks from the day of Order.
+            `}
+          </div>
         </div>
 
         <!-- Acceptance of Quote Section -->

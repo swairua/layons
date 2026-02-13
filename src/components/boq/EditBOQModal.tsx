@@ -99,6 +99,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
   const [projectTitle, setProjectTitle] = useState('');
   const [contractor, setContractor] = useState('');
   const [notes, setNotes] = useState('');
+  const [termsAndConditions, setTermsAndConditions] = useState('');
   const [currency, setCurrency] = useState('KES');
   const [sections, setSections] = useState<BOQSectionRow[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -114,6 +115,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
       setProjectTitle(boqData.project_title || '');
       setContractor(boqData.contractor || '');
       setNotes(boqData.notes || '');
+      setTermsAndConditions(boq.terms_and_conditions || boqData.terms_and_conditions || '');
       setCurrency(boqData.currency || 'KES');
 
       const clientIdFromBoq = customers.find(c => c.name === boq.client_name)?.id;
@@ -327,6 +329,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
           }))
         })),
         notes: notes || undefined,
+        terms_and_conditions: termsAndConditions || undefined,
       };
 
       const payload = {
@@ -346,6 +349,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
         tax_amount: 0,
         total_amount: filledSubtotal,
         data: doc,
+        terms_and_conditions: termsAndConditions || null,
       };
 
       const { error: updateError } = await supabase.from('boqs').update(payload).eq('id', boq.id);
@@ -588,6 +592,21 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
           <div>
             <Label>Notes</Label>
             <Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={4} placeholder="Any special notes or terms" />
+          </div>
+
+          <div>
+            <Label>Terms and Conditions</Label>
+            <Textarea
+              value={termsAndConditions}
+              onChange={e => setTermsAndConditions(e.target.value)}
+              rows={6}
+              placeholder={`1. Payment terms - 50% Advance, 40% Upon commencement, 10% Upon completion
+2. Validity: This quotation is valid for 7 days from the date of issue
+3. Warranty: As per contract terms and conditions
+4. Scope of Work: As detailed in the specifications and drawings
+5. General: Excludes site supervision, public liability insurance, and other items not mentioned
+6. Acceptance: Confirmed when client signs both copies and returns one copy`}
+            />
           </div>
         </div>
 
