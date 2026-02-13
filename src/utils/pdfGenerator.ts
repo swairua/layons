@@ -651,41 +651,6 @@ const escapeHtml = (text: string): string => {
 const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalculatedValues: boolean = true): string => {
   if (!termsText) return '';
 
-  // Split by lines but preserve original spacing for indentation detection
-  const allLines = termsText.split('\n');
-  const items: Array<{ number: string; content: Array<{ text: string; isIndented: boolean }> }> = [];
-  let currentItem: { number: string; content: Array<{ text: string; isIndented: boolean }> } | null = null;
-
-  for (const line of allLines) {
-    const trimmedLine = line.trim();
-    if (!trimmedLine) continue;
-
-    // Detect if line is indented (starts with spaces)
-    const isLineIndented = line.match(/^\s+/) !== null;
-
-    // Match lines that start with a number followed by a period and space
-    const match = trimmedLine.match(/^(\d+)\.\s+(.*)$/);
-
-    if (match && !isLineIndented) {
-      // This is a new numbered item
-      if (currentItem) {
-        items.push(currentItem);
-      }
-      currentItem = {
-        number: match[1] + '.',
-        content: [{ text: match[2], isIndented: false }]
-      };
-    } else if (currentItem && trimmedLine) {
-      // This is a continuation of the previous item (could be indented)
-      currentItem.content.push({ text: trimmedLine, isIndented: isLineIndented });
-    }
-  }
-
-  // Don't forget the last item
-  if (currentItem) {
-    items.push(currentItem);
-  }
-
   // Helper function to calculate percentage values
   const calculateValue = (text: string): string => {
     if (!totalAmount || !showCalculatedValues) return text;
@@ -701,30 +666,101 @@ const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalcul
     return text;
   };
 
-  // Render items with flexbox for proper alignment
-  return items.map(item => {
-    const mainContent = item.content.filter(c => !c.isIndented);
-    const indentedContent = item.content.filter(c => c.isIndented);
+  // Split by lines and clean up
+  const allLines = termsText.split('\n').filter(line => line.trim());
 
-    let contentHtml = mainContent.map(c => {
-      const processedText = calculateValue(escapeHtml(c.text));
-      return processedText;
-    }).join('<br />');
+  interface TermItem {
+    number: string;
+    text: string;
+    subItems: string[];
+  }
 
-    // If there are indented items, wrap them in a div with left margin
-    if (indentedContent.length > 0) {
-      const indentedHtml = indentedContent.map(c => {
-        const processedText = calculateValue(escapeHtml(c.text));
-        return `<div style="margin-bottom: 3px;">• ${processedText}</div>`;
-      }).join('');
-      contentHtml += `<div style="margin: 4px 0 4px 20px;">${indentedHtml}</div>`;
+  const items: TermItem[] = [];
+  let currentMainItem: TermItem | null = null;
+
+  for (const line of allLines) {
+    const trimmedLine = line.trim();
+    if (!trimmedLine) continue;
+
+    // Try to match main numbered items (1., 2., 3., etc.)
+    const mainMatch = trimmedLine.match(/^(\d+)\.\s+(.+)$/);
+    if (mainMatch) {
+      // Save previous item if exists
+      if (currentMainItem) {
+        items.push(currentMainItem);
+      }
+      // Create new main item
+      currentMainItem = {
+        number: mainMatch[1],
+        text: mainMatch[2],
+        subItems: []
+      };
+      continue;
     }
 
-    return `<div style="display: flex; margin-bottom: 8px; align-items: flex-start;">
-      <span style="margin-right: 8px; flex-shrink: 0; min-width: 20px;">${escapeHtml(item.number)}</span>
-      <div style="flex: 1;">${contentHtml}</div>
-    </div>`;
-  }).join('');
+    // Try to match lettered sub-items (a., b., c., etc.)
+    const subMatch = trimmedLine.match(/^([a-z])\.\s+(.+)$/i);
+    if (subMatch && currentMainItem) {
+      currentMainItem.subItems.push(subMatch[2]);
+      continue;
+    }
+
+    // If we have a current main item and this is additional text (not starting with a number),
+    // treat it as a sub-item (for bullet formatting)
+    if (currentMainItem && trimmedLine && !trimmedLine.match(/^\d+\./)) {
+      // Remove trailing comma if present for cleaner display
+      const cleanedLine = trimmedLine.replace(/,\s*$/, '');
+      currentMainItem.subItems.push(cleanedLine);
+    } else if (!currentMainItem && trimmedLine) {
+      // Standalone text - treat as part of main text if no current item
+      console.warn('Unparsed term line:', trimmedLine);
+    }
+  }
+
+  // Don't forget the last item
+  if (currentMainItem) {
+    items.push(currentMainItem);
+  }
+
+  // Render as HTML with proper numbered list and bullet points for sub-items
+  let html = '<div style="margin: 0; padding-left: 0; font-size: 11px; line-height: 1.6;">';
+
+  items.forEach((item) => {
+    const mainText = calculateValue(escapeHtml(item.text));
+    const itemNumber = parseInt(item.number, 10);
+
+    if (item.subItems.length > 0 && itemNumber === 1) {
+      // Item 1 with sub-items: use bullet points
+      html += `<div style="margin-bottom: 8px;">
+        <span style="font-weight: normal;">${itemNumber}. ${mainText}</span>
+        <div style="margin-left: 20px; margin-top: 6px;">`;
+
+      item.subItems.forEach(subItem => {
+        const subText = calculateValue(escapeHtml(subItem));
+        html += `<div style="margin-bottom: 4px;">• ${subText}</div>`;
+      });
+
+      html += `</div>
+      </div>`;
+    } else {
+      // Main item without sub-items, or sub-items for items other than 1
+      html += `<div style="margin-bottom: 8px;"><span>${itemNumber}. ${mainText}</span></div>`;
+
+      // In case other items have sub-items, render them as bullets too
+      if (item.subItems.length > 0) {
+        html += `<div style="margin-left: 20px; margin-top: -4px; margin-bottom: 8px;">`;
+        item.subItems.forEach(subItem => {
+          const subText = calculateValue(escapeHtml(subItem));
+          html += `<div style="margin-bottom: 4px;">• ${subText}</div>`;
+        });
+        html += `</div>`;
+      }
+    }
+  });
+
+  html += '</div>';
+
+  return html;
 };
 
 export const generatePDF = async (data: DocumentData) => {
@@ -1204,7 +1240,6 @@ export const generatePDF = async (data: DocumentData) => {
       </div>
 
       <!-- Page 2: Terms and Conditions -->
-      ${data.customTitle === 'INVOICE' ? '' : `
       <div class="terms-page">
         <!-- Terms Section -->
         <div style="margin-bottom: 15px; page-break-inside: avoid;">
@@ -1220,9 +1255,9 @@ export const generatePDF = async (data: DocumentData) => {
                 <div style="flex: 1;">
                   <div style="margin-bottom: 4px;">Payment terms for each stage are as follows:</div>
                   <div style="margin: 4px 0 4px 20px;">
-                    <div style="margin-bottom: 3px;">• 50% Upon Order (${formatCurrency(grandTotalForBOQ * 0.5)})</div>
-                    <div style="margin-bottom: 3px;">• 40% As Progressive (${formatCurrency(grandTotalForBOQ * 0.4)})</div>
-                    <div style="margin-bottom: 3px;">• 10% Upon Completion (${formatCurrency(grandTotalForBOQ * 0.1)})</div>
+                    <div style="margin-bottom: 3px;">i. 50% Upon Order${data.showCalculatedValuesInTerms !== false ? ` (${formatCurrency(grandTotalForBOQ * 0.5)})` : ''}</div>
+                    <div style="margin-bottom: 3px;">ii. 40% As Progressive${data.showCalculatedValuesInTerms !== false ? ` (${formatCurrency(grandTotalForBOQ * 0.4)})` : ''}</div>
+                    <div style="margin-bottom: 3px;">iii. 10% Upon Completion${data.showCalculatedValuesInTerms !== false ? ` (${formatCurrency(grandTotalForBOQ * 0.1)})` : ''}</div>
                   </div>
                 </div>
               </div>
@@ -1350,7 +1385,6 @@ export const generatePDF = async (data: DocumentData) => {
           </div>
         </div>
       </div>
-      `}
     </body>
     </html>
     `;
@@ -3562,6 +3596,8 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
       balance_due: invoice.balance_due || (invoice.total_amount - (invoice.paid_amount || 0)),
       notes: invoice.notes,
       terms_and_conditions: invoice.terms_and_conditions,
+      showCalculatedValuesInTerms: false, // Never show calculated values in invoice terms
+      customTitle: 'INVOICE',
     };
   } else {
     documentData = {
@@ -3588,6 +3624,8 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
       balance_due: invoice.balance_due || (invoice.total_amount - (invoice.paid_amount || 0)),
       notes: invoice.notes,
       terms_and_conditions: invoice.terms_and_conditions,
+      showCalculatedValuesInTerms: false, // Never show calculated values in invoice terms
+      customTitle: 'INVOICE',
     };
   }
 

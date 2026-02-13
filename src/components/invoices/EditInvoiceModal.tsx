@@ -76,7 +76,8 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
   const [lpoNumber, setLpoNumber] = useState('');
   const [notes, setNotes] = useState('');
   const [termsAndConditions, setTermsAndConditions] = useState('');
-  
+  const [showCalculatedValuesInTerms, setShowCalculatedValuesInTerms] = useState(true);
+
   const [sections, setSections] = useState<InvoiceSection[]>([]);
   const [searchProduct, setSearchProduct] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -96,6 +97,10 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
   // Load invoice data when modal opens
   useEffect(() => {
     if (invoice && open) {
+      console.log('📝 EditInvoiceModal opened for:', invoice.invoice_number);
+      console.log('📦 Received invoice_items:', invoice.invoice_items?.length || 0);
+      console.log('📊 Full invoice_items:', invoice.invoice_items);
+
       setSelectedCustomerId(invoice.customer_id || '');
       setInvoiceDate(invoice.invoice_date || '');
       setDueDate(invoice.due_date || '');
@@ -103,10 +108,12 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
       setLpoNumber(invoice.lpo_number || '');
       setNotes(invoice.notes || '');
       setTermsAndConditions(invoice.terms_and_conditions || '');
+      setShowCalculatedValuesInTerms(invoice.showCalculatedValuesInTerms !== false);
 
       // Group invoice items by section
       const sectionMap = new Map<string, any[]>();
       (invoice.invoice_items || []).forEach((item: any, index: number) => {
+        console.log('Processing item:', index, item.section_name);
         const sectionName = item.section_name || 'General Items';
         if (!sectionMap.has(sectionName)) {
           sectionMap.set(sectionName, []);
@@ -125,7 +132,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
           items: items.map((item: any, index: number) => ({
             id: item.id || `existing-${index}`,
             product_id: item.product_id || '',
-            product_name: item.products?.name || 'Unknown Product',
+            product_name: item.products?.name || item.product_name || 'Unknown Product',
             description: item.description || '',
             quantity: item.quantity || 0,
             unit_price: item.unit_price || 0,
@@ -138,6 +145,14 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
         };
       });
 
+      console.log('✅ Sections loaded:', loadedSections.length);
+      console.log('📂 Section details:', loadedSections.map(s => ({
+        id: s.id,
+        name: s.name,
+        itemCount: s.items.length,
+        expanded: s.expanded,
+        items: s.items.map(i => ({ id: i.id, description: i.description, quantity: i.quantity }))
+      })));
       setSections(loadedSections);
     }
   }, [invoice, open]);
@@ -433,7 +448,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
 
       const invoiceItems = sections.flatMap((section, sectionIndex) =>
         section.items.map(item => ({
-          product_id: item.product_id,
+          product_id: item.product_id || null,
           description: item.description,
           quantity: item.quantity,
           unit_price: item.unit_price,
@@ -459,7 +474,9 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
       onOpenChange(false);
     } catch (error) {
       console.error('Error updating invoice:', error);
-      toast.error('Failed to update invoice. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
+      console.error('Detailed error:', errorMessage);
+      toast.error(`Failed to update invoice: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -572,6 +589,16 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                     onChange={(e) => setTermsAndConditions(e.target.value)}
                     rows={3}
                   />
+                  <div className="flex items-center space-x-2 mt-3">
+                    <Checkbox
+                      id="showCalculatedValues"
+                      checked={showCalculatedValuesInTerms}
+                      onCheckedChange={(checked) => setShowCalculatedValuesInTerms(checked === true)}
+                    />
+                    <Label htmlFor="showCalculatedValues" className="font-normal cursor-pointer">
+                      Show calculated values (e.g., 50% (KES 50,000))
+                    </Label>
+                  </div>
                 </div>
               </CardContent>
             </Card>

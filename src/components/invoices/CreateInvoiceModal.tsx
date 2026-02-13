@@ -452,7 +452,7 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
           }
 
           return {
-            product_id: item.product_id,
+            product_id: item.product_id || null,
             description: item.description,
             quantity: item.quantity,
             unit_price: item.unit_price,
