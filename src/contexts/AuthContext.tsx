@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/utils/safeToast';
 import { initializeAuth, clearAuthTokens, safeAuthOperation } from '@/utils/authHelpers';
 import { logError, getUserFriendlyErrorMessage, isErrorType } from '@/utils/errorLogger';
+import { parseErrorMessage } from '@/utils/errorHelpers';
 
 // Type definitions for user roles and statuses
 export type UserRole = 'admin' | 'super_admin' | 'accountant' | 'stock_manager' | 'user';
@@ -631,32 +632,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (error) {
       setLoading(false);
       // Ensure error is a proper Error object with a message property
-      let formattedError: Error;
-      if (error instanceof Error) {
-        formattedError = error;
-      } else if (error && typeof error === 'object') {
-        const errObj = error as any;
-        const message = errObj.message || errObj.error_description || errObj.details || 'Authentication failed';
-        formattedError = new Error(typeof message === 'string' ? message : JSON.stringify(message));
-      } else {
-        formattedError = new Error(String(error) || 'Authentication failed');
-      }
+      const errorMessage = parseErrorMessage(error);
+      const formattedError = new Error(errorMessage || 'Authentication failed');
       return { error: formattedError as AuthError };
     }
 
     if (data?.error) {
       setLoading(false);
       // Ensure error is a proper Error object with a message property
-      let formattedError: Error;
-      if (data.error instanceof Error) {
-        formattedError = data.error;
-      } else if (data.error && typeof data.error === 'object') {
-        const errObj = data.error as any;
-        const message = errObj.message || errObj.error_description || errObj.details || 'Authentication failed';
-        formattedError = new Error(typeof message === 'string' ? message : JSON.stringify(message));
-      } else {
-        formattedError = new Error(String(data.error) || 'Authentication failed');
-      }
+      const errorMessage = parseErrorMessage(data.error);
+      const formattedError = new Error(errorMessage || 'Authentication failed');
       return { error: formattedError as AuthError };
     }
 
