@@ -184,7 +184,12 @@ export const useInvoicesFixed = (companyId?: string) => {
 
         console.log('✅ Invoices enriched successfully:', enrichedInvoices.length);
         enrichedInvoices.forEach(inv => {
-          console.log(`  📦 Invoice ${inv.invoice_number}: ${inv.invoice_items.length} items`);
+          console.log(`  📦 Invoice ${inv.invoice_number}:`, {
+            id: inv.id,
+            idType: typeof inv.id,
+            idLength: inv.id?.length,
+            items: inv.invoice_items.length
+          });
         });
         return enrichedInvoices;
 
