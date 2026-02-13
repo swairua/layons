@@ -431,7 +431,6 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
         balance_due: balanceDue,
         terms_and_conditions: termsAndConditions,
         notes: notes,
-        showCalculatedValuesInTerms: showCalculatedValuesInTerms,
       };
 
       const invoiceItems = sections.flatMap((section, sectionIndex) =>
@@ -462,7 +461,9 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
       onOpenChange(false);
     } catch (error) {
       console.error('Error updating invoice:', error);
-      toast.error('Failed to update invoice. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
+      console.error('Detailed error:', errorMessage);
+      toast.error(`Failed to update invoice: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
     }
