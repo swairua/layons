@@ -722,28 +722,39 @@ const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalcul
     items.push(currentMainItem);
   }
 
-  // Render as HTML with proper nested lists
+  // Render as HTML with proper numbered list and bullet points for sub-items
   let html = '<ol style="margin: 0; padding-left: 20px; font-size: 11px; line-height: 1.6;">';
 
-  items.forEach(item => {
+  items.forEach((item, index) => {
     const mainText = calculateValue(escapeHtml(item.text));
+    const itemNumber = parseInt(item.number, 10);
 
-    if (item.subItems.length > 0) {
-      // Main item with sub-items
+    if (item.subItems.length > 0 && itemNumber === 1) {
+      // Item 1 with sub-items: use bullet points instead of lettered list
       html += `<li style="margin-bottom: 8px;">
         <span>${mainText}</span>
-        <ol style="margin: 6px 0 0 0; padding-left: 20px; list-style-type: lower-alpha;">`;
+        <div style="margin-left: 20px; margin-top: 6px;">`;
 
       item.subItems.forEach(subItem => {
         const subText = calculateValue(escapeHtml(subItem.text));
-        html += `<li style="margin-bottom: 4px;">${subText}</li>`;
+        html += `<div style="margin-bottom: 4px;">• ${subText}</div>`;
       });
 
-      html += `</ol>
+      html += `</div>
       </li>`;
     } else {
-      // Main item without sub-items
+      // Main item without sub-items (or sub-items for items other than 1)
       html += `<li style="margin-bottom: 8px;">${mainText}</li>`;
+
+      // In case other items have sub-items, render them as bullets too
+      if (item.subItems.length > 0) {
+        html += `<div style="margin-left: 40px; margin-top: -4px; margin-bottom: 8px;">`;
+        item.subItems.forEach(subItem => {
+          const subText = calculateValue(escapeHtml(subItem.text));
+          html += `<div style="margin-bottom: 4px;">• ${subText}</div>`;
+        });
+        html += `</div>`;
+      }
     }
   });
 
