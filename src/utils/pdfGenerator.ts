@@ -1972,18 +1972,18 @@ export const generatePDF = async (data: DocumentData) => {
           <div style="margin-bottom: 15px;">
             <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
             <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #000;">
-              <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
-                <ul style="display: block; width: 100%; clear: both; font-size: 11px; line-height: 1.6; margin: 12px 0 6px 0; padding-left: 40px; color: #000; list-style-type: lower-alpha;">
-                  <li style="margin-bottom: 4px;">50% Upon Order (${formatCurrency(grandTotal * 0.5)})</li>
-                  <li style="margin-bottom: 4px;">40% As Progressive (${formatCurrency(grandTotal * 0.4)})</li>
-                  <li style="margin-bottom: 4px;">10% Upon Completion (${formatCurrency(grandTotal * 0.1)})</li>
+              <li style="margin-bottom: 6px;">Payment terms:
+                <ul style="display: block; width: 100%; clear: both; font-size: 11px; line-height: 1.6; margin: 12px 0 6px 0; padding-left: 40px; color: #000; list-style-type: none;">
+                  <li style="margin-bottom: 4px;">50% Advance,</li>
+                  <li style="margin-bottom: 4px;">40% Upon commencement,</li>
+                  <li style="margin-bottom: 4px;">10% Upon completion</li>
                 </ul>
               </li>
-              <li style="margin-bottom: 6px;">All work will be executed based on the drawings and samples approved by the client</li>
-              <li style="margin-bottom: 6px;">Any Changes/alterations to the scope of work outlined will affect the final quantity will be measured, and charges will be applied on a pro-rata basis at the agreed rate</li>
-              <li style="margin-bottom: 6px;">We are not responsible for any damages caused by negligence from other Sub Contractors Hired by the Client.</li>
-              <li style="margin-bottom: 6px;">The quotation does not include statutory fees.</li>
-              <li style="margin-bottom: 6px;">The work shall be completed within weeks from the day of Order.</li>
+              <li style="margin-bottom: 6px;">Validity: This quotation is valid for 7 days from the date of issue.</li>
+              <li style="margin-bottom: 6px;">Warranty: As per contract terms and conditions.</li>
+              <li style="margin-bottom: 6px;">Scope of Work: As detailed in the specifications and drawings.</li>
+              <li style="margin-bottom: 6px;">General: Excludes site supervision, public liability insurance, and other items not mentioned.</li>
+              <li style="margin-bottom: 6px;">Acceptance of Quote: Acceptance is confirmed when the client signs both copies of this document and returns one copy to us</li>
             </ol>
           </div>
 
@@ -3383,18 +3383,18 @@ export const generatePDF = async (data: DocumentData) => {
           <div style="margin-bottom: 15px;">
             <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
             <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #000;">
-              <li style="margin-bottom: 6px;">The Payment terms for each stage are as follows;
-                <ul style="display: block; width: 100%; clear: both; font-size: 11px; line-height: 1.6; margin: 12px 0 6px 0; padding-left: 40px; color: #000; list-style-type: lower-alpha;">
-                  <li style="margin-bottom: 4px;">50% Upon Order (${formatCurrency(data.total_amount * 0.5)})</li>
-                  <li style="margin-bottom: 4px;">40% As Progressive (${formatCurrency(data.total_amount * 0.4)})</li>
-                  <li style="margin-bottom: 4px;">10% Upon Completion (${formatCurrency(data.total_amount * 0.1)})</li>
+              <li style="margin-bottom: 6px;">Payment terms:
+                <ul style="display: block; width: 100%; clear: both; font-size: 11px; line-height: 1.6; margin: 12px 0 6px 0; padding-left: 40px; color: #000; list-style-type: none;">
+                  <li style="margin-bottom: 4px;">50% Advance,</li>
+                  <li style="margin-bottom: 4px;">40% Upon commencement,</li>
+                  <li style="margin-bottom: 4px;">10% Upon completion</li>
                 </ul>
               </li>
-              <li style="margin-bottom: 6px;">All work will be executed based on the drawings and samples approved by the client</li>
-              <li style="margin-bottom: 6px;">Any Changes/alterations to the scope of work outlined will affect the final quantity will be measured, and charges will be applied on a pro-rata basis at the agreed rate</li>
-              <li style="margin-bottom: 6px;">We are not responsible for any damages caused by negligence from other Sub Contractors Hired by the Client.</li>
-              <li style="margin-bottom: 6px;">The quotation does not include statutory fees.</li>
-              <li style="margin-bottom: 6px;">The work shall be completed within weeks from the day of Order.</li>
+              <li style="margin-bottom: 6px;">Validity: This quotation is valid for 7 days from the date of issue.</li>
+              <li style="margin-bottom: 6px;">Warranty: As per contract terms and conditions.</li>
+              <li style="margin-bottom: 6px;">Scope of Work: As detailed in the specifications and drawings.</li>
+              <li style="margin-bottom: 6px;">General: Excludes site supervision, public liability insurance, and other items not mentioned.</li>
+              <li style="margin-bottom: 6px;">Acceptance of Quote: Acceptance is confirmed when the client signs both copies of this document and returns one copy to us</li>
             </ol>
           </div>
 
