@@ -638,6 +638,56 @@ const generatePDFHeader = (
   `;
 };
 
+// Helper function to escape HTML special characters
+const escapeHtml = (text: string): string => {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+};
+
+// Helper function to parse custom terms and render with flexbox alignment
+const parseAndRenderTerms = (termsText: string): string => {
+  if (!termsText) return '';
+
+  // Split by numbered items (e.g., "1. ", "2. ", etc.)
+  const lines = termsText.split('\n').map(l => l.trim()).filter(l => l);
+  const items: Array<{ number: string; content: string[] }> = [];
+  let currentItem: { number: string; content: string[] } | null = null;
+
+  for (const line of lines) {
+    // Match lines that start with a number followed by a period and space
+    const match = line.match(/^(\d+)\.\s+(.*)$/);
+
+    if (match) {
+      // This is a new numbered item
+      if (currentItem) {
+        items.push(currentItem);
+      }
+      currentItem = {
+        number: match[1] + '.',
+        content: [match[2]]
+      };
+    } else if (currentItem && line) {
+      // This is a continuation of the previous item
+      currentItem.content.push(line);
+    }
+  }
+
+  // Don't forget the last item
+  if (currentItem) {
+    items.push(currentItem);
+  }
+
+  // Render items with flexbox for proper alignment
+  return items.map(item => {
+    const contentHtml = item.content.map(line => escapeHtml(line)).join('<br />');
+    return `<div style="display: flex; margin-bottom: 8px; align-items: flex-start;">
+      <span style="margin-right: 8px; flex-shrink: 0; min-width: 20px;">${escapeHtml(item.number)}</span>
+      <div style="flex: 1;">${contentHtml}</div>
+    </div>`;
+  }).join('');
+};
+
 export const generatePDF = async (data: DocumentData) => {
   console.log('🎨 generatePDF called');
   console.log('📄 Document type:', data.type);
@@ -1121,8 +1171,8 @@ export const generatePDF = async (data: DocumentData) => {
         <div style="margin-bottom: 15px; page-break-inside: avoid;">
           <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
           ${data.terms_and_conditions ? `
-            <div style="font-size: 11px; line-height: 1.6; margin: 0; color: #000; white-space: pre-wrap;">
-              ${data.terms_and_conditions}
+            <div style="font-size: 11px; line-height: 1.6; margin: 0; padding: 0; color: #000;">
+              ${parseAndRenderTerms(data.terms_and_conditions)}
             </div>
           ` : `
             <div style="font-size: 11px; line-height: 1.6; margin: 0; padding: 0; color: #000;">
