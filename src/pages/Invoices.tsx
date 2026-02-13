@@ -298,6 +298,9 @@ export default function Invoices() {
 
   const handleEditInvoice = async (invoice: Invoice) => {
     try {
+      console.log('🔍 handleEditInvoice called for:', invoice.invoice_number, 'ID:', invoice.id);
+      console.log('📋 Current invoice_items count:', invoice.invoice_items?.length || 0);
+
       // Ensure invoice has items; if not, fetch them
       let enrichedInvoice: any = invoice;
 
@@ -328,19 +331,22 @@ export default function Invoices() {
           .order('sort_order', { ascending: true });
 
         if (error) {
-          console.error('❌ Failed to fetch invoice items:', error);
-          toast.error('Failed to load invoice items');
+          console.error('❌ Failed to fetch invoice items - Error:', error);
+          toast.error(`Failed to load invoice items: ${error.message}`);
           return;
         }
 
-        console.log('✅ Invoice items fetched:', items?.length || 0);
+        console.log('✅ Invoice items fetched from DB:', items?.length || 0, items);
         enrichedInvoice = { ...invoice, invoice_items: items || [] };
+      } else {
+        console.log('✅ Invoice already has items:', invoice.invoice_items.length);
       }
 
+      console.log('🔐 Setting selected invoice with items:', enrichedInvoice.invoice_items?.length || 0);
       setSelectedInvoice(enrichedInvoice);
       setShowEditModal(true);
     } catch (error) {
-      console.error('Error in handleEditInvoice:', error);
+      console.error('❌ Error in handleEditInvoice:', error);
       toast.error('Failed to load invoice for editing');
     }
   };

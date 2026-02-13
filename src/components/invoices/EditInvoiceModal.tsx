@@ -97,6 +97,10 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
   // Load invoice data when modal opens
   useEffect(() => {
     if (invoice && open) {
+      console.log('📝 EditInvoiceModal opened for:', invoice.invoice_number);
+      console.log('📦 Received invoice_items:', invoice.invoice_items?.length || 0);
+      console.log('📊 Full invoice_items:', invoice.invoice_items);
+
       setSelectedCustomerId(invoice.customer_id || '');
       setInvoiceDate(invoice.invoice_date || '');
       setDueDate(invoice.due_date || '');
@@ -109,6 +113,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
       // Group invoice items by section
       const sectionMap = new Map<string, any[]>();
       (invoice.invoice_items || []).forEach((item: any, index: number) => {
+        console.log('Processing item:', index, item.section_name);
         const sectionName = item.section_name || 'General Items';
         if (!sectionMap.has(sectionName)) {
           sectionMap.set(sectionName, []);
@@ -140,6 +145,14 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
         };
       });
 
+      console.log('✅ Sections loaded:', loadedSections.length);
+      console.log('📂 Section details:', loadedSections.map(s => ({
+        id: s.id,
+        name: s.name,
+        itemCount: s.items.length,
+        expanded: s.expanded,
+        items: s.items.map(i => ({ id: i.id, description: i.description, quantity: i.quantity }))
+      })));
       setSections(loadedSections);
     }
   }, [invoice, open]);
