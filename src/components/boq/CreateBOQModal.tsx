@@ -37,7 +37,10 @@ interface CreateBOQModalProps {
   onSuccess?: () => void;
 }
 
-const DEFAULT_TERMS_AND_CONDITIONS = `1. Payment terms: 50% Advance, 40% Upon commencement, 10% Upon completion
+const DEFAULT_TERMS_AND_CONDITIONS = `1. Payment terms:
+   50% Advance,
+   40% Upon commencement,
+   10% Upon completion
 2. Validity: This quotation is valid for 7 days from the date of issue
 3. Warranty: As per contract terms and conditions
 4. Scope of Work: As detailed in the specifications and drawings

@@ -647,30 +647,36 @@ const escapeHtml = (text: string): string => {
 };
 
 // Helper function to parse custom terms and render with flexbox alignment
-const parseAndRenderTerms = (termsText: string): string => {
+const parseAndRenderTerms = (termsText: string, totalAmount?: number): string => {
   if (!termsText) return '';
 
-  // Split by numbered items (e.g., "1. ", "2. ", etc.)
-  const lines = termsText.split('\n').map(l => l.trim()).filter(l => l);
-  const items: Array<{ number: string; content: string[] }> = [];
-  let currentItem: { number: string; content: string[] } | null = null;
+  // Split by lines but preserve original spacing for indentation detection
+  const allLines = termsText.split('\n');
+  const items: Array<{ number: string; content: Array<{ text: string; isIndented: boolean }> }> = [];
+  let currentItem: { number: string; content: Array<{ text: string; isIndented: boolean }> } | null = null;
 
-  for (const line of lines) {
+  for (const line of allLines) {
+    const trimmedLine = line.trim();
+    if (!trimmedLine) continue;
+
+    // Detect if line is indented (starts with spaces)
+    const isLineIndented = line.match(/^\s+/) !== null;
+
     // Match lines that start with a number followed by a period and space
-    const match = line.match(/^(\d+)\.\s+(.*)$/);
+    const match = trimmedLine.match(/^(\d+)\.\s+(.*)$/);
 
-    if (match) {
+    if (match && !isLineIndented) {
       // This is a new numbered item
       if (currentItem) {
         items.push(currentItem);
       }
       currentItem = {
         number: match[1] + '.',
-        content: [match[2]]
+        content: [{ text: match[2], isIndented: false }]
       };
-    } else if (currentItem && line) {
-      // This is a continuation of the previous item
-      currentItem.content.push(line);
+    } else if (currentItem && trimmedLine) {
+      // This is a continuation of the previous item (could be indented)
+      currentItem.content.push({ text: trimmedLine, isIndented: isLineIndented });
     }
   }
 
@@ -679,9 +685,40 @@ const parseAndRenderTerms = (termsText: string): string => {
     items.push(currentItem);
   }
 
+  // Helper function to calculate percentage values
+  const calculateValue = (text: string): string => {
+    if (!totalAmount) return text;
+
+    // Match percentage patterns like "50%" or "40%"
+    const percentMatch = text.match(/(\d+)%/);
+    if (percentMatch) {
+      const percentage = parseInt(percentMatch[1], 10);
+      const value = totalAmount * (percentage / 100);
+      // Replace percentage with calculated value while preserving the text
+      return text.replace(/\d+%/, `${percentage}% (${formatCurrency(value)})`);
+    }
+    return text;
+  };
+
   // Render items with flexbox for proper alignment
   return items.map(item => {
-    const contentHtml = item.content.map(line => escapeHtml(line)).join('<br />');
+    const mainContent = item.content.filter(c => !c.isIndented);
+    const indentedContent = item.content.filter(c => c.isIndented);
+
+    let contentHtml = mainContent.map(c => {
+      const processedText = calculateValue(escapeHtml(c.text));
+      return processedText;
+    }).join('<br />');
+
+    // If there are indented items, wrap them in a div with left margin
+    if (indentedContent.length > 0) {
+      const indentedHtml = indentedContent.map(c => {
+        const processedText = calculateValue(escapeHtml(c.text));
+        return `<div style="margin-bottom: 3px;">• ${processedText}</div>`;
+      }).join('');
+      contentHtml += `<div style="margin: 4px 0 4px 20px;">${indentedHtml}</div>`;
+    }
+
     return `<div style="display: flex; margin-bottom: 8px; align-items: flex-start;">
       <span style="margin-right: 8px; flex-shrink: 0; min-width: 20px;">${escapeHtml(item.number)}</span>
       <div style="flex: 1;">${contentHtml}</div>
@@ -1173,7 +1210,7 @@ export const generatePDF = async (data: DocumentData) => {
           <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
           ${data.terms_and_conditions ? `
             <div style="font-size: 11px; line-height: 1.6; margin: 0; padding: 0; color: #000;">
-              ${parseAndRenderTerms(data.terms_and_conditions)}
+              ${parseAndRenderTerms(data.terms_and_conditions, grandTotalForBOQ)}
             </div>
           ` : `
             <div style="font-size: 11px; line-height: 1.6; margin: 0; padding: 0; color: #000;">
