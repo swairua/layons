@@ -1126,7 +1126,7 @@ export const generatePDF = async (data: DocumentData) => {
             </div>
           ` : `
             <div style="font-size: 11px; line-height: 1.6; margin: 0; padding: 0; color: #000;">
-              <div style="display: flex; margin-bottom: 8px;">
+              <div style="display: flex; margin-bottom: 8px; align-items: flex-start;">
                 <span style="margin-right: 8px; flex-shrink: 0;">1.</span>
                 <div style="flex: 1;">
                   <div style="margin-bottom: 4px;">Payment terms for each stage are as follows:</div>
