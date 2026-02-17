@@ -1324,6 +1324,10 @@ export const generatePDF = async (data: DocumentData) => {
               <td style="width: 70%; border: none;">${data.customer.phone}</td>
             </tr>
             ` : ''}
+            <tr style="border: none;">
+              <td style="width: 30%; border: none;"><strong>Customer signed;</strong></td>
+              <td style="width: 70%; border: none;">........................</td>
+            </tr>
           </table>
         </div>
 
@@ -2021,6 +2025,10 @@ export const generatePDF = async (data: DocumentData) => {
               <tr style="border: none;">
                 <td style="border: none;"><strong>Tel No;</strong></td>
                 <td style="border: none;">________________________</td>
+              </tr>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>Customer signed;</strong></td>
+                <td style="border: none;">........................</td>
               </tr>
             </table>
             <div style="text-align: center; flex-shrink: 0; width: 44mm;">
@@ -3438,6 +3446,10 @@ export const generatePDF = async (data: DocumentData) => {
               <tr style="border: none;">
                 <td style="border: none;"><strong>Tel No;</strong></td>
                 <td style="border: none;">________________________</td>
+              </tr>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>Customer signed;</strong></td>
+                <td style="border: none;">........................</td>
               </tr>
             </table>
             <div style="text-align: center; flex-shrink: 0; width: 44mm;">
