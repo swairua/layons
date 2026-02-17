@@ -2020,11 +2020,11 @@ export const generatePDF = async (data: DocumentData) => {
             <table style="font-size: 10px; flex: 1; line-height: 1.6; color: #000; border: none;">
               <tr style="border: none;">
                 <td style="width: 40%; border: none;"><strong>Client;</strong></td>
-                <td style="width: 60%; border: none;">________________________</td>
+                <td style="width: 60%; border: none;">${data.customer?.name || '________________________'}</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>Tel No;</strong></td>
-                <td style="border: none;">________________________</td>
+                <td style="border: none;">${data.customer?.phone || '________________________'}</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>Customer signed;</strong></td>
@@ -3441,11 +3441,11 @@ export const generatePDF = async (data: DocumentData) => {
             <table style="font-size: 10px; flex: 1; line-height: 1.6; color: #000; border: none;">
               <tr style="border: none;">
                 <td style="width: 40%; border: none;"><strong>Client;</strong></td>
-                <td style="width: 60%; border: none;">________________________</td>
+                <td style="width: 60%; border: none;">${data.customer?.name || '________________________'}</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>Tel No;</strong></td>
-                <td style="border: none;">________________________</td>
+                <td style="border: none;">${data.customer?.phone || '________________________'}</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>Customer signed;</strong></td>
