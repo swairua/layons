@@ -4,6 +4,7 @@ import { DashboardSummaryCards } from '@/components/dashboard/DashboardSummaryCa
 import { RecentActivity } from '@/components/dashboard/RecentActivity';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { useCompanies } from '@/hooks/useDatabase';
+import SEO from '@/components/SEO';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -34,6 +35,10 @@ const Index = () => {
 
   return (
     <div className="space-y-6">
+      <SEO
+        title="Dashboard"
+        description="View your business performance, recent activities, and manage your companies from one place."
+      />
       {/* Page Header */}
       <div>
         <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>

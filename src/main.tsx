@@ -5,6 +5,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { CompanyProvider } from '@/contexts/CompanyContext';
 import { AuthErrorBoundary } from '@/components/auth/AuthErrorBoundary';
 import { enableResizeObserverErrorSuppression } from '@/utils/resizeObserverErrorHandler';
+import { HelmetProvider } from 'react-helmet-async';
 import App from './App.tsx'
 import './index.css'
 
@@ -15,14 +16,16 @@ const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
-    <AuthErrorBoundary>
-      <AuthProvider>
-        <CompanyProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
-        </CompanyProvider>
-      </AuthProvider>
-    </AuthErrorBoundary>
+    <HelmetProvider>
+      <AuthErrorBoundary>
+        <AuthProvider>
+          <CompanyProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </CompanyProvider>
+        </AuthProvider>
+      </AuthErrorBoundary>
+    </HelmetProvider>
   </QueryClientProvider>
 );
