@@ -1683,7 +1683,7 @@ export const generatePDF = async (data: DocumentData) => {
       }
 
       // Download PDF
-      pdf.save(`BOQ-${data.number}.pdf`);
+      pdf.save(`${data.number}.pdf`);
       console.log('BOQ PDF generated successfully');
       return;
 
@@ -2541,9 +2541,7 @@ export const generatePDF = async (data: DocumentData) => {
       </html>
     `;
 
-    const filename = data.type === 'invoice' ? `Invoice-${data.number}.pdf` :
-                     data.type === 'proforma' ? `Proforma-${data.number}.pdf` :
-                     `Quotation-${data.number}.pdf`;
+    const filename = `${data.number}.pdf`;
     await convertHTMLToPDFAndDownload(htmlContentWithSections, filename);
   }
 
@@ -3511,7 +3509,7 @@ export const generatePDF = async (data: DocumentData) => {
     </html>
   `;
 
-  const fallbackFilename = `${documentTitle.replace(/\s+/g, '-')}-${data.number}.pdf`;
+  const fallbackFilename = `${data.number}.pdf`;
   await convertHTMLToPDFAndDownload(htmlContent, fallbackFilename);
 };
 
