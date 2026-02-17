@@ -560,14 +560,9 @@ const generatePDFHeader = (
   formatDateLong: (date: string) => string,
   documentType: string = 'Quotation'
 ): string => {
-  let documentNumber = 'Qtn No';
-  if (documentType === 'Bill of Quantities') {
-    documentNumber = 'BOQ No';
-  } else if (data.customTitle === 'INVOICE' || data.type === 'invoice') {
-    documentNumber = 'Invoice No';
-  } else if (data.type === 'proforma') {
-    documentNumber = 'Proforma No';
-  }
+  let documentNumber = 'Reference';
+  // Use common 'Reference' label for all document types
+  // Previously: 'Qtn No' for Quotation, 'BOQ No' for BOQ, 'Invoice No' for Invoice, 'Proforma No' for Proforma
 
   const displayNumber = data.customTitle === 'INVOICE'
     ? (data.number?.replace(/^BOQ-/, '') || '')
