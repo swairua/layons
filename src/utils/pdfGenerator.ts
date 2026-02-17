@@ -560,14 +560,9 @@ const generatePDFHeader = (
   formatDateLong: (date: string) => string,
   documentType: string = 'Quotation'
 ): string => {
-  let documentNumber = 'Qtn No';
-  if (documentType === 'Bill of Quantities') {
-    documentNumber = 'BOQ No';
-  } else if (data.customTitle === 'INVOICE' || data.type === 'invoice') {
-    documentNumber = 'Invoice No';
-  } else if (data.type === 'proforma') {
-    documentNumber = 'Proforma No';
-  }
+  let documentNumber = 'Reference';
+  // Use common 'Reference' label for all document types
+  // Previously: 'Qtn No' for Quotation, 'BOQ No' for BOQ, 'Invoice No' for Invoice, 'Proforma No' for Proforma
 
   const displayNumber = data.customTitle === 'INVOICE'
     ? (data.number?.replace(/^BOQ-/, '') || '')
@@ -1324,6 +1319,10 @@ export const generatePDF = async (data: DocumentData) => {
               <td style="width: 70%; border: none;">${data.customer.phone}</td>
             </tr>
             ` : ''}
+            <tr style="border: none;">
+              <td style="width: 30%; border: none;"><strong>Customer signed;</strong></td>
+              <td style="width: 70%; border: none;">........................</td>
+            </tr>
           </table>
         </div>
 
@@ -2016,11 +2015,15 @@ export const generatePDF = async (data: DocumentData) => {
             <table style="font-size: 10px; flex: 1; line-height: 1.6; color: #000; border: none;">
               <tr style="border: none;">
                 <td style="width: 40%; border: none;"><strong>Client;</strong></td>
-                <td style="width: 60%; border: none;">________________________</td>
+                <td style="width: 60%; border: none;">${data.customer?.name || '________________________'}</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>Tel No;</strong></td>
-                <td style="border: none;">________________________</td>
+                <td style="border: none;">${data.customer?.phone || '________________________'}</td>
+              </tr>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>Customer signed;</strong></td>
+                <td style="border: none;">........................</td>
               </tr>
             </table>
             <div style="text-align: center; flex-shrink: 0; width: 44mm;">
@@ -3433,11 +3436,15 @@ export const generatePDF = async (data: DocumentData) => {
             <table style="font-size: 10px; flex: 1; line-height: 1.6; color: #000; border: none;">
               <tr style="border: none;">
                 <td style="width: 40%; border: none;"><strong>Client;</strong></td>
-                <td style="width: 60%; border: none;">________________________</td>
+                <td style="width: 60%; border: none;">${data.customer?.name || '________________________'}</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>Tel No;</strong></td>
-                <td style="border: none;">________________________</td>
+                <td style="border: none;">${data.customer?.phone || '________________________'}</td>
+              </tr>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>Customer signed;</strong></td>
+                <td style="border: none;">........................</td>
               </tr>
             </table>
             <div style="text-align: center; flex-shrink: 0; width: 44mm;">
