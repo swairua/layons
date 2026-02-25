@@ -644,12 +644,12 @@ const escapeHtml = (text: string): string => {
 };
 
 // Helper function to parse custom terms and render with flexbox alignment
-const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalculatedValues: boolean = true): string => {
+const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalculatedValues: boolean = true, formatCurrency?: (amount: number) => string): string => {
   if (!termsText) return '';
 
   // Helper function to calculate percentage values
   const calculateValue = (text: string): string => {
-    if (!totalAmount || !showCalculatedValues) return text;
+    if (!totalAmount || !showCalculatedValues || !formatCurrency) return text;
 
     // Match percentage patterns like "50%" or "40%"
     const percentMatch = text.match(/(\d+)%/);
@@ -1242,7 +1242,7 @@ export const generatePDF = async (data: DocumentData) => {
           <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
           ${data.terms_and_conditions ? `
             <div style="font-size: 11px; line-height: 1.6; margin: 0; padding: 0; color: #000;">
-              ${parseAndRenderTerms(data.terms_and_conditions, grandTotalForBOQ, data.showCalculatedValuesInTerms !== false)}
+              ${parseAndRenderTerms(data.terms_and_conditions, grandTotalForBOQ, data.showCalculatedValuesInTerms !== false, formatCurrency)}
             </div>
           ` : `
             <div style="font-size: 11px; line-height: 1.6; margin: 0; padding: 0; color: #000;">
@@ -1693,7 +1693,10 @@ export const generatePDF = async (data: DocumentData) => {
       }
 
       // Download PDF
-      pdf.save(`${data.number}.pdf`);
+      const filename = data.project_title
+        ? `${data.number}-${data.project_title}.pdf`
+        : `${data.number}.pdf`;
+      pdf.save(filename);
       console.log('BOQ PDF generated successfully');
       return;
 
@@ -2555,7 +2558,9 @@ export const generatePDF = async (data: DocumentData) => {
       </html>
     `;
 
-    const filename = `${data.number}.pdf`;
+    const filename = data.project_title
+      ? `${data.number}-${data.project_title}.pdf`
+      : `${data.number}.pdf`;
     await convertHTMLToPDFAndDownload(htmlContentWithSections, filename);
   }
 
@@ -3393,7 +3398,7 @@ export const generatePDF = async (data: DocumentData) => {
             <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
             ${data.terms_and_conditions ? `
               <div style="font-size: 11px; line-height: 1.6; margin: 0; padding: 0; color: #000;">
-                ${parseAndRenderTerms(data.terms_and_conditions, data.total_amount || 0, false)}
+                ${parseAndRenderTerms(data.terms_and_conditions, data.total_amount || 0, false, formatCurrency)}
               </div>
             ` : `
               <ol style="font-size: 11px; line-height: 1.6; margin: 0; padding-left: 20px; color: #000;">
@@ -3526,7 +3531,9 @@ export const generatePDF = async (data: DocumentData) => {
     </html>
   `;
 
-  const fallbackFilename = `${data.number}.pdf`;
+  const fallbackFilename = data.project_title
+    ? `${data.number}-${data.project_title}.pdf`
+    : `${data.number}.pdf`;
   await convertHTMLToPDFAndDownload(htmlContent, fallbackFilename);
 };
 
