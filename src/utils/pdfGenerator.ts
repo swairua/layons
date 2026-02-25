@@ -3535,11 +3535,11 @@ export const generatePDF = async (data: DocumentData) => {
                 </tr>
                 <tr style="border: none;">
                   <td style="border: none;"><strong>ACCOUNT NUMBER;</strong></td>
-                  <td style="border: none;">1394939360</td>
+                  <td style="border: none;">1349793760</td>
                 </tr>
                 <tr style="border: none;">
                   <td style="border: none;"><strong>BRANCH;</strong></td>
-                  <td style="border: none;">TITU RT</td>
+                  <td style="border: none;">JKUAT</td>
                 </tr>
                 <tr style="border: none;">
                   <td style="border: none;"><strong>SWIFT CODE;</strong></td>
