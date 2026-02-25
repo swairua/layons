@@ -37,6 +37,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { CURRENCY_SELECT_OPTIONS } from '@/utils/getCurrencySelectOptions';
 import { toNumber, toInteger } from '@/utils/numericFormHelpers';
+import { supabase } from '@/integrations/supabase/client';
 
 interface QuotationItem {
   id: string;
@@ -74,7 +75,8 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
   const [currency, setCurrency] = useState('KES');
   const [notes, setNotes] = useState('');
   const [termsAndConditions, setTermsAndConditions] = useState('Payment due within 30 days of invoice date.');
-  
+  const [previousTermsLoaded, setPreviousTermsLoaded] = useState(false);
+
   const [sections, setSections] = useState<QuotationSection[]>([]);
   const [searchProduct, setSearchProduct] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -102,6 +104,33 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
       setSections([defaultSection]);
     }
   }, [open]);
+
+  // Load previous quotation's terms and conditions when modal opens
+  useEffect(() => {
+    if (open && currentCompany?.id && !previousTermsLoaded) {
+      const fetchPreviousTerms = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('quotations')
+            .select('terms_and_conditions')
+            .eq('company_id', currentCompany.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          if (!error && data?.terms_and_conditions) {
+            setTermsAndConditions(data.terms_and_conditions);
+          }
+          setPreviousTermsLoaded(true);
+        } catch (err) {
+          console.log('No previous quotation found or error fetching terms:', err);
+          setPreviousTermsLoaded(true);
+        }
+      };
+
+      fetchPreviousTerms();
+    }
+  }, [open, currentCompany?.id, previousTermsLoaded]);
 
   // Log for debugging if needed
   if (process.env.NODE_ENV === 'development') {
@@ -486,7 +515,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
 
       toast.success(`Quotation ${quotationNumber} created successfully!`);
       onSuccess();
-      onOpenChange(false);
+      handleOpenChange(false);
       resetForm();
     } catch (error) {
       console.error('Error creating quotation:', error);
@@ -552,10 +581,18 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
     setSections([]);
     setSearchProduct('');
     setNewSectionName('');
+    setPreviousTermsLoaded(false);
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      setPreviousTermsLoaded(false);
+    }
+    onOpenChange(newOpen);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="w-[95vw] max-w-7xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
@@ -965,7 +1002,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+          <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isSubmitting}>
             Cancel
           </Button>
           <Button 
