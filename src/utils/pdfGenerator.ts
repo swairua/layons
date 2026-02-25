@@ -2558,7 +2558,9 @@ export const generatePDF = async (data: DocumentData) => {
       </html>
     `;
 
-    const filename = `${data.number}.pdf`;
+    const filename = data.project_title
+      ? `${data.number}-${data.project_title}.pdf`
+      : `${data.number}.pdf`;
     await convertHTMLToPDFAndDownload(htmlContentWithSections, filename);
   }
 
@@ -3529,7 +3531,9 @@ export const generatePDF = async (data: DocumentData) => {
     </html>
   `;
 
-  const fallbackFilename = `${data.number}.pdf`;
+  const fallbackFilename = data.project_title
+    ? `${data.number}-${data.project_title}.pdf`
+    : `${data.number}.pdf`;
   await convertHTMLToPDFAndDownload(htmlContent, fallbackFilename);
 };
 
