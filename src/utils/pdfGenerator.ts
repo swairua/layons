@@ -1693,7 +1693,10 @@ export const generatePDF = async (data: DocumentData) => {
       }
 
       // Download PDF
-      pdf.save(`${data.number}.pdf`);
+      const filename = data.project_title
+        ? `${data.number}-${data.project_title}.pdf`
+        : `${data.number}.pdf`;
+      pdf.save(filename);
       console.log('BOQ PDF generated successfully');
       return;
 
