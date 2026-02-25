@@ -1345,47 +1345,47 @@ export const generatePDF = async (data: DocumentData) => {
               <tr style="border: none;">
                 <td style="width: 25%; border: none;"><strong>BANK;</strong></td>
                 <td style="width: 37.5%; border: none;">CO-OPERATIVE BANK OF KENYA</td>
-                <td style="width: 37.5%; border: none; color: #0066CC;">KCB BANK LIMITED</td>
+                <td style="width: 37.5%; border: none;">KCB BANK LIMITED</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>ACCOUNT NAME;</strong></td>
                 <td style="border: none;">LAYONS CONSTRUCTION LIMITED</td>
-                <td style="border: none; color: #0066CC;">LAYONS CONSTRUCTION LIMITED</td>
+                <td style="border: none;">LAYONS CONSTRUCTION LIMITED</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>ACCOUNT NUMBER;</strong></td>
                 <td style="border: none;">01192659527000</td>
-                <td style="border: none; color: #0066CC;">1349793760</td>
+                <td style="border: none;">1349793760</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>BRANCH;</strong></td>
                 <td style="border: none;">JUJA</td>
-                <td style="border: none; color: #0066CC;">JKUAT</td>
+                <td style="border: none;">JKUAT</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>SWIFT CODE;</strong></td>
                 <td style="border: none;">KCOOKENA</td>
-                <td style="border: none; color: #0066CC;">KCBLKENX</td>
+                <td style="border: none;">KCBLKENX</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>BANK CODE;</strong></td>
                 <td style="border: none;">11000</td>
-                <td style="border: none; color: #0066CC;">01</td>
+                <td style="border: none;">01</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>BRANCH CODE;</strong></td>
                 <td style="border: none;">11124</td>
-                <td style="border: none; color: #0066CC;">314</td>
+                <td style="border: none;">314</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>PAYBILL;</strong></td>
                 <td style="border: none;">400200</td>
-                <td style="border: none; color: #0066CC;">522533</td>
+                <td style="border: none;">522533</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>ACCOUNT;</strong></td>
                 <td style="border: none;">01192659527000</td>
-                <td style="border: none; color: #0066CC;">8064381</td>
+                <td style="border: none;">8064381</td>
               </tr>
             </table>
           </div>
@@ -1964,11 +1964,6 @@ export const generatePDF = async (data: DocumentData) => {
             </tr>
           </table>
         </div>
-
-        <!-- Stamp Section -->
-        ${stampImage ? `<div class="stamp-section" style="display:flex; justify-content:center; margin:40px 0 24px 0;">
-          <img src="${stampImage}" alt="Company Stamp" style="width: 44mm; height: 44mm; object-fit:contain;" />
-        </div>` : ''}
       </div>
     `;
 
@@ -2058,47 +2053,47 @@ export const generatePDF = async (data: DocumentData) => {
               <tr style="border: none;">
                 <td style="width: 25%; border: none;"><strong>BANK;</strong></td>
                 <td style="width: 37.5%; border: none;">CO-OPERATIVE BANK OF KENYA</td>
-                <td style="width: 37.5%; border: none; color: #0066CC;">KCB BANK LIMITED</td>
+                <td style="width: 37.5%; border: none;">KCB BANK LIMITED</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>ACCOUNT NAME;</strong></td>
                 <td style="border: none;">LAYONS CONSTRUCTION LIMITED</td>
-                <td style="border: none; color: #0066CC;">LAYONS CONSTRUCTION LIMITED</td>
+                <td style="border: none;">LAYONS CONSTRUCTION LIMITED</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>ACCOUNT NUMBER;</strong></td>
                 <td style="border: none;">01192659527000</td>
-                <td style="border: none; color: #0066CC;">1349793760</td>
+                <td style="border: none;">1349793760</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>BRANCH;</strong></td>
                 <td style="border: none;">JUJA</td>
-                <td style="border: none; color: #0066CC;">JKUAT</td>
+                <td style="border: none;">JKUAT</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>SWIFT CODE;</strong></td>
                 <td style="border: none;">KCOOKENA</td>
-                <td style="border: none; color: #0066CC;">KCBLKENX</td>
+                <td style="border: none;">KCBLKENX</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>BANK CODE;</strong></td>
                 <td style="border: none;">11000</td>
-                <td style="border: none; color: #0066CC;">01</td>
+                <td style="border: none;">01</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>BRANCH CODE;</strong></td>
                 <td style="border: none;">11124</td>
-                <td style="border: none; color: #0066CC;">314</td>
+                <td style="border: none;">314</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>PAYBILL;</strong></td>
                 <td style="border: none;">400200</td>
-                <td style="border: none; color: #0066CC;">522533</td>
+                <td style="border: none;">522533</td>
               </tr>
               <tr style="border: none;">
                 <td style="border: none;"><strong>ACCOUNT;</strong></td>
                 <td style="border: none;">01192659527000</td>
-                <td style="border: none; color: #0066CC;">8064381</td>
+                <td style="border: none;">8064381</td>
               </tr>
             </table>
           </div>
@@ -3372,12 +3367,6 @@ export const generatePDF = async (data: DocumentData) => {
         </div>
         ` : ''}
 
-        <!-- Stamp Section (for all documents) -->
-        ${stampImage ? `
-        <div class="stamp-section" style="display:flex; justify-content:center; margin:30px 0 24px 0;">
-          <img src="${stampImage}" alt="Company Stamp" style="width: 44mm; height: 44mm; object-fit:contain;" />
-        </div>
-        ` : ''}
 
         <!-- Footer (only for non-invoice/quotation types) -->
         ${(data.type !== 'invoice' && data.type !== 'quotation') ? `
@@ -3480,89 +3469,55 @@ export const generatePDF = async (data: DocumentData) => {
           </div>
 
           <!-- Account Details Section -->
-          <div style="margin-top: 8px; padding-top: 4px; display: flex; gap: 24px;">
-            <div style="flex: 1;">
-              <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Account Details;</h3>
-              <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #000; border: none;">
-                <tr style="border: none;">
-                  <td style="width: 30%; border: none;"><strong>BANK;</strong></td>
-                  <td style="width: 70%; border: none;">CO-OPERATIVE BANK OF KENYA</td>
-                </tr>
-                <tr style="border: none;">
-                  <td style="border: none;"><strong>ACCOUNT NAME;</strong></td>
-                  <td style="border: none;">LAYONS CONSTRUCTION LIMITED</td>
-                </tr>
-                <tr style="border: none;">
-                  <td style="border: none;"><strong>ACCOUNT NUMBER;</strong></td>
-                  <td style="border: none;">01192659527000</td>
-                </tr>
-                <tr style="border: none;">
-                  <td style="border: none;"><strong>BRANCH;</strong></td>
-                  <td style="border: none;">JUJA</td>
-                </tr>
-                <tr style="border: none;">
-                  <td style="border: none;"><strong>SWIFT CODE;</strong></td>
-                  <td style="border: none;">KCOOKENA</td>
-                </tr>
-                <tr style="border: none;">
-                  <td style="border: none;"><strong>BANK CODE;</strong></td>
-                  <td style="border: none;">11000</td>
-                </tr>
-                <tr style="border: none;">
-                  <td style="border: none;"><strong>BRANCH CODE;</strong></td>
-                  <td style="border: none;">11124</td>
-                </tr>
-                <tr style="border: none;">
-                  <td style="border: none;"><strong>PAYBILL;</strong></td>
-                  <td style="border: none;">400200</td>
-                </tr>
-                <tr style="border: none;">
-                  <td style="border: none;"><strong>ACCOUNT;</strong></td>
-                  <td style="border: none;">01192659527000</td>
-                </tr>
-              </table>
-            </div>
-            <div style="flex: 1;">
-              <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Account Details;</h3>
-              <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #0066CC; border: none;">
-                <tr style="border: none;">
-                  <td style="width: 30%; border: none;"><strong>BANK;</strong></td>
-                  <td style="width: 70%; border: none;">KCB BANK LIMITED</td>
-                </tr>
-                <tr style="border: none;">
-                  <td style="border: none;"><strong>ACCOUNT NAME;</strong></td>
-                  <td style="border: none;">LAYONS CONSTRUCTION LIMITED</td>
-                </tr>
-                <tr style="border: none;">
-                  <td style="border: none;"><strong>ACCOUNT NUMBER;</strong></td>
-                  <td style="border: none;">1394939360</td>
-                </tr>
-                <tr style="border: none;">
-                  <td style="border: none;"><strong>BRANCH;</strong></td>
-                  <td style="border: none;">TITU RT</td>
-                </tr>
-                <tr style="border: none;">
-                  <td style="border: none;"><strong>SWIFT CODE;</strong></td>
-                  <td style="border: none;">KCBLKENX</td>
-                </tr>
-                <tr style="border: none;">
-                  <td style="border: none;"><strong>BANK CODE;</strong></td>
-                  <td style="border: none;">01</td>
-                </tr>
-                <tr style="border: none;">
-                  <td style="border: none;"><strong>BRANCH CODE;</strong></td>
-                  <td style="border: none;">314</td>
-                </tr>
-                <tr style="border: none;">
-                  <td style="border: none;"><strong>PAYBILL;</strong></td>
-                  <td style="border: none;">522533</td>
-                </tr>
-                <tr style="border: none;">
-                  <td style="border: none;"><strong>ACCOUNT;</strong></td>
-                  <td style="border: none;">8064381</td>
-                </tr>
-              </table>
-            </div>
+          <div style="margin-top: 8px; padding-top: 4px;">
+            <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Account Details;</h3>
+            <table style="font-size: 10px; width: 100%; line-height: 1.8; color: #000; border: none;">
+              <tr style="border: none;">
+                <td style="width: 25%; border: none;"><strong>BANK;</strong></td>
+                <td style="width: 37.5%; border: none;">CO-OPERATIVE BANK OF KENYA</td>
+                <td style="width: 37.5%; border: none;">KCB BANK LIMITED</td>
+              </tr>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>ACCOUNT NAME;</strong></td>
+                <td style="border: none;">LAYONS CONSTRUCTION LIMITED</td>
+                <td style="border: none;">LAYONS CONSTRUCTION LIMITED</td>
+              </tr>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>ACCOUNT NUMBER;</strong></td>
+                <td style="border: none;">01192659527000</td>
+                <td style="border: none;">1349793760</td>
+              </tr>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>BRANCH;</strong></td>
+                <td style="border: none;">JUJA</td>
+                <td style="border: none;">JKUAT</td>
+              </tr>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>SWIFT CODE;</strong></td>
+                <td style="border: none;">KCOOKENA</td>
+                <td style="border: none;">KCBLKENX</td>
+              </tr>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>BANK CODE;</strong></td>
+                <td style="border: none;">11000</td>
+                <td style="border: none;">01</td>
+              </tr>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>BRANCH CODE;</strong></td>
+                <td style="border: none;">11124</td>
+                <td style="border: none;">314</td>
+              </tr>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>PAYBILL;</strong></td>
+                <td style="border: none;">400200</td>
+                <td style="border: none;">522533</td>
+              </tr>
+              <tr style="border: none;">
+                <td style="border: none;"><strong>ACCOUNT;</strong></td>
+                <td style="border: none;">01192659527000</td>
+                <td style="border: none;">8064381</td>
+              </tr>
+            </table>
           </div>
         </div>
       </div>
