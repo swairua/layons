@@ -118,6 +118,7 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
   const [contractor, setContractor] = useState('');
   const [notes, setNotes] = useState('');
   const [termsAndConditions, setTermsAndConditions] = useState(DEFAULT_TERMS_AND_CONDITIONS);
+  const [previousTermsLoaded, setPreviousTermsLoaded] = useState(false);
   const [showCalculatedValuesInTerms, setShowCalculatedValuesInTerms] = useState(true);
   const [currency, setCurrency] = useState(currentCompany?.currency || 'KES');
   const [sections, setSections] = useState<BOQSectionRow[]>([defaultSection()]);
@@ -130,6 +131,33 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
       setDueDate(todayISO);
     }
   }, [open, defaultNumber, todayISO]);
+
+  // Load previous BOQ's terms and conditions when modal opens
+  useEffect(() => {
+    if (open && currentCompany?.id && !previousTermsLoaded) {
+      const fetchPreviousTerms = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('boqs')
+            .select('terms_and_conditions')
+            .eq('company_id', currentCompany.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          if (!error && data?.terms_and_conditions) {
+            setTermsAndConditions(data.terms_and_conditions);
+          }
+          setPreviousTermsLoaded(true);
+        } catch (err) {
+          console.log('No previous BOQ found or error fetching terms:', err);
+          setPreviousTermsLoaded(true);
+        }
+      };
+
+      fetchPreviousTerms();
+    }
+  }, [open, currentCompany?.id, previousTermsLoaded]);
 
   const selectedClient = useMemo(() => customers.find(c => c.id === clientId), [customers, clientId]);
 
@@ -376,7 +404,7 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
 
       toast.success(`BOQ ${boqNumber} generated and saved`);
       onSuccess?.();
-      onOpenChange(false);
+      handleOpenChange(false);
     } catch (err) {
       console.error('Failed to generate BOQ PDF or save', err);
       toast.error('Failed to generate BOQ PDF or save to database');
@@ -385,8 +413,15 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
     }
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      setPreviousTermsLoaded(false);
+    }
+    onOpenChange(newOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="w-[95vw] max-w-7xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
