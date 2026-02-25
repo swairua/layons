@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-expressions, prefer-const, no-self-assign, no-useless-escape */
 // Two-column bank details layout updated
 import { PDF_PAGE_CSS } from './pdfMarginConstants';
-import { formatCurrency as formatCurrencyUtil } from './currencyFormatter';
+import { formatCurrency } from './currencyFormatter';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
