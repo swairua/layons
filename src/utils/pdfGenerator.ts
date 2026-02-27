@@ -719,7 +719,7 @@ const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalcul
   }
 
   // Render as HTML with proper numbered list and bullet points for sub-items
-  let html = '<div style="margin: 0; padding-left: 0; font-size: 11px; line-height: 1.6;">';
+  let html = '<div style="margin: 0; padding-left: 0; font-size: 11px; line-height: 1.4;">';
 
   items.forEach((item) => {
     const mainText = calculateValue(escapeHtml(item.text));
@@ -727,27 +727,27 @@ const parseAndRenderTerms = (termsText: string, totalAmount?: number, showCalcul
 
     if (item.subItems.length > 0 && itemNumber === 1) {
       // Item 1 with sub-items: use bullet points
-      html += `<div style="margin-bottom: 8px;">
+      html += `<div style="margin-bottom: 4px;">
         <span style="font-weight: normal;">${itemNumber}. ${mainText}</span>
-        <div style="margin-left: 20px; margin-top: 6px;">`;
+        <div style="margin-left: 20px; margin-top: 2px;">`;
 
       item.subItems.forEach(subItem => {
         const subText = calculateValue(escapeHtml(subItem));
-        html += `<div style="margin-bottom: 4px;">• ${subText}</div>`;
+        html += `<div style="margin-bottom: 2px;">• ${subText}</div>`;
       });
 
       html += `</div>
       </div>`;
     } else {
       // Main item without sub-items, or sub-items for items other than 1
-      html += `<div style="margin-bottom: 8px;"><span>${itemNumber}. ${mainText}</span></div>`;
+      html += `<div style="margin-bottom: 4px;"><span>${itemNumber}. ${mainText}</span></div>`;
 
       // In case other items have sub-items, render them as bullets too
       if (item.subItems.length > 0) {
-        html += `<div style="margin-left: 20px; margin-top: -4px; margin-bottom: 8px;">`;
+        html += `<div style="margin-left: 20px; margin-top: -2px; margin-bottom: 4px;">`;
         item.subItems.forEach(subItem => {
           const subText = calculateValue(escapeHtml(subItem));
-          html += `<div style="margin-bottom: 4px;">• ${subText}</div>`;
+          html += `<div style="margin-bottom: 2px;">• ${subText}</div>`;
         });
         html += `</div>`;
       }
@@ -1182,11 +1182,13 @@ export const generatePDF = async (data: DocumentData) => {
         .terms-page {
           display: block;
           width: 100%;
-          padding: 15mm;
+          padding: 12mm;
           page-break-before: always;
           box-sizing: border-box;
           margin: 0;
           page-break-after: auto;
+          font-size: 11px;
+          line-height: 1.3;
         }
 
         .terms-page table { border-collapse: collapse; width: 100%; }
@@ -1238,38 +1240,38 @@ export const generatePDF = async (data: DocumentData) => {
       <!-- Page 2: Terms and Conditions -->
       <div class="terms-page">
         <!-- Terms Section -->
-        <div style="margin-bottom: 15px; page-break-inside: avoid;">
-          <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">Terms;</h3>
+        <div style="margin-bottom: 8px;">
+          <h3 style="font-size: 13px; font-weight: bold; margin-bottom: 4px; margin-top: 0; text-transform: uppercase;">Terms;</h3>
           ${data.terms_and_conditions ? `
-            <div style="font-size: 11px; line-height: 1.6; margin: 0; padding: 0; color: #000;">
+            <div style="font-size: 11px; line-height: 1.4; margin: 0; padding: 0; color: #000;">
               ${parseAndRenderTerms(data.terms_and_conditions, grandTotalForBOQ, data.showCalculatedValuesInTerms !== false, formatCurrency)}
             </div>
           ` : `
-            <div style="font-size: 11px; line-height: 1.6; margin: 0; padding: 0; color: #000;">
-              <div style="display: flex; margin-bottom: 8px; align-items: flex-start;">
+            <div style="font-size: 11px; line-height: 1.4; margin: 0; padding: 0; color: #000;">
+              <div style="display: flex; margin-bottom: 4px; align-items: flex-start;">
                 <span style="margin-right: 8px; flex-shrink: 0;">1.</span>
                 <div style="flex: 1;">
-                  <div style="margin-bottom: 4px;">Payment terms for each stage are as follows:</div>
-                  <div style="margin: 4px 0 4px 20px;">
-                    <div style="margin-bottom: 3px;">i. 50% Upon Order${data.showCalculatedValuesInTerms !== false ? ` (${formatCurrency(grandTotalForBOQ * 0.5)})` : ''}</div>
-                    <div style="margin-bottom: 3px;">ii. 40% As Progressive${data.showCalculatedValuesInTerms !== false ? ` (${formatCurrency(grandTotalForBOQ * 0.4)})` : ''}</div>
-                    <div style="margin-bottom: 3px;">iii. 10% Upon Completion${data.showCalculatedValuesInTerms !== false ? ` (${formatCurrency(grandTotalForBOQ * 0.1)})` : ''}</div>
+                  <div style="margin-bottom: 2px;">Payment terms for each stage are as follows:</div>
+                  <div style="margin: 2px 0 2px 20px;">
+                    <div style="margin-bottom: 2px;">i. 50% Upon Order${data.showCalculatedValuesInTerms !== false ? ` (${formatCurrency(grandTotalForBOQ * 0.5)})` : ''}</div>
+                    <div style="margin-bottom: 2px;">ii. 40% As Progressive${data.showCalculatedValuesInTerms !== false ? ` (${formatCurrency(grandTotalForBOQ * 0.4)})` : ''}</div>
+                    <div style="margin-bottom: 2px;">iii. 10% Upon Completion${data.showCalculatedValuesInTerms !== false ? ` (${formatCurrency(grandTotalForBOQ * 0.1)})` : ''}</div>
                   </div>
                 </div>
               </div>
-              <div style="display: flex; margin-bottom: 8px;">
+              <div style="display: flex; margin-bottom: 4px;">
                 <span style="margin-right: 8px; flex-shrink: 0;">2.</span>
                 <div style="flex: 1;">All work will be executed based on the drawings and samples approved by the client</div>
               </div>
-              <div style="display: flex; margin-bottom: 8px;">
+              <div style="display: flex; margin-bottom: 4px;">
                 <span style="margin-right: 8px; flex-shrink: 0;">3.</span>
                 <div style="flex: 1;">Any Changes/alterations to the scope of work outlined will affect the final quantity will be measured, and charges will be applied on a pro-rata basis at the agreed rate</div>
               </div>
-              <div style="display: flex; margin-bottom: 8px;">
+              <div style="display: flex; margin-bottom: 4px;">
                 <span style="margin-right: 8px; flex-shrink: 0;">4.</span>
                 <div style="flex: 1;">We are not responsible for any damages caused by negligence from other Sub Contractors Hired by the Client.</div>
               </div>
-              <div style="display: flex; margin-bottom: 8px;">
+              <div style="display: flex; margin-bottom: 4px;">
                 <span style="margin-right: 8px; flex-shrink: 0;">5.</span>
                 <div style="flex: 1;">The quotation does not include statutory fees.</div>
               </div>
@@ -1282,57 +1284,57 @@ export const generatePDF = async (data: DocumentData) => {
         </div>
 
         <!-- Acceptance of Quote Section -->
-        <div style="margin-bottom: 12px; padding-top: 8px; page-break-inside: avoid;">
-          <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Acceptance of Quote;</h3>
-          <p style="font-size: 10px; margin: 0; color: #000;">The above prices specifications and terms are satisfactory.</p>
+        <div style="margin-bottom: 6px; padding-top: 4px;">
+          <h3 style="font-size: 12px; font-weight: bold; margin-bottom: 3px; margin-top: 0; text-transform: uppercase;">Acceptance of Quote;</h3>
+          <p style="font-size: 10px; margin: 0; line-height: 1.3; color: #000;">The above prices specifications and terms are satisfactory.</p>
         </div>
 
         <!-- Contractor Section -->
-        <div style="margin-bottom: 10px; padding-top: 6px; page-break-inside: avoid;">
-          <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #000; border: none;">
+        <div style="margin-bottom: 6px; padding-top: 3px;">
+          <table style="font-size: 10px; width: 100%; line-height: 1.4; color: #000; border: none;">
             <tr style="border: none;">
-              <td style="width: 30%; border: none;"><strong>Contractor;</strong></td>
-              <td style="width: 70%; border: none;">${company.name}</td>
+              <td style="width: 30%; border: none; padding: 2px 0;"><strong>Contractor;</strong></td>
+              <td style="width: 70%; border: none; padding: 2px 0;">${company.name}</td>
             </tr>
             <tr style="border: none;">
-              <td style="border: none;"><strong>Tel No;</strong></td>
-              <td style="border: none;">254720717463</td>
+              <td style="border: none; padding: 2px 0;"><strong>Tel No;</strong></td>
+              <td style="border: none; padding: 2px 0;">254720717463</td>
             </tr>
             <tr style="border: none;">
-              <td style="border: none;"><strong>Signed;</strong></td>
-              <td style="border: none;">KELVIN MURIITHI</td>
+              <td style="border: none; padding: 2px 0;"><strong>Signed;</strong></td>
+              <td style="border: none; padding: 2px 0;">KELVIN MURIITHI</td>
             </tr>
           </table>
         </div>
 
         <!-- Client Section -->
-        <div style="margin-bottom: 10px; padding-top: 6px; page-break-inside: avoid;">
-          <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #000; border: none;">
+        <div style="margin-bottom: 6px; padding-top: 3px;">
+          <table style="font-size: 10px; width: 100%; line-height: 1.4; color: #000; border: none;">
             <tr style="border: none;">
-              <td style="width: 30%; border: none; vertical-align: top;"><strong>Client;</strong></td>
-              <td style="width: 70%; border: none;">
+              <td style="width: 30%; border: none; vertical-align: top; padding: 2px 0;"><strong>Client;</strong></td>
+              <td style="width: 70%; border: none; padding: 2px 0;">
                 ${data.customer.name}${data.customer.address ? '<br/>' + data.customer.address : ''}${data.customer.city ? '<br/>' + data.customer.city : ''}${data.customer.country ? '<br/>' + data.customer.country : ''}
               </td>
             </tr>
             ${data.customer.phone ? `
             <tr style="border: none;">
-              <td style="width: 30%; border: none;"><strong>Tel No;</strong></td>
-              <td style="width: 70%; border: none;">${data.customer.phone}</td>
+              <td style="width: 30%; border: none; padding: 2px 0;"><strong>Tel No;</strong></td>
+              <td style="width: 70%; border: none; padding: 2px 0;">${data.customer.phone}</td>
             </tr>
             ` : ''}
             <tr style="border: none;">
-              <td style="width: 30%; border: none;"><strong>Customer signed;</strong></td>
-              <td style="width: 70%; border: none;">........................</td>
+              <td style="width: 30%; border: none; padding: 2px 0;"><strong>Customer signed;</strong></td>
+              <td style="width: 70%; border: none; padding: 2px 0;">........................</td>
             </tr>
           </table>
         </div>
 
         <!-- Prepaired By Section -->
-        <div style="margin-bottom: 8px; padding-top: 4px; page-break-inside: avoid;">
-          <table style="font-size: 10px; width: 100%; line-height: 1.6; color: #000; border: none;">
+        <div style="margin-bottom: 4px; padding-top: 2px;">
+          <table style="font-size: 10px; width: 100%; line-height: 1.4; color: #000; border: none;">
             <tr style="border: none;">
-              <td style="width: 30%; border: none;"><strong>PREPAIRED BY;</strong></td>
-              <td style="width: 70%; border: none;">${company.name}</td>
+              <td style="width: 30%; border: none; padding: 2px 0;"><strong>PREPAIRED BY;</strong></td>
+              <td style="width: 70%; border: none; padding: 2px 0;">${company.name}</td>
             </tr>
           </table>
         </div>

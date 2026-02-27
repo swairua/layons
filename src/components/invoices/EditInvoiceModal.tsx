@@ -76,7 +76,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
   const [lpoNumber, setLpoNumber] = useState('');
   const [notes, setNotes] = useState('');
   const [termsAndConditions, setTermsAndConditions] = useState('');
-  const [showCalculatedValuesInTerms, setShowCalculatedValuesInTerms] = useState(true);
+  const [showCalculatedValuesInTerms, setShowCalculatedValuesInTerms] = useState(false);
 
   const [sections, setSections] = useState<InvoiceSection[]>([]);
   const [searchProduct, setSearchProduct] = useState('');

@@ -111,7 +111,7 @@ export function EditBOQModal({ open, onOpenChange, boq, onSuccess }: EditBOQModa
   const [contractor, setContractor] = useState('');
   const [notes, setNotes] = useState('');
   const [termsAndConditions, setTermsAndConditions] = useState('');
-  const [showCalculatedValuesInTerms, setShowCalculatedValuesInTerms] = useState(true);
+  const [showCalculatedValuesInTerms, setShowCalculatedValuesInTerms] = useState(false);
   const [currency, setCurrency] = useState('KES');
   const [sections, setSections] = useState<BOQSectionRow[]>([]);
   const [submitting, setSubmitting] = useState(false);
