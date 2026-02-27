@@ -119,7 +119,7 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess }: CreateBOQModal
   const [notes, setNotes] = useState('');
   const [termsAndConditions, setTermsAndConditions] = useState(DEFAULT_TERMS_AND_CONDITIONS);
   const [previousTermsLoaded, setPreviousTermsLoaded] = useState(false);
-  const [showCalculatedValuesInTerms, setShowCalculatedValuesInTerms] = useState(true);
+  const [showCalculatedValuesInTerms, setShowCalculatedValuesInTerms] = useState(false);
   const [currency, setCurrency] = useState(currentCompany?.currency || 'KES');
   const [sections, setSections] = useState<BOQSectionRow[]>([defaultSection()]);
   const [submitting, setSubmitting] = useState(false);
