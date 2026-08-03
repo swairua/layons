@@ -140,6 +140,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const mountedRef = useRef(true);
   const initializingRef = useRef(false);
   const forceCompletedRef = useRef(false);
+  const signingOutRef = useRef(false);
 
   // Toast spam prevention
   const lastNetworkErrorToast = useRef<number>(0);
@@ -287,7 +288,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Handle auth state changes with improved error handling
   const handleAuthStateChange = useCallback(async (event: string, newSession: Session | null) => {
-    if (!mountedRef.current || initializingRef.current) return;
+    if (!mountedRef.current || initializingRef.current || signingOutRef.current) return;
 
     
     try {
@@ -407,7 +408,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             sessionTimeoutPromise
           ]) as any;
 
-          if (sessionData?.session?.user && mountedRef.current) {
+          if (sessionData?.session?.user && mountedRef.current && !signingOutRef.current) {
             console.log('✅ [AuthContext] Session found, user:', sessionData.session.user.email);
             console.log('📋 [AuthContext] Session tokens:', {
               hasAccessToken: !!sessionData.session.access_token,
@@ -751,11 +752,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const signOut = useCallback(async () => {
+    signingOutRef.current = true;
+
     try {
-      console.log('���� Starting sign out process...');
+      console.log('Starting sign out process...');
       setLoading(true);
 
-      const { error } = await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
 
       if (error) {
         // Better error message handling
@@ -838,6 +841,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (mountedRef.current) {
         setLoading(false);
       }
+      signingOutRef.current = false;
     }
   }, []);
 
