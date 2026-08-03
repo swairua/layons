@@ -501,26 +501,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!user) return;
 
     const pollInterval = setInterval(() => {
-      if (mountedRef.current) {
-        supabase
-          .from('user_permissions')
-          .select('permission_name, granted')
-          .eq('user_id', user.id)
-          .then(({ data: permissionData, error: permissionError }) => {
-            if (permissionError) {
-              console.warn('[AuthContext] Permission poll error:', permissionError.message);
-              return;
-            }
-            if (mountedRef.current) {
-              setPermissions(Object.fromEntries(
-                (permissionData || []).map(permission => [permission.permission_name, permission.granted === true])
-              ));
-            }
-          })
-          .catch(err => {
-            console.warn('[AuthContext] Permission poll failed:', err instanceof Error ? err.message : String(err));
-          });
-      }
+      if (!mountedRef.current || window.location.pathname === '/settings/permissions') return;
+
+      supabase
+        .from('user_permissions')
+        .select('permission_name, granted')
+        .eq('user_id', user.id)
+        .then(({ data: permissionData, error: permissionError }) => {
+          if (permissionError) {
+            console.warn('[AuthContext] Permission poll error:', permissionError.message);
+            return;
+          }
+          if (mountedRef.current) {
+            setPermissions(Object.fromEntries(
+              (permissionData || []).map(permission => [permission.permission_name, permission.granted === true])
+            ));
+          }
+        })
+        .catch(err => {
+          console.warn('[AuthContext] Permission poll failed:', err instanceof Error ? err.message : String(err));
+        });
     }, 8000);
 
     return () => clearInterval(pollInterval);
