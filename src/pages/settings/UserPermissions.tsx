@@ -87,7 +87,7 @@ export default function UserPermissions() {
         id: p.id,
         email: p.email,
         full_name: p.full_name,
-        role: p.role as UserRole,
+        role: (p.role ?? 'user') as UserRole,
         status: p.status,
         overrides: permMap[p.id] || {},
         changed: false,

@@ -3,7 +3,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Lock, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
 import { hasFeature } from '@/utils/rolePermissions';
 import type { FeatureKey, UserRole } from '@/utils/rolePermissions';
 
@@ -22,35 +21,9 @@ export function ProtectedRoute({
   allowedRoles,
   requiredFeature,
 }: ProtectedRouteProps) {
-  const { isAuthenticated, loading, profile, permissions, profileReady } = useAuth();
-  const [sessionVerified, setSessionVerified] = useState(false);
-  const [verifyingSession, setVerifyingSession] = useState(false);
+  const { isAuthenticated, session, loading, profile, permissions, profileReady } = useAuth();
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      setSessionVerified(true);
-      return;
-    }
-    if (loading) return;
-
-    const verifySuperbaseSession = async () => {
-      setVerifyingSession(true);
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          setSessionVerified(true);
-        }
-      } catch {
-        // ignore
-      } finally {
-        setVerifyingSession(false);
-      }
-    };
-
-    verifySuperbaseSession();
-  }, [isAuthenticated, loading]);
-
-  if (loading || verifyingSession || (requiredFeature && isAuthenticated && !profileReady)) {
+  if (loading || (requiredFeature && isAuthenticated && !profileReady)) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -61,7 +34,7 @@ export function ProtectedRoute({
     );
   }
 
-  if (requireAuth && !isAuthenticated && !sessionVerified) {
+  if (requireAuth && !isAuthenticated && !session) {
     return fallback || (
       <div className="flex items-center justify-center min-h-[400px]">
         <Card className="w-full max-w-md text-center">
