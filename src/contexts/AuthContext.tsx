@@ -69,6 +69,7 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   refreshProfile: () => Promise<void>;
+  refreshPermissions: () => Promise<void>;
   clearTokens: () => void;
   permissions: Record<string, boolean>;
   profileReady: boolean;
@@ -495,6 +496,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       subscription.unsubscribe();
     };
   }, [fetchProfile, handleAuthStateChange]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const pollInterval = setInterval(() => {
+      if (mountedRef.current) {
+        supabase
+          .from('user_permissions')
+          .select('permission_name, granted')
+          .eq('user_id', user.id)
+          .then(({ data: permissionData, error: permissionError }) => {
+            if (permissionError) {
+              console.warn('[AuthContext] Permission poll error:', permissionError.message);
+              return;
+            }
+            if (mountedRef.current) {
+              setPermissions(Object.fromEntries(
+                (permissionData || []).map(permission => [permission.permission_name, permission.granted === true])
+              ));
+            }
+          })
+          .catch(err => {
+            console.warn('[AuthContext] Permission poll failed:', err instanceof Error ? err.message : String(err));
+          });
+      }
+    }, 8000);
+
+    return () => clearInterval(pollInterval);
+  }, [user]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     console.log(`🔐 [AuthContext] Starting sign in for: ${email}`);
@@ -923,6 +953,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [user, fetchProfile]);
 
+  const refreshPermissions = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      const { data: permissionData, error: permissionError } = await supabase
+        .from('user_permissions')
+        .select('permission_name, granted')
+        .eq('user_id', user.id);
+
+      if (permissionError) {
+        console.warn('Failed to refresh permissions:', permissionError.message);
+        return;
+      }
+
+      if (mountedRef.current) {
+        setPermissions(Object.fromEntries(
+          (permissionData || []).map(permission => [permission.permission_name, permission.granted === true])
+        ));
+      }
+    } catch (error) {
+      console.warn('Unexpected error refreshing permissions:', error instanceof Error ? error.message : String(error));
+    }
+  }, [user]);
+
   const changeUserPassword = useCallback(async (userId: string, newPassword: string) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -1009,6 +1063,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated,
     isAdmin,
     refreshProfile,
+    refreshPermissions,
     clearTokens,
     permissions,
     profileReady,
