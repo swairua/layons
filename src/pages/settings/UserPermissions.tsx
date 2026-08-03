@@ -124,8 +124,16 @@ export default function UserPermissions() {
         toast.success(
           `Saved for ${user.full_name || user.email} (${result.rowsInserted || 0} overrides)`
         );
+        // Recompute the overrides actually persisted: drop entries that
+        // match the role default so the UI stays in sync with the database.
+        const defaults = new Set<string>(getAllowedFeatures(user.role));
+        const effectiveOverrides = Object.fromEntries(
+          Object.entries(user.overrides).filter(
+            ([feature, granted]) => granted !== defaults.has(feature as FeatureKey)
+          )
+        );
         setUsers(prev => prev.map(u =>
-          u.id === userId ? { ...u, changed: false } : u
+          u.id === userId ? { ...u, overrides: effectiveOverrides, changed: false } : u
         ));
         // Trigger permission refresh for modified user to sync changes
         await refreshPermissions();

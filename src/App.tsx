@@ -1,6 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import PDFProgressDialog from "@/components/ui/PDFProgressDialog";
 import { Routes, Route } from "react-router-dom";
 import { useEffect, useState, Component, ReactNode, ErrorInfo } from "react";
 import { Layout } from "@/components/layout/Layout";
@@ -322,6 +323,7 @@ const App = () => {
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <PDFProgressDialog />
       <Layout>
         <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
         <Routes>

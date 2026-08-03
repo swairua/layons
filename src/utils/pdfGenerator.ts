@@ -7,6 +7,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { getProjectTitleFromInvoice } from './boqInvoiceLinkage';
 import { supabase } from '@/integrations/supabase/client';
+import { reportPDFProgress } from './pdfProgress';
 
 const PDF_RENDER_SCALE = 1.35;
 const PDF_IMAGE_QUALITY = 0.85;
@@ -223,7 +224,11 @@ const addCanvasToPDF = async (pdf: jsPDF, canvas: HTMLCanvasElement, pageWidth: 
 // Helper function to convert HTML to PDF and auto-download
 const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string) => {
   let wrapper: HTMLElement | null = null;
+  let progressStep = 0;
+  let progressTotal = 1;
   try {
+    reportPDFProgress({ current: 0, total: 1, stage: 'Preparing document…' });
+
     // Create a temporary wrapper for proper rendering
     wrapper = document.createElement('div');
     wrapper.style.position = 'absolute';
@@ -291,6 +296,10 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
     const pageSections = wrapper.querySelectorAll('.page, .page-section');
     let isFirstPage = true;
 
+    progressTotal = pageSections.length + 1;
+    reportPDFProgress({ current: 1, total: progressTotal, stage: 'Rendering pages…' });
+    progressStep = 1;
+
     // Render each page section separately to avoid cutting across pages
     for (const pageElement of pageSections) {
       // Convert each page element to canvas
@@ -341,6 +350,13 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
         pdf.addImage(chunkImgData, 'JPEG', 0, 0, pageWidth, captureHmm);
         yPxOffset += capturePx;
       }
+
+      progressStep += 1;
+      reportPDFProgress({
+        current: progressStep,
+        total: progressTotal,
+        stage: `Rendering page ${progressStep} of ${progressTotal}…`,
+      });
     }
 
     // Fallback: if no page sections found, render entire content
@@ -396,6 +412,12 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
       throw new Error('Failed to add content to PDF');
     }
 
+    reportPDFProgress({
+      current: progressTotal,
+      total: progressTotal,
+      stage: 'Finalizing PDF…',
+    });
+
     // Download the PDF with proper error handling
     try {
       pdf.save(filename);
@@ -414,6 +436,7 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
     if (wrapper && document.body.contains(wrapper)) {
       document.body.removeChild(wrapper);
     }
+    reportPDFProgress(null);
   }
 };
 
@@ -1516,6 +1539,10 @@ export const generatePDF = async (data: DocumentData) => {
     let boqWrapper: HTMLElement | null = null;
     let termsWrapper: HTMLElement | null = null;
 
+    reportPDFProgress({ current: 0, total: 1, stage: 'Preparing BOQ document…' });
+    let boqProgressStep = 0;
+    let boqProgressTotal = 1;
+
     try {
       // Create PDF
       const pdf = new jsPDF('p', 'mm', 'a4', { compress: true });
@@ -1570,6 +1597,25 @@ export const generatePDF = async (data: DocumentData) => {
       const headerElement = boqMainElement.querySelector('.container > .header') as HTMLElement;
       const preliminariesElement = boqMainElement.querySelector('.preliminaries-section') as HTMLElement;
       const sectionsContainer = boqMainElement.querySelector('.sections-container') as HTMLElement;
+
+      // Set up progress tracking for BOQ stages
+      const boqSectionBlocks = sectionsContainer ? Array.from(sectionsContainer.querySelectorAll('.section-block')) : [];
+      const boqHasTerms = !!boqWrapper.querySelector('.terms-page');
+      const boqHasTotals = !!boqMainElement.querySelector('.totals');
+      boqProgressTotal =
+        (preliminariesElement ? 1 : 0) +
+        boqSectionBlocks.length +
+        (boqHasTotals ? 1 : 0) +
+        (boqHasTerms ? 1 : 0) +
+        1; // finalize
+      const reportBoqProgress = (stage: string) => {
+        boqProgressStep = Math.min(boqProgressStep + 1, boqProgressTotal);
+        reportPDFProgress({
+          current: boqProgressStep,
+          total: boqProgressTotal,
+          stage,
+        });
+      };
 
       // Render header first
       let currentPageY = margin;
@@ -1654,12 +1700,15 @@ export const generatePDF = async (data: DocumentData) => {
         currentPageY += prelimImgHeight;
 
         document.body.removeChild(prelim);
+        reportBoqProgress('Rendering preliminaries…');
       }
 
       // Render each section block with row-aware pagination
       const sectionBlocks = sectionsContainer ? Array.from(sectionsContainer.querySelectorAll('.section-block')) : [];
 
+      let boqSectionIndex = 0;
       for (const sectionBlock of sectionBlocks) {
+        boqSectionIndex += 1;
         const bottomPadding = 12;
 
         // Phase 1: Clone into hidden measurer to measure row heights
@@ -1701,6 +1750,7 @@ export const generatePDF = async (data: DocumentData) => {
           if (fbImgH > fbAvail && currentPageY > margin + 10) { pdf.addPage(); currentPageY = margin; }
           pdf.addImage(fbCanvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY), 'JPEG', 0, currentPageY, pageWidth, fbImgH);
           currentPageY += fbImgH;
+          reportBoqProgress(`Rendering section ${boqSectionIndex} of ${boqSectionBlocks.length}…`);
           continue;
         }
 
@@ -1793,6 +1843,8 @@ export const generatePDF = async (data: DocumentData) => {
             currentPageY = margin;
           }
         }
+
+        reportBoqProgress(`Rendering section ${boqSectionIndex} of ${boqSectionBlocks.length}…`);
       }
 
       // Render totals section
@@ -1838,6 +1890,7 @@ export const generatePDF = async (data: DocumentData) => {
         pdf.addImage(totalsImgData, 'JPEG', 0, currentPageY, totalsImgWidth, totalsImgHeight);
 
         document.body.removeChild(totalsWrapper2);
+        reportBoqProgress('Rendering totals…');
       }
 
       // Render Page 2: Terms and Conditions (on a fresh page) - only if terms section exists
@@ -1920,6 +1973,7 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         console.log(`Terms content rendered across ${Math.ceil(imgTermsHeight / pageContentHeight)} page(s)`);
+        reportBoqProgress('Rendering terms and conditions…');
       } else {
         console.log('Terms page section not included (customTitle may be set)');
       }
@@ -1928,6 +1982,11 @@ export const generatePDF = async (data: DocumentData) => {
       const filename = data.project_title
         ? `${data.number}-${data.project_title}.pdf`
         : `${data.number}.pdf`;
+      reportPDFProgress({
+        current: boqProgressTotal,
+        total: boqProgressTotal,
+        stage: 'Finalizing PDF…',
+      });
       pdf.save(filename);
       console.log('BOQ PDF generated successfully');
       return;
@@ -1940,6 +1999,7 @@ export const generatePDF = async (data: DocumentData) => {
       if (boqWrapper && boqWrapper.parentNode) {
         boqWrapper.parentNode.removeChild(boqWrapper);
       }
+      reportPDFProgress(null);
     }
   }
 
