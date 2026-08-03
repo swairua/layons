@@ -8,6 +8,9 @@ import html2canvas from 'html2canvas';
 import { getProjectTitleFromInvoice } from './boqInvoiceLinkage';
 import { supabase } from '@/integrations/supabase/client';
 
+const PDF_RENDER_SCALE = 1.35;
+const PDF_IMAGE_QUALITY = 0.85;
+
 // Helper function to render HTML content to canvas
 const renderHTMLToCanvas = async (htmlContent: string, pageSelector: string) => {
   let wrapper: HTMLElement | null = null;
@@ -73,7 +76,7 @@ const renderHTMLToCanvas = async (htmlContent: string, pageSelector: string) => 
 
     // Convert HTML to canvas - render only the specific page
     const canvas = await html2canvas(pageElement, {
-      scale: 2,
+      scale: PDF_RENDER_SCALE,
       backgroundColor: '#ffffff',
       logging: false,
       allowTaint: true,
@@ -118,7 +121,7 @@ const renderBOQSectionsToPDF = async (pdf: jsPDF, wrapper: HTMLElement, pageWidt
   await new Promise(resolve => setTimeout(resolve, 2000));
 
   const headerCanvas = await html2canvas(headerWrapper, {
-    scale: 2,
+    scale: PDF_RENDER_SCALE,
     backgroundColor: '#ffffff',
     logging: false,
     allowTaint: true,
@@ -131,9 +134,9 @@ const renderBOQSectionsToPDF = async (pdf: jsPDF, wrapper: HTMLElement, pageWidt
     foreignObjectRendering: false
   });
 
-  const headerImgData = headerCanvas.toDataURL('image/png');
+  const headerImgData = headerCanvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
   const headerImgHeight = (headerCanvas.height * pageWidth) / headerCanvas.width;
-  pdf.addImage(headerImgData, 'PNG', 0, 0, pageWidth, headerImgHeight);
+  pdf.addImage(headerImgData, 'JPEG', 0, 0, pageWidth, headerImgHeight);
 
   document.body.removeChild(headerWrapper);
 
@@ -156,7 +159,7 @@ const renderBOQSectionsToPDF = async (pdf: jsPDF, wrapper: HTMLElement, pageWidt
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     const sectionCanvas = await html2canvas(sectionWrapper, {
-      scale: 2,
+      scale: PDF_RENDER_SCALE,
       backgroundColor: '#ffffff',
       logging: false,
       allowTaint: true,
@@ -169,7 +172,7 @@ const renderBOQSectionsToPDF = async (pdf: jsPDF, wrapper: HTMLElement, pageWidt
       foreignObjectRendering: false
     });
 
-    const sectionImgData = sectionCanvas.toDataURL('image/png');
+    const sectionImgData = sectionCanvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
     const sectionImgHeight = (sectionCanvas.height * pageWidth) / sectionCanvas.width;
 
     // Check if section fits on current page, if not start new page
@@ -178,7 +181,7 @@ const renderBOQSectionsToPDF = async (pdf: jsPDF, wrapper: HTMLElement, pageWidt
       currentPageHeight = 0;
     }
 
-    pdf.addImage(sectionImgData, 'PNG', 0, currentPageHeight, pageWidth, sectionImgHeight);
+    pdf.addImage(sectionImgData, 'JPEG', 0, currentPageHeight, pageWidth, sectionImgHeight);
     currentPageHeight += sectionImgHeight;
 
     document.body.removeChild(sectionWrapper);
@@ -197,7 +200,7 @@ const addCanvasToPDF = async (pdf: jsPDF, canvas: HTMLCanvasElement, pageWidth: 
   }
 
   // Get canvas data
-  const imgData = canvas.toDataURL('image/png');
+  const imgData = canvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
   const imgWidth = pageWidth; // A4 width in mm
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
   let heightLeft = imgHeight;
@@ -210,7 +213,7 @@ const addCanvasToPDF = async (pdf: jsPDF, canvas: HTMLCanvasElement, pageWidth: 
       pdf.addPage();
     }
 
-    pdf.addImage(imgData, 'PNG', 0, -position, pageWidth, imgHeight);
+    pdf.addImage(imgData, 'JPEG', 0, -position, pageWidth, imgHeight);
     heightLeft -= pageHeight;
     position += pageHeight;
     isFirstPage = false;
@@ -275,7 +278,7 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Create PDF
-    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdf = new jsPDF('p', 'mm', 'a4', { compress: true });
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
 
@@ -292,7 +295,7 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
     for (const pageElement of pageSections) {
       // Convert each page element to canvas
       const pageCanvas = await html2canvas(pageElement as HTMLElement, {
-        scale: 2,
+        scale: PDF_RENDER_SCALE,
         backgroundColor: '#ffffff',
         logging: false,
         allowTaint: true,
@@ -333,9 +336,9 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
         if (tempCtx) {
           tempCtx.drawImage(pageCanvas, 0, yPxOffset, canvasW, capturePx, 0, 0, canvasW, capturePx);
         }
-        const chunkImgData = tempCanvas.toDataURL('image/png');
+        const chunkImgData = tempCanvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
 
-        pdf.addImage(chunkImgData, 'PNG', 0, 0, pageWidth, captureHmm);
+        pdf.addImage(chunkImgData, 'JPEG', 0, 0, pageWidth, captureHmm);
         yPxOffset += capturePx;
       }
     }
@@ -343,7 +346,7 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
     // Fallback: if no page sections found, render entire content
     if (pageSections.length === 0) {
       const canvas = await html2canvas(wrapper, {
-        scale: 2,
+        scale: PDF_RENDER_SCALE,
         backgroundColor: '#ffffff',
         logging: false,
         allowTaint: true,
@@ -381,9 +384,9 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
         if (tempCtx2) {
           tempCtx2.drawImage(canvas, 0, yPxOffset2, canvasW2, capturePx, 0, 0, canvasW2, capturePx);
         }
-        const chunkImgData2 = tempCanvas2.toDataURL('image/png');
+        const chunkImgData2 = tempCanvas2.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
 
-        pdf.addImage(chunkImgData2, 'PNG', 0, 0, pageWidth, captureHmm);
+        pdf.addImage(chunkImgData2, 'JPEG', 0, 0, pageWidth, captureHmm);
         yPxOffset2 += capturePx;
       }
     }
@@ -1515,7 +1518,7 @@ export const generatePDF = async (data: DocumentData) => {
 
     try {
       // Create PDF
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdf = new jsPDF('p', 'mm', 'a4', { compress: true });
       const pageWidth = pdf.internal.pageSize.getWidth(); // 210mm
       const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
       const margin = 15; // 15mm margins on all sides
@@ -1586,7 +1589,7 @@ export const generatePDF = async (data: DocumentData) => {
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         const headerCanvas = await html2canvas(headerWrapper2, {
-          scale: 2,
+          scale: PDF_RENDER_SCALE,
           backgroundColor: '#ffffff',
           logging: false,
           allowTaint: true,
@@ -1599,10 +1602,10 @@ export const generatePDF = async (data: DocumentData) => {
           foreignObjectRendering: false
         });
 
-        const headerImgData = headerCanvas.toDataURL('image/png');
+        const headerImgData = headerCanvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
         const headerImgWidth = pageWidth;
         const headerImgHeight = (headerCanvas.height * headerImgWidth) / headerCanvas.width;
-        pdf.addImage(headerImgData, 'PNG', 0, currentPageY, headerImgWidth, headerImgHeight);
+        pdf.addImage(headerImgData, 'JPEG', 0, currentPageY, headerImgWidth, headerImgHeight);
         currentPageY += headerImgHeight;
 
         document.body.removeChild(headerWrapper2);
@@ -1624,7 +1627,7 @@ export const generatePDF = async (data: DocumentData) => {
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         const prelimCanvas = await html2canvas(prelim, {
-          scale: 2,
+          scale: PDF_RENDER_SCALE,
           backgroundColor: '#ffffff',
           logging: false,
           allowTaint: true,
@@ -1637,7 +1640,7 @@ export const generatePDF = async (data: DocumentData) => {
           foreignObjectRendering: false
         });
 
-        const prelimImgData = prelimCanvas.toDataURL('image/png');
+        const prelimImgData = prelimCanvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
         const prelimImgWidth = pageWidth;
         const prelimImgHeight = (prelimCanvas.height * prelimImgWidth) / prelimCanvas.width;
 
@@ -1647,7 +1650,7 @@ export const generatePDF = async (data: DocumentData) => {
           currentPageY = margin;
         }
 
-        pdf.addImage(prelimImgData, 'PNG', 0, currentPageY, prelimImgWidth, prelimImgHeight);
+        pdf.addImage(prelimImgData, 'JPEG', 0, currentPageY, prelimImgWidth, prelimImgHeight);
         currentPageY += prelimImgHeight;
 
         document.body.removeChild(prelim);
@@ -1687,7 +1690,7 @@ export const generatePDF = async (data: DocumentData) => {
           document.body.appendChild(fbWrapper);
           await new Promise(resolve => setTimeout(resolve, 1000));
           const fbCanvas = await html2canvas(fbWrapper, {
-            scale: 2, backgroundColor: '#ffffff', logging: false, allowTaint: true, useCORS: true,
+            scale: PDF_RENDER_SCALE, backgroundColor: '#ffffff', logging: false, allowTaint: true, useCORS: true,
             imageTimeout: 15000, timeout: 45000,
             windowHeight: Math.max(fbWrapper.scrollHeight, fbWrapper.offsetHeight) || 1000,
             windowWidth: 210 * 3.779527559, proxy: undefined, foreignObjectRendering: false
@@ -1696,7 +1699,7 @@ export const generatePDF = async (data: DocumentData) => {
           const fbImgH = (fbCanvas.height * pageWidth) / fbCanvas.width;
           const fbAvail = pageHeight - currentPageY - margin;
           if (fbImgH > fbAvail && currentPageY > margin + 10) { pdf.addPage(); currentPageY = margin; }
-          pdf.addImage(fbCanvas.toDataURL('image/png'), 'PNG', 0, currentPageY, pageWidth, fbImgH);
+          pdf.addImage(fbCanvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY), 'JPEG', 0, currentPageY, pageWidth, fbImgH);
           currentPageY += fbImgH;
           continue;
         }
@@ -1773,7 +1776,7 @@ export const generatePDF = async (data: DocumentData) => {
           await new Promise(resolve => setTimeout(resolve, 1000));
 
           const sliceCanvas = await html2canvas(sliceWrapper, {
-            scale: 2, backgroundColor: '#ffffff', logging: false, allowTaint: true, useCORS: true,
+            scale: PDF_RENDER_SCALE, backgroundColor: '#ffffff', logging: false, allowTaint: true, useCORS: true,
             imageTimeout: 15000, timeout: 45000,
             windowHeight: Math.max(sliceWrapper.scrollHeight, sliceWrapper.offsetHeight) || 1000,
             windowWidth: 210 * 3.779527559, proxy: undefined, foreignObjectRendering: false
@@ -1782,7 +1785,7 @@ export const generatePDF = async (data: DocumentData) => {
           document.body.removeChild(sliceWrapper);
 
           const imgHmm = (sliceCanvas.height * pageWidth) / sliceCanvas.width;
-          pdf.addImage(sliceCanvas.toDataURL('image/png'), 'PNG', 0, currentPageY, pageWidth, imgHmm);
+          pdf.addImage(sliceCanvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY), 'JPEG', 0, currentPageY, pageWidth, imgHmm);
           currentPageY += imgHmm;
 
           if (rowIndex < rowData.length) {
@@ -1809,7 +1812,7 @@ export const generatePDF = async (data: DocumentData) => {
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         const totalsCanvas = await html2canvas(totalsWrapper2, {
-          scale: 2,
+          scale: PDF_RENDER_SCALE,
           backgroundColor: '#ffffff',
           logging: false,
           allowTaint: true,
@@ -1822,7 +1825,7 @@ export const generatePDF = async (data: DocumentData) => {
           foreignObjectRendering: false
         });
 
-        const totalsImgData = totalsCanvas.toDataURL('image/png');
+        const totalsImgData = totalsCanvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
         const totalsImgWidth = pageWidth;
         const totalsImgHeight = (totalsCanvas.height * totalsImgWidth) / totalsCanvas.width;
 
@@ -1832,7 +1835,7 @@ export const generatePDF = async (data: DocumentData) => {
           currentPageY = margin;
         }
 
-        pdf.addImage(totalsImgData, 'PNG', 0, currentPageY, totalsImgWidth, totalsImgHeight);
+        pdf.addImage(totalsImgData, 'JPEG', 0, currentPageY, totalsImgWidth, totalsImgHeight);
 
         document.body.removeChild(totalsWrapper2);
       }
@@ -1846,7 +1849,7 @@ export const generatePDF = async (data: DocumentData) => {
         // Render the terms element to canvas with a very large height to capture all content
         // html2canvas will only render what's actually there, so this ensures nothing is cut off
         const termsCanvas = await html2canvas(termsElement, {
-          scale: 2,
+          scale: PDF_RENDER_SCALE,
           backgroundColor: '#ffffff',
           logging: false,
           allowTaint: true,
@@ -1862,7 +1865,7 @@ export const generatePDF = async (data: DocumentData) => {
         console.log('Terms canvas dimensions:', termsCanvas.width, 'x', termsCanvas.height);
 
         // Convert canvas to image data
-        const imgTermsData = termsCanvas.toDataURL('image/png');
+        const imgTermsData = termsCanvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
         const imgTermsWidth = contentWidth; // Content width 180mm (210mm - 30mm margins)
         const imgTermsHeight = (termsCanvas.height * imgTermsWidth) / termsCanvas.width;
 
@@ -1906,10 +1909,10 @@ export const generatePDF = async (data: DocumentData) => {
             );
 
             // Convert cropped canvas to image
-            const croppedImageData = tempCanvas.toDataURL('image/png');
+            const croppedImageData = tempCanvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
 
             // Add cropped image to PDF
-            pdf.addImage(croppedImageData, 'PNG', margin, margin, imgTermsWidth, heightOnThisPage);
+            pdf.addImage(croppedImageData, 'JPEG', margin, margin, imgTermsWidth, heightOnThisPage);
           }
 
           currentPageY += heightOnThisPage;
@@ -1943,7 +1946,7 @@ export const generatePDF = async (data: DocumentData) => {
   // Handle quotations, invoices, and proformas with sections
   if ((data.type === 'quotation' || data.type === 'invoice' || data.type === 'proforma') && data.sections && data.sections.length > 0) {
     // For section-based PDFs, render each section separately to avoid text cutting across pages
-    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdf = new jsPDF('p', 'mm', 'a4', { compress: true });
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
     const pageContentHeight = pageHeight - 30; // Account for margins (15mm top + 15mm bottom = 30mm)
@@ -1994,7 +1997,7 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         const canvas = await html2canvas(pageElement, {
-          scale: 2,
+          scale: PDF_RENDER_SCALE,
           backgroundColor: '#ffffff',
           logging: false,
           allowTaint: true,
@@ -2012,7 +2015,7 @@ export const generatePDF = async (data: DocumentData) => {
           pdf.addPage();
         }
 
-        const imgData = canvas.toDataURL('image/png');
+        const imgData = canvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
         const imgHeight = (canvas.height * pageWidth) / canvas.width;
         let heightLeft = imgHeight;
         let position = 0;
@@ -2022,7 +2025,7 @@ export const generatePDF = async (data: DocumentData) => {
           if (!isFirstPageOfSection) {
             pdf.addPage();
           }
-          pdf.addImage(imgData, 'PNG', 0, -position, pageWidth, imgHeight);
+          pdf.addImage(imgData, 'JPEG', 0, -position, pageWidth, imgHeight);
           heightLeft -= pageContentHeight;
           position += pageContentHeight;
           isFirstPageOfSection = false;
