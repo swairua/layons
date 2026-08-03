@@ -7,6 +7,8 @@ import { Header } from './Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { EnhancedLogin } from '@/components/auth/EnhancedLogin';
+import { clearAuthTokens } from '@/utils/authHelpers';
+import { Button } from '@/components/ui/button';
 
 interface LayoutProps {
   children: ReactNode;
@@ -17,6 +19,20 @@ export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [loadingStartTime] = useState(Date.now());
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showStuckRecovery, setShowStuckRecovery] = useState(false);
+
+  // Safety net: if the app is ever stuck in the loading+authenticated state
+  // for an extended period, surface a manual reset so the user is never trapped.
+  useEffect(() => {
+    if (loading && isAuthenticated) {
+      const timer = setTimeout(() => setShowStuckRecovery(true), 6000);
+      return () => {
+        clearTimeout(timer);
+        setShowStuckRecovery(false);
+      };
+    }
+    setShowStuckRecovery(false);
+  }, [loading, isAuthenticated]);
 
   // Routes that don't require authentication
   const publicRoutes = ['/auth-test', '/manual-setup', '/database-fix-page', '/auto-fix', '/audit', '/auto-payment-sync', '/payment-sync', '/admin-recreate'];
@@ -68,6 +84,22 @@ export function Layout({ children }: LayoutProps) {
           <h2 className="text-lg font-semibold mb-2">Loading...</h2>
           <p className="text-muted-foreground">App appears to be stuck in loading state...</p>
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mt-4"></div>
+          {showStuckRecovery && (
+            <div className="mt-6 space-y-3">
+              <p className="text-sm text-muted-foreground">
+                The app is taking too long to respond. You can reset your session to continue.
+              </p>
+              <Button
+                variant="default"
+                onClick={() => {
+                  clearAuthTokens();
+                  window.location.reload();
+                }}
+              >
+                Reset session and reload
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     );

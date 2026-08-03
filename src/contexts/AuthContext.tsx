@@ -754,11 +754,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signOut = useCallback(async () => {
     signingOutRef.current = true;
 
-    try {
-      console.log('Starting sign out process...');
-      setLoading(true);
+    // Clear local auth state immediately and unconditionally so the UI never
+    // depends on the Supabase /logout request settling. Without this, a slow or
+    // hanging network call left loading=true while isAuthenticated stayed true,
+    // which made the app appear stuck on the "Loading..." screen indefinitely.
+    console.log('Starting sign out process...');
+    setUser(null);
+    setProfile(null);
+    setPermissions({});
+    setSession(null);
+    setProfileReady(true);
+    clearAuthTokens();
+    setLoading(false);
 
+    // Hard timeout so a hanging sign-out request can never freeze the app.
+    // Mirrors the existing timeout pattern used by signIn and initialization.
+    let timedOut = false;
+    const hardTimeout = setTimeout(() => {
+      timedOut = true;
+      signingOutRef.current = false;
+      setTimeout(() => toast.info('Signed out locally (connection issue)'), 0);
+    }, 2500);
+
+    try {
+      // Best-effort server-side sign out; local state is already cleared.
       const { error } = await supabase.auth.signOut({ scope: 'local' });
+
+      if (timedOut) return;
+      clearTimeout(hardTimeout);
 
       if (error) {
         // Better error message handling
@@ -783,27 +806,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         logError('❌ Sign out error:', errorMsg, { context: 'signOut' });
 
-        // Still clear local state on error - user may have network issues
-        setUser(null);
-        setProfile(null);
-        setPermissions({});
-        setSession(null);
-        clearAuthTokens();
-
         // Network errors during sign out are non-critical since we clear local state anyway
         setTimeout(() => toast.info('Signed out locally (connection issue)'), 0);
       } else {
         console.log('✅ Supabase sign out successful');
-
-        // Clear state immediately
-        setUser(null);
-        setProfile(null);
-        setPermissions({});
-        setSession(null);
-
-        // Clear local storage
-        clearAuthTokens();
-
         setTimeout(() => toast.success('Signed out successfully'), 0);
         console.log('🎉 Sign out complete!');
       }
@@ -829,15 +835,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       logError('❌ Sign out exception:', errorMsg, { context: 'signOut' });
 
-      // Clear local state anyway to allow user to proceed
-      setUser(null);
-      setProfile(null);
-      setSession(null);
-      clearAuthTokens();
-
       // Network errors during sign out are not critical - we've already cleared local state
       setTimeout(() => toast.info('Signed out locally (connection issue)'), 0);
     } finally {
+      if (!timedOut) clearTimeout(hardTimeout);
       if (mountedRef.current) {
         setLoading(false);
       }
