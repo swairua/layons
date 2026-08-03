@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { hasFeature, getAllowedFeatures } from '@/utils/rolePermissions';
 import type { FeatureKey, UserRole } from '@/utils/rolePermissions';
+import { saveUserPermissions } from '@/utils/permissionSaveHelper';
 import { toast } from 'sonner';
 import { parseErrorMessage } from '@/utils/errorHelpers';
 import { Loader2, Search, Shield, Save, AlertCircle } from 'lucide-react';
@@ -44,7 +45,7 @@ interface UserWithPermissions {
 }
 
 export default function UserPermissions() {
-  const { profile } = useAuth();
+  const { profile, refreshPermissions } = useAuth();
   const [users, setUsers] = useState<UserWithPermissions[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
@@ -112,35 +113,31 @@ export default function UserPermissions() {
 
   const savePermissions = async (userId: string) => {
     const user = users.find(u => u.id === userId);
-    if (!user) return;
+    if (!user || !profile?.id) return;
 
     setSaving(userId);
     try {
-      const roleDefaults = getAllowedFeatures(user.role);
-      const overrides = Object.entries(user.overrides)
-        .filter(([key, granted]) => {
-          const defaultValue = roleDefaults.includes(key as FeatureKey);
-          return granted !== defaultValue;
-        });
+      const result = await saveUserPermissions(
+        userId,
+        profile.id,
+        user.overrides,
+        user.role
+      );
 
-      await supabase.from('user_permissions').delete().eq('user_id', userId);
-
-      if (overrides.length > 0) {
-        const { error } = await supabase.from('user_permissions').insert(
-          overrides.map(([permission_name, granted]) => ({
-            user_id: userId,
-            permission_name,
-            granted,
-            granted_by: profile?.id,
-          }))
+      if (result.success) {
+        toast.success(
+          `Saved for ${user.full_name || user.email} (${result.rowsInserted || 0} overrides)`
         );
-        if (error) throw error;
+        setUsers(prev => prev.map(u =>
+          u.id === userId ? { ...u, changed: false } : u
+        ));
+        // Trigger permission refresh for modified user to sync changes
+        await refreshPermissions();
+      } else {
+        const errorMsg = result.error?.message || 'Unknown error';
+        const details = result.error?.details ? ` (${result.error.details})` : '';
+        toast.error(`Save failed: ${errorMsg}${details}`);
       }
-
-      toast.success(`Saved for ${user.full_name || user.email}`);
-      setUsers(prev => prev.map(u =>
-        u.id === userId ? { ...u, changed: false } : u
-      ));
     } catch (err) {
       toast.error(`Save failed: ${parseErrorMessage(err)}`);
     } finally {
@@ -292,12 +289,13 @@ export default function UserPermissions() {
             try {
               const userIds = users.map(u => u.id);
               if (userIds.length > 0) {
-                await supabase.from('user_permissions').delete().in('user_id', userIds);
+                const { error } = await supabase.from('user_permissions').delete().in('user_id', userIds);
+                if (error) throw error;
               }
               await loadUsers();
               toast.success('Overrides cleared');
             } catch (err) {
-              toast.error(`Sync failed: ${parseErrorMessage(err)}`);
+              toast.error(`Clear failed: ${parseErrorMessage(err)}`);
             } finally {
               setLoading(false);
             }
