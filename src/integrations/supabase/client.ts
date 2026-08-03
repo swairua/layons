@@ -40,7 +40,7 @@ const getStorage = () => {
 // (tables like boqs, lcl_template_*, cash_receipts are missing). To unblock the
 // build while the types regenerate, the client is cast to `any` here. Runtime
 // behaviour is unchanged.
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+const supabaseClient = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: getStorage(),
     storageKey: 'sb-auth-token',
@@ -54,3 +54,5 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     },
   },
 }) as any;
+
+export { supabaseClient as supabase };
