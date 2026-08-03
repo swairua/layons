@@ -68,7 +68,7 @@ export default function UserPermissions() {
       if (profileError) throw profileError;
       const userIds = (profiles || []).map(p => p.id);
 
-      let permMap: Record<string, Record<string, boolean>> = {};
+      const permMap: Record<string, Record<string, boolean>> = {};
       if (userIds.length > 0) {
         const { data: perms, error: permError } = await supabase
           .from('user_permissions')
@@ -104,11 +104,12 @@ export default function UserPermissions() {
   }, [loadUsers]);
 
   const toggleOverride = (userId: string, feature: FeatureKey) => {
-    setUsers(prev => prev.map(u =>
-      u.id === userId
-        ? { ...u, overrides: { ...u.overrides, [feature]: !u.overrides[feature] }, changed: true }
-        : u
-    ));
+    setUsers(prev => prev.map(u => {
+      if (u.id !== userId) return u;
+
+      const currentValue = feature in u.overrides ? u.overrides[feature] : hasFeature(u.role, feature);
+      return { ...u, overrides: { ...u.overrides, [feature]: !currentValue }, changed: true };
+    }));
   };
 
   const savePermissions = async (userId: string) => {
@@ -117,12 +118,7 @@ export default function UserPermissions() {
 
     setSaving(userId);
     try {
-      const result = await saveUserPermissions(
-        userId,
-        profile.id,
-        user.overrides,
-        user.role
-      );
+      const result = await saveUserPermissions(userId, user.overrides, user.role);
 
       if (result.success) {
         toast.success(
@@ -287,12 +283,13 @@ export default function UserPermissions() {
             if (!confirm('Clear all permission overrides for your company?')) return;
             setLoading(true);
             try {
-              const userIds = users.map(u => u.id);
-              if (userIds.length > 0) {
-                const { error } = await supabase.from('user_permissions').delete().in('user_id', userIds);
-                if (error) throw error;
-              }
+              const results = await Promise.all(
+                users.map((user) => saveUserPermissions(user.id, {}, user.role))
+              );
+              const failedResult = results.find((result) => !result.success);
+              if (failedResult) throw new Error(failedResult.error?.message || 'Permission reset failed');
               await loadUsers();
+              await refreshPermissions();
               toast.success('Overrides cleared');
             } catch (err) {
               toast.error(`Clear failed: ${parseErrorMessage(err)}`);
