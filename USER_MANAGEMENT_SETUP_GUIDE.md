@@ -444,6 +444,10 @@ npm install -g supabase
 supabase functions deploy create-user
 supabase functions deploy delete-user
 supabase functions deploy send-invitation
+supabase functions deploy save-user-permissions
+
+# Apply the permission schema, RLS policies, and transactional save RPC
+supabase db push
 ```
 
 ## Option 2: External Backend API

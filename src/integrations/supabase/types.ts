@@ -2208,7 +2208,7 @@ export type Database = {
           granted_by: string | null
           id: string
           permission_name: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           granted?: boolean | null

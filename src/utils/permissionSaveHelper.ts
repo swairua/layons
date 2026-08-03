@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { UserRole } from '@/utils/rolePermissions';
 
 export interface PermissionSaveError {
@@ -24,16 +25,32 @@ export async function saveUserPermissions(
   });
 
   if (error) {
+    const message = error.message || '';
+    const isUnavailable = error.name === 'FunctionsFetchError' || message.toLowerCase().includes('failed to send a request');
+
     return {
       success: false,
-      error: { code: 'SAVE_FAILED', message: error.message },
+      error: {
+        code: isUnavailable ? 'SAVE_SERVICE_UNAVAILABLE' : 'SAVE_FAILED',
+        message: isUnavailable
+          ? 'Permission service is unavailable. Ask an administrator to deploy the save-user-permissions function.'
+          : message || 'Permission save failed',
+        details: message || undefined,
+      },
     };
   }
 
   if (!data?.success) {
+    const message = data?.error || 'Permission save failed';
+    const isAuthorizationError = /only admins|other companies|unauthorized/i.test(message);
+
     return {
       success: false,
-      error: { code: 'SAVE_FAILED', message: data?.error || 'Permission save failed' },
+      error: {
+        code: isAuthorizationError ? 'SAVE_NOT_AUTHORIZED' : 'SAVE_FAILED',
+        message: isAuthorizationError ? 'You are not authorized to change permissions for this user.' : message,
+        details: message,
+      },
     };
   }
 
