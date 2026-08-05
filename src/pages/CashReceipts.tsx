@@ -156,6 +156,7 @@ export default function CashReceipts() {
         .select(sourceReceiptSelect)
         .eq('company_id', currentCompany.id)
         .order('receipt_date', { ascending: false })
+        .order('created_at', { ascending: false })
         .range(from, to - 1);
 
       if (error) {
@@ -165,6 +166,7 @@ export default function CashReceipts() {
           .select(legacyReceiptSelect)
           .eq('company_id', currentCompany.id)
           .order('receipt_date', { ascending: false })
+          .order('created_at', { ascending: false })
           .range(from, to - 1));
       }
 

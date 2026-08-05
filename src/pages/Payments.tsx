@@ -275,7 +275,17 @@ export default function Payments() {
 
   // Removed inline PDF generation function - now using utility function
 
-  const filteredPayments = payments.filter(payment => {
+  const sortedPayments = [...payments].sort((a, b) => {
+    const paymentDateDifference = new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime();
+    if (paymentDateDifference !== 0) return paymentDateDifference;
+
+    const createdAtDifference = new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+    if (createdAtDifference !== 0) return createdAtDifference;
+
+    return b.id.localeCompare(a.id);
+  });
+
+  const filteredPayments = sortedPayments.filter(payment => {
     const matchesSearch =
       (payment.customers?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
       (payment.payment_number?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
