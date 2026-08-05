@@ -4664,6 +4664,18 @@ export const downloadLPOPDF = async (lpo: any, company?: CompanyDetails) => {
   return generatePDF(documentData);
 };
 
+export const mapCashReceiptItems = (receipt: any) =>
+  (receipt.cash_receipt_items || []).map((item: any) => ({
+    description: item.description,
+    quantity: item.quantity,
+    unit_price: item.unit_price,
+    tax_percentage: item.tax_percentage || 0,
+    tax_amount: item.tax_amount || 0,
+    tax_inclusive: false,
+    line_total: item.line_total,
+    invoice_number: receipt.invoices?.invoice_number,
+  }));
+
 // Function for generating cash receipt PDF
 export const downloadCashReceiptPDF = async (receipt: any, company?: CompanyDetails) => {
   const projectTitle = receipt.project_title || receipt.invoices?.project_title || (
@@ -4672,16 +4684,7 @@ export const downloadCashReceiptPDF = async (receipt: any, company?: CompanyDeta
       : null
   );
 
-  // Format items from receipt
-  const items = (receipt.cash_receipt_items || []).map((item: any) => ({
-    description: item.description,
-    quantity: item.quantity,
-    unit_price: item.unit_price,
-    tax_percentage: item.tax_percentage || 0,
-    tax_amount: item.tax_amount || 0,
-    tax_inclusive: false,
-    line_total: item.line_total,
-  }));
+  const items = mapCashReceiptItems(receipt);
 
   // Calculate totals
   const subtotal = items.reduce((sum: number, item: any) => sum + (item.quantity * item.unit_price), 0);
