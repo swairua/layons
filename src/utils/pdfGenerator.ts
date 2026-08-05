@@ -4650,6 +4650,12 @@ export const downloadLPOPDF = async (lpo: any, company?: CompanyDetails) => {
 
 // Function for generating cash receipt PDF
 export const downloadCashReceiptPDF = async (receipt: any, company?: CompanyDetails) => {
+  const projectTitle = receipt.project_title || (
+    receipt.invoices?.invoice_number && receipt.company_id
+      ? await getProjectTitleFromInvoice(receipt.invoices, receipt.company_id)
+      : null
+  );
+
   // Format items from receipt
   const items = (receipt.cash_receipt_items || []).map((item: any) => ({
     description: item.description,
@@ -4678,6 +4684,7 @@ export const downloadCashReceiptPDF = async (receipt: any, company?: CompanyDeta
       city: receipt.customers?.city,
       country: receipt.customers?.country,
     },
+    project_title: projectTitle || undefined,
     items: items.length > 0 ? items : [
       {
         description: 'Payment Received',

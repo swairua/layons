@@ -40,6 +40,7 @@ interface CashReceiptItem {
 
 interface CashReceipt {
   id: string;
+  company_id: string;
   receipt_number: string;
   customers?: {
     name: string;
@@ -88,6 +89,7 @@ export default function CashReceipts() {
 
       const sourceReceiptSelect = `
         id,
+        company_id,
         receipt_number,
         customer_id,
         receipt_date,
@@ -121,6 +123,7 @@ export default function CashReceipts() {
       `;
       const legacyReceiptSelect = `
         id,
+        company_id,
         receipt_number,
         customer_id,
         receipt_date,
