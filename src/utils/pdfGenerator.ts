@@ -4659,7 +4659,7 @@ export const downloadLPOPDF = async (lpo: any, company?: CompanyDetails) => {
 
 // Function for generating cash receipt PDF
 export const downloadCashReceiptPDF = async (receipt: any, company?: CompanyDetails) => {
-  const projectTitle = receipt.project_title || (
+  const projectTitle = receipt.project_title || receipt.invoices?.project_title || (
     receipt.invoices?.invoice_number && receipt.company_id
       ? await getProjectTitleFromInvoice(receipt.invoices, receipt.company_id)
       : null

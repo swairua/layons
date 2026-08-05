@@ -53,8 +53,10 @@ interface CashReceipt {
   change: number;
   notes?: string;
   invoice_id?: string | null;
+  project_title?: string | null;
   invoices?: {
     invoice_number: string;
+    project_title?: string | null;
     notes?: string | null;
   } | null;
   created_at?: string;
@@ -102,6 +104,7 @@ export default function CashReceipts() {
         created_at,
         invoices:invoices!invoice_id (
           invoice_number,
+          project_title,
           notes
         ),
         customers (
