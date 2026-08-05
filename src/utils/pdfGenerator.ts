@@ -323,32 +323,39 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
         continue;
       }
 
-      // Crop and add canvas to PDF in page-sized chunks
+      // Fit receipt overflow onto one page instead of creating a trailing page.
       const canvasW = pageCanvas.width;
       const canvasH = pageCanvas.height;
       const pxPerMm = canvasW / pageWidth;
-      let yPxOffset = 0;
 
-      while (yPxOffset < canvasH) {
-        if (!isFirstPage) {
-          pdf.addPage();
-        }
+      if (data.type === 'receipt') {
+        if (!isFirstPage) pdf.addPage();
         isFirstPage = false;
+        const pageImgData = pageCanvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
+        pdf.addImage(pageImgData, 'JPEG', 0, 0, pageWidth, pageHeight);
+      } else {
+        let yPxOffset = 0;
+        while (yPxOffset < canvasH) {
+          if (!isFirstPage) {
+            pdf.addPage();
+          }
+          isFirstPage = false;
 
-        const capturePx = Math.min(canvasH - yPxOffset, Math.round(pageHeight * pxPerMm));
-        const captureHmm = capturePx / pxPerMm;
+          const capturePx = Math.min(canvasH - yPxOffset, Math.round(pageHeight * pxPerMm));
+          const captureHmm = capturePx / pxPerMm;
 
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = canvasW;
-        tempCanvas.height = capturePx;
-        const tempCtx = tempCanvas.getContext('2d');
-        if (tempCtx) {
-          tempCtx.drawImage(pageCanvas, 0, yPxOffset, canvasW, capturePx, 0, 0, canvasW, capturePx);
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = canvasW;
+          tempCanvas.height = capturePx;
+          const tempCtx = tempCanvas.getContext('2d');
+          if (tempCtx) {
+            tempCtx.drawImage(pageCanvas, 0, yPxOffset, canvasW, capturePx, 0, 0, canvasW, capturePx);
+          }
+          const chunkImgData = tempCanvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
+
+          pdf.addImage(chunkImgData, 'JPEG', 0, 0, pageWidth, captureHmm);
+          yPxOffset += capturePx;
         }
-        const chunkImgData = tempCanvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
-
-        pdf.addImage(chunkImgData, 'JPEG', 0, 0, pageWidth, captureHmm);
-        yPxOffset += capturePx;
       }
 
       progressStep += 1;
@@ -3356,7 +3363,7 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         body.receipt-document .page:last-of-type {
-          padding-bottom: 15mm;
+          padding-bottom: 0;
           margin-bottom: 0;
           page-break-after: auto;
         }
@@ -4650,6 +4657,12 @@ export const downloadLPOPDF = async (lpo: any, company?: CompanyDetails) => {
 
 // Function for generating cash receipt PDF
 export const downloadCashReceiptPDF = async (receipt: any, company?: CompanyDetails) => {
+  const projectTitle = receipt.project_title || (
+    receipt.invoices?.invoice_number && receipt.company_id
+      ? await getProjectTitleFromInvoice(receipt.invoices, receipt.company_id)
+      : null
+  );
+
   // Format items from receipt
   const items = (receipt.cash_receipt_items || []).map((item: any) => ({
     description: item.description,
@@ -4678,6 +4691,7 @@ export const downloadCashReceiptPDF = async (receipt: any, company?: CompanyDeta
       city: receipt.customers?.city,
       country: receipt.customers?.country,
     },
+    project_title: projectTitle || undefined,
     items: items.length > 0 ? items : [
       {
         description: 'Payment Received',

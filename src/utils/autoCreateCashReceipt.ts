@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface AutoCreateReceiptParams {
   company_id: string;
   customer_id: string;
+  invoice_id: string;
   payment_date: string;
   amount: number;
   payment_method: string;
@@ -20,6 +21,7 @@ export async function autoCreateCashReceipt(params: AutoCreateReceiptParams) {
     const {
       company_id,
       customer_id,
+      invoice_id,
       payment_date,
       amount,
       payment_method,
@@ -53,6 +55,7 @@ export async function autoCreateCashReceipt(params: AutoCreateReceiptParams) {
       .insert({
         company_id,
         customer_id,
+        invoice_id,
         receipt_number: receiptNumber,
         receipt_date: payment_date,
         total_amount: amount,

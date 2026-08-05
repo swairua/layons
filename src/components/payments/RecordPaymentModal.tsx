@@ -167,6 +167,7 @@ export function RecordPaymentModal({ open, onOpenChange, onSuccess, invoice }: R
         const receiptResult = await autoCreateCashReceipt({
           company_id: selectedInvoice.company_id || currentCompany!.id,
           customer_id: selectedInvoice.customer_id,
+          invoice_id: selectedInvoice.id,
           payment_date: paymentData.payment_date,
           amount: amount,
           payment_method: paymentData.payment_method,

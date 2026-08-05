@@ -26,6 +26,7 @@ import { useCustomers, useProducts, useTaxSettings } from '@/hooks/useDatabase';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { extractBoqNumberFromNotes, fetchBoqProjectTitle } from '@/utils/boqInvoiceLinkage';
 
 const PAYMENT_METHODS = [
   'Cash',
@@ -66,6 +67,7 @@ export function EditCashReceiptModal({ open, onOpenChange, onSuccess, receipt }:
   const [items, setItems] = useState<CashReceiptItem[]>([]);
   const [applyTax, setApplyTax] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [boqProjectTitle, setBoqProjectTitle] = useState<string | null>(null);
 
   const { currentCompany, isLoading: companyLoading } = useCurrentCompany();
   const { data: customers, isLoading: loadingCustomers } = useCustomers(currentCompany?.id);
@@ -104,6 +106,26 @@ export function EditCashReceiptModal({ open, onOpenChange, onSuccess, receipt }:
       setItems(mappedItems);
     }
   }, [receipt, open]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadBoqProjectTitle = async () => {
+      setBoqProjectTitle(null);
+      const invoice = receipt?.invoices;
+      if (!open || !receipt?.invoice_id || !invoice || !currentCompany?.id) return;
+
+      const boqNumber = extractBoqNumberFromNotes(invoice.notes);
+      if (!boqNumber) return;
+
+      const projectTitle = await fetchBoqProjectTitle(boqNumber, currentCompany.id);
+      if (!cancelled) setBoqProjectTitle(projectTitle);
+    };
+
+    loadBoqProjectTitle();
+    return () => {
+      cancelled = true;
+    };
+  }, [receipt, open, currentCompany?.id]);
 
   // Recalculate all items when applyTax changes
   useEffect(() => {
@@ -405,6 +427,21 @@ export function EditCashReceiptModal({ open, onOpenChange, onSuccess, receipt }:
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {receipt?.invoice_id && receipt.invoices && (
+            <div className="rounded-md border bg-muted/30 p-4 space-y-2">
+              <div className="flex justify-between gap-4 text-sm">
+                <span className="font-medium text-muted-foreground">Invoice</span>
+                <span>{receipt.invoices.invoice_number}</span>
+              </div>
+              {boqProjectTitle && (
+                <div className="flex justify-between gap-4 text-sm">
+                  <span className="font-medium text-muted-foreground">BOQ</span>
+                  <span className="text-right">{boqProjectTitle}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Customer Selection */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
