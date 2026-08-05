@@ -214,7 +214,7 @@ export default function Payments() {
     }
   };
 
-  const handleDownloadReceipt = (payment: Payment) => {
+  const handleDownloadReceipt = async (payment: Payment) => {
     try {
       // Debug: Log the payment data
       console.log('Payment data for receipt:', {
@@ -265,7 +265,7 @@ export default function Payments() {
         company_services: currentCompany.company_services
       } : undefined;
 
-      generatePaymentReceiptPDF(enrichedPayment, companyDetails);
+      await generatePaymentReceiptPDF(enrichedPayment, companyDetails);
       toast.success(`Receipt downloaded for payment ${payment.payment_number}`);
     } catch (error) {
       console.error('Error downloading receipt:', error);

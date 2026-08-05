@@ -922,8 +922,9 @@ export const usePayments = (companyId?: string) => {
             updated_at
           `)
           .eq('company_id', companyId)
-          .order('created_at', { ascending: true })
-          .order('id', { ascending: true });
+          .order('payment_date', { ascending: false })
+          .order('created_at', { ascending: false })
+          .order('id', { ascending: false });
 
         const { data: payments, error: paymentsError } = await query;
 

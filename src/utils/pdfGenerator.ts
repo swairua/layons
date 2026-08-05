@@ -222,7 +222,7 @@ const addCanvasToPDF = async (pdf: jsPDF, canvas: HTMLCanvasElement, pageWidth: 
 };
 
 // Helper function to convert HTML to PDF and auto-download
-const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string) => {
+const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string, documentType: DocumentData['type']) => {
   let wrapper: HTMLElement | null = null;
   let progressStep = 0;
   let progressTotal = 1;
@@ -328,7 +328,7 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
       const canvasH = pageCanvas.height;
       const pxPerMm = canvasW / pageWidth;
 
-      if (data.type === 'receipt') {
+      if (documentType === 'receipt') {
         if (!isFirstPage) pdf.addPage();
         isFirstPage = false;
         const pageImgData = pageCanvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
@@ -2892,7 +2892,7 @@ export const generatePDF = async (data: DocumentData) => {
     } else {
       filename = `${data.number}.pdf`;
     }
-    await convertHTMLToPDFAndDownload(htmlContentWithSections, filename);
+    await convertHTMLToPDFAndDownload(htmlContentWithSections, filename, data.type);
   }
 
   // Fallback generic document HTML (existing template)
@@ -3982,7 +3982,7 @@ export const generatePDF = async (data: DocumentData) => {
   } else {
     fallbackFilename = `${data.number}.pdf`;
   }
-  await convertHTMLToPDFAndDownload(htmlContent, fallbackFilename);
+  await convertHTMLToPDFAndDownload(htmlContent, fallbackFilename, data.type);
 };
 
 // Specific function for invoice PDF generation
