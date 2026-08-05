@@ -3754,7 +3754,7 @@ export const generatePDF = async (data: DocumentData) => {
                 ${(data.items as any[]).map((item: any, index: number) => `
                 <tr style="border: 1px solid #ddd;">
                   <td style="padding: 8px; text-align: left; border: 1px solid #ddd; font-size: 10px;">${index + 1}</td>
-                  <td style="padding: 8px; text-align: left; border: 1px solid #ddd; font-size: 10px;">Invoice ${item.invoice_number && item.invoice_number !== 'N/A' ? item.invoice_number : 'Unknown'}${item.project_title ? `<br><span style="font-size: 9px; color: #555;">${item.project_title}</span>` : ''}</td>
+                  <td style="padding: 8px; text-align: left; border: 1px solid #ddd; font-size: 10px;">${item.invoice_number && item.invoice_number !== 'N/A' ? `Invoice ${item.invoice_number}` : (item.description && item.description !== 'Invoice Unknown' && item.description !== 'Unknown Invoice' ? item.description : 'Payment Received')}${item.project_title ? `<br><span style="font-size: 9px; color: #555;">${item.project_title}</span>` : ''}</td>
                   <td style="padding: 8px; text-align: right; border: 1px solid #ddd; font-size: 10px; font-weight: 600;">${formatCurrency((item as any).allocated_amount || 0)}</td>
                 </tr>
                 `).join('')}
@@ -4664,6 +4664,49 @@ export const downloadLPOPDF = async (lpo: any, company?: CompanyDetails) => {
   return generatePDF(documentData);
 };
 
+const findHistoricalReceiptInvoiceNumber = async (receipt: any) => {
+  if (receipt.invoices?.invoice_number || !receipt.company_id || !receipt.customer_id || !receipt.receipt_date) {
+    return undefined;
+  }
+
+  const { data: matchingPayments, error: paymentsError } = await supabase
+    .from('payments')
+    .select('id')
+    .eq('company_id', receipt.company_id)
+    .eq('customer_id', receipt.customer_id)
+    .eq('payment_date', receipt.receipt_date)
+    .eq('amount', receipt.total_amount);
+
+  if (paymentsError || matchingPayments?.length !== 1) return undefined;
+
+  const { data: allocations, error: allocationsError } = await supabase
+    .from('payment_allocations')
+    .select('invoice_id')
+    .eq('payment_id', matchingPayments[0].id);
+
+  if (allocationsError || allocations?.length !== 1 || !allocations[0].invoice_id) return undefined;
+
+  const { data: invoice, error: invoiceError } = await supabase
+    .from('invoices')
+    .select('invoice_number')
+    .eq('id', allocations[0].invoice_id)
+    .maybeSingle();
+
+  return invoiceError ? undefined : invoice?.invoice_number;
+};
+
+export const mapCashReceiptItems = (receipt: any, invoiceNumber?: string) =>
+  (receipt.cash_receipt_items || []).map((item: any) => ({
+    description: item.description,
+    quantity: item.quantity,
+    unit_price: item.unit_price,
+    tax_percentage: item.tax_percentage || 0,
+    tax_amount: item.tax_amount || 0,
+    tax_inclusive: false,
+    line_total: item.line_total,
+    invoice_number: invoiceNumber || receipt.invoices?.invoice_number,
+  }));
+
 // Function for generating cash receipt PDF
 export const downloadCashReceiptPDF = async (receipt: any, company?: CompanyDetails) => {
   const projectTitle = receipt.project_title || receipt.invoices?.project_title || (
@@ -4672,16 +4715,8 @@ export const downloadCashReceiptPDF = async (receipt: any, company?: CompanyDeta
       : null
   );
 
-  // Format items from receipt
-  const items = (receipt.cash_receipt_items || []).map((item: any) => ({
-    description: item.description,
-    quantity: item.quantity,
-    unit_price: item.unit_price,
-    tax_percentage: item.tax_percentage || 0,
-    tax_amount: item.tax_amount || 0,
-    tax_inclusive: false,
-    line_total: item.line_total,
-  }));
+  const invoiceNumber = await findHistoricalReceiptInvoiceNumber(receipt);
+  const items = mapCashReceiptItems(receipt, invoiceNumber);
 
   // Calculate totals
   const subtotal = items.reduce((sum: number, item: any) => sum + (item.quantity * item.unit_price), 0);
