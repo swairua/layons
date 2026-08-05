@@ -4664,7 +4664,38 @@ export const downloadLPOPDF = async (lpo: any, company?: CompanyDetails) => {
   return generatePDF(documentData);
 };
 
-export const mapCashReceiptItems = (receipt: any) =>
+const findHistoricalReceiptInvoiceNumber = async (receipt: any) => {
+  if (receipt.invoices?.invoice_number || !receipt.company_id || !receipt.customer_id || !receipt.receipt_date) {
+    return undefined;
+  }
+
+  const { data: matchingPayments, error: paymentsError } = await supabase
+    .from('payments')
+    .select('id')
+    .eq('company_id', receipt.company_id)
+    .eq('customer_id', receipt.customer_id)
+    .eq('payment_date', receipt.receipt_date)
+    .eq('amount', receipt.total_amount);
+
+  if (paymentsError || matchingPayments?.length !== 1) return undefined;
+
+  const { data: allocations, error: allocationsError } = await supabase
+    .from('payment_allocations')
+    .select('invoice_id')
+    .eq('payment_id', matchingPayments[0].id);
+
+  if (allocationsError || allocations?.length !== 1 || !allocations[0].invoice_id) return undefined;
+
+  const { data: invoice, error: invoiceError } = await supabase
+    .from('invoices')
+    .select('invoice_number')
+    .eq('id', allocations[0].invoice_id)
+    .maybeSingle();
+
+  return invoiceError ? undefined : invoice?.invoice_number;
+};
+
+export const mapCashReceiptItems = (receipt: any, invoiceNumber?: string) =>
   (receipt.cash_receipt_items || []).map((item: any) => ({
     description: item.description,
     quantity: item.quantity,
@@ -4673,7 +4704,7 @@ export const mapCashReceiptItems = (receipt: any) =>
     tax_amount: item.tax_amount || 0,
     tax_inclusive: false,
     line_total: item.line_total,
-    invoice_number: receipt.invoices?.invoice_number,
+    invoice_number: invoiceNumber || receipt.invoices?.invoice_number,
   }));
 
 // Function for generating cash receipt PDF
@@ -4684,7 +4715,8 @@ export const downloadCashReceiptPDF = async (receipt: any, company?: CompanyDeta
       : null
   );
 
-  const items = mapCashReceiptItems(receipt);
+  const invoiceNumber = await findHistoricalReceiptInvoiceNumber(receipt);
+  const items = mapCashReceiptItems(receipt, invoiceNumber);
 
   // Calculate totals
   const subtotal = items.reduce((sum: number, item: any) => sum + (item.quantity * item.unit_price), 0);

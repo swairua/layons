@@ -17,5 +17,10 @@ assert.equal(linkedItems[0].invoice_number, 'INV-179');
 
 const historicalItems = mapCashReceiptItems({
   cash_receipt_items: [receiptItem],
+}, 'INV-179');
+assert.equal(historicalItems[0].invoice_number, 'INV-179');
+
+const unlinkedItems = mapCashReceiptItems({
+  cash_receipt_items: [receiptItem],
 });
-assert.equal(historicalItems[0].invoice_number, undefined);
+assert.equal(unlinkedItems[0].invoice_number, undefined);
