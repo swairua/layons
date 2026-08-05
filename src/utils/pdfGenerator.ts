@@ -3356,7 +3356,7 @@ export const generatePDF = async (data: DocumentData) => {
         }
 
         body.receipt-document .page:last-of-type {
-          padding-bottom: 15mm;
+          padding-bottom: 0;
           margin-bottom: 0;
           page-break-after: auto;
         }

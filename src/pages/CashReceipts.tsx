@@ -51,6 +51,11 @@ interface CashReceipt {
   value_tendered: number;
   change: number;
   notes?: string;
+  invoice_id?: string | null;
+  invoices?: {
+    invoice_number: string;
+    notes?: string | null;
+  } | null;
   created_at?: string;
   cash_receipt_items?: CashReceiptItem[];
 }
@@ -94,7 +99,12 @@ export default function CashReceipts() {
           value_tendered,
           change,
           notes,
+          invoice_id,
           created_at,
+          invoices:invoices!invoice_id (
+            invoice_number,
+            notes
+          ),
           customers (
             id,
             name,
