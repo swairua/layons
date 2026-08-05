@@ -999,7 +999,7 @@ export const usePayments = (companyId?: string) => {
               // Try to fetch invoices by their IDs
               let { data: invoiceData, error: invoiceError } = await supabase
                 .from('invoices')
-                .select('id, invoice_number, total_amount, paid_amount, balance_due, company_id')
+                .select('id, invoice_number, project_title, total_amount, paid_amount, balance_due, company_id')
                 .in('id', validInvoiceIds);
 
               console.log('Invoice fetch result (specific IDs):', {
@@ -1022,7 +1022,7 @@ export const usePayments = (companyId?: string) => {
                 // Fallback: Fetch all invoices for the company
                 const { data: allInvoices, error: allInvoicesError } = await supabase
                   .from('invoices')
-                  .select('id, invoice_number, total_amount, paid_amount, balance_due, company_id')
+                  .select('id, invoice_number, project_title, total_amount, paid_amount, balance_due, company_id')
                   .eq('company_id', companyId);
 
                 console.log('Fallback invoice fetch result (all for company):', {
@@ -1073,6 +1073,7 @@ export const usePayments = (companyId?: string) => {
           allocationsMap.get(allocation.payment_id).push({
             id: allocation.id,
             invoice_number: invoice?.invoice_number || 'N/A',
+            project_title: invoice?.project_title || null,
             allocated_amount: Number(allocation.amount_allocated || 0),
             invoice_total: Number(invoice?.total_amount || 0),
             paid_amount: Number(invoice?.paid_amount || 0),

@@ -3754,7 +3754,7 @@ export const generatePDF = async (data: DocumentData) => {
                 ${(data.items as any[]).map((item: any, index: number) => `
                 <tr style="border: 1px solid #ddd;">
                   <td style="padding: 8px; text-align: left; border: 1px solid #ddd; font-size: 10px;">${index + 1}</td>
-                  <td style="padding: 8px; text-align: left; border: 1px solid #ddd; font-size: 10px;">Invoice ${item.invoice_number && item.invoice_number !== 'N/A' ? item.invoice_number : 'Unknown'}</td>
+                  <td style="padding: 8px; text-align: left; border: 1px solid #ddd; font-size: 10px;">Invoice ${item.invoice_number && item.invoice_number !== 'N/A' ? item.invoice_number : 'Unknown'}${item.project_title ? `<br><span style="font-size: 9px; color: #555;">${item.project_title}</span>` : ''}</td>
                   <td style="padding: 8px; text-align: right; border: 1px solid #ddd; font-size: 10px; font-weight: 600;">${formatCurrency((item as any).allocated_amount || 0)}</td>
                 </tr>
                 `).join('')}
@@ -4462,6 +4462,7 @@ export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyD
   const invoiceParticulars = payment.payment_allocations && payment.payment_allocations.length > 0
     ? payment.payment_allocations.map((alloc: any) => ({
         invoice_number: alloc.invoice_number || 'N/A',
+        project_title: alloc.project_title || '',
         invoice_total: alloc.invoice_total || 0,
         allocated_amount: alloc.allocated_amount || 0,
         // Use enriched previous_balance if available, otherwise calculate
@@ -4497,6 +4498,7 @@ export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyD
     // Add invoice particulars and balance information
     items: invoicesToDisplay.map((inv: any) => ({
       description: `Invoice ${inv.invoice_number}`,
+      project_title: inv.project_title,
       quantity: 1,
       unit_price: 0,
       tax_percentage: 0,
