@@ -86,45 +86,84 @@ export default function CashReceipts() {
       const from = page * PAGE_SIZE;
       const to = from + PAGE_SIZE;
 
-      // Fetch receipts with items
-      const { data, error } = await supabase
-        .from('cash_receipts')
-        .select(`
+      const sourceReceiptSelect = `
+        id,
+        receipt_number,
+        customer_id,
+        receipt_date,
+        total_amount,
+        payment_method,
+        value_tendered,
+        change,
+        notes,
+        invoice_id,
+        created_at,
+        invoices:invoices!invoice_id (
+          invoice_number,
+          notes
+        ),
+        customers (
           id,
-          receipt_number,
-          customer_id,
-          receipt_date,
-          total_amount,
-          payment_method,
-          value_tendered,
-          change,
-          notes,
-          invoice_id,
-          created_at,
-          invoices:invoices!invoice_id (
-            invoice_number,
-            notes
-          ),
-          customers (
-            id,
-            name,
-            email
-          ),
-          cash_receipt_items (
-            id,
-            product_id,
-            description,
-            quantity,
-            unit_price,
-            tax_percentage,
-            tax_amount,
-            line_total,
-            unit_of_measure
-          )
-        `)
+          name,
+          email
+        ),
+        cash_receipt_items (
+          id,
+          product_id,
+          description,
+          quantity,
+          unit_price,
+          tax_percentage,
+          tax_amount,
+          line_total,
+          unit_of_measure
+        )
+      `;
+      const legacyReceiptSelect = `
+        id,
+        receipt_number,
+        customer_id,
+        receipt_date,
+        total_amount,
+        payment_method,
+        value_tendered,
+        change,
+        notes,
+        created_at,
+        customers (
+          id,
+          name,
+          email
+        ),
+        cash_receipt_items (
+          id,
+          product_id,
+          description,
+          quantity,
+          unit_price,
+          tax_percentage,
+          tax_amount,
+          line_total,
+          unit_of_measure
+        )
+      `;
+
+      let { data, error } = await supabase
+        .from('cash_receipts')
+        .select(sourceReceiptSelect)
         .eq('company_id', currentCompany.id)
         .order('receipt_date', { ascending: false })
         .range(from, to - 1);
+
+      if (error) {
+        console.warn('Receipt source details unavailable; loading receipts without invoice links:', error);
+        ({ data, error } = await supabase
+          .from('cash_receipts')
+          .select(legacyReceiptSelect)
+          .eq('company_id', currentCompany.id)
+          .order('receipt_date', { ascending: false })
+          .range(from, to - 1));
+      }
 
       if (error) {
         console.error('Supabase error details:', {
