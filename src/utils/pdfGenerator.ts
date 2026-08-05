@@ -222,7 +222,7 @@ const addCanvasToPDF = async (pdf: jsPDF, canvas: HTMLCanvasElement, pageWidth: 
 };
 
 // Helper function to convert HTML to PDF and auto-download
-const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string) => {
+const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string, documentType: DocumentData['type']) => {
   let wrapper: HTMLElement | null = null;
   let progressStep = 0;
   let progressTotal = 1;
@@ -328,7 +328,7 @@ const convertHTMLToPDFAndDownload = async (htmlContent: string, filename: string
       const canvasH = pageCanvas.height;
       const pxPerMm = canvasW / pageWidth;
 
-      if (data.type === 'receipt') {
+      if (documentType === 'receipt') {
         if (!isFirstPage) pdf.addPage();
         isFirstPage = false;
         const pageImgData = pageCanvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
@@ -2892,7 +2892,7 @@ export const generatePDF = async (data: DocumentData) => {
     } else {
       filename = `${data.number}.pdf`;
     }
-    await convertHTMLToPDFAndDownload(htmlContentWithSections, filename);
+    await convertHTMLToPDFAndDownload(htmlContentWithSections, filename, data.type);
   }
 
   // Fallback generic document HTML (existing template)
@@ -3754,7 +3754,7 @@ export const generatePDF = async (data: DocumentData) => {
                 ${(data.items as any[]).map((item: any, index: number) => `
                 <tr style="border: 1px solid #ddd;">
                   <td style="padding: 8px; text-align: left; border: 1px solid #ddd; font-size: 10px;">${index + 1}</td>
-                  <td style="padding: 8px; text-align: left; border: 1px solid #ddd; font-size: 10px;">Invoice ${item.invoice_number && item.invoice_number !== 'N/A' ? item.invoice_number : 'Unknown'}</td>
+                  <td style="padding: 8px; text-align: left; border: 1px solid #ddd; font-size: 10px;">Invoice ${item.invoice_number && item.invoice_number !== 'N/A' ? item.invoice_number : 'Unknown'}${item.project_title ? `<br><span style="font-size: 9px; color: #555;">${item.project_title}</span>` : ''}</td>
                   <td style="padding: 8px; text-align: right; border: 1px solid #ddd; font-size: 10px; font-weight: 600;">${formatCurrency((item as any).allocated_amount || 0)}</td>
                 </tr>
                 `).join('')}
@@ -3982,7 +3982,7 @@ export const generatePDF = async (data: DocumentData) => {
   } else {
     fallbackFilename = `${data.number}.pdf`;
   }
-  await convertHTMLToPDFAndDownload(htmlContent, fallbackFilename);
+  await convertHTMLToPDFAndDownload(htmlContent, fallbackFilename, data.type);
 };
 
 // Specific function for invoice PDF generation
@@ -4462,6 +4462,7 @@ export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyD
   const invoiceParticulars = payment.payment_allocations && payment.payment_allocations.length > 0
     ? payment.payment_allocations.map((alloc: any) => ({
         invoice_number: alloc.invoice_number || 'N/A',
+        project_title: alloc.project_title || '',
         invoice_total: alloc.invoice_total || 0,
         allocated_amount: alloc.allocated_amount || 0,
         // Use enriched previous_balance if available, otherwise calculate
@@ -4481,6 +4482,12 @@ export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyD
     };
   });
 
+  const projectTitles = [...new Set(
+    invoicesToDisplay
+      .map((invoice: any) => invoice.project_title)
+      .filter((title: string | null | undefined): title is string => Boolean(title))
+  )];
+
   const documentData: DocumentData = {
     type: 'receipt', // Use receipt type for payment receipts
     number: payment.number || payment.payment_number || `REC-${Date.now()}`,
@@ -4491,12 +4498,14 @@ export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyD
       email: payment.customers?.email,
       phone: payment.customers?.phone,
     },
+    project_title: projectTitles.length === 1 ? projectTitles[0] : undefined,
     total_amount: typeof payment.amount === 'string' ?
       parseFloat(payment.amount.replace('$', '').replace(',', '')) :
       payment.amount,
     // Add invoice particulars and balance information
     items: invoicesToDisplay.map((inv: any) => ({
       description: `Invoice ${inv.invoice_number}`,
+      project_title: inv.project_title,
       quantity: 1,
       unit_price: 0,
       tax_percentage: 0,
@@ -4657,7 +4666,7 @@ export const downloadLPOPDF = async (lpo: any, company?: CompanyDetails) => {
 
 // Function for generating cash receipt PDF
 export const downloadCashReceiptPDF = async (receipt: any, company?: CompanyDetails) => {
-  const projectTitle = receipt.project_title || (
+  const projectTitle = receipt.project_title || receipt.invoices?.project_title || (
     receipt.invoices?.invoice_number && receipt.company_id
       ? await getProjectTitleFromInvoice(receipt.invoices, receipt.company_id)
       : null

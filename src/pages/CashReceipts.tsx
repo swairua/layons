@@ -53,8 +53,10 @@ interface CashReceipt {
   change: number;
   notes?: string;
   invoice_id?: string | null;
+  project_title?: string | null;
   invoices?: {
     invoice_number: string;
+    project_title?: string | null;
     notes?: string | null;
   } | null;
   created_at?: string;
@@ -132,7 +134,12 @@ export default function CashReceipts() {
         value_tendered,
         change,
         notes,
+        invoice_id,
         created_at,
+        invoices:invoices!invoice_id (
+          invoice_number,
+          notes
+        ),
         customers (
           id,
           name,
@@ -156,6 +163,7 @@ export default function CashReceipts() {
         .select(sourceReceiptSelect)
         .eq('company_id', currentCompany.id)
         .order('receipt_date', { ascending: false })
+        .order('created_at', { ascending: false })
         .range(from, to - 1);
 
       if (error) {
@@ -165,6 +173,7 @@ export default function CashReceipts() {
           .select(legacyReceiptSelect)
           .eq('company_id', currentCompany.id)
           .order('receipt_date', { ascending: false })
+          .order('created_at', { ascending: false })
           .range(from, to - 1));
       }
 

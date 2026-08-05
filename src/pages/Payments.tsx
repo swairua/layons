@@ -71,6 +71,7 @@ interface Payment {
     balance_due?: number;
     allocation_created_at?: string | null;
     invoice_id?: string | null;
+    project_title?: string | null;
   }[];
 }
 
@@ -214,7 +215,7 @@ export default function Payments() {
     }
   };
 
-  const handleDownloadReceipt = (payment: Payment) => {
+  const handleDownloadReceipt = async (payment: Payment) => {
     try {
       // Debug: Log the payment data
       console.log('Payment data for receipt:', {
@@ -265,7 +266,7 @@ export default function Payments() {
         company_services: currentCompany.company_services
       } : undefined;
 
-      generatePaymentReceiptPDF(enrichedPayment, companyDetails);
+      await generatePaymentReceiptPDF(enrichedPayment, companyDetails);
       toast.success(`Receipt downloaded for payment ${payment.payment_number}`);
     } catch (error) {
       console.error('Error downloading receipt:', error);
@@ -275,7 +276,17 @@ export default function Payments() {
 
   // Removed inline PDF generation function - now using utility function
 
-  const filteredPayments = payments.filter(payment => {
+  const sortedPayments = [...payments].sort((a, b) => {
+    const paymentDateDifference = new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime();
+    if (paymentDateDifference !== 0) return paymentDateDifference;
+
+    const createdAtDifference = new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+    if (createdAtDifference !== 0) return createdAtDifference;
+
+    return b.id.localeCompare(a.id);
+  });
+
+  const filteredPayments = sortedPayments.filter(payment => {
     const matchesSearch =
       (payment.customers?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
       (payment.payment_number?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
