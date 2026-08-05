@@ -71,6 +71,7 @@ interface Payment {
     balance_due?: number;
     allocation_created_at?: string | null;
     invoice_id?: string | null;
+    project_title?: string | null;
   }[];
 }
 

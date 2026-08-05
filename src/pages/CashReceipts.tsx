@@ -104,7 +104,6 @@ export default function CashReceipts() {
         created_at,
         invoices:invoices!invoice_id (
           invoice_number,
-          project_title,
           notes
         ),
         customers (
@@ -135,7 +134,12 @@ export default function CashReceipts() {
         value_tendered,
         change,
         notes,
+        invoice_id,
         created_at,
+        invoices:invoices!invoice_id (
+          invoice_number,
+          notes
+        ),
         customers (
           id,
           name,

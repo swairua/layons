@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { parseErrorMessage } from '@/utils/errorHelpers';
 import { RLSPolicyError } from '@/utils/RLSError';
 import { ensureCompanyImageColumns, ensureQuantityColumnsAreDecimal } from '@/utils/ensureDatabaseColumns';
+import { extractBoqNumberFromNotes, fetchBoqProjectTitle } from '@/utils/boqInvoiceLinkage';
 
 // Types
 export interface Company {
@@ -999,7 +1000,7 @@ export const usePayments = (companyId?: string) => {
               // Try to fetch invoices by their IDs
               let { data: invoiceData, error: invoiceError } = await supabase
                 .from('invoices')
-                .select('id, invoice_number, project_title, total_amount, paid_amount, balance_due, company_id')
+                .select('id, invoice_number, notes, total_amount, paid_amount, balance_due, company_id')
                 .in('id', validInvoiceIds);
 
               console.log('Invoice fetch result (specific IDs):', {
@@ -1022,7 +1023,7 @@ export const usePayments = (companyId?: string) => {
                 // Fallback: Fetch all invoices for the company
                 const { data: allInvoices, error: allInvoicesError } = await supabase
                   .from('invoices')
-                  .select('id, invoice_number, project_title, total_amount, paid_amount, balance_due, company_id')
+                  .select('id, invoice_number, notes, total_amount, paid_amount, balance_due, company_id')
                   .eq('company_id', companyId);
 
                 console.log('Fallback invoice fetch result (all for company):', {
@@ -1043,6 +1044,20 @@ export const usePayments = (companyId?: string) => {
                   });
                 }
               }
+
+              const boqNumbers = [...new Set(
+                [...invoiceMap.values()]
+                  .map(invoice => extractBoqNumberFromNotes(invoice.notes))
+                  .filter((boqNumber): boqNumber is string => Boolean(boqNumber))
+              )];
+              const boqProjectTitles = new Map<string, string | null>();
+              await Promise.all(boqNumbers.map(async boqNumber => {
+                boqProjectTitles.set(boqNumber, await fetchBoqProjectTitle(boqNumber, companyId));
+              }));
+              invoiceMap.forEach(invoice => {
+                const boqNumber = extractBoqNumberFromNotes(invoice.notes);
+                invoice.project_title = boqNumber ? boqProjectTitles.get(boqNumber) || null : null;
+              });
 
               // Log which invoice IDs were not found
               const notFoundIds = validInvoiceIds.filter(id => !invoiceMap.has(id));

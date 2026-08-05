@@ -4482,6 +4482,12 @@ export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyD
     };
   });
 
+  const projectTitles = [...new Set(
+    invoicesToDisplay
+      .map((invoice: any) => invoice.project_title)
+      .filter((title: string | null | undefined): title is string => Boolean(title))
+  )];
+
   const documentData: DocumentData = {
     type: 'receipt', // Use receipt type for payment receipts
     number: payment.number || payment.payment_number || `REC-${Date.now()}`,
@@ -4492,6 +4498,7 @@ export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyD
       email: payment.customers?.email,
       phone: payment.customers?.phone,
     },
+    project_title: projectTitles.length === 1 ? projectTitles[0] : undefined,
     total_amount: typeof payment.amount === 'string' ?
       parseFloat(payment.amount.replace('$', '').replace(',', '')) :
       payment.amount,
