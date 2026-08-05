@@ -3754,7 +3754,7 @@ export const generatePDF = async (data: DocumentData) => {
                 ${(data.items as any[]).map((item: any, index: number) => `
                 <tr style="border: 1px solid #ddd;">
                   <td style="padding: 8px; text-align: left; border: 1px solid #ddd; font-size: 10px;">${index + 1}</td>
-                  <td style="padding: 8px; text-align: left; border: 1px solid #ddd; font-size: 10px;">Invoice ${item.invoice_number && item.invoice_number !== 'N/A' ? item.invoice_number : 'Unknown'}${item.project_title ? `<br><span style="font-size: 9px; color: #555;">${item.project_title}</span>` : ''}</td>
+                  <td style="padding: 8px; text-align: left; border: 1px solid #ddd; font-size: 10px;">${item.invoice_number && item.invoice_number !== 'N/A' ? `Invoice ${item.invoice_number}` : (item.description && item.description !== 'Invoice Unknown' && item.description !== 'Unknown Invoice' ? item.description : 'Payment Received')}${item.project_title ? `<br><span style="font-size: 9px; color: #555;">${item.project_title}</span>` : ''}</td>
                   <td style="padding: 8px; text-align: right; border: 1px solid #ddd; font-size: 10px; font-weight: 600;">${formatCurrency((item as any).allocated_amount || 0)}</td>
                 </tr>
                 `).join('')}
