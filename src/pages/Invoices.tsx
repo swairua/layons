@@ -457,6 +457,7 @@ export default function Invoices() {
               return {
                 ...item,
                 quantity: 1,
+                unit_price: Number(item.line_total ?? item.unit_price ?? 0),
                 unit_of_measure: paymentUnit,
                 products: item.products
                   ? { ...item.products, unit_of_measure: paymentUnit }
