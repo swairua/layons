@@ -18,7 +18,7 @@ export function ChangePercentageRateModal({
   boq,
   onDownload
 }: ChangePercentageRateModalProps) {
-  const [percentage, setPercentage] = useState(40);
+  const [percentage, setPercentage] = useState(10);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDownload = async () => {
@@ -40,7 +40,7 @@ export function ChangePercentageRateModal({
 
   const handleOpenChange = (newOpen: boolean) => {
     if (newOpen) {
-      setPercentage(40);
+      setPercentage(10);
     }
     onOpenChange(newOpen);
   };
