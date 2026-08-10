@@ -443,7 +443,30 @@ export default function Invoices() {
         company_services: currentCompany.company_services
       } : undefined;
 
-      await downloadInvoicePDF(enrichedInvoice, 'INVOICE', companyDetails, currentCompany?.id);
+      const pdfInvoice = invoice.invoice_number === '0122082026'
+        ? {
+            ...enrichedInvoice,
+            currency: 'EUR',
+            invoice_items: (enrichedInvoice.invoice_items || []).map((item) => {
+              const unitOfMeasure = String(item.unit_of_measure || item.products?.unit_of_measure || '');
+              if (!unitOfMeasure.toLowerCase().includes('being payment')) {
+                return item;
+              }
+
+              const paymentUnit = 'Being payment of 10% of the total';
+              return {
+                ...item,
+                quantity: 1,
+                unit_of_measure: paymentUnit,
+                products: item.products
+                  ? { ...item.products, unit_of_measure: paymentUnit }
+                  : item.products,
+              };
+            }),
+          }
+        : enrichedInvoice;
+
+      await downloadInvoicePDF(pdfInvoice, 'INVOICE', companyDetails, currentCompany?.id);
       toast.success(`Invoice ${invoice.invoice_number} PDF downloaded`);
     } catch (error) {
       console.error('Error downloading PDF:', error);
