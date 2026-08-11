@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PaginationControls } from '@/components/pagination/PaginationControls';
 import { usePagination } from '@/hooks/usePagination';
-import { Layers, Plus, Eye, Download, Trash2, Copy, Pencil, FileText, Filter, Search, AlertCircle, Clock, CheckCircle, X, Lock } from 'lucide-react';
+import { Layers, Plus, Eye, Download, Trash2, Copy, Pencil, FileText, Receipt, Filter, Search, AlertCircle, Clock, CheckCircle, X, Lock } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CreateBOQModal } from '@/components/boq/CreateBOQModal';
 import { CreatePercentageCopyModal } from '@/components/boq/CreatePercentageCopyModal';
@@ -397,6 +397,12 @@ export default function BOQs() {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       toast.error(`Failed to download BOQ: ${errorMessage}`);
     }
+  };
+
+  const handleDownloadInvoicePDF = (boq: BOQ) => {
+    if (linkedBOQIds.has(boq.id)) return;
+    setPercentageRateBoq(boq as BOQData);
+    setPercentageRateOpen(true);
   };
 
   const handleDeleteClick = (id: string, number: string) => {
@@ -977,6 +983,16 @@ export default function BOQs() {
                             <Button
                               size="icon"
                               variant="outline"
+                              onClick={() => handleDownloadInvoicePDF(b)}
+                              title={linkedBOQIds.has(b.id) ? "Download unavailable: Linked to LCL template" : "Download Invoice PDF"}
+                              disabled={linkedBOQIds.has(b.id)}
+                              className="h-8 w-8 md:h-9 md:w-9"
+                            >
+                              <Receipt className="h-3 w-3 md:h-4 md:w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="outline"
                               onClick={() => handleConvertClick(b.id, b.number, linkedBOQIds.has(b.id))}
                               title="Convert to Invoice"
                               disabled={!!b.converted_to_invoice_id}
@@ -1060,6 +1076,9 @@ export default function BOQs() {
                   <Button variant="ghost" onClick={() => { setViewing(null); }} className="w-full sm:w-auto">Close</Button>
                   <Button onClick={() => handleDownloadPDF(viewing)} className="w-full sm:w-auto">
                     <Download className="h-4 w-4 mr-2" /> Download PDF
+                  </Button>
+                  <Button onClick={() => handleDownloadInvoicePDF(viewing)} variant="outline" className="w-full sm:w-auto">
+                    <Receipt className="h-4 w-4 mr-2" /> Download Invoice PDF
                   </Button>
                 </div>
               </div>

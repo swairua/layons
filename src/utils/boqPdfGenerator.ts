@@ -205,6 +205,9 @@ export async function downloadBOQPDF(doc: BoqDocument, company?: { name: string;
 
   const customizedItems = flatItems.map(item => ({
     ...item,
+    quantity: paymentPercentageText && !item._isSectionHeader && !item._isSubtotal && !item._isSectionTotal
+      ? 1
+      : item.quantity,
     unit_price: item.unit_price * multiplier,
     line_total: item.line_total * multiplier,
     unit_of_measure: paymentPercentageText && !item._isSectionHeader && !item._isSubtotal && !item._isSectionTotal
