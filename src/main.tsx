@@ -6,7 +6,7 @@ import { CompanyProvider } from '@/contexts/CompanyContext';
 import { AuthErrorBoundary } from '@/components/auth/AuthErrorBoundary';
 import { enableResizeObserverErrorSuppression } from '@/utils/resizeObserverErrorHandler';
 import { HelmetProvider } from 'react-helmet-async';
-import App from './App.tsx'
+import App, { AppErrorBoundary } from './App.tsx'
 import './index.css'
 
 // Suppress ResizeObserver errors before any components render
@@ -30,7 +30,9 @@ createRoot(document.getElementById("root")!).render(
         <AuthProvider>
           <CompanyProvider>
             <BrowserRouter>
-              <App />
+              <AppErrorBoundary>
+                <App />
+              </AppErrorBoundary>
             </BrowserRouter>
           </CompanyProvider>
         </AuthProvider>
