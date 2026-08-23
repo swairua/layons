@@ -9,11 +9,6 @@ export default defineConfig(({ mode }) => {
       host: "::",
       port: 5173,
       middlewareMode: false,
-      // HMR configuration: let the browser determine the host/port automatically
-      // This fixes module loading issues in proxied environments like builder.io
-      hmr: {
-        protocol: "ws",
-      },
     },
     plugins: [
       react(),
