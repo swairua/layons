@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import PDFProgressDialog from "@/components/ui/PDFProgressDialog";
 import { Routes, Route } from "react-router-dom";
-import { useEffect, useState, Component, ReactNode, ErrorInfo } from "react";
+import { useEffect, useState, Component, ReactNode, ErrorInfo, ComponentType, lazy, Suspense } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useCurrentCompany } from "@/contexts/CompanyContext";
@@ -18,47 +18,66 @@ import { ensureRLSPolicies } from "@/utils/ensureRLSPolicies";
 import { ensureCompanyImageColumns } from "@/utils/ensureDatabaseColumns";
 import { ensureDatabaseIndexes } from "@/utils/ensureDatabaseIndexes";
 
-// Lazy load the page components to reduce initial bundle size and startup time
-import { lazy, Suspense } from "react";
+const lazyWithRetry = <T extends ComponentType<unknown>>(
+  importer: () => Promise<{ default: T }>,
+  retries = 2,
+) =>
+  lazy(async () => {
+    let lastError: unknown;
 
-const Index = lazy(() => import("./pages/Index"));
-const Quotations = lazy(() => import("./pages/Quotations"));
-const Invoices = lazy(() => import("./pages/Invoices"));
-const Payments = lazy(() => import("./pages/Payments"));
-const Inventory = lazy(() => import("./pages/Inventory"));
-const Customers = lazy(() => import("./pages/Customers"));
-const DeliveryNotes = lazy(() => import("./pages/DeliveryNotes"));
-const Proforma = lazy(() => import("./pages/Proforma"));
-const ReportsOverview = lazy(() => import("./pages/reports/ReportsOverview"));
-const SalesReports = lazy(() => import("./pages/reports/SalesReports"));
-const InventoryReports = lazy(() => import("./pages/reports/InventoryReports"));
-const StatementOfAccounts = lazy(() => import("./pages/reports/StatementOfAccounts"));
-const CompanySettings = lazy(() => import("./pages/settings/CompanySettings"));
-const UserManagement = lazy(() => import("./pages/settings/UserManagement"));
-const UserPermissions = lazy(() => import("./pages/settings/UserPermissions"));
-const UnitsSettings = lazy(() => import("./pages/settings/Units"));
-const UnitsNormalize = lazy(() => import("./pages/settings/UnitsNormalize"));
-const RemittanceAdvice = lazy(() => import("./pages/RemittanceAdvice"));
-const LPOs = lazy(() => import("./pages/LPOs"));
-const BOQs = lazy(() => import("./pages/BOQs"));
-const FixedBOQ = lazy(() => import("./pages/FixedBOQ"));
-const FixedBOQHierarchical = lazy(() => import("./pages/FixedBOQHierarchical"));
-const LCLTemplate = lazy(() => import("./pages/LCLTemplate"));
-const LCLBOQList = lazy(() => import("./pages/LCLBOQList"));
-const CreditNotes = lazy(() => import("./pages/CreditNotes"));
-const CashReceipts = lazy(() => import("./pages/CashReceipts"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const PaymentSynchronizationPage = lazy(() => import("./pages/PaymentSynchronization"));
-const OptimizedInventory = lazy(() => import("./pages/OptimizedInventory"));
-const PerformanceOptimizerPage = lazy(() => import("./pages/PerformanceOptimizerPage"));
-const OptimizedCustomers = lazy(() => import("./pages/OptimizedCustomers"));
-const CustomerPerformanceOptimizerPage = lazy(() => import("./pages/CustomerPerformanceOptimizerPage"));
-const AuditLogs = lazy(() => import("./pages/AuditLogs"));
-const DatabaseFix = lazy(() => import("./pages/DatabaseFix"));
-const CompanyIdConsolidation = lazy(() => import("./pages/CompanyIdConsolidation"));
+    for (let attempt = 0; attempt <= retries; attempt += 1) {
+      try {
+        return await importer();
+      } catch (error) {
+        lastError = error;
+        if (attempt < retries) {
+          await new Promise(resolve => setTimeout(resolve, 300 * (attempt + 1)));
+        }
+      }
+    }
+
+    throw lastError;
+  });
+
+// Lazy load the page components to reduce initial bundle size and startup time
+const Index = lazyWithRetry(() => import("./pages/Index"));
+const Quotations = lazyWithRetry(() => import("./pages/Quotations"));
+const Invoices = lazyWithRetry(() => import("./pages/Invoices"));
+const Payments = lazyWithRetry(() => import("./pages/Payments"));
+const Inventory = lazyWithRetry(() => import("./pages/Inventory"));
+const Customers = lazyWithRetry(() => import("./pages/Customers"));
+const DeliveryNotes = lazyWithRetry(() => import("./pages/DeliveryNotes"));
+const Proforma = lazyWithRetry(() => import("./pages/Proforma"));
+const ReportsOverview = lazyWithRetry(() => import("./pages/reports/ReportsOverview"));
+const SalesReports = lazyWithRetry(() => import("./pages/reports/SalesReports"));
+const InventoryReports = lazyWithRetry(() => import("./pages/reports/InventoryReports"));
+const StatementOfAccounts = lazyWithRetry(() => import("./pages/reports/StatementOfAccounts"));
+const CompanySettings = lazyWithRetry(() => import("./pages/settings/CompanySettings"));
+const UserManagement = lazyWithRetry(() => import("./pages/settings/UserManagement"));
+const UserPermissions = lazyWithRetry(() => import("./pages/settings/UserPermissions"));
+const UnitsSettings = lazyWithRetry(() => import("./pages/settings/Units"));
+const UnitsNormalize = lazyWithRetry(() => import("./pages/settings/UnitsNormalize"));
+const RemittanceAdvice = lazyWithRetry(() => import("./pages/RemittanceAdvice"));
+const LPOs = lazyWithRetry(() => import("./pages/LPOs"));
+const BOQs = lazyWithRetry(() => import("./pages/BOQs"));
+const FixedBOQ = lazyWithRetry(() => import("./pages/FixedBOQ"));
+const FixedBOQHierarchical = lazyWithRetry(() => import("./pages/FixedBOQHierarchical"));
+const LCLTemplate = lazyWithRetry(() => import("./pages/LCLTemplate"));
+const LCLBOQList = lazyWithRetry(() => import("./pages/LCLBOQList"));
+const CreditNotes = lazyWithRetry(() => import("./pages/CreditNotes"));
+const CashReceipts = lazyWithRetry(() => import("./pages/CashReceipts"));
+const NotFound = lazyWithRetry(() => import("./pages/NotFound"));
+const PaymentSynchronizationPage = lazyWithRetry(() => import("./pages/PaymentSynchronization"));
+const OptimizedInventory = lazyWithRetry(() => import("./pages/OptimizedInventory"));
+const PerformanceOptimizerPage = lazyWithRetry(() => import("./pages/PerformanceOptimizerPage"));
+const OptimizedCustomers = lazyWithRetry(() => import("./pages/OptimizedCustomers"));
+const CustomerPerformanceOptimizerPage = lazyWithRetry(() => import("./pages/CustomerPerformanceOptimizerPage"));
+const AuditLogs = lazyWithRetry(() => import("./pages/AuditLogs"));
+const DatabaseFix = lazyWithRetry(() => import("./pages/DatabaseFix"));
+const CompanyIdConsolidation = lazyWithRetry(() => import("./pages/CompanyIdConsolidation"));
 
 // Error boundary class component to catch module loading errors
-class AppErrorBoundary extends Component<
+export class AppErrorBoundary extends Component<
   { children: ReactNode },
   { hasError: boolean; error: Error | null }
 > {
@@ -74,26 +93,13 @@ class AppErrorBoundary extends Component<
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('App Error:', error, errorInfo);
 
-    // Check if this is a module loading error
     const isModuleError =
       error.message.includes('dynamically imported module') ||
       error.message.includes('Failed to fetch') ||
       error.message.includes('network');
 
     if (isModuleError) {
-      console.warn('⚠️ Module loading error detected - attempting recovery');
-      console.warn('Error details:', error.message);
-      console.warn('This may be due to:');
-      console.warn('1. Network connectivity issues');
-      console.warn('2. Browser cache issues');
-      console.warn('3. Dev server configuration issues');
-
-      // Clear service worker cache if available
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(registrations => {
-          registrations.forEach(reg => reg.unregister());
-        }).catch(err => console.warn('Could not clear service workers:', err));
-      }
+      console.warn('Module loading error detected after retry attempts:', error.message);
     }
   }
 
@@ -108,67 +114,26 @@ class AppErrorBoundary extends Component<
 
 // Error recovery component for module loading failures
 const ModuleErrorFallback = () => {
-  const [retryCount, setRetryCount] = useState(0);
-  const [isClearing, setIsClearing] = useState(false);
-
   const handleRetry = () => {
-    setRetryCount(prev => prev + 1);
     window.location.reload();
-  };
-
-  const handleHardRefresh = async () => {
-    setIsClearing(true);
-    try {
-      // Clear all caches
-      if ('caches' in window) {
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames.map(name => caches.delete(name)));
-      }
-
-      // Force hard refresh (Ctrl+Shift+R equivalent)
-      window.location.reload(true);
-    } catch (err) {
-      console.error('Error clearing cache:', err);
-      // Fallback to normal reload
-      window.location.reload();
-    } finally {
-      setIsClearing(false);
-    }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
       <div className="max-w-md w-full p-6 space-y-4">
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-foreground">Module Loading Error</h1>
+          <h1 className="text-2xl font-bold text-foreground">This page could not be loaded</h1>
           <p className="text-muted-foreground">
-            There was an issue loading the page content. This can happen if the connection was interrupted or your browser cache is outdated.
+            The connection was interrupted while loading this page. Try again or return to the home page.
           </p>
-        </div>
-
-        <div className="bg-destructive/10 border border-destructive/20 rounded p-4">
-          <p className="text-sm text-destructive/80 font-medium mb-2">Troubleshooting steps:</p>
-          <ul className="text-xs text-destructive/70 space-y-1">
-            <li>• Check your internet connection</li>
-            <li>• Try a hard refresh (Ctrl+Shift+R)</li>
-            <li>• Clear your browser cache</li>
-            <li>• Try a different browser</li>
-          </ul>
         </div>
 
         <div className="flex flex-col gap-2">
           <button
-            onClick={handleHardRefresh}
-            disabled={isClearing}
-            className="w-full px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors font-medium disabled:opacity-50"
-          >
-            {isClearing ? 'Clearing cache...' : 'Hard Refresh (Clear Cache)'}
-          </button>
-          <button
             onClick={handleRetry}
-            className="w-full px-4 py-2 bg-secondary text-secondary-foreground rounded hover:bg-secondary/90 transition-colors font-medium"
+            className="w-full px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors font-medium"
           >
-            Soft Refresh
+            Try again
           </button>
           <button
             onClick={() => window.location.href = '/'}
@@ -178,11 +143,6 @@ const ModuleErrorFallback = () => {
           </button>
         </div>
 
-        {retryCount > 0 && (
-          <p className="text-xs text-muted-foreground text-center">
-            Refresh attempts: {retryCount}
-          </p>
-        )}
       </div>
     </div>
   );
