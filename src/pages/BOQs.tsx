@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PaginationControls } from '@/components/pagination/PaginationControls';
-import { usePagination } from '@/hooks/usePagination';
 import { Layers, Plus, Eye, Download, Trash2, Copy, Pencil, FileText, Receipt, Filter, Search, AlertCircle, Clock, CheckCircle, X, Lock } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CreateBOQModal } from '@/components/boq/CreateBOQModal';
@@ -20,7 +19,7 @@ import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { useCurrentCompany } from '@/contexts/CompanyContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useBOQs, useUnits } from '@/hooks/useDatabase';
+import { fetchBOQDetails, usePaginatedBOQs, useUnits } from '@/hooks/useDatabase';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { useConvertBoqToInvoice } from '@/hooks/useBOQ';
 import { convertLCLBOQToInvoice } from '@/services/lclBoqService';
@@ -60,7 +59,20 @@ export default function BOQs() {
   const { currentCompany } = useCurrentCompany();
   const { profile } = useAuth();
   const companyId = currentCompany?.id;
-  const { data: boqs = [], isLoading, refetch: refetchBOQs, error: boqsError } = useBOQs(companyId);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const boqFilters = {
+    page,
+    pageSize,
+    search: searchTerm,
+    dueDateFrom: dueDateFromFilter,
+    dueDateTo: dueDateToFilter,
+    dueStatus: statusFilter,
+    currency: currencyFilter,
+    conversionStatus: conversionStatusFilter,
+  } as const;
+  const { data: boqResult, isLoading, refetch: refetchBOQs, error: boqsError } = usePaginatedBOQs(companyId, boqFilters);
+  const boqs = boqResult?.rows || [];
   const { data: units = [] } = useUnits(companyId);
   const { logDelete } = useAuditLog();
   const convertToInvoice = useConvertBoqToInvoice();
@@ -119,6 +131,10 @@ export default function BOQs() {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, dueDateFromFilter, dueDateToFilter, statusFilter, currencyFilter, conversionStatusFilter]);
+
   // Fetch all create drafts when company changes (with timeout to prevent blocking)
   useEffect(() => {
     const checkForDrafts = async () => {
@@ -142,63 +158,11 @@ export default function BOQs() {
     checkForDrafts();
   }, [companyId, profile?.id]);
 
-  // Categorize BOQs by due date status
-  const categorizeBOQ = (boq: BOQ) => {
-    if (!boq.due_date) return 'current';
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const dueDate = new Date(boq.due_date);
-    dueDate.setHours(0, 0, 0, 0);
-
-    const daysUntilDue = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-    if (daysUntilDue < 0) return 'overdue';
-    if (daysUntilDue <= 7) return 'aging';
-    return 'current';
-  };
-
-  // Calculate summary stats
-  const boqSummary = {
-    overdue: boqs.filter(b => categorizeBOQ(b) === 'overdue').length,
-    aging: boqs.filter(b => categorizeBOQ(b) === 'aging').length,
-    current: boqs.filter(b => categorizeBOQ(b) === 'current').length,
-  };
-
-  // Filter and search logic
-  const filteredBOQs: BOQ[] = boqs.filter(boq => {
-    // Search filter (guard against undefined/null values)
-    const search = searchTerm.toLowerCase();
-    const matchesSearch =
-      String(boq.number || '').toLowerCase().includes(search) ||
-      String(boq.client_name || '').toLowerCase().includes(search) ||
-      String(boq.contractor || '').toLowerCase().includes(search) ||
-      String(boq.project_title || '').toLowerCase().includes(search);
-
-    // Due date filter
-    const dueDate = boq.due_date ? new Date(boq.due_date) : null;
-    const matchesDueDateFrom = !dueDateFromFilter || (dueDate && dueDate >= new Date(dueDateFromFilter));
-    const matchesDueDateTo = !dueDateToFilter || (dueDate && dueDate <= new Date(dueDateToFilter));
-
-    // Status filter
-    const boqStatus = categorizeBOQ(boq);
-    const matchesStatus = statusFilter === 'all' || boqStatus === statusFilter;
-
-    // Currency filter
-    const matchesCurrency = !currencyFilter || (boq.currency || 'KES') === currencyFilter;
-
-    // Conversion status filter
-    const isConverted = !!boq.converted_to_invoice_id;
-    const matchesConversionStatus =
-      conversionStatusFilter === 'all' ||
-      (conversionStatusFilter === 'converted' && isConverted) ||
-      (conversionStatusFilter === 'unconverted' && !isConverted);
-
-    return matchesSearch && matchesDueDateFrom && matchesDueDateTo && matchesStatus && matchesCurrency && matchesConversionStatus;
-  });
+  const boqSummary = boqResult?.summary || { overdue: 0, aging: 0, current: 0 };
+  const totalBOQs = boqResult?.total || 0;
 
   const handleClearFilters = () => {
+    setPage(1);
     setSearchTerm('');
     setDueDateFromFilter('');
     setDueDateToFilter('');
@@ -293,9 +257,21 @@ export default function BOQs() {
     }
   };
 
-  // Pagination hook
-  const pagination = usePagination(filteredBOQs, { initialPageSize: 10 });
-  const paginatedBOQs = pagination.paginatedItems;
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setPage(1);
+  };
+
+  const openBOQDetails = async (boq: BOQ, mode: 'view' | 'edit') => {
+    if (!companyId) return;
+    try {
+      const details = await fetchBOQDetails(companyId, boq.id);
+      if (mode === 'view') setViewing(details as BOQData);
+      else setEditing(details as BOQData);
+    } catch (error) {
+      toast.error(`Failed to load BOQ details: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
 
   const handleDownloadPDF = async (boq: BOQ, options?: { customTitle?: string; amountMultiplier?: number; forceCurrency?: string; customClient?: any; stampImageUrl?: string; specialPaymentPercentage?: number; invoiceNumber?: string; useCurrentDate?: boolean }) => {
     try {
@@ -878,7 +854,7 @@ export default function BOQs() {
             <span>BOQs List</span>
             {!isLoading && (
               <Badge variant="outline" className="ml-auto">
-                {filteredBOQs.length} boqs
+                {totalBOQs} boqs
               </Badge>
             )}
           </CardTitle>
@@ -910,7 +886,7 @@ export default function BOQs() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {paginatedBOQs.map((b: BOQ) => (
+                    {boqs.map((b: BOQ) => (
                       <TableRow key={b.id}>
                         <TableCell className="text-xs md:text-sm">{b.number}</TableCell>
                         <TableCell className="text-xs md:text-sm">{new Date(b.boq_date).toLocaleDateString()}</TableCell>
@@ -953,7 +929,7 @@ export default function BOQs() {
                             <Button
                               size="icon"
                               variant="ghost"
-                              onClick={() => !linkedBOQIds.has(b.id) && setViewing(b)}
+                              onClick={() => !linkedBOQIds.has(b.id) && openBOQDetails(b, 'view')}
                               title={linkedBOQIds.has(b.id) ? "View unavailable: Linked to LCL template" : "View"}
                               disabled={linkedBOQIds.has(b.id)}
                               className="h-8 w-8 md:h-9 md:w-9"
@@ -963,7 +939,7 @@ export default function BOQs() {
                             <Button
                               size="icon"
                               variant="ghost"
-                              onClick={() => !linkedBOQIds.has(b.id) && setEditing(b)}
+                              onClick={() => !linkedBOQIds.has(b.id) && openBOQDetails(b, 'edit')}
                               title={linkedBOQIds.has(b.id) ? "Read-only: Linked to LCL template" : "Edit"}
                               disabled={linkedBOQIds.has(b.id)}
                               className="h-8 w-8 md:h-9 md:w-9"
@@ -1018,12 +994,12 @@ export default function BOQs() {
                 </Table>
               </div>
               <PaginationControls
-                currentPage={pagination.currentPage}
-                totalPages={pagination.totalPages}
-                pageSize={pagination.pageSize}
-                totalItems={pagination.totalItems}
-                onPageChange={pagination.setCurrentPage}
-                onPageSizeChange={pagination.setPageSize}
+                currentPage={page}
+                totalPages={Math.max(1, Math.ceil(totalBOQs / pageSize))}
+                pageSize={pageSize}
+                totalItems={totalBOQs}
+                onPageChange={setPage}
+                onPageSizeChange={handlePageSizeChange}
                 pageSizeOptions={[10, 25, 50, 100]}
               />
             </div>

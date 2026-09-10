@@ -121,6 +121,7 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess, company, initial
   const lastProfileRef = useRef(profile);
   const formStateRef = useRef<any>({});
   const draftTokenRef = useRef<string>(generateSafeUUID());
+  const draftIdRef = useRef<string | null>(null);
   const loadedDraftTokenRef = useRef<string | null>(null);
 
   const todayISO = new Date().toISOString().split('T')[0];
@@ -200,10 +201,12 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess, company, initial
             }
           }
           if (draft && draft.data) {
+            draftIdRef.current = draft.id;
             // Check if draft is stale (>30 minutes old)
             if (isDraftStale(draft.last_autosaved_at, 30 * 60 * 1000)) {
               console.log('[CreateBOQModal] Draft is stale, deleting and starting fresh');
               const staleToken = draft.draft_token || token;
+              draftIdRef.current = null;
               const deleteResult = await deleteDraft(profile.id, currentCompany.id, staleToken);
               if (!deleteResult.success) {
                 console.error('[CreateBOQModal] Failed to delete stale draft:', deleteResult.error);
@@ -298,9 +301,10 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess, company, initial
         attachmentUrl: formData.attachmentUrl,
         boqStatus: formData.boqStatus,
         sections: formData.sections,
-      }, draftTokenRef.current);
+      }, draftTokenRef.current, draftIdRef.current || undefined);
 
       if (result.success) {
+        if (result.draftId) draftIdRef.current = result.draftId;
         setLastAutosavedAt(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
         setHasUnsavedChanges(false);
       } else {
@@ -676,52 +680,41 @@ export function CreateBOQModal({ open, onOpenChange, onSuccess, company, initial
       return;
     }
 
-    try {
-      const docForPdf = {
-        ...insertedDoc,
-        terms_and_conditions: termsAndConditions || undefined,
-        showCalculatedValuesInTerms: showCalculatedValuesInTerms,
-      };
-      await downloadBOQPDF(docForPdf, currentCompany ? {
-        name: currentCompany.name,
-        logo_url: currentCompany.logo_url || undefined,
-        address: currentCompany.address || undefined,
-        city: currentCompany.city || undefined,
-        country: currentCompany.country || undefined,
-        phone: currentCompany.phone || undefined,
-        email: currentCompany.email || undefined,
-        tax_number: currentCompany.tax_number || undefined,
-        company_services: currentCompany.company_services || undefined,
-      } : undefined);
+    const docForPdf = {
+      ...insertedDoc,
+      terms_and_conditions: termsAndConditions || undefined,
+      showCalculatedValuesInTerms,
+    };
+    const companyForPdf = currentCompany ? {
+      name: currentCompany.name,
+      logo_url: currentCompany.logo_url || undefined,
+      address: currentCompany.address || undefined,
+      city: currentCompany.city || undefined,
+      country: currentCompany.country || undefined,
+      phone: currentCompany.phone || undefined,
+      email: currentCompany.email || undefined,
+      tax_number: currentCompany.tax_number || undefined,
+      company_services: currentCompany.company_services || undefined,
+    } : undefined;
 
-      toast.success(`BOQ ${currentNumber} generated and saved`);
+    toast.success(`BOQ ${currentNumber} saved`);
+    if (currentCompany?.id) invalidateBOQNumberCache(currentCompany.id);
+    onSuccess?.();
 
-      if (currentCompany?.id) {
-        invalidateBOQNumberCache(currentCompany.id);
-      }
+    if (pendingTimeoutRef.current) {
+      clearTimeout(pendingTimeoutRef.current);
+      pendingTimeoutRef.current = null;
+    }
+    formStateRef.current = {};
+    setSubmitting(false);
+    await deleteDraft(profile.id, currentCompany.id, draftTokenRef.current);
+    draftIdRef.current = null;
+    handleOpenChange(false);
 
-      onSuccess?.();
-      handleOpenChange(false);
-    } catch (err) {
+    void downloadBOQPDF(docForPdf, companyForPdf).catch((err) => {
       console.error('Failed to generate BOQ PDF', err);
       toast.error('BOQ saved but failed to generate PDF. You can download it later from the BOQ list.');
-    } finally {
-      // Clear draft from database regardless of PDF outcome
-      if (profile?.id && currentCompany?.id) {
-        const deleteResult = await deleteDraft(profile.id, currentCompany.id, draftTokenRef.current);
-        if (!deleteResult.success) {
-          console.warn('Failed to delete draft after BOQ creation:', deleteResult.error);
-        }
-      }
-
-      // Clear pending autosave and form state to prevent re-autosave on modal close
-      if (pendingTimeoutRef.current) {
-        clearTimeout(pendingTimeoutRef.current);
-        pendingTimeoutRef.current = null;
-      }
-      formStateRef.current = {};
-      setSubmitting(false);
-    }
+    });
   };
 
   const handleOpenChange = async (newOpen: boolean) => {

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { parseErrorMessage } from '@/utils/errorHelpers';
 import { RLSPolicyError } from '@/utils/RLSError';
 import { ensureCompanyImageColumns, ensureQuantityColumnsAreDecimal } from '@/utils/ensureDatabaseColumns';
@@ -244,8 +245,11 @@ export interface LPOItem {
 
 // Companies hooks
 export const useCompanies = () => {
+  const { isAuthenticated, user } = useAuth();
+
   return useQuery({
-    queryKey: ['companies'],
+    queryKey: ['companies', user?.id],
+    enabled: isAuthenticated,
     queryFn: async () => {
       // NOTE: ensureCompanyImageColumns() is now called once at app startup in App.tsx
       // This avoids expensive per-hook RPC calls and improves performance significantly
@@ -470,8 +474,11 @@ export const useCreateStockMovement = () => {
 
 // Tax Settings hooks
 export const useTaxSettings = (companyId?: string) => {
+  const { isAuthenticated } = useAuth();
+
   return useQuery({
     queryKey: ['tax_settings', companyId],
+    enabled: isAuthenticated && !!companyId,
     queryFn: async () => {
       let query = supabase
         .from('tax_settings')
@@ -566,6 +573,108 @@ export const useBOQs = (companyId?: string, selectFields?: string) => {
       return data;
     },
   });
+};
+
+export interface BOQListFilters {
+  page: number;
+  pageSize: number;
+  search?: string;
+  dueDateFrom?: string;
+  dueDateTo?: string;
+  dueStatus?: 'all' | 'overdue' | 'aging' | 'current';
+  currency?: string;
+  conversionStatus?: 'all' | 'converted' | 'unconverted';
+}
+
+const BOQ_LIST_FIELDS = 'id, number, boq_date, due_date, client_name, project_title, currency, status, total_amount, subtotal, tax_amount, client_email, client_phone, client_address, client_city, client_country, contractor, converted_to_invoice_id, created_at, updated_at, created_by';
+
+const localDateString = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const applyBOQListFilters = (query: any, filters: BOQListFilters) => {
+  const search = filters.search?.trim().replace(/[%,()_]/g, '');
+  if (search) {
+    query = query.or([
+      `number.ilike.%${search}%`,
+      `client_name.ilike.%${search}%`,
+      `contractor.ilike.%${search}%`,
+      `project_title.ilike.%${search}%`,
+    ].join(','));
+  }
+  if (filters.dueDateFrom) query = query.gte('due_date', filters.dueDateFrom);
+  if (filters.dueDateTo) query = query.lte('due_date', filters.dueDateTo);
+  if (filters.currency) query = query.eq('currency', filters.currency);
+  if (filters.conversionStatus === 'converted') query = query.not('converted_to_invoice_id', 'is', null);
+  if (filters.conversionStatus === 'unconverted') query = query.is('converted_to_invoice_id', null);
+
+  const today = new Date();
+  const todayString = localDateString(today);
+  const agingEnd = new Date(today);
+  agingEnd.setDate(agingEnd.getDate() + 7);
+  const agingEndString = localDateString(agingEnd);
+  if (filters.dueStatus === 'overdue') query = query.lt('due_date', todayString);
+  if (filters.dueStatus === 'aging') query = query.gte('due_date', todayString).lte('due_date', agingEndString);
+  if (filters.dueStatus === 'current') query = query.or(`due_date.is.null,due_date.gt.${agingEndString}`);
+  return query;
+};
+
+export const usePaginatedBOQs = (companyId?: string, filters: BOQListFilters = { page: 1, pageSize: 10 }) => {
+  return useQuery({
+    queryKey: ['boq-list', companyId, filters],
+    enabled: !!companyId,
+    queryFn: async () => {
+      if (!companyId) return { rows: [], total: 0, summary: { overdue: 0, aging: 0, current: 0 } };
+      const from = (filters.page - 1) * filters.pageSize;
+      const to = from + filters.pageSize - 1;
+      const listQuery = applyBOQListFilters(
+        supabase.from('boqs').select(BOQ_LIST_FIELDS, { count: 'exact' }).eq('company_id', companyId),
+        filters,
+      ).order('created_at', { ascending: false }).order('id', { ascending: false }).range(from, to);
+
+      const today = new Date();
+      const todayString = localDateString(today);
+      const agingEnd = new Date(today);
+      agingEnd.setDate(agingEnd.getDate() + 7);
+      const agingEndString = localDateString(agingEnd);
+      const countQuery = (status: 'overdue' | 'aging' | 'current') => {
+        let query = supabase.from('boqs').select('id', { count: 'exact', head: true }).eq('company_id', companyId);
+        if (status === 'overdue') query = query.lt('due_date', todayString);
+        if (status === 'aging') query = query.gte('due_date', todayString).lte('due_date', agingEndString);
+        if (status === 'current') query = query.or(`due_date.is.null,due_date.gt.${agingEndString}`);
+        return query;
+      };
+
+      const [listResult, overdueResult, agingResult, currentResult] = await Promise.all([
+        listQuery,
+        countQuery('overdue'),
+        countQuery('aging'),
+        countQuery('current'),
+      ]);
+      if (listResult.error) throw listResult.error;
+      if (overdueResult.error) throw overdueResult.error;
+      if (agingResult.error) throw agingResult.error;
+      if (currentResult.error) throw currentResult.error;
+      return {
+        rows: listResult.data || [],
+        total: listResult.count || 0,
+        summary: {
+          overdue: overdueResult.count || 0,
+          aging: agingResult.count || 0,
+          current: currentResult.count || 0,
+        },
+      };
+    },
+  });
+};
+
+export const fetchBOQDetails = async (companyId: string, boqId: string) => {
+  const { data, error } = await supabase.from('boqs').select('*').eq('company_id', companyId).eq('id', boqId).single();
+  if (error) throw error;
+  return data;
 };
 
 export const useCreateBOQ = () => {
