@@ -14,16 +14,19 @@ const CompanyContext = createContext<CompanyContextType | undefined>(undefined);
 
 export function CompanyProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const { data: companies, isLoading, error } = useCompanies();
 
   // Invalidate companies query when auth becomes active
   // This handles the case where useCompanies cached an error from pre-login attempts
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !authLoading) {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
     }
-  }, [isAuthenticated, queryClient]);
+    if (!isAuthenticated) {
+      queryClient.removeQueries({ queryKey: ['companies'] });
+    }
+  }, [authLoading, isAuthenticated, queryClient]);
   const defaultCompanyId = import.meta.env.VITE_DEFAULT_COMPANY_ID?.trim();
   const defaultCompanyName = import.meta.env.VITE_DEFAULT_COMPANY_NAME?.trim().toLowerCase();
 

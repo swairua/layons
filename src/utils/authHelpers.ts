@@ -139,8 +139,11 @@ export const safeAuthOperation = async <T>(
       return { data: null, error: tokenError };
     }
 
-    // Return a properly formatted Error object
-    const formattedError = new Error(errorMessage);
+    const formattedError = Object.assign(new Error(errorMessage), {
+      name: error?.name,
+      code: error?.code,
+      status: error?.status,
+    });
     return { data: null, error: formattedError };
   }
 };

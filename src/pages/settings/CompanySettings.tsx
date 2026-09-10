@@ -26,32 +26,8 @@ import { QuickSchemaFix } from '@/components/QuickSchemaFix';
 import { addCurrencyColumn, ADD_CURRENCY_COLUMN_SQL } from '@/utils/addCurrencyColumn';
 
 export default function CompanySettings() {
-  const { profile } = useAuth();
+  const { profile, loading: authLoading, isAuthenticated } = useAuth();
   const role = (profile?.role || 'user') as UserRole;
-
-  if (!hasFeature(role, 'settings-company')) {
-    return (
-      <div className="space-y-6 p-6">
-        <Alert className="border-red-200 bg-red-50">
-          <AlertCircle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-900">
-            You don't have permission to access Settings.
-          </AlertDescription>
-        </Alert>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Access Denied</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-slate-600">
-              You don't have permission to view or manage settings. Please contact your administrator if you believe this is an error.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
   const [editingTax, setEditingTax] = useState<string | null>(null);
   const [newTax, setNewTax] = useState({ name: '', rate: 0, is_default: false });
   const [showNewTaxForm, setShowNewTaxForm] = useState(false);
@@ -92,14 +68,6 @@ export default function CompanySettings() {
 
   // Debug logging and schema check
   useEffect(() => {
-    console.log('Companies data:', companies);
-    console.log('Companies loading:', companiesLoading);
-    console.log('Companies error:', companiesError);
-    console.log('Current company:', currentCompany);
-    console.log('Tax settings:', taxSettings);
-    console.log('Tax settings loading:', taxSettingsLoading);
-    console.log('Tax settings error:', taxSettingsError);
-
     // Check for schema errors in the companies query
     if (companiesError) {
       const errorString = String(companiesError);
@@ -780,16 +748,69 @@ export default function CompanySettings() {
     }
   };
 
-  // Show loading state while companies are loading
-  if (companiesLoading) {
+  if (authLoading || companiesLoading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Company Settings</h1>
-            <p className="text-muted-foreground">Loading company information...</p>
-          </div>
-        </div>
+      <div className="flex min-h-[400px] items-center justify-center">
+        <p className="text-muted-foreground">Loading company settings...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="p-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>Please sign in again to view company settings.</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (!hasFeature(role, 'settings-company')) {
+    return (
+      <div className="space-y-6 p-6">
+        <Alert className="border-red-200 bg-red-50">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-900">
+            You don't have permission to access Settings.
+          </AlertDescription>
+        </Alert>
+        <Card>
+          <CardHeader><CardTitle>Access Denied</CardTitle></CardHeader>
+          <CardContent>
+            <p className="text-slate-600">You don't have permission to view or manage settings. Please contact your administrator if you believe this is an error.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (companiesError) {
+    const errorMessage = parseErrorMessage(companiesError);
+    const isSchemaError = schemaError !== null;
+    return (
+      <div className="space-y-6 p-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {isSchemaError
+              ? `Company settings could not load because ${schemaError}. Apply the database migration and try again.`
+              : `Company settings could not load: ${errorMessage}`}
+          </AlertDescription>
+        </Alert>
+        <p className="text-sm text-muted-foreground">Check your connection and permissions, then reload the page.</p>
+      </div>
+    );
+  }
+
+  if (!currentCompany) {
+    return (
+      <div className="p-6">
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>No company is configured for this account. Create a company before editing settings.</AlertDescription>
+        </Alert>
       </div>
     );
   }
@@ -810,6 +831,13 @@ export default function CompanySettings() {
           </Button>
         </div>
       </div>
+
+      {taxSettingsError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>Tax settings could not load: {parseErrorMessage(taxSettingsError)}</AlertDescription>
+        </Alert>
+      )}
 
       {/* Simple Currency Column Fix - Show when schema errors are detected */}
       {schemaError && !companiesError && (

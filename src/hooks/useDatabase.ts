@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { parseErrorMessage } from '@/utils/errorHelpers';
 import { RLSPolicyError } from '@/utils/RLSError';
 import { ensureCompanyImageColumns, ensureQuantityColumnsAreDecimal } from '@/utils/ensureDatabaseColumns';
@@ -244,8 +245,11 @@ export interface LPOItem {
 
 // Companies hooks
 export const useCompanies = () => {
+  const { isAuthenticated, user } = useAuth();
+
   return useQuery({
-    queryKey: ['companies'],
+    queryKey: ['companies', user?.id],
+    enabled: isAuthenticated,
     queryFn: async () => {
       // NOTE: ensureCompanyImageColumns() is now called once at app startup in App.tsx
       // This avoids expensive per-hook RPC calls and improves performance significantly
@@ -470,8 +474,11 @@ export const useCreateStockMovement = () => {
 
 // Tax Settings hooks
 export const useTaxSettings = (companyId?: string) => {
+  const { isAuthenticated } = useAuth();
+
   return useQuery({
     queryKey: ['tax_settings', companyId],
+    enabled: isAuthenticated && !!companyId,
     queryFn: async () => {
       let query = supabase
         .from('tax_settings')
