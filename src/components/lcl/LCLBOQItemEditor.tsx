@@ -13,7 +13,6 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertCircle, ChevronRight, Copy, Plus, Trash2 } from 'lucide-react';
 import { LCLHierarchicalData, LCLTemplateStructure } from '@/types/lclTemplate';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
-import { lclBoqService } from '@/services/lclBoqService';
 import { lclTemplateService } from '@/services/lclTemplateService';
 import { formatNumberWithoutTrailingZeros } from '@/utils/numberFormatter';
 import { getDisplaySectionName, buildSectionDisplayHeader } from '@/utils/lclSectionDisplayUtils';
@@ -775,29 +774,7 @@ export const LCLBOQItemEditor = forwardRef<LCLBOQItemEditorHandle, LCLBOQItemEdi
     setItems((prev) => [...prev, newItem]);
     setAddItemForm(null);
 
-    // Persist to database immediately if companyId is provided
-    if (companyId) {
-      try {
-        const updatedItems = [...items, newItem];
-        // Save draft BOQ with updated items using upsert to maintain single draft per company
-        await lclBoqService.autosaveLCLBOQDraftWithUpsert({
-          company_id: companyId,
-          number: 'DRAFT',
-          items_snapshot: updatedItems,
-          status: 'draft',
-        });
-        toast({ title: 'Success', description: 'Item added and saved.' });
-      } catch (error) {
-        console.error('Failed to persist item:', error);
-        toast({
-          title: 'Warning',
-          description: 'Item added locally but failed to save to database.',
-          variant: 'destructive',
-        });
-      }
-    } else {
-      toast({ title: 'Success', description: 'Item added.' });
-    }
+    toast({ title: 'Success', description: 'Item added.' });
   };
 
   // Group items by section for rendering

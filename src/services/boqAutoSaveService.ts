@@ -49,6 +49,8 @@ export interface BOQDraftRecord {
   data: any;
   terms_and_conditions: string;
   showCalculatedValuesInTerms: boolean;
+  attachment_url?: string;
+  status?: string;
   created_at: string;
   updated_at: string;
   last_autosaved_at: string;
@@ -64,7 +66,8 @@ export async function saveBoqDraft(
   userId: string,
   companyId: string,
   formData: BOQDraftData,
-  draftToken?: string
+  draftToken?: string,
+  existingDraftId?: string
 ): Promise<{ success: boolean; error?: string; draftId?: string }> {
   try {
     if (!userId || !companyId) {
@@ -110,7 +113,22 @@ export async function saveBoqDraft(
 
     let draftId: string | undefined;
 
-    if (draftToken) {
+    if (existingDraftId) {
+      const { data, error } = await supabase
+        .from('boq_drafts')
+        .update(payload)
+        .eq('id', existingDraftId)
+        .eq('user_id', userId)
+        .eq('company_id', companyId)
+        .is('boq_id', null)
+        .select('id')
+        .single();
+      if (error) {
+        const errorMsg = error instanceof Error ? error.message : (error?.message || JSON.stringify(error));
+        return { success: false, error: errorMsg };
+      }
+      draftId = data?.id;
+    } else if (draftToken) {
       // Scoped lookup by draft_token
       const { data: existingDraft, error: fetchError } = await supabase
         .from('boq_drafts')

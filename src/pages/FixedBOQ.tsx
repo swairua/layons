@@ -295,17 +295,17 @@ CREATE INDEX IF NOT EXISTS idx_fixed_boq_items_company ON fixed_boq_items(compan
         return;
       }
 
-      // Update in batches
       const batchSize = 50;
       for (let i = 0; i < updates.length; i += batchSize) {
         const batch = updates.slice(i, i + batchSize);
-        for (const update of batch) {
-          const { error } = await supabase
+        const results = await Promise.all(batch.map((update) =>
+          supabase
             .from('fixed_boq_items')
             .update({ description: update.description })
-            .eq('id', update.id);
-          if (error) throw error;
-        }
+            .eq('id', update.id)
+        ));
+        const failed = results.find(({ error }) => error);
+        if (failed?.error) throw failed.error;
       }
 
       toast.success(`Cleaned ${cleanedCount} descriptions`);
